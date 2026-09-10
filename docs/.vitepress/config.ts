@@ -103,6 +103,7 @@ export default defineConfig({
             { text: 'Credits', link: '/credits' },
             { text: 'Models and weights', link: '/reference/models' },
             { text: 'Docker and versions', link: '/reference/docker' },
+            { text: 'Closing the loop', link: '/reference/closing-the-loop' },
           ],
         },
       ],
