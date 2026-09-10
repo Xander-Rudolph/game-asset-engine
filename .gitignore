@@ -29,3 +29,6 @@ node_modules/
 # Python
 __pycache__/
 *.pyc
+
+# Browser automation artefacts
+.playwright-mcp/
