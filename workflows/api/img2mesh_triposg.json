@@ -1,4 +1,5 @@
 {
+  "_comment": "MIT, and the route with no territory clause: use this for anything shipping worldwide, where Hunyuan3D's Tencent Community Licence excludes the EU, the UK and South Korea. IT NEEDS AN RGBA CUT-OUT AND THERE IS NO NODE HERE THAT MAKES ONE. The graph is LoadImage -> pipeline -> I23D -> decimate -> save, with nothing that removes a background, so a plain render on a grey or white ground comes back as a fragmented blob and it looks like the generator failed. Hunyuan3D's ShapeGen removes the background itself (remove_background=true), which is exactly why the licence-driven swap from Hunyuan to TripoSG is when this bites: the same input that worked stops working. Cut the subject out first, or generate the concept against a background you can key. SHAPE ONLY: TripoSG returns vertex colours, not a texture map, so the MIT route ships untextured unless you run mesh_texture_hunyuan3d21.json over it afterwards -- which puts the territory clause back.",
   "1": {
     "class_type": "LoadImage",
     "inputs": {

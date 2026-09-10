@@ -111,7 +111,16 @@ for ob in meshes:
         w = ob.matrix_world @ Vector(c)
         lo = Vector((min(lo[i], w[i]) for i in range(3)))
         hi = Vector((max(hi[i], w[i]) for i in range(3)))
+# Fitted to THIS mesh unless a span is given, and that distinction is the
+# one people get wrong. Per-model fit is right for looking at a prop on its
+# own, or for baking an inventory icon -- a flask framed against a figure's
+# height is a speck. It is wrong for a SET: fit every model to its own
+# bounding box and a dagger and a golem fill their cells identically, which
+# reaches the engine as every creature the same size on the map and is then
+# hunted for in the wrong place.
 size = max((hi - lo)[i] for i in range(3)) or 1.0
+if cfg.get("span"):
+    size = float(cfg["span"])
 centre = (lo + hi) / 2.0
 # Feet on the floor, not centre on the floor: sprites read better anchored low.
 floor = lo.z
@@ -277,8 +286,13 @@ def main() -> int:
     ap.add_argument("--zoom", type=float, default=1.15,
                     help="ortho scale as a multiple of the subject's largest extent")
     ap.add_argument("--persp", action="store_true",
-                    help="perspective camera (default is orthographic, which is "
-                         "what keeps sprite scale consistent between assets)")
+                    help="perspective camera. The default is orthographic, "
+                         "which keeps one asset the same size across angles "
+                         "and frames -- NOT across assets, see --span")
+    ap.add_argument("--span", type=float, default=0.0, metavar="UNITS",
+                    help="frame against this fixed world height instead of "
+                         "the subject's own extent, so a set of assets shares "
+                         "a scale and a golem looms over a homunculus")
     ap.add_argument("--key", type=float, default=1.6, help="sun strength")
     ap.add_argument("--ambient", type=float, default=0.22, help="world light strength")
     ap.add_argument("--clay", action="store_true",
@@ -315,6 +329,7 @@ def main() -> int:
         "elevation": args.elevation,
         "size": args.size,
         "zoom": args.zoom,
+        "span": args.span,
         "ortho": not args.persp,
         "key": args.key,
         "ambient": args.ambient,
