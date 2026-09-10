@@ -33,7 +33,8 @@ Everything in `scripts/`. Each takes `--help`.
 | Script | Does |
 |---|---|
 | `render_sheet.py` | Render a model to a sprite sheet. Angles across, poses down. |
-| `decimation_report.py` | Measure what each face budget costs, three ways. |
+| `decimation_report.py` | Measure what each face budget costs, three ways, or bisect for an answer. |
+| `sheet_check.py` | Check a sprite sheet for the faults that are arithmetic. Exits non-zero on a fault. |
 | `transfer_weights.py` | Move a skeleton from a decimated proxy onto the original mesh. |
 | `normalise_mesh.py` | Scale a mesh to a declared world size and record the rule. `--check` gates a whole folder. |
 | `make_seamless.py` | Make a texture tile, and say whether it worked. |

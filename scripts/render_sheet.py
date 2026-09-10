@@ -301,6 +301,10 @@ def main() -> int:
     ap.add_argument("--clay-color", default="0.55,0.54,0.52",
                     help="clay RGB, 0-1, comma separated")
     ap.add_argument("--out", type=Path, help="sheet png (default: alongside the model)")
+    ap.add_argument("--check", action="store_true",
+                    help="run scripts/sheet_check.py on the composed sheet. It "
+                         "knows the cell size and azimuths from this run, so it "
+                         "can also name the down-and-right facing")
     ap.add_argument("--keep-frames", action="store_true",
                     help="keep the per-cell PNGs under output/_sheet_frames/ "
                          "instead of deleting them once the sheet is composed")
@@ -367,13 +371,31 @@ def main() -> int:
     if not out.is_absolute():
         out = ROOT / out
     compose(info, args.size, out)
+
+    rc = 0
+    if args.check:
+        # Runs here rather than being left to the caller because this is where
+        # the cell size and the azimuth list already exist. Asking a human to
+        # supply them is how the arithmetic checks got done by eye instead.
+        from sheet_check import slice_sheet, check as sheet_checks
+        cells, rows, cols = slice_sheet(out, args.size)
+        findings, facts = sheet_checks(cells, rows, cols, azimuths)
+        print()
+        for f in facts:
+            print(f"  {f}")
+        for f in findings:
+            print(f"  ! {f}")
+        if findings:
+            print("  ! the sheet has faults above. Look at it before using it.")
+            rc = 1
+
     if not args.keep_frames:
         # The per-run directory exists so two concurrent renders cannot
         # interleave their frames. Once composed it is scratch, and nothing
         # used to delete it -- they accumulated one per run, indefinitely.
         shutil.rmtree(ROOT / "output" / "_sheet_frames" / info["run_id"],
                       ignore_errors=True)
-    return 0
+    return rc
 
 
 def compose(info: dict, cell: int, out: Path) -> None:

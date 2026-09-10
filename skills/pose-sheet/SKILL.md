@@ -118,20 +118,36 @@ scripts/render_sheet.py output/rigged/<name>.fbx \
 Other flags: `--angles`, `--azimuth-start`, `--elevation`, `--size`, `--zoom`,
 `--persp`, `--key`, `--ambient`, `--clay-color`, `--flat`.
 
-## 5. Look at it, then say what you see
+## 5. Check what is arithmetic, then look at what is not
 
-**Read the sheet** and judge it before handing it over. A mis signed rotation
-produces a confident, wrong, perfectly rendered cycle.
+```sh
+scripts/render_sheet.py output/rigged/<name>.fbx \
+    --poses transforms:poses/walk.json --angles 4 --size 220 \
+    --out output/sheets/<name>_walk.png --check
+```
 
-Check in this order:
+`--check` computes the faults that are numbers and exits non-zero if it finds
+any:
 
-1. Did any bone name miss? The script prints `! bones not in the rig: ...`. If so
-   the pose did nothing and you are looking at the rest pose repeated.
-2. Do the facings match the game's camera? Pick the cell where the figure faces
-   down and to the right on screen, and say which cell index that is. That is the
-   first facing, and the engine's mapping starts there.
-3. Does the motion read at the size it will ship at? If you rendered at 340 and
-   the game uses 128, render again at 128 before approving.
+- an empty or near-empty cell, meaning the render failed or the subject rotated
+  out of frame
+- **a pose row identical to row 0 at every angle**, meaning the pose did nothing
+  and you are looking at the rest pose repeated. The missing-bone warning catches
+  a typo; this catches a rotation that cancelled, was zero, or went to an axis
+  with no effect
+- a subject touching its cell border, so the frame is clipping it
+- a coverage spread across angles that usually means framing
+
+It also **names the down-and-right facing** rather than asking you to find it,
+because the azimuth list is arithmetic and the script already has it.
+
+`scripts/sheet_check.py <sheet> --cell <size>` does the same to a sheet you
+already have.
+
+**Then read the sheet yourself for the one thing no check can see: whether the
+motion reads as the motion.** A sheet that passes every check above can still be
+a confident, well rendered, wrong cycle. Judge it at the size it ships at, not at
+340 pixels.
 
 ## Rules
 
