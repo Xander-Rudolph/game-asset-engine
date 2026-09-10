@@ -5,22 +5,71 @@ and the MCP server definitions that go with them.
 
 ## Install
 
-```sh
-claude plugin install /path/to/game-asset-engine
+Installing from GitHub goes through a marketplace: the first command registers
+this repo as one, the second installs the plugin from it.
+
+**In a Claude Code session:**
+
 ```
+/plugin marketplace add Xander-Rudolph/game-asset-engine
+/plugin install game-asset-engine@game-asset-engine
+```
+
+**Or from a shell:**
+
+```sh
+claude plugin marketplace add Xander-Rudolph/game-asset-engine
+claude plugin install game-asset-engine@game-asset-engine --scope user
+```
+
+`--scope` is `user` (you, everywhere), `project` (committed, shared with
+collaborators) or `local` (you, this repo only).
 
 Or skip installing entirely and run Claude Code from the repo root, which finds
 `skills/` without any setup. That is the better option while you are still
 editing the repo, because you are always testing what is on disk.
 
+::: tip A private repo works, if git does
+The clone uses your git credentials, so a private repo installs fine when your
+GitHub CLI or SSH auth is already set up. If it is not, the marketplace add
+fails at the clone rather than saying anything about permissions.
+:::
+
 ## Check it took
 
-Ask Claude what it can do, or just make a request and watch which skill it picks.
-The skills are also plain files, so you can read them:
+```sh
+claude plugin list
+claude plugin details game-asset-engine@game-asset-engine
+```
+
+The second prints the component inventory and what each skill costs in tokens:
+
+```
+Component inventory
+  Skills (6)  asset-cleanup, asset-pipeline, concept-edit, ground-texture, mesh-budget, pose-sheet
+  MCP servers (1)  meshy
+
+Projected token cost
+  Always-on:   ~714 tok   added to every session
+```
+
+Skills are discovered from `skills/<name>/SKILL.md`. You do not list them in
+`plugin.json`.
+
+## If you are packaging your own
+
+Two manifests, and missing the second is the one that bites:
+
+- `.claude-plugin/plugin.json` describes the plugin.
+- `.claude-plugin/marketplace.json` is what makes the repo installable **from
+  GitHub**. Without it, `marketplace add` fails with `Marketplace file not found`
+  even though the plugin itself is perfectly valid.
+
+Check both before pushing:
 
 ```sh
-ls skills/*/SKILL.md
-head -4 skills/asset-pipeline/SKILL.md
+claude plugin validate .
+claude plugin validate .claude-plugin/marketplace.json
 ```
 
 ## You do not invoke skills by name

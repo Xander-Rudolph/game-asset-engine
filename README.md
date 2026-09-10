@@ -82,12 +82,14 @@ uses. [What the numbers say](https://xander-rudolph.github.io/game-asset-engine/
 This repo is a Claude Code plugin. Point Claude at it and ask for an asset in
 plain language; the skills carry the settings, the gates and the checks.
 
-```sh
-claude plugin install /path/to/game-asset-engine
+```
+/plugin marketplace add Xander-Rudolph/game-asset-engine
+/plugin install game-asset-engine@game-asset-engine
 ```
 
-Or just run Claude Code from the repo root, which finds the skills without
-installing anything.
+Or from a shell with `claude plugin marketplace add ...` then
+`claude plugin install ... --scope user`. Or skip installing and run Claude Code
+from the repo root, which finds the skills without any setup.
 
 ### What to say
 

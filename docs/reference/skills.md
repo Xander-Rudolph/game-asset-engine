@@ -5,14 +5,13 @@ pipeline and the MCP server definitions that go with them.
 
 ## Installing it as a plugin
 
-Point Claude Code at the repo:
-
-```sh
-claude plugin install /path/to/game-asset-engine
+```
+/plugin marketplace add Xander-Rudolph/game-asset-engine
+/plugin install game-asset-engine@game-asset-engine
 ```
 
-Or, if you work in the repo directly, the skills are found automatically when
-Claude Code is run from the repo root.
+Full detail, including the second manifest that GitHub installation needs, is in
+[installing it for Claude](/guide/claude).
 
 ## What ships
 
