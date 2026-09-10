@@ -1,0 +1,72 @@
+{
+  "_comment": "Fastest path, ~10s on a 4070 Ti Super. TripoSR wants a cut-out: feed it an RGBA PNG so LoadImage's alpha becomes the mask, or the whole background is reconstructed as geometry.",
+  "1": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "example.png"
+    },
+    "_meta": {
+      "title": "Reference"
+    }
+  },
+  "2": {
+    "class_type": "[Comfy3D] Load TripoSR Model",
+    "inputs": {
+      "model_name": "model.ckpt",
+      "chunk_size": 8192
+    },
+    "_meta": {
+      "title": "TripoSR Model"
+    }
+  },
+  "3": {
+    "class_type": "[Comfy3D] TripoSR",
+    "inputs": {
+      "tsr_model": [
+        "2",
+        0
+      ],
+      "reference_image": [
+        "1",
+        0
+      ],
+      "reference_mask": [
+        "1",
+        1
+      ],
+      "geometry_extract_resolution": 256,
+      "marching_cude_threshold": 25.0
+    },
+    "_meta": {
+      "title": "TripoSR"
+    }
+  },
+  "4": {
+    "class_type": "[Comfy3D] Decimate Mesh",
+    "inputs": {
+      "mesh": [
+        "3",
+        0
+      ],
+      "target": 48000,
+      "remesh": false,
+      "optimalplacement": true
+    },
+    "_meta": {
+      "title": "Decimate"
+    }
+  },
+  "5": {
+    "class_type": "[Comfy3D] Save 3D Mesh",
+    "inputs": {
+      "mesh": [
+        "4",
+        0
+      ],
+      "save_path": "mesh/TripoSR_%Y-%m-%d-%H-%M-%S.glb"
+    },
+    "_meta": {
+      "title": "Save Mesh"
+    }
+  }
+}

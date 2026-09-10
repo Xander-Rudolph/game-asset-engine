@@ -1,0 +1,122 @@
+# ComfyUI + ComfyUI-3D-Pack — image generation and image→3D.
+#
+#   docker compose --profile comfy up -d          # connected (can download)
+#   docker compose --profile comfy-local up -d    # offline, DNS blackholed
+#
+# Everything weight-shaped lives under ${MODELS_DIR} (see .env), including
+# the 3D-Pack's own Checkpoints tree — the pack hardcodes that to a folder
+# inside its node directory, so we mount over it.
+x-comfyui-base: &comfyui-base
+  build:
+    context: .
+    dockerfile: Dockerfile
+  ports:
+    - "8188:8188"
+  environment:
+    - NVIDIA_VISIBLE_DEVICES=all
+    - NVIDIA_DRIVER_CAPABILITIES=all
+    - PYOPENGL_PLATFORM=egl
+    - HF_HOME=/app/models/.hf
+    # Leave comfy-env isolation ON.  Turning it off (COMFY_ENV_ISOLATE=0) makes
+    # UniRigLoadMesh re-scan input/3d per request, which is tempting — but then
+    # UniRig imports into the MAIN environment and picks up its bpy 4.5.9, which
+    # dies with `undefined symbol: rtcGetSceneTraversable` (Embree ABI mismatch).
+    # The pixi env ships a bpy built to match.  See README on getting a mesh into
+    # UniRigLoadMesh's list.
+  volumes:
+    - ${MODELS_DIR}:/app/models
+    - ${MODELS_DIR}/3d_checkpoints:/app/custom_nodes/ComfyUI-3D-Pack/Checkpoints
+    - ./output:/app/output
+    - ./input:/app/input
+    - ./custom_nodes:/app/custom_nodes
+    - ./workflows:/app/user
+    # UniRig's whole HOME, kept on the host.  comfy-env spreads itself across
+    # $HOME/.ce (the pixi ENVIRONMENT, ~10GB) *and* $HOME/.pixi (the pixi BINARY
+    # that runs it) — mounting only .ce survives a restart but not a
+    # --force-recreate, which wipes .pixi and fails with
+    # `FileNotFoundError: /app/.home/.pixi/bin/pixi`.  Mount the parent, not the
+    # pieces.  NOT under custom_nodes/, where ComfyUI would try to import it.
+    - ./.home:/app/.home
+  deploy:
+    resources:
+      reservations:
+        devices:
+          - driver: nvidia
+            count: 1
+            capabilities: [gpu]
+  # Write as the invoking user, not root — see the Dockerfile note.
+  user: "${PUID:-1000}:${PGID:-1000}"
+  shm_size: '16g'
+  restart: unless-stopped
+  # No --lowvram: 3D-Pack keeps several pipelines resident and lowvram thrashes
+  # them.  Normal VRAM handling is the default and current ComfyUI no longer
+  # accepts an explicit --normalvram, so the flag is simply absent.
+  command: python3 main.py --listen 0.0.0.0 --enable-manager
+
+services:
+  # The preconfigured package: everything but the weights, already built.
+  #
+  #   docker compose --profile packaged up -d
+  #
+  # No source checkout, no clones, no post-install: the node packs are baked
+  # at pinned commits with their patches applied and the Hunyuan TexGen
+  # extension compiled, and the workflows are already in ComfyUI's sidebar.
+  # The two mounts left are the two things an image cannot carry: ~200GB of
+  # weights, and the output you want to keep. The container names any missing
+  # weights on boot, and fetches them if ATHANOR_FETCH_MODELS=1.
+  #
+  # Deliberately NOT mounting custom_nodes or workflows: a bind mount replaces
+  # the path rather than merging with it, so mounting an empty host directory
+  # over the baked one is exactly how you get a server with no nodes in it.
+  # Use the `comfy` profile when you want to edit node source on the host.
+  comfyui-packaged:
+    image: ${ATHANOR_COMFY_IMAGE:-ghcr.io/athanorgames/athanor-comfy:latest}
+    container_name: comfyui-packaged
+    profiles: ["packaged"]
+    ports:
+      - "8188:8188"
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - PYOPENGL_PLATFORM=egl
+      - HF_HOME=/app/models/.hf
+      - ATHANOR_FETCH_MODELS=${ATHANOR_FETCH_MODELS:-0}
+    volumes:
+      - ${MODELS_DIR}:/app/models
+      - ${MODELS_DIR}/3d_checkpoints:/app/custom_nodes/ComfyUI-3D-Pack/Checkpoints
+      - ./output:/app/output
+      - ./input:/app/input
+      # UniRig's pixi environment, which is ~11GB and is built on first use.
+      # A named volume rather than a bind mount: nothing on the host needs to
+      # read it, and it survives `down` and `--force-recreate` alike.
+      - unirig-home:/app/.home
+      # ComfyUI's user dir. Without this a graph you craft in the editor and
+      # save lives only in the container's writable layer, and the next
+      # `--force-recreate` throws it away. The entrypoint seeds this from the
+      # image's own copy the first time, so it starts full rather than empty.
+      - comfy-user:/app/user
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    user: "${PUID:-1000}:${PGID:-1000}"
+    shm_size: '16g'
+    restart: unless-stopped
+
+  comfyui:
+    <<: *comfyui-base
+    container_name: comfyui
+    profiles: ["comfy"]
+
+  comfyui-local:
+    <<: *comfyui-base
+    container_name: comfyui-local
+    profiles: ["comfy-local"]
+    dns: 0.0.0.0
+
+volumes:
+  unirig-home:
+  comfy-user:

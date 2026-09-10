@@ -1,0 +1,697 @@
+{
+ "id": "txt2mesh_qwen_hunyuan3d21",
+ "revision": 0,
+ "last_node_id": 26,
+ "last_link_id": 14,
+ "nodes": [
+  {
+   "id": 26,
+   "type": "Note",
+   "pos": [
+    -20,
+    60
+   ],
+   "size": [
+    400,
+    600
+   ],
+   "flags": {},
+   "order": -1,
+   "mode": 0,
+   "title": "Read me",
+   "properties": {
+    "text": ""
+   },
+   "widgets_values": [
+    "CHARACTER, END TO END -- prompt in, mesh out\n\nOne queue: Qwen paints the concept, Hunyuan3D turns it into a mesh.\nBoth the picture and the mesh are saved, so a good concept is not lost\nif the mesh comes out badly.\n\nConvenient, but it commits: the mesh is generated whether or not the\nconcept was worth it, and a bad concept is the usual reason a mesh\ncomes out as twenty disconnected pieces.  Use txt2img_qwen_fast to\nfind the picture first, then img2mesh_hunyuan3d21 on the one you like.\n\nSame licence caveat as img2mesh_hunyuan3d21.\n\n---\n\nCharacter, end to end: Qwen-Image paints the concept and\nHunyuan3D 2.1 ShapeGen turns it into a mesh, in one queue. Both\nare saved -- the picture as well as the mesh -- because a good\nconcept is worth keeping even when the mesh it produced is not.\nConvenient but committing: the mesh is generated whether or not\nthe concept was worth it, and a bad concept is the usual reason\na mesh comes out as twenty disconnected pieces. The staged path\n(txt2img_qwen_fast to find the picture, then\nimg2mesh_hunyuan3d21 on the one you like) wastes less.\nHunyuan3D's licence excludes the EU, the UK and South Korea --\nsee README.md."
+   ],
+   "color": "#432",
+   "bgcolor": "#653"
+  },
+  {
+   "id": 1,
+   "type": "UNETLoader",
+   "pos": [
+    420,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 0,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      1
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "UNETLoader"
+   },
+   "widgets_values": [
+    "qwen_image_2512_fp8_e4m3fn.safetensors",
+    "default"
+   ]
+  },
+  {
+   "id": 3,
+   "type": "CLIPLoader",
+   "pos": [
+    420,
+    380
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 1,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "CLIP",
+     "type": "CLIP",
+     "links": [
+      2,
+      3
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPLoader"
+   },
+   "widgets_values": [
+    "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+    "qwen_image",
+    "default"
+   ]
+  },
+  {
+   "id": 6,
+   "type": "EmptySD3LatentImage",
+   "pos": [
+    420,
+    700
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 2,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      7
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "EmptySD3LatentImage"
+   },
+   "widgets_values": [
+    1104,
+    1472,
+    1
+   ]
+  },
+  {
+   "id": 8,
+   "type": "VAELoader",
+   "pos": [
+    420,
+    1020
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 3,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "VAE",
+     "type": "VAE",
+     "links": [
+      9
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAELoader"
+   },
+   "widgets_values": [
+    "qwen_image_vae.safetensors"
+   ]
+  },
+  {
+   "id": 22,
+   "type": "[Comfy3D] Load Hunyuan3D 21 ShapeGen Pipeline",
+   "pos": [
+    420,
+    1340
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 4,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "shapegen_pipe",
+     "type": "DIFFUSERS_PIPE",
+     "links": [
+      11
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "[Comfy3D] Load Hunyuan3D 21 ShapeGen Pipeline"
+   },
+   "widgets_values": [
+    "hunyuan3d-dit-v2-1"
+   ]
+  },
+  {
+   "id": 2,
+   "type": "ModelSamplingAuraFlow",
+   "pos": [
+    880,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 5,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 1
+    }
+   ],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      4
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ModelSamplingAuraFlow"
+   },
+   "widgets_values": [
+    3.1
+   ]
+  },
+  {
+   "id": 4,
+   "type": "CLIPTextEncode",
+   "pos": [
+    880,
+    380
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 6,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 2
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      5
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPTextEncode"
+   },
+   "widgets_values": [
+    "a weathered stone golem overgrown with moss, a single creature standing upright, full body from head to feet, three-quarter view, even flat studio lighting, plain neutral grey background, no cast shadow, game asset concept art, sharp detail"
+   ]
+  },
+  {
+   "id": 5,
+   "type": "CLIPTextEncode",
+   "pos": [
+    880,
+    700
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 7,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 3
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      6
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPTextEncode"
+   },
+   "widgets_values": [
+    "multiple figures, turnaround sheet, cropped, cut off, busy background, scenery, text, watermark, harsh cast shadows, depth of field, motion blur"
+   ]
+  },
+  {
+   "id": 7,
+   "type": "KSampler",
+   "pos": [
+    1340,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 8,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 4
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 5
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 6
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 7
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      8
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "KSampler"
+   },
+   "widgets_values": [
+    0,
+    "fixed",
+    20,
+    4.0,
+    "euler",
+    "simple",
+    1.0
+   ]
+  },
+  {
+   "id": 9,
+   "type": "VAEDecode",
+   "pos": [
+    1800,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 9,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 8
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 9
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      10,
+      12
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEDecode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 10,
+   "type": "SaveImage",
+   "pos": [
+    2260,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 10,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 10
+    }
+   ],
+   "outputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "links": [],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "SaveImage"
+   },
+   "widgets_values": [
+    "concept/character"
+   ]
+  },
+  {
+   "id": 23,
+   "type": "[Comfy3D] Hunyuan3D 21 ShapeGen",
+   "pos": [
+    2260,
+    380
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 11,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "shapegen_pipe",
+     "type": "DIFFUSERS_PIPE",
+     "link": 11
+    },
+    {
+     "name": "image",
+     "type": "IMAGE",
+     "link": 12
+    }
+   ],
+   "outputs": [
+    {
+     "name": "mesh",
+     "type": "MESH",
+     "links": [
+      13
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "processed_image",
+     "type": "IMAGE",
+     "links": [],
+     "slot_index": 1
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "[Comfy3D] Hunyuan3D 21 ShapeGen"
+   },
+   "widgets_values": [
+    0,
+    30,
+    7.5,
+    256,
+    true,
+    false
+   ]
+  },
+  {
+   "id": 24,
+   "type": "[Comfy3D] Decimate Mesh",
+   "pos": [
+    2720,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 12,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "mesh",
+     "type": "MESH",
+     "link": 13
+    }
+   ],
+   "outputs": [
+    {
+     "name": "mesh",
+     "type": "MESH",
+     "links": [
+      14
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "[Comfy3D] Decimate Mesh"
+   },
+   "widgets_values": [
+    48000,
+    false,
+    true
+   ]
+  },
+  {
+   "id": 25,
+   "type": "[Comfy3D] Save 3D Mesh",
+   "pos": [
+    3180,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 13,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "mesh",
+     "type": "MESH",
+     "link": 14
+    }
+   ],
+   "outputs": [
+    {
+     "name": "save_path",
+     "type": "STRING",
+     "links": [],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "[Comfy3D] Save 3D Mesh"
+   },
+   "widgets_values": [
+    "mesh/character_%Y-%m-%d-%H-%M-%S.glb"
+   ]
+  }
+ ],
+ "links": [
+  [
+   1,
+   1,
+   0,
+   2,
+   0,
+   "MODEL"
+  ],
+  [
+   2,
+   3,
+   0,
+   4,
+   0,
+   "CLIP"
+  ],
+  [
+   3,
+   3,
+   0,
+   5,
+   0,
+   "CLIP"
+  ],
+  [
+   4,
+   2,
+   0,
+   7,
+   0,
+   "MODEL"
+  ],
+  [
+   5,
+   4,
+   0,
+   7,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   6,
+   5,
+   0,
+   7,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   7,
+   6,
+   0,
+   7,
+   3,
+   "LATENT"
+  ],
+  [
+   8,
+   7,
+   0,
+   9,
+   0,
+   "LATENT"
+  ],
+  [
+   9,
+   8,
+   0,
+   9,
+   1,
+   "VAE"
+  ],
+  [
+   10,
+   9,
+   0,
+   10,
+   0,
+   "IMAGE"
+  ],
+  [
+   11,
+   22,
+   0,
+   23,
+   0,
+   "DIFFUSERS_PIPE"
+  ],
+  [
+   12,
+   9,
+   0,
+   23,
+   1,
+   "IMAGE"
+  ],
+  [
+   13,
+   23,
+   0,
+   24,
+   0,
+   "MESH"
+  ],
+  [
+   14,
+   24,
+   0,
+   25,
+   0,
+   "MESH"
+  ]
+ ],
+ "groups": [],
+ "config": {},
+ "extra": {},
+ "version": 0.4
+}

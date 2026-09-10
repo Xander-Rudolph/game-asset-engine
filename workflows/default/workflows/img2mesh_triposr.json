@@ -1,0 +1,276 @@
+{
+ "id": "img2mesh_triposr",
+ "revision": 0,
+ "last_node_id": 6,
+ "last_link_id": 5,
+ "nodes": [
+  {
+   "id": 6,
+   "type": "Note",
+   "pos": [
+    -20,
+    60
+   ],
+   "size": [
+    400,
+    600
+   ],
+   "flags": {},
+   "order": -1,
+   "mode": 0,
+   "title": "Read me",
+   "properties": {
+    "text": ""
+   },
+   "widgets_values": [
+    "CONCEPT -> MESH -- TripoSR\n\nFastest and roughest.  Needs an RGBA cut-out, like TripoSG.\n\n---\n\nFastest path, ~10s on a 4070 Ti Super. TripoSR wants a cut-out:\nfeed it an RGBA PNG so LoadImage's alpha becomes the mask, or\nthe whole background is reconstructed as geometry."
+   ],
+   "color": "#432",
+   "bgcolor": "#653"
+  },
+  {
+   "id": 1,
+   "type": "LoadImage",
+   "pos": [
+    420,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 0,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      2
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "MASK",
+     "type": "MASK",
+     "links": [
+      3
+     ],
+     "slot_index": 1
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "LoadImage"
+   },
+   "widgets_values": [
+    "example.png"
+   ]
+  },
+  {
+   "id": 2,
+   "type": "[Comfy3D] Load TripoSR Model",
+   "pos": [
+    420,
+    380
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 1,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "tsr_model",
+     "type": "TSR_MODEL",
+     "links": [
+      1
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "[Comfy3D] Load TripoSR Model"
+   },
+   "widgets_values": [
+    "model.ckpt",
+    8192
+   ]
+  },
+  {
+   "id": 3,
+   "type": "[Comfy3D] TripoSR",
+   "pos": [
+    880,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 2,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "tsr_model",
+     "type": "TSR_MODEL",
+     "link": 1
+    },
+    {
+     "name": "reference_image",
+     "type": "IMAGE",
+     "link": 2
+    },
+    {
+     "name": "reference_mask",
+     "type": "MASK",
+     "link": 3
+    }
+   ],
+   "outputs": [
+    {
+     "name": "mesh",
+     "type": "MESH",
+     "links": [
+      4
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "[Comfy3D] TripoSR"
+   },
+   "widgets_values": [
+    256,
+    25.0
+   ]
+  },
+  {
+   "id": 4,
+   "type": "[Comfy3D] Decimate Mesh",
+   "pos": [
+    1340,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 3,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "mesh",
+     "type": "MESH",
+     "link": 4
+    }
+   ],
+   "outputs": [
+    {
+     "name": "mesh",
+     "type": "MESH",
+     "links": [
+      5
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "[Comfy3D] Decimate Mesh"
+   },
+   "widgets_values": [
+    48000,
+    false,
+    true
+   ]
+  },
+  {
+   "id": 5,
+   "type": "[Comfy3D] Save 3D Mesh",
+   "pos": [
+    1800,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 4,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "mesh",
+     "type": "MESH",
+     "link": 5
+    }
+   ],
+   "outputs": [
+    {
+     "name": "save_path",
+     "type": "STRING",
+     "links": [],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "[Comfy3D] Save 3D Mesh"
+   },
+   "widgets_values": [
+    "mesh/TripoSR_%Y-%m-%d-%H-%M-%S.glb"
+   ]
+  }
+ ],
+ "links": [
+  [
+   1,
+   2,
+   0,
+   3,
+   0,
+   "TSR_MODEL"
+  ],
+  [
+   2,
+   1,
+   0,
+   3,
+   1,
+   "IMAGE"
+  ],
+  [
+   3,
+   1,
+   1,
+   3,
+   2,
+   "MASK"
+  ],
+  [
+   4,
+   3,
+   0,
+   4,
+   0,
+   "MESH"
+  ],
+  [
+   5,
+   4,
+   0,
+   5,
+   0,
+   "MESH"
+  ]
+ ],
+ "groups": [],
+ "config": {},
+ "extra": {},
+ "version": 0.4
+}

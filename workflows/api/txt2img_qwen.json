@@ -1,0 +1,142 @@
+{
+  "_comment": "Qwen-Image text-to-image (Apache-2.0). Replaces SDXL base as the concept generator: it follows a written description far more faithfully, which is what a game-asset brief needs. Structure follows ComfyUI's own image_qwen_image template - UNETLoader -> ModelSamplingAuraFlow(shift 3.1) -> KSampler(euler/simple, 20 steps, cfg 4.0), a qwen_image-type CLIPLoader, and EmptySD3LatentImage (16-channel; a plain EmptyLatentImage will NOT work here). 1328x1328 is Qwen's native 1:1; 1664x928 is its 16:9. Default is 1104x1472 (Qwen's 3:4): a square crops a standing figure at mid-thigh, and a cropped concept makes a cropped mesh.",
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "qwen_image_2512_fp8_e4m3fn.safetensors",
+      "weight_dtype": "default"
+    },
+    "_meta": {
+      "title": "Qwen Diffusion"
+    }
+  },
+  "2": {
+    "class_type": "ModelSamplingAuraFlow",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "shift": 3.1
+    },
+    "_meta": {
+      "title": "Sampling Shift"
+    }
+  },
+  "3": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+      "type": "qwen_image",
+      "device": "default"
+    },
+    "_meta": {
+      "title": "Qwen Text Encoder"
+    }
+  },
+  "4": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "3",
+        0
+      ],
+      "text": "a weathered stone golem overgrown with moss, a single creature standing upright, full body from head to feet, three-quarter view, even flat studio lighting, plain neutral grey background, no cast shadow, game asset concept art, sharp detail"
+    },
+    "_meta": {
+      "title": "Positive"
+    }
+  },
+  "5": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "3",
+        0
+      ],
+      "text": "multiple figures, turnaround sheet, cropped, cut off, busy background, scenery, text, watermark, harsh cast shadows, depth of field, motion blur"
+    },
+    "_meta": {
+      "title": "Negative"
+    }
+  },
+  "6": {
+    "class_type": "EmptySD3LatentImage",
+    "inputs": {
+      "width": 1104,
+      "height": 1472,
+      "batch_size": 1
+    },
+    "_meta": {
+      "title": "Latent"
+    }
+  },
+  "7": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "2",
+        0
+      ],
+      "positive": [
+        "4",
+        0
+      ],
+      "negative": [
+        "5",
+        0
+      ],
+      "latent_image": [
+        "6",
+        0
+      ],
+      "seed": 0,
+      "steps": 20,
+      "cfg": 4.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0
+    },
+    "_meta": {
+      "title": "Sampler"
+    }
+  },
+  "8": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "qwen_image_vae.safetensors"
+    },
+    "_meta": {
+      "title": "Qwen VAE"
+    }
+  },
+  "9": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "7",
+        0
+      ],
+      "vae": [
+        "8",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Decode"
+    }
+  },
+  "10": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "9",
+        0
+      ],
+      "filename_prefix": "concept/qwen"
+    },
+    "_meta": {
+      "title": "Save"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+[
+  {"bone_20": {"rotate": [28, 0, 0]}, "bone_21": {"rotate": [-10, 0, 0]},
+   "bone_24": {"rotate": [-24, 0, 0]}, "bone_25": {"rotate": [-22, 0, 0]},
+   "bone_7": {"rotate": [-16, 0, 0]}, "bone_14": {"rotate": [18, 0, 0]},
+   "bone_2": {"rotate": [4, 0, 0]}},
+  {"bone_20": {"rotate": [2, 0, 0]}, "bone_21": {"rotate": [-6, 0, 0]},
+   "bone_24": {"rotate": [-6, 0, 0]}, "bone_25": {"rotate": [-42, 0, 0]},
+   "bone_7": {"rotate": [-4, 0, 0]}, "bone_14": {"rotate": [4, 0, 0]},
+   "bone_2": {"rotate": [6, 0, 0]}},
+  {"bone_20": {"rotate": [-24, 0, 0]}, "bone_21": {"rotate": [-22, 0, 0]},
+   "bone_24": {"rotate": [28, 0, 0]}, "bone_25": {"rotate": [-10, 0, 0]},
+   "bone_7": {"rotate": [18, 0, 0]}, "bone_14": {"rotate": [-16, 0, 0]},
+   "bone_2": {"rotate": [4, 0, 0]}},
+  {"bone_20": {"rotate": [-6, 0, 0]}, "bone_21": {"rotate": [-42, 0, 0]},
+   "bone_24": {"rotate": [2, 0, 0]}, "bone_25": {"rotate": [-6, 0, 0]},
+   "bone_7": {"rotate": [4, 0, 0]}, "bone_14": {"rotate": [-4, 0, 0]},
+   "bone_2": {"rotate": [6, 0, 0]}}
+]

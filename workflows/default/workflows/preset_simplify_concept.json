@@ -1,0 +1,707 @@
+{
+ "id": "preset_simplify_concept",
+ "revision": 0,
+ "last_node_id": 13,
+ "last_link_id": 18,
+ "nodes": [
+  {
+   "id": 1,
+   "type": "LoadImage",
+   "pos": [
+    420,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 0,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      1
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "MASK",
+     "type": "MASK",
+     "links": [],
+     "slot_index": 1
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "LoadImage"
+   },
+   "widgets_values": [
+    "example.png"
+   ]
+  },
+  {
+   "id": 3,
+   "type": "UNETLoader",
+   "pos": [
+    420,
+    380
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 1,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      2
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "UNETLoader"
+   },
+   "widgets_values": [
+    "qwen_image_edit_2509_fp8_e4m3fn.safetensors",
+    "default"
+   ]
+  },
+  {
+   "id": 6,
+   "type": "CLIPLoader",
+   "pos": [
+    420,
+    700
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 2,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "CLIP",
+     "type": "CLIP",
+     "links": [
+      4,
+      7
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPLoader"
+   },
+   "widgets_values": [
+    "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+    "qwen_image",
+    "default"
+   ]
+  },
+  {
+   "id": 7,
+   "type": "VAELoader",
+   "pos": [
+    420,
+    1020
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 3,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "VAE",
+     "type": "VAE",
+     "links": [
+      5,
+      8,
+      11,
+      17
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAELoader"
+   },
+   "widgets_values": [
+    "qwen_image_vae.safetensors"
+   ]
+  },
+  {
+   "id": 2,
+   "type": "FluxKontextImageScale",
+   "pos": [
+    880,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 4,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "image",
+     "type": "IMAGE",
+     "link": 1
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      6,
+      9,
+      10
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "FluxKontextImageScale"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 4,
+   "type": "ModelSamplingAuraFlow",
+   "pos": [
+    880,
+    380
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 5,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 2
+    }
+   ],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      3
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ModelSamplingAuraFlow"
+   },
+   "widgets_values": [
+    3.0
+   ]
+  },
+  {
+   "id": 5,
+   "type": "CFGNorm",
+   "pos": [
+    1340,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 6,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 3
+    }
+   ],
+   "outputs": [
+    {
+     "name": "patched_model",
+     "type": "MODEL",
+     "links": [
+      12
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CFGNorm"
+   },
+   "widgets_values": [
+    1.0,
+    false
+   ]
+  },
+  {
+   "id": 8,
+   "type": "TextEncodeQwenImageEditPlus",
+   "pos": [
+    1340,
+    380
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 7,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 4
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 5
+    },
+    {
+     "name": "image1",
+     "type": "IMAGE",
+     "link": 6
+    },
+    {
+     "name": "image2",
+     "type": "IMAGE",
+     "link": null
+    },
+    {
+     "name": "image3",
+     "type": "IMAGE",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      13
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "TextEncodeQwenImageEditPlus"
+   },
+   "widgets_values": [
+    "Redraw this character as a clean game-ready design, built from a few large bold shapes with a strong readable silhouette. Remove ALL tiny clutter: no small buckles, no rivets, no engraved filigree, no dangling cords, and give every cloth edge a straight clean hem with NO ragged torn tatters anywhere. Reduce the many small glass vials to exactly two larger vials on the belt. Simplify the armour into a few large smooth plates.\nKEEP the glowing purple orb in its brass ring on his shoulder as the focal point. KEEP the full colour palette: warm aged brass and gold metal, deep purple cloth, brown leather, olive green sleeves. KEEP brown leather gloves and brown leather boots, NOT grey. KEEP his face, hair and beard, his standing pose with arms at his sides, and the plain light grey background.\nIt must remain a fully rendered painted fantasy illustration with real material contrast between metal, leather and cloth, with proper shading, highlights and surface texture. It must NOT become flat untextured plastic, NOT a smooth grey toy, NOT cartoon, NOT a clay render."
+   ]
+  },
+  {
+   "id": 9,
+   "type": "TextEncodeQwenImageEditPlus",
+   "pos": [
+    1340,
+    700
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 8,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 7
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 8
+    },
+    {
+     "name": "image1",
+     "type": "IMAGE",
+     "link": 9
+    },
+    {
+     "name": "image2",
+     "type": "IMAGE",
+     "link": null
+    },
+    {
+     "name": "image3",
+     "type": "IMAGE",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      14
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "TextEncodeQwenImageEditPlus"
+   },
+   "widgets_values": [
+    ""
+   ]
+  },
+  {
+   "id": 10,
+   "type": "VAEEncode",
+   "pos": [
+    1340,
+    1020
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 9,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "pixels",
+     "type": "IMAGE",
+     "link": 10
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 11
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      15
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEEncode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 11,
+   "type": "KSampler",
+   "pos": [
+    1800,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 10,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 12
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 13
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 14
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 15
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      16
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "KSampler"
+   },
+   "widgets_values": [
+    0,
+    "fixed",
+    20,
+    4.0,
+    "euler",
+    "simple",
+    0.85
+   ]
+  },
+  {
+   "id": 12,
+   "type": "VAEDecode",
+   "pos": [
+    2260,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 11,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 16
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 17
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      18
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEDecode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 13,
+   "type": "SaveImage",
+   "pos": [
+    2720,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 12,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 18
+    }
+   ],
+   "outputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "links": [],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "SaveImage"
+   },
+   "widgets_values": [
+    "simplified/asset"
+   ]
+  }
+ ],
+ "links": [
+  [
+   1,
+   1,
+   0,
+   2,
+   0,
+   "IMAGE"
+  ],
+  [
+   2,
+   3,
+   0,
+   4,
+   0,
+   "MODEL"
+  ],
+  [
+   3,
+   4,
+   0,
+   5,
+   0,
+   "MODEL"
+  ],
+  [
+   4,
+   6,
+   0,
+   8,
+   0,
+   "CLIP"
+  ],
+  [
+   5,
+   7,
+   0,
+   8,
+   1,
+   "VAE"
+  ],
+  [
+   6,
+   2,
+   0,
+   8,
+   2,
+   "IMAGE"
+  ],
+  [
+   7,
+   6,
+   0,
+   9,
+   0,
+   "CLIP"
+  ],
+  [
+   8,
+   7,
+   0,
+   9,
+   1,
+   "VAE"
+  ],
+  [
+   9,
+   2,
+   0,
+   9,
+   2,
+   "IMAGE"
+  ],
+  [
+   10,
+   2,
+   0,
+   10,
+   0,
+   "IMAGE"
+  ],
+  [
+   11,
+   7,
+   0,
+   10,
+   1,
+   "VAE"
+  ],
+  [
+   12,
+   5,
+   0,
+   11,
+   0,
+   "MODEL"
+  ],
+  [
+   13,
+   8,
+   0,
+   11,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   14,
+   9,
+   0,
+   11,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   15,
+   10,
+   0,
+   11,
+   3,
+   "LATENT"
+  ],
+  [
+   16,
+   11,
+   0,
+   12,
+   0,
+   "LATENT"
+  ],
+  [
+   17,
+   7,
+   0,
+   12,
+   1,
+   "VAE"
+  ],
+  [
+   18,
+   12,
+   0,
+   13,
+   0,
+   "IMAGE"
+  ]
+ ],
+ "groups": [],
+ "config": {},
+ "extra": {},
+ "version": 0.4
+}

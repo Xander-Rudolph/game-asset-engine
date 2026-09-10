@@ -1,0 +1,10 @@
+[
+  {},
+  {"bone_1": {"rotate": [-18, 0, 0]}, "bone_2": {"rotate": [-20, 0, 0]},
+   "bone_4": {"rotate": [-22, 0, 0]},
+   "bone_7": {"rotate": [-20, 0, -22]}, "bone_14": {"rotate": [-20, 0, 22]},
+   "bone_20": {"rotate": [-12, 0, 0]}, "bone_24": {"rotate": [6, 0, 0]}},
+  {"bone_1": {"rotate": [-7, 0, 0]}, "bone_2": {"rotate": [-8, 0, 0]},
+   "bone_4": {"rotate": [-9, 0, 0]},
+   "bone_7": {"rotate": [-8, 0, -10]}, "bone_14": {"rotate": [-8, 0, 10]}}
+]

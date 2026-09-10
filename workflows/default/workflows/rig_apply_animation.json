@@ -1,0 +1,70 @@
+{
+ "id": "rig_apply_animation",
+ "revision": 0,
+ "last_node_id": 2,
+ "last_link_id": 0,
+ "nodes": [
+  {
+   "id": 2,
+   "type": "Note",
+   "pos": [
+    -20,
+    60
+   ],
+   "size": [
+    400,
+    600
+   ],
+   "flags": {},
+   "order": -1,
+   "mode": 0,
+   "title": "Read me",
+   "properties": {
+    "text": ""
+   },
+   "widgets_values": [
+    "RIGGED FBX + CLIP -> ANIMATED FBX\n\nUniRig ships five Mixamo clips and none of them are game cycles.  For\nidle/walk/attack, drop clips into input/animation_templates/mixamo/ or\nuse mesh2motion's 176 CC0 clips.  scripts/list_animations.py prints\nboth libraries.\n\n---\n\nApply a Mixamo animation to a rigged FBX from\nmesh_rig_unirig.json. animation_file is a combo built from\ninput/animation_templates/mixamo/, which ships Breakdance,\nCapoeira, Dying, Hip_Hop_Dancing and Mma_Kick \u2014 drop more .fbx\nthere and they appear in the list."
+   ],
+   "color": "#432",
+   "bgcolor": "#653"
+  },
+  {
+   "id": 1,
+   "type": "UniRigApplyAnimation",
+   "pos": [
+    420,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 0,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "animated_fbx_path",
+     "type": "STRING",
+     "links": [],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "UniRigApplyAnimation"
+   },
+   "widgets_values": [
+    "output/rigged.fbx",
+    "mixamo",
+    "Capoeira.fbx",
+    ""
+   ]
+  }
+ ],
+ "links": [],
+ "groups": [],
+ "config": {},
+ "extra": {},
+ "version": 0.4
+}

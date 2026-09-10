@@ -1,0 +1,270 @@
+{
+ "id": "img2mesh_hunyuan3d21",
+ "revision": 0,
+ "last_node_id": 6,
+ "last_link_id": 4,
+ "nodes": [
+  {
+   "id": 6,
+   "type": "Note",
+   "pos": [
+    -20,
+    60
+   ],
+   "size": [
+    400,
+    600
+   ],
+   "flags": {},
+   "order": -1,
+   "mode": 0,
+   "title": "Read me",
+   "properties": {
+    "text": ""
+   },
+   "widgets_values": [
+    "CONCEPT -> MESH -- Hunyuan3D 2.1 ShapeGen (~50s)\n\nShape only, no colour: it comes out grey clay.  It removes the\nbackground itself, so a plain concept render is the right input.\n\nLICENCE: Hunyuan3D's terms exclude the EU, the UK and South Korea.\nUse img2mesh_triposg (MIT, no territory clause) for anything shipping\nworldwide -- but TripoSG does NOT remove the background and needs an\nalpha cut-out.\n\nDecimate Mesh's target is a CEILING, not a target: a simpler mesh\nstays simpler.\n\n---\n\nLICENCE: Hunyuan3D 2.1 is under the Tencent Hunyuan Community\nLicense, whose grant excludes the EU, UK and South Korea and\ncalls use of the outputs there unlicensed. Kept deliberately for\nits mesh quality \u2014 see the Licensing section of README.md. For\nan asset shipping worldwide use img2mesh_triposg.json (MIT).\nAUTO_CLEANUP IS FALSE ON PURPOSE: with it true the ShapeGen node\nfrees the pipeline after the run, but ComfyUI caches the loader\nnode's output \u2014 so the FIRST run succeeds and every later one\ndies with \"'Hunyuan3DDiTFlowMatchingPipeline' object has no\nattribute 'scheduler'\" on the gutted cached object. Keeping the\npipeline resident costs VRAM; ComfyUI evicts it when it needs\nto."
+   ],
+   "color": "#432",
+   "bgcolor": "#653"
+  },
+  {
+   "id": 1,
+   "type": "LoadImage",
+   "pos": [
+    420,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 0,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      2
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "MASK",
+     "type": "MASK",
+     "links": [],
+     "slot_index": 1
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "LoadImage"
+   },
+   "widgets_values": [
+    "example.png"
+   ]
+  },
+  {
+   "id": 2,
+   "type": "[Comfy3D] Load Hunyuan3D 21 ShapeGen Pipeline",
+   "pos": [
+    420,
+    380
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 1,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "shapegen_pipe",
+     "type": "DIFFUSERS_PIPE",
+     "links": [
+      1
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "[Comfy3D] Load Hunyuan3D 21 ShapeGen Pipeline"
+   },
+   "widgets_values": [
+    "hunyuan3d-dit-v2-1"
+   ]
+  },
+  {
+   "id": 3,
+   "type": "[Comfy3D] Hunyuan3D 21 ShapeGen",
+   "pos": [
+    880,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 2,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "shapegen_pipe",
+     "type": "DIFFUSERS_PIPE",
+     "link": 1
+    },
+    {
+     "name": "image",
+     "type": "IMAGE",
+     "link": 2
+    }
+   ],
+   "outputs": [
+    {
+     "name": "mesh",
+     "type": "MESH",
+     "links": [
+      3
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "processed_image",
+     "type": "IMAGE",
+     "links": [],
+     "slot_index": 1
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "[Comfy3D] Hunyuan3D 21 ShapeGen"
+   },
+   "widgets_values": [
+    0,
+    30,
+    7.5,
+    256,
+    true,
+    false
+   ]
+  },
+  {
+   "id": 4,
+   "type": "[Comfy3D] Decimate Mesh",
+   "pos": [
+    1340,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 3,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "mesh",
+     "type": "MESH",
+     "link": 3
+    }
+   ],
+   "outputs": [
+    {
+     "name": "mesh",
+     "type": "MESH",
+     "links": [
+      4
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "[Comfy3D] Decimate Mesh"
+   },
+   "widgets_values": [
+    48000,
+    false,
+    true
+   ]
+  },
+  {
+   "id": 5,
+   "type": "[Comfy3D] Save 3D Mesh",
+   "pos": [
+    1800,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 4,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "mesh",
+     "type": "MESH",
+     "link": 4
+    }
+   ],
+   "outputs": [
+    {
+     "name": "save_path",
+     "type": "STRING",
+     "links": [],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "[Comfy3D] Save 3D Mesh"
+   },
+   "widgets_values": [
+    "mesh/Hunyuan21_%Y-%m-%d-%H-%M-%S.glb"
+   ]
+  }
+ ],
+ "links": [
+  [
+   1,
+   2,
+   0,
+   3,
+   0,
+   "DIFFUSERS_PIPE"
+  ],
+  [
+   2,
+   1,
+   0,
+   3,
+   1,
+   "IMAGE"
+  ],
+  [
+   3,
+   3,
+   0,
+   4,
+   0,
+   "MESH"
+  ],
+  [
+   4,
+   4,
+   0,
+   5,
+   0,
+   "MESH"
+  ]
+ ],
+ "groups": [],
+ "config": {},
+ "extra": {},
+ "version": 0.4
+}

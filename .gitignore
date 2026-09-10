@@ -1,0 +1,31 @@
+# Local configuration and secrets
+.env
+*.local
+
+# Weights, uploads, generated output: none of this belongs in git
+input/
+output/
+logs/*
+!logs/.gitkeep
+*.log
+
+# Node packs are cloned or baked into the image, not vendored here
+custom_nodes/
+
+# ComfyUI's own runtime state lands in the user dir we mount
+workflows/*
+!workflows/api/
+!workflows/default/
+workflows/default/*
+!workflows/default/workflows/
+workflows/api/*.bak
+.home/
+
+# Docs site
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+node_modules/
+
+# Python
+__pycache__/
+*.pyc

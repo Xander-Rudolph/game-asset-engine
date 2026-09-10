@@ -1,0 +1,13 @@
+[
+  {"bone_14": {"rotate": [25, 0, 10]}, "bone_15": {"rotate": [-30, 0, 0]},
+   "bone_2": {"rotate": [0, 0, -8]}, "bone_20": {"rotate": [10, 0, 0]}},
+  {"bone_14": {"rotate": [70, 0, 18]}, "bone_15": {"rotate": [-55, 0, 0]},
+   "bone_2": {"rotate": [-8, 0, -18]}, "bone_1": {"rotate": [-5, 0, 0]},
+   "bone_20": {"rotate": [16, 0, 0]}},
+  {"bone_14": {"rotate": [-65, 0, 5]}, "bone_15": {"rotate": [-12, 0, 0]},
+   "bone_2": {"rotate": [14, 0, 16]}, "bone_1": {"rotate": [8, 0, 0]},
+   "bone_20": {"rotate": [-14, 0, 0]}, "bone_24": {"rotate": [22, 0, 0]}},
+  {"bone_14": {"rotate": [-38, 0, 0]}, "bone_15": {"rotate": [-24, 0, 0]},
+   "bone_2": {"rotate": [8, 0, 8]}, "bone_20": {"rotate": [-6, 0, 0]},
+   "bone_24": {"rotate": [12, 0, 0]}}
+]

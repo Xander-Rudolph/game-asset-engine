@@ -1,0 +1,198 @@
+{
+  "_comment": "Qwen-Image-Edit 2509 (Apache-2.0): change part of an existing concept instead of rerolling the whole thing. Use this when a design is approved except for one element - swapping a pauldron, changing a colour, removing a prop - because a regeneration, even on the same seed, will not preserve the rest. Phrase the prompt as an instruction and say what to KEEP: 'Replace X with Y, keeping everything else identical.' FluxKontextImageScale snaps the input to a resolution the model was trained on. 20 steps at cfg 4.0 rather than the 4-step Lightning LoRA on purpose: applying a bf16 LoRA to the fp8 base makes ComfyUI dequantize to patch it, and that spike OOMs a 16GB card - the same wall txt2img_qwen_fast.json works around with a pre-merged checkpoint, which does not exist for the edit model. DENOISE IS THE STYLE KNOB. At the default 1.0 the whole image is re-diffused and the model's own style prior wins: asking to 'simplify' a painted illustration returns flat vector art or featureless clay no matter how many times the prompt says 'not cartoon'. Lower it to preserve the source's rendering while still applying the edit: ~0.8 for a small swap, ~0.5-0.65 to restyle or simplify while keeping the painterly surface. Reach for this before adding more words to the prompt.",
+  "1": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "example.png"
+    },
+    "_meta": {
+      "title": "Source"
+    }
+  },
+  "2": {
+    "class_type": "FluxKontextImageScale",
+    "inputs": {
+      "image": [
+        "1",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Scale To Native"
+    }
+  },
+  "3": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "qwen_image_edit_2509_fp8_e4m3fn.safetensors",
+      "weight_dtype": "default"
+    },
+    "_meta": {
+      "title": "Qwen Edit Model"
+    }
+  },
+  "4": {
+    "class_type": "ModelSamplingAuraFlow",
+    "inputs": {
+      "model": [
+        "3",
+        0
+      ],
+      "shift": 3.0
+    },
+    "_meta": {
+      "title": "Sampling Shift"
+    }
+  },
+  "5": {
+    "class_type": "CFGNorm",
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "strength": 1.0,
+      "pre_cfg": false
+    },
+    "_meta": {
+      "title": "CFG Norm"
+    }
+  },
+  "6": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+      "type": "qwen_image",
+      "device": "default"
+    },
+    "_meta": {
+      "title": "Qwen Text Encoder"
+    }
+  },
+  "7": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "qwen_image_vae.safetensors"
+    },
+    "_meta": {
+      "title": "Qwen VAE"
+    }
+  },
+  "8": {
+    "class_type": "TextEncodeQwenImageEditPlus",
+    "inputs": {
+      "clip": [
+        "6",
+        0
+      ],
+      "vae": [
+        "7",
+        0
+      ],
+      "image1": [
+        "2",
+        0
+      ],
+      "prompt": "Replace the left shoulder pauldron with a rounded glass chamber of glowing amber fluid set in a brass housing, keeping the pose, armour, colours and background identical."
+    },
+    "_meta": {
+      "title": "Positive"
+    }
+  },
+  "9": {
+    "class_type": "TextEncodeQwenImageEditPlus",
+    "inputs": {
+      "clip": [
+        "6",
+        0
+      ],
+      "vae": [
+        "7",
+        0
+      ],
+      "image1": [
+        "2",
+        0
+      ],
+      "prompt": ""
+    },
+    "_meta": {
+      "title": "Negative"
+    }
+  },
+  "10": {
+    "class_type": "VAEEncode",
+    "inputs": {
+      "pixels": [
+        "2",
+        0
+      ],
+      "vae": [
+        "7",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Encode Source"
+    }
+  },
+  "11": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "5",
+        0
+      ],
+      "positive": [
+        "8",
+        0
+      ],
+      "negative": [
+        "9",
+        0
+      ],
+      "latent_image": [
+        "10",
+        0
+      ],
+      "seed": 0,
+      "steps": 20,
+      "cfg": 4.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0
+    },
+    "_meta": {
+      "title": "Sampler"
+    }
+  },
+  "12": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "11",
+        0
+      ],
+      "vae": [
+        "7",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Decode"
+    }
+  },
+  "13": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "12",
+        0
+      ],
+      "filename_prefix": "concept/edit"
+    },
+    "_meta": {
+      "title": "Save"
+    }
+  }
+}

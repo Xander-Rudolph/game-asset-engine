@@ -1,0 +1,26 @@
+# The build context was 12GB, nearly all of it things the image must not have.
+# Docker tars the whole context and hands it to the daemon before it reads the
+# first instruction, so this is paid on every build, cached or not.
+
+# UniRig's pixi environment: 11GB, built on first use, and pointless here.
+.home/
+# Generated assets, and the staging areas they pass through.
+output/
+input/
+logs/
+# The node packs are CLONED in the Dockerfile at pinned commits now, not
+# copied from the host. Copying them would make the image depend on whatever
+# state this particular machine's checkout happens to be in.
+custom_nodes/
+# ComfyUI's own user dir: its database, its logs, the Manager's cache. The two
+# things in there we want are named explicitly by the Dockerfile
+# (workflows/api and workflows/default/workflows), so the rest can go.
+workflows/comfyui.db*
+workflows/__manager/
+workflows/*.log
+# Host-specific, and secret-adjacent.
+.env
+*.log
+__pycache__/
+*.pyc
+.git/

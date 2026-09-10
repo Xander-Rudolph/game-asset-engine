@@ -1,0 +1,142 @@
+{
+  "_comment": "Qwen-Image 4-step, using the PRE-MERGED Lightning checkpoint rather than applying the LoRA at runtime. Both Apache-2.0. The merge is not a convenience: applying the bf16 LoRA to the fp8 base makes ComfyUI dequantize the affected layers to patch them, and that spike OOMs a 16GB card every time. A pre-merged checkpoint has nothing to patch. cfg MUST stay 1.0 - a distilled model has no classifier-free guidance to steer, so the negative prompt does nothing here; put everything in the positive. 1104x1472 is Qwen's 3:4, which keeps a standing figure head-to-toe; a square crops at mid-thigh and a cropped concept makes a cropped mesh.",
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "qwen_image_2512_4steps_merged.safetensors",
+      "weight_dtype": "default"
+    },
+    "_meta": {
+      "title": "Qwen Diffusion"
+    }
+  },
+  "2": {
+    "class_type": "ModelSamplingAuraFlow",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "shift": 3.1
+    },
+    "_meta": {
+      "title": "Sampling Shift"
+    }
+  },
+  "3": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+      "type": "qwen_image",
+      "device": "default"
+    },
+    "_meta": {
+      "title": "Qwen Text Encoder"
+    }
+  },
+  "4": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "3",
+        0
+      ],
+      "text": "a weathered stone golem overgrown with moss, a single creature standing upright, full body from head to feet, three-quarter view, even flat studio lighting, plain neutral grey background, no cast shadow, game asset concept art, sharp detail"
+    },
+    "_meta": {
+      "title": "Positive"
+    }
+  },
+  "5": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "3",
+        0
+      ],
+      "text": "multiple figures, turnaround sheet, cropped, cut off, busy background, scenery, text, watermark, harsh cast shadows, depth of field, motion blur"
+    },
+    "_meta": {
+      "title": "Negative"
+    }
+  },
+  "6": {
+    "class_type": "EmptySD3LatentImage",
+    "inputs": {
+      "width": 1104,
+      "height": 1472,
+      "batch_size": 1
+    },
+    "_meta": {
+      "title": "Latent"
+    }
+  },
+  "7": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "2",
+        0
+      ],
+      "positive": [
+        "4",
+        0
+      ],
+      "negative": [
+        "5",
+        0
+      ],
+      "latent_image": [
+        "6",
+        0
+      ],
+      "seed": 0,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0
+    },
+    "_meta": {
+      "title": "Sampler"
+    }
+  },
+  "8": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "qwen_image_vae.safetensors"
+    },
+    "_meta": {
+      "title": "Qwen VAE"
+    }
+  },
+  "9": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "7",
+        0
+      ],
+      "vae": [
+        "8",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Decode"
+    }
+  },
+  "10": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "9",
+        0
+      ],
+      "filename_prefix": "concept/qwenfast"
+    },
+    "_meta": {
+      "title": "Save"
+    }
+  }
+}

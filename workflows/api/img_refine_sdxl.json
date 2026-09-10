@@ -1,0 +1,30 @@
+{
+  "_comment": "Low-denoise img2img refiner over an existing image, using SDXL base (CreativeML OpenRAIL++-M). Purpose: re-render surfaces more realistically WITHOUT changing the design - a second pass after img_edit_qwen.json has done the simplifying. One job per pass beats one prompt doing both. denoise is the whole control: 0.25-0.35 adds material detail and keeps the design; above ~0.5 SDXL starts reinventing shapes. Note the CivitAI realism checkpoints on this machine are NOT used here - their licensing is unclear and this pipeline ships game assets.",
+  "1": { "class_type": "LoadImage", "inputs": { "image": "example.png" }, "_meta": { "title": "Source" } },
+  "2": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": { "ckpt_name": "sd_xl_base_1.0.safetensors" },
+    "_meta": { "title": "SDXL" }
+  },
+  "3": {
+    "class_type": "CLIPTextEncode",
+    "inputs": { "clip": ["2", 1], "text": "photorealistic character costume, worn brass and gold metal with specular highlights and fine scratches, real leather grain, woven fabric texture, cinematic studio lighting, soft shadows, ambient occlusion, sharp focus, highly detailed realistic materials" },
+    "_meta": { "title": "Positive" }
+  },
+  "4": {
+    "class_type": "CLIPTextEncode",
+    "inputs": { "clip": ["2", 1], "text": "flat vector art, cel shaded, cartoon, anime, comic, plastic, toy, smooth untextured, low detail, blurry" },
+    "_meta": { "title": "Negative" }
+  },
+  "5": { "class_type": "VAEEncode", "inputs": { "pixels": ["1", 0], "vae": ["2", 2] }, "_meta": { "title": "Encode" } },
+  "6": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": ["2", 0], "positive": ["3", 0], "negative": ["4", 0], "latent_image": ["5", 0],
+      "seed": 0, "steps": 24, "cfg": 6.0, "sampler_name": "dpmpp_2m", "scheduler": "karras", "denoise": 0.3
+    },
+    "_meta": { "title": "Sampler" }
+  },
+  "7": { "class_type": "VAEDecode", "inputs": { "samples": ["6", 0], "vae": ["2", 2] }, "_meta": { "title": "Decode" } },
+  "8": { "class_type": "SaveImage", "inputs": { "images": ["7", 0], "filename_prefix": "lordtest/refined" }, "_meta": { "title": "Save" } }
+}

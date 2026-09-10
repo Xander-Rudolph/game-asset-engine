@@ -1,0 +1,731 @@
+{
+ "id": "img_edit_qwen",
+ "revision": 0,
+ "last_node_id": 14,
+ "last_link_id": 18,
+ "nodes": [
+  {
+   "id": 14,
+   "type": "Note",
+   "pos": [
+    -20,
+    60
+   ],
+   "size": [
+    400,
+    600
+   ],
+   "flags": {},
+   "order": -1,
+   "mode": 0,
+   "title": "Read me",
+   "properties": {
+    "text": ""
+   },
+   "widgets_values": [
+    "CHARACTER EDIT -- Qwen-Image-Edit 2509\n\nLoad the image to change in LoadImage, then say what to change in the\nTextEncodeQwenImageEditPlus 'prompt' box -- an instruction, not a\ndescription: \"replace the left pauldron with a glass chamber of green\nfluid\", not \"a figure with a glass pauldron\".\n\nDenoise is a cliff, not a slider.  Below about 0.75 nothing moves;\nabove it the whole figure is redrawn.  If the edit will not take, it is\nusually the prompt, not the number.\n\n---\n\nQwen-Image-Edit 2509 (Apache-2.0): change part of an existing\nconcept instead of rerolling the whole thing. Use this when a\ndesign is approved except for one element - swapping a pauldron,\nchanging a colour, removing a prop - because a regeneration,\neven on the same seed, will not preserve the rest. Phrase the\nprompt as an instruction and say what to KEEP: 'Replace X with\nY, keeping everything else identical.' FluxKontextImageScale\nsnaps the input to a resolution the model was trained on. 20\nsteps at cfg 4.0 rather than the 4-step Lightning LoRA on\npurpose: applying a bf16 LoRA to the fp8 base makes ComfyUI\ndequantize to patch it, and that spike OOMs a 16GB card - the\nsame wall txt2img_qwen_fast.json works around with a pre-merged\ncheckpoint, which does not exist for the edit model. DENOISE IS\nTHE STYLE KNOB. At the default 1.0 the whole image is re-\ndiffused and the model's own style prior wins: asking to\n'simplify' a painted illustration returns flat vector art or\nfeatureless clay no matter how many times the prompt says 'not\ncartoon'. Lower it to preserve the source's rendering while\nstill applying the edit: ~0.8 for a small swap, ~0.5-0.65 to\nrestyle or simplify while keeping the painterly surface. Reach\nfor this before adding more words to the prompt."
+   ],
+   "color": "#432",
+   "bgcolor": "#653"
+  },
+  {
+   "id": 1,
+   "type": "LoadImage",
+   "pos": [
+    420,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 0,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      1
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "MASK",
+     "type": "MASK",
+     "links": [],
+     "slot_index": 1
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "LoadImage"
+   },
+   "widgets_values": [
+    "example.png"
+   ]
+  },
+  {
+   "id": 3,
+   "type": "UNETLoader",
+   "pos": [
+    420,
+    380
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 1,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      2
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "UNETLoader"
+   },
+   "widgets_values": [
+    "qwen_image_edit_2509_fp8_e4m3fn.safetensors",
+    "default"
+   ]
+  },
+  {
+   "id": 6,
+   "type": "CLIPLoader",
+   "pos": [
+    420,
+    700
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 2,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "CLIP",
+     "type": "CLIP",
+     "links": [
+      4,
+      7
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPLoader"
+   },
+   "widgets_values": [
+    "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+    "qwen_image",
+    "default"
+   ]
+  },
+  {
+   "id": 7,
+   "type": "VAELoader",
+   "pos": [
+    420,
+    1020
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 3,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "VAE",
+     "type": "VAE",
+     "links": [
+      5,
+      8,
+      11,
+      17
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAELoader"
+   },
+   "widgets_values": [
+    "qwen_image_vae.safetensors"
+   ]
+  },
+  {
+   "id": 2,
+   "type": "FluxKontextImageScale",
+   "pos": [
+    880,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 4,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "image",
+     "type": "IMAGE",
+     "link": 1
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      6,
+      9,
+      10
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "FluxKontextImageScale"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 4,
+   "type": "ModelSamplingAuraFlow",
+   "pos": [
+    880,
+    380
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 5,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 2
+    }
+   ],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      3
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ModelSamplingAuraFlow"
+   },
+   "widgets_values": [
+    3.0
+   ]
+  },
+  {
+   "id": 5,
+   "type": "CFGNorm",
+   "pos": [
+    1340,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 6,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 3
+    }
+   ],
+   "outputs": [
+    {
+     "name": "patched_model",
+     "type": "MODEL",
+     "links": [
+      12
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CFGNorm"
+   },
+   "widgets_values": [
+    1.0,
+    false
+   ]
+  },
+  {
+   "id": 8,
+   "type": "TextEncodeQwenImageEditPlus",
+   "pos": [
+    1340,
+    380
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 7,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 4
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 5
+    },
+    {
+     "name": "image1",
+     "type": "IMAGE",
+     "link": 6
+    },
+    {
+     "name": "image2",
+     "type": "IMAGE",
+     "link": null
+    },
+    {
+     "name": "image3",
+     "type": "IMAGE",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      13
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "TextEncodeQwenImageEditPlus"
+   },
+   "widgets_values": [
+    "Replace the left shoulder pauldron with a rounded glass chamber of glowing amber fluid set in a brass housing, keeping the pose, armour, colours and background identical."
+   ]
+  },
+  {
+   "id": 9,
+   "type": "TextEncodeQwenImageEditPlus",
+   "pos": [
+    1340,
+    700
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 8,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 7
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 8
+    },
+    {
+     "name": "image1",
+     "type": "IMAGE",
+     "link": 9
+    },
+    {
+     "name": "image2",
+     "type": "IMAGE",
+     "link": null
+    },
+    {
+     "name": "image3",
+     "type": "IMAGE",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      14
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "TextEncodeQwenImageEditPlus"
+   },
+   "widgets_values": [
+    ""
+   ]
+  },
+  {
+   "id": 10,
+   "type": "VAEEncode",
+   "pos": [
+    1340,
+    1020
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 9,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "pixels",
+     "type": "IMAGE",
+     "link": 10
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 11
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      15
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEEncode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 11,
+   "type": "KSampler",
+   "pos": [
+    1800,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 10,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 12
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 13
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 14
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 15
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      16
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "KSampler"
+   },
+   "widgets_values": [
+    0,
+    "fixed",
+    20,
+    4.0,
+    "euler",
+    "simple",
+    1.0
+   ]
+  },
+  {
+   "id": 12,
+   "type": "VAEDecode",
+   "pos": [
+    2260,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 11,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 16
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 17
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      18
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEDecode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 13,
+   "type": "SaveImage",
+   "pos": [
+    2720,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 12,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 18
+    }
+   ],
+   "outputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "links": [],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "SaveImage"
+   },
+   "widgets_values": [
+    "concept/edit"
+   ]
+  }
+ ],
+ "links": [
+  [
+   1,
+   1,
+   0,
+   2,
+   0,
+   "IMAGE"
+  ],
+  [
+   2,
+   3,
+   0,
+   4,
+   0,
+   "MODEL"
+  ],
+  [
+   3,
+   4,
+   0,
+   5,
+   0,
+   "MODEL"
+  ],
+  [
+   4,
+   6,
+   0,
+   8,
+   0,
+   "CLIP"
+  ],
+  [
+   5,
+   7,
+   0,
+   8,
+   1,
+   "VAE"
+  ],
+  [
+   6,
+   2,
+   0,
+   8,
+   2,
+   "IMAGE"
+  ],
+  [
+   7,
+   6,
+   0,
+   9,
+   0,
+   "CLIP"
+  ],
+  [
+   8,
+   7,
+   0,
+   9,
+   1,
+   "VAE"
+  ],
+  [
+   9,
+   2,
+   0,
+   9,
+   2,
+   "IMAGE"
+  ],
+  [
+   10,
+   2,
+   0,
+   10,
+   0,
+   "IMAGE"
+  ],
+  [
+   11,
+   7,
+   0,
+   10,
+   1,
+   "VAE"
+  ],
+  [
+   12,
+   5,
+   0,
+   11,
+   0,
+   "MODEL"
+  ],
+  [
+   13,
+   8,
+   0,
+   11,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   14,
+   9,
+   0,
+   11,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   15,
+   10,
+   0,
+   11,
+   3,
+   "LATENT"
+  ],
+  [
+   16,
+   11,
+   0,
+   12,
+   0,
+   "LATENT"
+  ],
+  [
+   17,
+   7,
+   0,
+   12,
+   1,
+   "VAE"
+  ],
+  [
+   18,
+   12,
+   0,
+   13,
+   0,
+   "IMAGE"
+  ]
+ ],
+ "groups": [],
+ "config": {},
+ "extra": {},
+ "version": 0.4
+}

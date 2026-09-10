@@ -1,0 +1,55 @@
+{
+  "_comment": "Mesh -> skeleton + skin -> FBX. Three defaults here are load-bearing, all found by failing on a real asset:\n  skeleton_template=articulationxl, NOT mixamo. mixamo demands a fixed 52-bone humanoid and aborts with \"Expected 52 bones for cls='vroid', got 22\" whenever the predictor cannot resolve limbs - which is any figure whose arms hang against its body. articulationxl has no fixed count and fits any asset, at the cost of generic bone_N names instead of Mixamo ones. Use mixamo only for a clean T-pose humanoid, and only if you want Mixamo clips to retarget.\n  precision=fp16, NOT auto. auto picks bf16 on Ampere/Ada and spconv 2.3.8 has no bfloat16 kernels, so skinning dies with a bare 'WorkerError: torch.bfloat16'.\n  UniRigLoadMesh lists only files that existed when the container STARTED - comfy-env's isolated worker snapshots the node schema - so: copy your mesh into input/3d/, restart the container, then run. A file added afterwards is rejected with 'value_not_in_list'.",
+  "1": {
+    "class_type": "UniRigLoadMesh",
+    "inputs": {
+      "source_folder": "output",
+      "file_path": "mesh/asset.glb"
+    },
+    "_meta": {
+      "title": "Load Mesh"
+    }
+  },
+  "2": {
+    "class_type": "UniRigLoadModel",
+    "inputs": {
+      "precision": "fp16",
+      "attn_backend": "auto"
+    },
+    "_meta": {
+      "title": "UniRig Model"
+    }
+  },
+  "3": {
+    "class_type": "UniRigAutoRig",
+    "inputs": {
+      "trimesh": [
+        "1",
+        0
+      ],
+      "model": [
+        "2",
+        0
+      ],
+      "skeleton_template": "articulationxl",
+      "fbx_name": "",
+      "target_face_count": 48000,
+      "debug": false
+    },
+    "_meta": {
+      "title": "Auto Rig"
+    }
+  },
+  "4": {
+    "class_type": "UniRigPreviewRiggedMesh",
+    "inputs": {
+      "fbx_output_path": [
+        "3",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Preview Rig"
+    }
+  }
+}

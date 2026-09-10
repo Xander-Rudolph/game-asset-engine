@@ -1,0 +1,107 @@
+{
+  "_comment": "Saved mesh -> 8 facings on Athanor's ISOMETRIC diagonal. The game draws on a 2:1 dimetric grid (map_painter.dart: isoTileW 64, isoTileH 32), so the camera is at 30 degrees elevation and looks down the diagonal between the world axes: a unit facing north/east/south/west must be rendered at 45/135/225/315, NOT 0/90/180/270, or the sprite faces square-on while the ground runs diagonally beneath it. Azimuth is clamped to [-180,180], so eight facings are -135..180 step 45. Load 3D Mesh takes a STRING CONTAINER path. Masks are MASK and need MaskToImage before SaveImage.",
+  "1": {
+    "class_type": "[Comfy3D] Load 3D Mesh",
+    "inputs": {
+      "mesh_file_path": "/app/output/mesh/asset.glb",
+      "resize": true,
+      "renormal": true,
+      "retex": false,
+      "optimizable": false,
+      "clean": false,
+      "resize_bound": 0.9
+    },
+    "_meta": {
+      "title": "Load Mesh"
+    }
+  },
+  "2": {
+    "class_type": "[Comfy3D] Stack Orbit Camera Poses",
+    "inputs": {
+      "orbit_radius_start": 1.75,
+      "orbit_radius_stop": 1.75,
+      "orbit_radius_step": 0.1,
+      "elevation_start": 30.0,
+      "elevation_stop": 30.0,
+      "elevation_step": 0.0,
+      "azimuth_start": -135.0,
+      "azimuth_stop": 180.0,
+      "azimuth_step": 45.0,
+      "orbit_center_X_start": 0.0,
+      "orbit_center_X_stop": 0.0,
+      "orbit_center_X_step": 0.1,
+      "orbit_center_Y_start": 0.0,
+      "orbit_center_Y_stop": 0.0,
+      "orbit_center_Y_step": 0.1,
+      "orbit_center_Z_start": 0.0,
+      "orbit_center_Z_stop": 0.0,
+      "orbit_center_Z_step": 0.1
+    },
+    "_meta": {
+      "title": "Camera Poses"
+    }
+  },
+  "3": {
+    "class_type": "[Comfy3D] Mesh Orbit Renderer",
+    "inputs": {
+      "mesh": [
+        "1",
+        0
+      ],
+      "render_orbit_camera_poses": [
+        "2",
+        0
+      ],
+      "render_image_width": 512,
+      "render_image_height": 512,
+      "render_orbit_camera_fovy": 49.1,
+      "render_background_color_r": 0.0,
+      "render_background_color_g": 0.0,
+      "render_background_color_b": 0.0,
+      "force_cuda_rasterize": false,
+      "render_depth": false,
+      "render_normal": false
+    },
+    "_meta": {
+      "title": "Orbit Render"
+    }
+  },
+  "4": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "3",
+        0
+      ],
+      "filename_prefix": "sprites/asset"
+    },
+    "_meta": {
+      "title": "Save Sprites"
+    }
+  },
+  "5": {
+    "class_type": "MaskToImage",
+    "inputs": {
+      "mask": [
+        "3",
+        1
+      ]
+    },
+    "_meta": {
+      "title": "Mask to Image"
+    }
+  },
+  "6": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "5",
+        0
+      ],
+      "filename_prefix": "sprites/asset_mask"
+    },
+    "_meta": {
+      "title": "Save Masks"
+    }
+  }
+}

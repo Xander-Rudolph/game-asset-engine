@@ -1,0 +1,167 @@
+{
+  "_comment": "LICENCE: Hunyuan3D 2.1 is under the Tencent Hunyuan Community License, whose grant excludes the EU, UK and South Korea and calls use of the outputs there unlicensed. Kept deliberately for its mesh quality \u2014 see the Licensing section of README.md. For an asset shipping worldwide use img2mesh_triposg.json (MIT).  AUTO_CLEANUP IS FALSE ON PURPOSE: with it true the ShapeGen node frees the pipeline after the run, but ComfyUI caches the loader node's output \u2014 so the FIRST run succeeds and every later one dies with \"'Hunyuan3DDiTFlowMatchingPipeline' object has no attribute 'scheduler'\" on the gutted cached object. Keeping the pipeline resident costs VRAM; ComfyUI evicts it when it needs to.",
+  "1": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": {
+      "ckpt_name": "sd_xl_base_1.0.safetensors"
+    },
+    "_meta": {
+      "title": "Checkpoint"
+    }
+  },
+  "2": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "1",
+        1
+      ],
+      "text": "a weathered stone golem overgrown with moss, single object, full body, centred, three-quarter view, even studio lighting, flat neutral grey background, no shadow on the ground, game asset concept, sharp detail"
+    },
+    "_meta": {
+      "title": "Positive"
+    }
+  },
+  "3": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "1",
+        1
+      ],
+      "text": "multiple objects, cropped, cut off, busy background, scenery, text, watermark, motion blur, depth of field, harsh cast shadows"
+    },
+    "_meta": {
+      "title": "Negative"
+    }
+  },
+  "4": {
+    "class_type": "EmptyLatentImage",
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "_meta": {
+      "title": "Latent"
+    }
+  },
+  "5": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "positive": [
+        "2",
+        0
+      ],
+      "negative": [
+        "3",
+        0
+      ],
+      "latent_image": [
+        "4",
+        0
+      ],
+      "seed": 0,
+      "steps": 30,
+      "cfg": 7.0,
+      "sampler_name": "dpmpp_2m",
+      "scheduler": "karras",
+      "denoise": 1.0
+    },
+    "_meta": {
+      "title": "Sampler"
+    }
+  },
+  "6": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "5",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    },
+    "_meta": {
+      "title": "Decode"
+    }
+  },
+  "7": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "6",
+        0
+      ],
+      "filename_prefix": "concept/asset"
+    },
+    "_meta": {
+      "title": "Save"
+    }
+  },
+  "12": {
+    "class_type": "[Comfy3D] Load Hunyuan3D 21 ShapeGen Pipeline",
+    "inputs": {
+      "subfolder": "hunyuan3d-dit-v2-1"
+    },
+    "_meta": {
+      "title": "ShapeGen Pipeline"
+    }
+  },
+  "13": {
+    "class_type": "[Comfy3D] Hunyuan3D 21 ShapeGen",
+    "inputs": {
+      "shapegen_pipe": [
+        "12",
+        0
+      ],
+      "image": [
+        "6",
+        0
+      ],
+      "seed": 0,
+      "steps": 30,
+      "guidance_scale": 7.5,
+      "octree_resolution": 256,
+      "remove_background": true,
+      "auto_cleanup": false
+    },
+    "_meta": {
+      "title": "ShapeGen"
+    }
+  },
+  "14": {
+    "class_type": "[Comfy3D] Decimate Mesh",
+    "inputs": {
+      "mesh": [
+        "13",
+        0
+      ],
+      "target": 48000,
+      "remesh": false,
+      "optimalplacement": true
+    },
+    "_meta": {
+      "title": "Decimate"
+    }
+  },
+  "15": {
+    "class_type": "[Comfy3D] Save 3D Mesh",
+    "inputs": {
+      "mesh": [
+        "14",
+        0
+      ],
+      "save_path": "mesh/Asset_%Y-%m-%d-%H-%M-%S.glb"
+    },
+    "_meta": {
+      "title": "Save Mesh"
+    }
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "1": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "example.png"
+    },
+    "_meta": {
+      "title": "Reference"
+    }
+  },
+  "2": {
+    "class_type": "[Comfy3D] Load Diffusers Pipeline",
+    "inputs": {
+      "diffusers_pipeline_name": "TripoSGPipeline",
+      "repo_id": "VAST-AI/TripoSG",
+      "custom_pipeline": "",
+      "force_download": false
+    },
+    "_meta": {
+      "title": "TripoSG Pipeline"
+    }
+  },
+  "3": {
+    "class_type": "[Comfy3D] TripoSG I23D Model",
+    "inputs": {
+      "tsg_pipe": [
+        "2",
+        0
+      ],
+      "reference_image": [
+        "1",
+        0
+      ],
+      "seed": 42,
+      "guidance_scale": 7.0,
+      "num_inference_steps": 50,
+      "use_flash_decoder": true,
+      "flash_octree_depth": 9,
+      "hierarchical_octree_depth": 9,
+      "dense_octree_depth": 8
+    },
+    "_meta": {
+      "title": "TripoSG"
+    }
+  },
+  "4": {
+    "class_type": "[Comfy3D] Decimate Mesh",
+    "inputs": {
+      "mesh": [
+        "3",
+        0
+      ],
+      "target": 48000,
+      "remesh": false,
+      "optimalplacement": true
+    },
+    "_meta": {
+      "title": "Decimate"
+    }
+  },
+  "5": {
+    "class_type": "[Comfy3D] Save 3D Mesh",
+    "inputs": {
+      "mesh": [
+        "4",
+        0
+      ],
+      "save_path": "mesh/TripoSG_%Y-%m-%d-%H-%M-%S.glb"
+    },
+    "_meta": {
+      "title": "Save Mesh"
+    }
+  }
+}

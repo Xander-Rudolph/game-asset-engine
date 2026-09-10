@@ -1,0 +1,201 @@
+{
+ "id": "mesh_rig_unirig",
+ "revision": 0,
+ "last_node_id": 5,
+ "last_link_id": 3,
+ "nodes": [
+  {
+   "id": 5,
+   "type": "Note",
+   "pos": [
+    -20,
+    60
+   ],
+   "size": [
+    400,
+    600
+   ],
+   "flags": {},
+   "order": -1,
+   "mode": 0,
+   "title": "Read me",
+   "properties": {
+    "text": ""
+   },
+   "widgets_values": [
+    "MESH -> RIGGED FBX -- UniRig\n\nUniRigLoadMesh reads a combo of files that already exist on disk, so\nthe mesh must be saved first: this cannot be wired onto the end of a\ngenerate graph.  source_folder is 'output' and file_path is relative\nto it.\n\nGLB in, FBX out.  FBX is what carries a skeleton; OBJ cannot carry one\nat all.\n\nMIA is better than mixamo for humanoids, and much faster.\n\n---\n\nMesh -> skeleton + skin -> FBX. Three defaults here are load-\nbearing, all found by failing on a real asset:\nskeleton_template=articulationxl, NOT mixamo. mixamo demands a\nfixed 52-bone humanoid and aborts with \"Expected 52 bones for\ncls='vroid', got 22\" whenever the predictor cannot resolve limbs\n- which is any figure whose arms hang against its body.\narticulationxl has no fixed count and fits any asset, at the\ncost of generic bone_N names instead of Mixamo ones. Use mixamo\nonly for a clean T-pose humanoid, and only if you want Mixamo\nclips to retarget.   precision=fp16, NOT auto. auto picks bf16\non Ampere/Ada and spconv 2.3.8 has no bfloat16 kernels, so\nskinning dies with a bare 'WorkerError: torch.bfloat16'.\nUniRigLoadMesh lists only files that existed when the container\nSTARTED - comfy-env's isolated worker snapshots the node schema\n- so: copy your mesh into input/3d/, restart the container, then\nrun. A file added afterwards is rejected with\n'value_not_in_list'."
+   ],
+   "color": "#432",
+   "bgcolor": "#653"
+  },
+  {
+   "id": 1,
+   "type": "UniRigLoadMesh",
+   "pos": [
+    420,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 0,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "mesh",
+     "type": "TRIMESH",
+     "links": [
+      1
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "UniRigLoadMesh"
+   },
+   "widgets_values": [
+    "output",
+    "mesh/asset.glb"
+   ]
+  },
+  {
+   "id": 2,
+   "type": "UniRigLoadModel",
+   "pos": [
+    420,
+    380
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 1,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "model",
+     "type": "UNIRIG_MODEL",
+     "links": [
+      2
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "UniRigLoadModel"
+   },
+   "widgets_values": [
+    "fp16",
+    "auto"
+   ]
+  },
+  {
+   "id": 3,
+   "type": "UniRigAutoRig",
+   "pos": [
+    880,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 2,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "trimesh",
+     "type": "TRIMESH",
+     "link": 1
+    },
+    {
+     "name": "model",
+     "type": "UNIRIG_MODEL",
+     "link": 2
+    }
+   ],
+   "outputs": [
+    {
+     "name": "fbx_output_path",
+     "type": "STRING",
+     "links": [
+      3
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "UniRigAutoRig"
+   },
+   "widgets_values": [
+    "articulationxl",
+    "",
+    48000,
+    false
+   ]
+  },
+  {
+   "id": 4,
+   "type": "UniRigPreviewRiggedMesh",
+   "pos": [
+    1340,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 3,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "fbx_output_path",
+     "type": "STRING",
+     "link": 3
+    }
+   ],
+   "outputs": [],
+   "properties": {
+    "Node name for S&R": "UniRigPreviewRiggedMesh"
+   },
+   "widgets_values": []
+  }
+ ],
+ "links": [
+  [
+   1,
+   1,
+   0,
+   3,
+   0,
+   "TRIMESH"
+  ],
+  [
+   2,
+   2,
+   0,
+   3,
+   1,
+   "UNIRIG_MODEL"
+  ],
+  [
+   3,
+   3,
+   0,
+   4,
+   0,
+   "STRING"
+  ]
+ ],
+ "groups": [],
+ "config": {},
+ "extra": {},
+ "version": 0.4
+}
