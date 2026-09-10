@@ -23,7 +23,6 @@ Everything in `scripts/`. Each takes `--help`.
 | `api_to_ui.py` | Convert graphs into the editor's format. `--check` verifies every value survived. |
 | `build_presets.py` | Generate the drop in presets from base graphs plus the prompt library. |
 | `generate_concepts.sh` | Generate a whole prompt folder in the house style. |
-| `generate_lords.sh` | The same for one specific set. |
 | `simplify_concepts.sh` | Redraw existing art as simpler game ready versions. |
 | `asset_to_mesh.sh` | Concepts to shapes to textures to sheets to curated assets, correctly staged. |
 | `rig_units.sh` | Rig figures one at a time, with the settings that work. |
@@ -36,6 +35,7 @@ Everything in `scripts/`. Each takes `--help`.
 | `render_sheet.py` | Render a model to a sprite sheet. Angles across, poses down. |
 | `decimation_report.py` | Measure what each face budget costs, three ways. |
 | `transfer_weights.py` | Move a skeleton from a decimated proxy onto the original mesh. |
+| `normalise_mesh.py` | Scale a mesh to a declared world size and record the rule. `--check` gates a whole folder. |
 | `make_seamless.py` | Make a texture tile, and say whether it worked. |
 | `cut_icon.py` | Cut an icon out of its background and size it for a UI. |
 | `cleanup.py` | Curate the keepers, then sweep the rest. |
@@ -53,6 +53,10 @@ scripts/render_sheet.py MODEL [--poses SPEC] [--angles N] [--azimuth-start DEG]
 
 `--poses` takes `static`, `frames:1,7,13`, `even:N` or `transforms:FILE`.
 
+`--span <units>` frames against a fixed world height rather than the subject's
+own extent, which is what makes a set share a scale. Without it each model is
+framed to its own bounding box, so a wrong scale renders perfectly.
+
 Defaults are the isometric camera: elevation 30, first facing at 45 degrees,
 orthographic. See [facings](/guide/facings).
 
@@ -65,6 +69,22 @@ scripts/decimation_report.py MODEL [--faces LIST] [--sprite PX]
 
 Pass `--sprite` at the size the asset is really seen at. Judging a budget at 340
 pixels and shipping at 128 wastes geometry.
+
+### `normalise_mesh.py`
+
+```sh
+scripts/normalise_mesh.py MODEL... (--height UNITS | --footprint UNITS)
+                          [--out-dir DIR] [--suffix S] [--check] [--tolerance F]
+```
+
+`--height` for anything that stands, `--footprint` for anything tile bound: a
+character is sized by how tall it stands, a building by the tile it occupies.
+Both put the lowest vertex on z=0.
+
+`--check` changes nothing and exits non-zero if any model is outside the
+tolerance, so it works as a gate in a script. Each normalised model gets a
+`.scale.json` beside it recording the rule and factor, which is what answers
+"was this one normalised, and to what?" six months later.
 
 ### `transfer_weights.py`
 

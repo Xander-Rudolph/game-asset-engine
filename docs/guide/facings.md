@@ -163,10 +163,35 @@ camera rotation.
 
 Details in `render_sheet.py` that exist for specific reasons.
 
-**Orthographic by default.** This is what makes two assets rendered on different
-days share a scale. A perspective camera makes size depend on distance, so a
-figure rendered alone and a figure rendered in a group come out different sizes.
-Use `--persp` only when you want the look.
+**Orthographic by default, but that is not the whole scale story.** An
+orthographic camera keeps one asset the same size across its own angles and
+frames. It does **not** make two different assets share a scale, because the
+camera is framed to each subject's own bounding box. A dagger and a golem fill
+their cells identically.
+
+Two flags, and which you want depends on what the sheet is for:
+
+| | For |
+|---|---|
+| default, per model | A prop on its own, an inventory icon, anything judged by itself. A flask framed against a figure's height is a speck. |
+| `--span <units>` | A **set**. Frames against a fixed world height instead, so a golem looms over a homunculus. |
+
+::: danger A wrong scale renders perfectly
+This is the trap the flags exist for. Because the default frames each model to
+its own bounding box, a model at ten times its intended size produces a flawless
+sheet. The error is invisible in exactly the artefact you are told to inspect,
+and it surfaces later in the engine as every creature being the same size, where
+it gets hunted for in the renderer.
+
+Scale is not a thing you can check by looking. Measure it:
+
+```sh
+scripts/normalise_mesh.py output/mesh/*.glb --height 1.15 --check
+```
+
+That exits non-zero when anything is off, so it works as a gate. Drop `--check`
+to actually apply it. See [scripts](/reference/scripts).
+:::
 
 ::: warning The in graph sprite renderer is perspective
 `mesh_render_sprites.json` uses the 3D pack's orbit renderer, which has a field
