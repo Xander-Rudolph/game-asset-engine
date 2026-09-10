@@ -176,6 +176,28 @@ readable form at all.
 If you expected a texture, the texture stage has not run or its output was
 overwritten by a later asset.
 
+## The same prompt and seed gave a different file
+
+Expected. Nothing is wrong.
+
+Three fresh runs of the same graph, same seed, same input image, produced three
+different checksums: identical size, identical face count, different bytes. The
+variation is GPU nondeterminism in the sparse-convolution and attention kernels,
+and it applies to every generator here, not just one.
+
+So **compare renders, not hashes.** A checksum diff between two runs tells you
+nothing about whether a change you made had an effect.
+
+Two things that confuse this further:
+
+- **A repeat with identical node inputs does not re-execute.** ComfyUI serves the
+  cached result and returns in about a second. If you are trying to test whether
+  some change matters, that cache will happily show you an identical result for
+  the wrong reason. Change an input or restart the container to force a real run.
+- **Face counts are not evidence either** when a `Decimate` node is in the graph,
+  because it clamps to its target. Two runs both reporting 48,000 faces may have
+  produced quite different geometry.
+
 ## Two renders produced sheets containing each other's model
 
 Fixed, but worth knowing if you see it in an old script. Renders used to share one
