@@ -121,11 +121,9 @@ Until it is settled with the pack author, do not treat TripoSG in this install a
 unconditionally territory-free. TRELLIS (MIT) is the clean choice for anything
 shipping into those regions.
 
-One practical catch: **no workflow graph ships for TRELLIS yet**, and building one
-is less straightforward than it looks. There are two incompatible TRELLIS branches,
-one has its weights on disk but needs mask handling the house pattern does not
-provide, and the other has clean wiring but no weights at all.
-[The details are on their own page](/guide/trellis).
+`img2mesh_trellis.json` ships and has been run end to end. It also needs no
+cut-out, unlike TripoSG, because it removes the background itself.
+[Details, and the second TRELLIS branch that is still unwired](/guide/trellis).
 :::
 
 ## A route with the fewest conditions

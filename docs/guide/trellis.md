@@ -1,20 +1,28 @@
-# TRELLIS, and why no graph ships for it
+# TRELLIS
 
-TRELLIS is MIT and carries no territorial clause, which makes it the obvious
-choice for anything shipping into the EU, UK or South Korea. See
+TRELLIS is MIT and carries no territorial clause, which makes it the choice for
+anything shipping into the EU, UK or South Korea. See
 [licensing](/guide/licensing).
 
-The nodes are installed and most of the weights are on disk. There is still no
-workflow graph, and this page is the reason why: the two available routes each
-need something the house pattern does not provide, and picking the wrong one
-quietly costs you a multi-gigabyte download.
+```sh
+scripts/fetch_models.py --download --group trellis
+scripts/run_workflow.py workflows/api/img2mesh_trellis.json \
+    --image input/concept.png --set 'save_path=mesh/asset.glb'
+```
 
-::: warning None of this has been run
-Everything below is read from the server's node definitions and from the pack's
-source inside the container. No graph was queued. The wiring is derived, not
-proven, and the two "would corrupt" and "would re-download" findings are code
-paths rather than observed failures.
+`img2mesh_trellis.json` uses the Stable3DGen branch. It has been run end to end:
+a 1104x1472 character concept on a plain grey background produced a clean
+48,000-face mesh in 29 seconds, with the background removed automatically.
+
+::: tip It needs no cut-out, unlike TripoSG
+This is the practical reason to reach for it beyond the licence. The pipeline
+runs rembg with u2net itself, so a plain grey-background concept render works
+directly. `img2mesh_triposg.json` needs an RGBA cut-out and there is no node in
+this install that makes one.
 :::
+
+The rest of this page is why there are two TRELLIS branches, why only one of
+them ships as a graph, and what the other would need.
 
 ## There are two TRELLIS branches and they do not mix
 
@@ -37,7 +45,8 @@ validation.
 
 ## Which branch to choose
 
-Neither is ready today. They fail in different directions.
+StableGen is the one that ships. The plain branch is not wired up, for the
+reasons below.
 
 ### Plain TRELLIS: weights present, wiring awkward
 
@@ -88,30 +97,32 @@ and faces, leaving the UV arrays pointing at the old topology. TripoSG and
 Hunyuan3D are safe to decimate only because they return geometry with no UVs at
 all. TRELLIS also simplifies internally already. Go straight to `Save 3D Mesh`.
 
-### StableGen: cleaner wiring, no weights
+### StableGen: this is the one that ships
 
-This branch fits the house pattern exactly. Five nodes, no mask handling, and it
-is safe to decimate because it returns geometry without UVs. It removes the
-background itself using rembg with u2net, which is installed and cached, so it
-works offline.
+It fits the house pattern exactly. Five nodes, no mask handling, and it is safe
+to decimate because it returns geometry without UVs.
 
-The blocker is simply that **the weights are not there**. The loader wants four
-`.safetensors` under `Stable3DGen/trellis/trellis-normal-v0-1`; only the four
-matching `.json` configs exist, 100K in total. It would download
-`Stable-X/trellis-normal-v0-1` at run time, and `models.json` does not track it at
-all. It also wants its DINOv2 as a `.pth` at
-`Checkpoints/facebookresearch/dinov2/dinov2_vitl14_reg.pth`, which is a different
-file from the one on disk, so that is another ~1.2GB.
+Its weights used to be the blocker: the loader wants four `.safetensors` under
+`Stable3DGen/trellis/trellis-normal-v0-1` and only the four matching `.json`
+configs shipped, 100K in total. Both those weights and the `.pth` DINOv2 it
+wants are now declared in `models.json`, so `--group trellis` fetches them.
+
+One measured detail that matters if you change the numbers: **`mesh_simplify` is
+a keep ratio, not a removal ratio.** At its default of 0.95 it keeps 95% of the
+faces, so it barely simplifies and the `Decimate` node is what actually meets a
+budget. A run at the shipped settings came out at exactly 48,000 faces, which is
+Decimate's target rather than anything TRELLIS chose.
 
 One more difference worth knowing before you compare outputs: StableGen applies an
 axis transform that the plain branch does not, so the two branches may not agree
 on orientation with each other or with TripoSG and Hunyuan3D output.
 
-## The wiring, if you build it
+## The wiring
 
-Derived from the node definitions, not from a successful run.
+The StableGen half is what `img2mesh_trellis.json` ships and has been run. The
+plain half is derived from the node definitions and has not.
 
-**Plain TRELLIS**, five nodes plus an inverter:
+**Plain TRELLIS**, five nodes plus an inverter, NOT SHIPPED:
 
 ```
 LoadImage (RGBA cut-out)
@@ -129,7 +140,7 @@ Its other inputs: `seed`, `sparse_structure_guidance_scale` (7.5),
 `sparse_structure_sample_steps` (12), `structured_latent_guidance_scale` (3.0),
 `structured_latent_sample_steps` (12).
 
-**StableGen**, matching the house pattern:
+**StableGen**, matching the house pattern, and what ships:
 
 ```
 LoadImage ──► StableGen Trellis Image To 3D.images     (no mask needed)
@@ -146,33 +157,40 @@ The generator takes `mode` (`single` or `multi`), `seed`, `ss_guidance_strength`
 (7.5), `ss_sampling_steps` (12), `slat_guidance_strength` (3.0),
 `slat_sampling_steps` (12) and `mesh_simplify` (0.95, range 0.9 to 1.0).
 
-## The manifest bug
+## The manifest, and what was wrong with it
 
-`models.json` describes the `trellis` group as roughly 10GB and lists two entries.
-Both are on disk and `fetch_models.py` calls the group complete. Neither statement
-survives contact with what the code loads.
+The `trellis` group used to list two entries, call itself roughly 10GB, and
+report complete. All three were wrong about what a run needs, and the group could
+not produce a mesh on either branch.
 
-- The actual total on disk is **5.7GB**, not 10GB.
-- The **2.3GB DINOv2 entry is read by nothing.** The plain branch wants a torch
-  hub cache entry and the StableGen branch wants a `.pth` in a different layout.
-  Neither reads `facebook/dinov2-large` in transformers format.
-- **Neither branch's real image encoder is tracked**, and the StableGen model
-  weights are not tracked either.
+It now declares four entries totalling about 9.6GB: the plain branch's TRELLIS
+image-large, the StableGen weights, the `.pth` DINOv2 that Stable3DGen actually
+loads, and the original `facebook/dinov2-large`.
 
-So `fetch_models.py` reporting the group complete is true of what the manifest
-declares and false of what a run would need. Fixing it means changing what people
-download, so it is left as a finding rather than a patch.
+That last one is **read by nothing**, and is kept only so an existing 2.3GB
+download is not orphaned. The plain branch pulls its encoder through `torch.hub`
+into a separate cache; StableGen wants the `.pth`. Neither reads
+`facebook/dinov2-large` in transformers layout. It carries a note saying so, and
+it is a candidate for removal, which is a decision about what everyone downloads
+rather than a fix.
 
-## What it would take to finish this
+## What is left
 
-In rough order of least surprise:
+Done: the StableGen graph ships, its weights are declared, and it has been run.
 
-1. Build the **StableGen** graph, because its wiring is the house pattern and
-   needs no mask work.
-2. Add `Stable-X/trellis-normal-v0-1` and the `dinov2_vitl14_reg.pth` to
-   `models.json` so the download is declared rather than a run-time surprise.
-3. Fix or remove the unused `facebook/dinov2-large` entry.
-4. Run it once and compare orientation against a TripoSG output, since the axis
-   transform differs.
-5. Only then consider the plain branch, which needs the absolute-path workaround,
+Still open:
+
+1. **The unused `facebook/dinov2-large` entry.** 2.3GB that nothing reads. It is
+   annotated in `models.json` rather than removed, because removing it changes
+   what everyone downloads.
+2. **Orientation has not been compared** against a TripoSG or Hunyuan3D mesh.
+   This branch applies an axis transform the others do not, so they may disagree.
+3. **The plain branch is still unwired**, and needs the absolute-path workaround,
    an `InvertMask`, and a cut-out source.
+
+::: warning You may need the spconv fix first
+TRELLIS is a sparse-convolution model, and the published 0.1.0 image shipped
+with `spconv` unable to import. `scripts/doctor.py` names it; the remedy is in
+[troubleshooting](/guide/troubleshooting#anything-using-sparse-convolution-dies-with-type-not-registered-yet).
+An image built from the current Dockerfile is not affected.
+:::

@@ -1,0 +1,78 @@
+{
+  "_comment": "TRELLIS image-to-mesh, the Stable3DGen branch. USE THIS WHEN THE ASSET SHIPS INTO THE EU, UK OR SOUTH KOREA: TRELLIS is MIT with no territory clause, unlike Hunyuan3D, and unlike the TripoSG copy vendored in this pack, whose licence file carries the same exclusion (see docs/guide/licensing). Unlike img2mesh_triposg.json this needs NO cut-out: the pipeline runs rembg/u2net itself, so a plain grey-background concept render works. Two things worth knowing before you change numbers. mesh_simplify is a KEEP ratio, not a removal ratio -- 0.95 keeps 95% of the faces, so it barely simplifies and the Decimate node below is what actually meets a budget. And this branch applies an axis transform that the plain TRELLIS nodes do not, so if a mesh from here disagrees on orientation with a TripoSG or Hunyuan3D one, that is why. Needs the 'trellis' weight group: scripts/fetch_models.py --download --group trellis. Note the pipeline type is the generic DIFFUSERS_PIPE, shared with 14 other loaders, so ComfyUI will happily let you wire a TripoSG or Hunyuan loader in here and fail at run time rather than at validation -- keep node 2 as it is.",
+  "1": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "example.png"
+    },
+    "_meta": {
+      "title": "Reference"
+    }
+  },
+  "2": {
+    "class_type": "[Comfy3D] Load StableGen Trellis Pipeline",
+    "inputs": {
+      "model_name": "trellis-normal-v0-1",
+      "dinov2_model": "dinov2_vitl14_reg",
+      "use_fp16": true,
+      "attn_backend": "xformers",
+      "sparse_backend": "spconv",
+      "spconv_algo": "implicit_gemm",
+      "smooth_k": true
+    },
+    "_meta": {
+      "title": "TRELLIS Pipeline"
+    }
+  },
+  "3": {
+    "class_type": "[Comfy3D] StableGen Trellis Image To 3D",
+    "inputs": {
+      "trellis_pipe": [
+        "2",
+        0
+      ],
+      "images": [
+        "1",
+        0
+      ],
+      "mode": "single",
+      "seed": 1234,
+      "ss_guidance_strength": 7.5,
+      "ss_sampling_steps": 12,
+      "slat_guidance_strength": 3.0,
+      "slat_sampling_steps": 12,
+      "mesh_simplify": 0.95
+    },
+    "_meta": {
+      "title": "TRELLIS"
+    }
+  },
+  "4": {
+    "class_type": "[Comfy3D] Decimate Mesh",
+    "inputs": {
+      "mesh": [
+        "3",
+        0
+      ],
+      "target": 48000,
+      "remesh": false,
+      "optimalplacement": true
+    },
+    "_meta": {
+      "title": "Decimate"
+    }
+  },
+  "5": {
+    "class_type": "[Comfy3D] Save 3D Mesh",
+    "inputs": {
+      "mesh": [
+        "4",
+        0
+      ],
+      "save_path": "mesh/TRELLIS_%Y-%m-%d-%H-%M-%S.glb"
+    },
+    "_meta": {
+      "title": "Save Mesh"
+    }
+  }
+}
