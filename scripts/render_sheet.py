@@ -41,13 +41,14 @@ import argparse
 import json
 import os
 import shlex
+import shutil
 import subprocess
 import time
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _engine import container as _container  # noqa: E402
+from _engine import container as _container, exec_json  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 # Whichever profile is up: the packaged image names its container
@@ -300,6 +301,12 @@ def main() -> int:
     ap.add_argument("--clay-color", default="0.55,0.54,0.52",
                     help="clay RGB, 0-1, comma separated")
     ap.add_argument("--out", type=Path, help="sheet png (default: alongside the model)")
+    ap.add_argument("--keep-frames", action="store_true",
+                    help="keep the per-cell PNGs under output/_sheet_frames/ "
+                         "instead of deleting them once the sheet is composed")
+    ap.add_argument("--timeout", type=int, default=1800,
+                    help="seconds before giving up on Blender (default 1800). A "
+                         "hung render otherwise hangs forever")
     args = ap.parse_args()
 
     model = args.model if args.model.is_absolute() else ROOT / args.model
@@ -344,15 +351,9 @@ def main() -> int:
 
     script = (f"import os; os.makedirs({frames_dir!r}, exist_ok=True)\n"
               + BLENDER_SCRIPT)
-    cmd = ["docker", "exec", "-i", SVC, "python3", "-c", script, json.dumps(cfg)]
-    r = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True)
-    line = next((l for l in r.stdout.splitlines() if l.startswith("RENDERED ")), None)
-    if not line:
-        print(r.stdout[-2000:])
-        print(r.stderr[-3000:], file=sys.stderr)
+    info = exec_json(script, cfg, "RENDERED ", timeout=args.timeout)
+    if info is None:
         return 1
-
-    info = json.loads(line[len("RENDERED "):])
     info["run_id"] = run_id
     if info["missing_bones"]:
         print(f"  ! bones not in the rig: {', '.join(info['missing_bones'])}")
@@ -366,6 +367,12 @@ def main() -> int:
     if not out.is_absolute():
         out = ROOT / out
     compose(info, args.size, out)
+    if not args.keep_frames:
+        # The per-run directory exists so two concurrent renders cannot
+        # interleave their frames. Once composed it is scratch, and nothing
+        # used to delete it -- they accumulated one per run, indefinitely.
+        shutil.rmtree(ROOT / "output" / "_sheet_frames" / info["run_id"],
+                      ignore_errors=True)
     return 0
 
 

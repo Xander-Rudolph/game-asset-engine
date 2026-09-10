@@ -30,7 +30,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _engine import container as _container  # noqa: E402
+from _engine import container as _container, exec_json  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 CONTAINER = _container()
@@ -194,6 +194,8 @@ def main() -> int:
     ap.add_argument("dense", help="the original high-resolution mesh")
     ap.add_argument("--out", help="where to write the rigged dense mesh "
                                   "(.fbx or .glb; default alongside the dense mesh)")
+    ap.add_argument("--timeout", type=int, default=1800,
+                    help="seconds before giving up on Blender (default 1800)")
     ap.add_argument("--no-align", action="store_true",
                     help="skip bounding-box alignment. Only correct when the two "
                          "meshes already share a coordinate frame")
@@ -210,14 +212,9 @@ def main() -> int:
         "out": to_container(out),
         "align": not args.no_align,
     }
-    r = subprocess.run(
-        ["docker", "exec", "-i", CONTAINER, "python3", "-c", BLENDER, json.dumps(cfg)],
-        capture_output=True, text=True)
-    line = next((l for l in r.stdout.splitlines() if l.startswith("TRANSFER ")), None)
-    if not line:
-        sys.stderr.write(r.stdout[-2500:] + "\n" + r.stderr[-3500:] + "\n")
+    info = exec_json(BLENDER, cfg, "TRANSFER ", timeout=args.timeout)
+    if info is None:
         return 1
-    info = json.loads(line[len("TRANSFER "):])
     print(f"  proxy      {info['proxy_faces']:,} faces, {info['bones']} bones, "
           f"{info['groups']} weight groups")
     print(f"  original   {info['dense_faces']:,} faces, {info['verts']:,} verts")

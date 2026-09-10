@@ -30,24 +30,27 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _engine import container as _container  # noqa: E402
+from _engine import container as _container, exec_json  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 CONTAINER = _container()
 
 BLENDER = r'''
-import bpy, sys, json, math, time
+import bpy, sys, json, math, os, time
 import numpy as np
 from mathutils import Vector, Euler
 from mathutils.bvhtree import BVHTree
 
 cfg = json.loads(sys.argv[-1])
 SIZE = cfg["sprite"]
+os.makedirs(cfg["shots"], exist_ok=True)
 
 
 def load(path):
@@ -205,7 +208,7 @@ textured = any(
     m and m.use_nodes and any(n.type == "TEX_IMAGE" for n in m.node_tree.nodes)
     for m in (s.material for s in ob.material_slots))
 setup_scene(ob, textured)
-ref_img = render("/tmp/dec_ref.png")
+ref_img = render(cfg["shots"] + "/reference.png")
 
 rows = []
 for target in cfg["faces"]:
@@ -226,7 +229,7 @@ for target in cfg["faces"]:
     v, t = tris(ob)
     dev = deviation(ref_bvh, v, t, height)
     setup_scene(ob, textured)
-    img = render(f"/tmp/dec_{target}.png")
+    img = render(cfg["shots"] + f"/faces_{target}.png")
     iou, rgb, lost = compare(ref_img, img)
     rows.append({
         "target": target, "faces": len(t), "verts": len(v),
@@ -254,6 +257,9 @@ def main() -> int:
     ap.add_argument("--elevation", type=float, default=30.0)
     ap.add_argument("--azimuth", type=float, default=45.0)
     ap.add_argument("--json", type=Path, help="also write the raw numbers here")
+    ap.add_argument("--timeout", type=int, default=3600,
+                    help="seconds before giving up on Blender (default 3600). A "
+                         "sweep over many budgets is the slowest thing here")
     args = ap.parse_args()
 
     src = args.model
@@ -271,21 +277,22 @@ def main() -> int:
         else:
             src = str(p)
 
+    run_id = f"{os.getpid()}_{int(time.time())}"
     cfg = {
         "src": src,
         "faces": [int(f) for f in args.faces.split(",")],
         "sprite": args.sprite,
         "elevation": args.elevation,
         "azimuth": args.azimuth,
+        # Under /app/output, which IS bind mounted, so the renders the numbers
+        # describe can be looked at. They used to go to container /tmp, which
+        # meant every measurement was unfalsifiable by eye.
+        "shots": f"/app/output/_dec/{run_id}",
     }
-    r = subprocess.run(
-        ["docker", "exec", "-i", CONTAINER, "python3", "-c", BLENDER, json.dumps(cfg)],
-        capture_output=True, text=True)
-    line = next((l for l in r.stdout.splitlines() if l.startswith("REPORT ")), None)
-    if not line:
-        sys.stderr.write(r.stdout[-3000:] + "\n" + r.stderr[-4000:] + "\n")
+    print(f"  renders {ROOT / 'output' / '_dec' / run_id}")
+    info = exec_json(BLENDER, cfg, "REPORT ", timeout=args.timeout)
+    if info is None:
         return 1
-    info = json.loads(line[len("REPORT "):])
 
     print(f"{info['src']}")
     print(f"  {info['ref_faces']:,} faces, {info['ref_verts']:,} verts, "
