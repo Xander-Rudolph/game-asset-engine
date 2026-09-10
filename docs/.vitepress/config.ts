@@ -115,7 +115,7 @@ export default defineConfig({
     footer: {
       message:
         'Model weights carry their own licences. See the licensing guide before shipping anything.',
-      copyright: 'Alex Rudolph',
+      copyright: 'Xanderu',
     },
 
     editLink: {
