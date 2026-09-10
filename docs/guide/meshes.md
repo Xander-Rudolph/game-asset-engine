@@ -12,6 +12,7 @@ from the front view, which is why the concept art matters so much.
 | `mesh_texture_hunyuan3d21.json` | Hunyuan3D 2.1 | Paints an existing shape. Same licence limit. |
 | `img2mesh_triposr.json` | TripoSR | Fastest. Needs a cut out image with transparency. |
 | `txt2mesh_qwen_hunyuan3d21.json` | Both | Prompt to concept to mesh in one queue. |
+| none yet | TRELLIS | MIT, no territory clause, so the choice for shipping into the EU, UK or South Korea. Nodes installed, most weights present, [no graph yet and here is why](/guide/trellis). |
 
 ::: danger Decide the generator before the asset ships, not after
 Hunyuan3D produces the best meshes in this stack, and its licence does not apply

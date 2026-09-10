@@ -121,10 +121,11 @@ Until it is settled with the pack author, do not treat TripoSG in this install a
 unconditionally territory-free. TRELLIS (MIT) is the clean choice for anything
 shipping into those regions.
 
-One practical catch: **no workflow graph ships for TRELLIS yet.** Its weights are
-in the `trellis` group and its nodes load with the 3D pack
-(`[Comfy3D] Trellis Structured 3D Latents Models` and three others), so building
-a graph is straightforward, but it is not a one-liner today.
+One practical catch: **no workflow graph ships for TRELLIS yet**, and building one
+is less straightforward than it looks. There are two incompatible TRELLIS branches,
+one has its weights on disk but needs mask handling the house pattern does not
+provide, and the other has clean wiring but no weights at all.
+[The details are on their own page](/guide/trellis).
 :::
 
 ## A route with the fewest conditions

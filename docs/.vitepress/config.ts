@@ -52,6 +52,7 @@ export default defineConfig({
           items: [
             { text: 'Concept art', link: '/guide/concept-art' },
             { text: 'Turning art into a mesh', link: '/guide/meshes' },
+            { text: 'TRELLIS', link: '/guide/trellis' },
             { text: 'Textures', link: '/guide/textures' },
             { text: 'Ground and terrain', link: '/guide/terrain' },
             {
