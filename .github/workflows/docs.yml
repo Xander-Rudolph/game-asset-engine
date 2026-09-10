@@ -33,7 +33,13 @@ jobs:
           node-version: 22
       - run: npm install
       - run: npm run docs:build
+      # enablement: true turns Pages on the first time this runs, instead of
+      # failing with "Get Pages site failed ... Not Found" until somebody visits
+      # Settings and does it by hand. Note Pages on a PRIVATE repo needs a paid
+      # plan, so on a private repo this still fails until the repo is public.
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: docs/.vitepress/dist

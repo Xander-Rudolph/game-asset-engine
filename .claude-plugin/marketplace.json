@@ -1,0 +1,22 @@
+{
+  "name": "game-asset-engine",
+  "owner": {
+    "name": "Xanderu",
+    "url": "https://github.com/Xander-Rudolph"
+  },
+  "metadata": {
+    "description": "Concept art to rigged, animated game asset, on your own machine.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "game-asset-engine",
+      "source": "./",
+      "description": "Skills for driving a local ComfyUI install through the whole asset pipeline: concept art, 3D mesh, textures, rigging, sprite sheets and tileable ground.",
+      "version": "0.1.0",
+      "author": { "name": "Xanderu" },
+      "homepage": "https://xander-rudolph.github.io/game-asset-engine/",
+      "keywords": ["comfyui", "3d", "game-assets", "rigging", "sprites", "textures"]
+    }
+  ]
+}
