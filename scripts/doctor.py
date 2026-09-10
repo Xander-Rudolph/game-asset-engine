@@ -31,7 +31,18 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _engine import container as _container  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
-CONTAINER = _container()
+
+
+def container() -> str:
+    """The running container's name, resolved fresh every time.
+
+    NOT cached at import. --fix starts a container partway through the run, so
+    a name resolved before that is the name of something that does not exist
+    yet -- and every later `docker exec` against it fails. That produced a
+    confident "bpy is not importable", which is a fault that reads as a broken
+    image and invites a 27GB rebuild to fix nothing.
+    """
+    return _container()
 URL = os.environ.get("COMFY_URL", "http://127.0.0.1:8188")
 IMAGE = os.environ.get("ATHANOR_COMFY_IMAGE_REPO", "ghcr.io/athanorgames/athanor-comfy")
 
@@ -144,12 +155,13 @@ def check_image(rep: Report) -> bool:
 
 
 def check_container(rep: Report, fix: bool) -> bool:
-    code, out = run(["docker", "ps", "--filter", f"name=^{CONTAINER}$",
+    name = container()
+    code, out = run(["docker", "ps", "--filter", f"name=^{name}$",
                      "--format", "{{.Status}}"])
     if code == 0 and out:
-        rep.add(OK, "container", f"{CONTAINER} is {out.splitlines()[0].lower()}")
+        rep.add(OK, "container", f"{name} is {out.splitlines()[0].lower()}")
         return True
-    code, out = run(["docker", "ps", "-a", "--filter", f"name=^{CONTAINER}$",
+    code, out = run(["docker", "ps", "-a", "--filter", f"name=^{name}$",
                      "--format", "{{.Status}}"])
     exists = bool(out)
     if fix:
@@ -161,7 +173,7 @@ def check_container(rep: Report, fix: bool) -> bool:
         rep.add(BAD, "container", f"could not start it: {o[-300:]}", "")
         return False
     rep.add(BAD, "container",
-            f"{CONTAINER} exists but is stopped" if exists else f"{CONTAINER} is not running",
+            f"{name} exists but is stopped" if exists else f"{name} is not running",
             "docker compose --profile packaged up -d   (or --profile comfy if you "
             "build from source)")
     return False
@@ -191,7 +203,7 @@ def check_server(rep: Report, fix: bool) -> dict | None:
     rep.add(BAD, "server", f"nothing answering at {URL}",
             "The container can be up while ComfyUI is still importing nodes, which "
             "takes a minute or two on a cold start. Watch it: "
-            f"docker logs -f {CONTAINER}")
+            f"docker logs -f {container()}")
     return None
 
 
@@ -202,19 +214,21 @@ def check_nodes(rep: Report, info: dict) -> None:
         return
     packs = sorted(set(missing.values()))
     rep.add(BAD, "node packs", f"not loaded: {', '.join(packs)}",
-            f"docker logs {CONTAINER} 2>&1 | grep -i -A5 'error\\|traceback' | head -40  "
+            f"docker logs {container()} 2>&1 | grep -i -A5 'error\\|traceback' | head -40  "
             "(a node pack that fails to import says why there, and nowhere else)")
 
 
 def check_blender(rep: Report) -> None:
-    code, out = run(["docker", "exec", CONTAINER, "python3", "-c",
+    code, out = run(["docker", "exec", container(), "python3", "-c",
                      "import bpy; print(bpy.app.version_string)"], timeout=120)
     if code == 0 and out:
         rep.add(OK, "blender", f"bpy {out.strip().splitlines()[-1]} in the container")
     else:
-        rep.add(BAD, "blender", "bpy is not importable in the container",
-                "Sprite sheets, posing and decimation all run through Blender "
-                "inside the container. Rebuild the image, or use the packaged one.")
+        rep.add(BAD, "blender", f"bpy is not importable in {container()}",
+                "Sprite sheets, posing, decimation reports and weight transfer all "
+                "run through Blender inside the container. Check the container is "
+                "the one you think it is before rebuilding anything: "
+                f"docker exec {container()} python3 -c 'import bpy'")
 
 
 def check_models(rep: Report) -> None:
