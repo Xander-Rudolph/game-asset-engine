@@ -27,7 +27,7 @@ If it is not ready, walk the user through it rather than doing it silently:
 | `docker` missing | Docker is not installed or they are not in the `docker` group. The fix is printed. Adding a group needs a re-login. |
 | `gpu runtime` warning | The NVIDIA container toolkit is missing. Mesh generation will not work without it. Give them the `nvidia-ctk` command it prints. |
 | `.env` missing | Offer to run `scripts/doctor.py --fix`, which writes it from the example. They still need to set `MODELS_DIR`. |
-| `image` missing | 27GB pull. Say the size before starting it. `docker pull ghcr.io/xander-rudolph/game-game-asset-engine-comfy:latest` |
+| `image` missing | 27GB pull. Say the size before starting it. `docker pull ghcr.io/xander-rudolph/game-asset-engine-comfy:latest` |
 | `container` not running | `docker compose --profile packaged up -d`, or offer `--fix`. |
 | `server` not answering | The container can be up while ComfyUI is still importing nodes. That takes a minute or two on a cold start. Wait, do not restart. `docker logs -f comfyui` shows progress. |
 | `node packs` not loaded | A pack failed to import. The reason is only in the startup log: `docker logs comfyui 2>&1 \| grep -i -A5 error \| head -40` |

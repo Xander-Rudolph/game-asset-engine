@@ -54,6 +54,8 @@ export default defineConfig({
           items: [
             { text: 'What this is', link: '/guide/' },
             { text: 'Install and first run', link: '/guide/install' },
+            { text: 'Running the image', link: '/guide/running-the-image' },
+            { text: 'Installing it for Claude', link: '/guide/claude' },
             { text: 'Make your first asset', link: '/guide/first-asset' },
           ],
         },

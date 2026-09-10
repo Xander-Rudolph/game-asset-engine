@@ -46,7 +46,7 @@ def container() -> str:
 
 
 URL = os.environ.get("COMFY_URL", "http://127.0.0.1:8188")
-IMAGE = os.environ.get("ASSET_ENGINE_IMAGE_REPO", "ghcr.io/xander-rudolph/game-game-asset-engine-comfy")
+IMAGE = os.environ.get("ASSET_ENGINE_IMAGE_REPO", "ghcr.io/xander-rudolph/game-asset-engine-comfy")
 
 # Node classes the shipped workflows need. A missing one means the pack did not
 # load, which the server reports only in its startup log.

@@ -19,7 +19,7 @@ Output looks like this when everything is ready:
   [  ok  ] docker       engine 27.5.1
   [  ok  ] gpu runtime  nvidia runtime registered with docker
   [  ok  ] .env         MODELS_DIR=/models
-  [  ok  ] image        ghcr.io/xander-rudolph/game-game-asset-engine-comfy:latest
+  [  ok  ] image        ghcr.io/xander-rudolph/game-asset-engine-comfy:latest
   [  ok  ] container    comfyui is up 3 hours
   [  ok  ] server       http://127.0.0.1:8188 answering, 943 node types loaded
   [  ok  ] node packs   3D-Pack and UniRig both loaded
@@ -45,7 +45,9 @@ graph. Two seconds of checking removes the guessing.
 
 ## The prebuilt image
 
-Everything except the weights, already built.
+Everything except the weights, already built. This is the short version;
+[running the image](/guide/running-the-image) has the pull, the authentication,
+the plain `docker run` equivalent and what each flag is for.
 
 ```sh
 cp .env.example .env       # then set MODELS_DIR to where weights should live
