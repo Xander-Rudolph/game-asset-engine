@@ -31,10 +31,19 @@ is almost always why.
 Prompts live in `prompts/`, one folder per subject type, one text file per
 subject. Two files in each folder start with an underscore and are shared:
 
-- `_style.txt` is the house style. It gets pasted into each subject prompt when
-  the subject is written.
+- `_style.txt` carries the **technique**: one subject, whole thing in frame,
+  plain background, even lighting, large readable shapes. Those clauses are the
+  same whatever you are making. In the middle of it is an
+  `<<< ART DIRECTION: ... >>>` slot. **Replace that one phrase with your
+  project's look and change nothing else.**
 - `_negative.txt` is passed as the negative prompt for every subject in that
   folder.
+
+That split is deliberate. A shared style file is the single highest-leverage
+place to contaminate a whole asset set: bake a house style into the default and
+every generation silently carries someone else's project. `prompts/examples/`
+holds one project's filled-in version, to show what a completed art direction
+looks like. Nothing in the default path reads from it.
 
 Generate a whole folder:
 
@@ -83,7 +92,7 @@ Four things every subject prompt states:
    shading. Say it plainly, because the alternative is flat vector art, and flat
    art gives the mesh generator nothing to read depth from.
 
-Here is the character style used in this repo, as an example of all four:
+Here is a filled-in character style, as an example of all four:
 
 > Full body head to toe view of a single figure standing upright and facing the
 > viewer, the entire figure visible from the top of the head to the boots with
@@ -103,6 +112,16 @@ And the matching negative:
 
 The ragged and cluttered words are there for a reason. Generators love to add
 torn hems and hanging trinkets, and both turn into unreadable geometry.
+
+::: danger Naming a thing in the positive summons it, even to forbid it
+This one costs an afternoon to learn. Writing *"no ragged tatters, no tears, no
+frayed edges"* into the **positive** prompt produced a **more** tattered coat
+every single time.
+
+The split that works: the positive says only what the thing **should be** ("a
+smooth even curved hem, pristine, freshly tailored"), and the negative carries
+what it must not be. Never negate in the positive.
+:::
 
 ## Simplifying art you already have
 

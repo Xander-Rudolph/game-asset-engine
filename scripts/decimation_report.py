@@ -112,7 +112,7 @@ def deviation(ref_bvh, v, t, height):
     }
 
 
-# --- camera: the game's isometric one, orthographic ------------------------
+# --- camera: the isometric one, orthographic ------------------------
 def setup_scene(ob, textured):
     for o in list(bpy.data.objects):
         if o.type in {"CAMERA", "LIGHT"}:

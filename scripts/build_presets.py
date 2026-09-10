@@ -68,7 +68,7 @@ def presets() -> dict[str, dict]:
     }
 
     for name, folder, style_file, neg_file, w, h, prefix in [
-        ("preset_concept_character", "lords", "_style.txt", "_negative.txt",
+        ("preset_concept_character", "characters", "_style.txt", "_negative.txt",
          1104, 1472, "concept/character"),
         ("preset_concept_creature", "creatures", "_style.txt", "_negative.txt",
          1104, 1472, "concept/creature"),

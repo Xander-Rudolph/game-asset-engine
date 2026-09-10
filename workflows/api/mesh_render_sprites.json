@@ -1,5 +1,5 @@
 {
-  "_comment": "Saved mesh -> 8 facings on Athanor's ISOMETRIC diagonal. The game draws on a 2:1 dimetric grid (map_painter.dart: isoTileW 64, isoTileH 32), so the camera is at 30 degrees elevation and looks down the diagonal between the world axes: a unit facing north/east/south/west must be rendered at 45/135/225/315, NOT 0/90/180/270, or the sprite faces square-on while the ground runs diagonally beneath it. Azimuth is clamped to [-180,180], so eight facings are -135..180 step 45. Load 3D Mesh takes a STRING CONTAINER path. Masks are MASK and need MaskToImage before SaveImage.",
+  "_comment": "Saved mesh -> 8 facings on the ISOMETRIC diagonal. For a 2:1 dimetric grid (tile 64 wide by 32 high) the camera is at 30 degrees elevation and looks down the diagonal between the world axes: a unit facing north/east/south/west must be rendered at 45/135/225/315, NOT 0/90/180/270, or the sprite faces square-on while the ground runs diagonally beneath it. Azimuth is clamped to [-180,180], so eight facings are -135..180 step 45. Load 3D Mesh takes a STRING CONTAINER path. Masks are MASK and need MaskToImage before SaveImage.",
   "1": {
     "class_type": "[Comfy3D] Load 3D Mesh",
     "inputs": {

@@ -275,10 +275,10 @@ def main() -> int:
     ap.add_argument("--angles", type=int, default=4,
                     help="azimuths around the subject (default 4: front/right/back/left)")
     ap.add_argument("--azimuth-start", type=float, default=45.0,
-                    help="degrees of the first facing. Default 45 for Athanor's "
-                         "isometric camera — see --iso")
+                    help="degrees of the first facing. Default 45, which is what a "
+                         "2:1 isometric grid needs")
     ap.add_argument("--elevation", type=float, default=30.0,
-                    help="camera elevation. Default 30 matches the game's 2:1 dimetric")
+                    help="camera elevation. Default 30 matches a 2:1 dimetric grid")
     ap.add_argument("--flat", action="store_true",
                     help="render square-on (elevation 30, azimuth from 0) instead of "
                          "on the isometric diagonal. For look-dev, not for sprites")
@@ -307,8 +307,8 @@ def main() -> int:
         return int(bool(sys.stderr.write(f"no such model: {model}\n")))
 
     poses = parse_poses(args.poses, model)
-    # Athanor draws on a 2:1 dimetric grid (map_painter.dart: isoTileW 64,
-    # isoTileH 32, screen = ((u-v)*32, (u+v)*16)).  A ground vector's vertical
+    # A 2:1 dimetric grid (tile 64 wide by 32 high, so screen =
+    # ((u-v)*32, (u+v)*16)).  A ground vector's vertical
     # screen component is sin(elevation), and isoTileH/isoTileW = 0.5, so the
     # camera sits at exactly 30 degrees.  It looks down the diagonal BETWEEN the
     # world axes, so a unit whose Facing is on a world axis (north/east/south/
