@@ -66,7 +66,7 @@ does not cover.
 
 Every dependency keeps its own licence. The ones with conditions that affect a
 shipped game are listed with their exact terms in
-[the licensing guide](https://xander-rudolph.github.io/asset-engine/guide/licensing),
+[the licensing guide](https://xander-rudolph.github.io/game-asset-engine/guide/licensing),
 and `scripts/fetch_models.py --licenses` prints the current set.
 
 If you are credited here and want the wording changed or the entry removed, open

@@ -8,7 +8,7 @@ pipeline and the MCP server definitions that go with them.
 Point Claude Code at the repo:
 
 ```sh
-claude plugin install /path/to/asset-engine
+claude plugin install /path/to/game-asset-engine
 ```
 
 Or, if you work in the repo directly, the skills are found automatically when

@@ -21,7 +21,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-IMAGE="${ASSET_ENGINE_IMAGE_REPO:-ghcr.io/xander-rudolph/asset-engine-comfy}"
+IMAGE="${ASSET_ENGINE_IMAGE_REPO:-ghcr.io/xander-rudolph/game-game-asset-engine-comfy}"
 VERSION="${1:-}"
 DRY="${2:-}"
 

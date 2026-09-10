@@ -2,7 +2,7 @@
 layout: home
 
 hero:
-  name: Asset Engine
+  name: Game Asset Engine
   text: Written description in, game asset out
   tagline: A local ComfyUI setup that takes a sentence, draws the concept art, builds a 3D model, textures it, rigs it, and renders the sprite sheet your game actually loads. Everything runs on your own machine.
   actions:

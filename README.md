@@ -1,4 +1,4 @@
-# Asset Engine
+# Game Asset Engine
 
 Turn a written description into a textured, rigged, animated game asset, on your
 own machine.
@@ -7,7 +7,7 @@ ComfyUI in Docker with the 3D, rigging and animation node packs on top, plus the
 scripts, prompt libraries, drop in workflows and Claude Code skills to drive the
 whole thing from a terminal.
 
-**[Read the guides](https://xander-rudolph.github.io/asset-engine/)**
+**[Read the guides](https://xander-rudolph.github.io/game-asset-engine/)**
 
 ```
 "a mossy stone golem"
@@ -75,16 +75,78 @@ scripts/decimation_report.py output/mesh/asset.glb --sprite 128
 
 Reports how far the surface moved, how much of the outline was lost, and how far
 the texture drifted, at each face budget, rendered from the camera your game
-uses. [What the numbers say](https://xander-rudolph.github.io/asset-engine/guide/decimation).
+uses. [What the numbers say](https://xander-rudolph.github.io/game-asset-engine/guide/decimation).
 
-## Claude Code plugin
+## Using this with Claude
 
-This repo doubles as a plugin. It ships six skills and the MCP server
-definitions that go with them.
+This repo is a Claude Code plugin. Point Claude at it and ask for an asset in
+plain language; the skills carry the settings, the gates and the checks.
 
 ```sh
-claude plugin install /path/to/asset-engine
+claude plugin install /path/to/game-asset-engine
 ```
+
+Or just run Claude Code from the repo root, which finds the skills without
+installing anything.
+
+### What to say
+
+You do not invoke skills by name. Describe what you want and the right one is
+picked from its description:
+
+| Say something like | Runs |
+|---|---|
+| "make me a mossy stone golem for the map" | `asset-pipeline`, prompt to rigged model with a gate at each stage |
+| "use that one but swap the shoulder pauldron" | `concept-edit`, changes one element without redrawing |
+| "render walk and attack sheets for the golem" | `pose-sheet`, sprite sheets and facings |
+| "I need a tileable swamp ground texture" | `ground-texture`, generation plus seam fixing |
+| "how many faces should this be" / "rig this 600k mesh" | `mesh-budget`, measured budgets and heavy-mesh rigging |
+| "tidy up, I'm done with this asset" | `asset-cleanup`, curate the keepers and sweep the rest |
+
+### What Claude will do first, every time
+
+Run `scripts/doctor.py`. Nothing starts until it says ready, because almost
+every confusing failure here is one of a few ordinary things (no GPU runtime,
+container down, weights missing, spconv broken) that otherwise surface much
+later disguised as a broken workflow. If it is not ready, Claude walks you
+through the fix rather than guessing.
+
+### How the skills are meant to behave
+
+Worth knowing so you can tell when something is off:
+
+- **One stage per turn.** Concept art is shown and approved before a mesh is
+  built. A rejected mesh three stages later costs far more than a rerolled
+  image, so the gates are deliberate. If Claude runs two stages without asking,
+  that is a bug.
+- **It shows you the picture.** Every generated image is read back into the
+  conversation. A printed file path is not a result.
+- **It checks rather than assumes.** Face counts, bone names, body counts and
+  node availability are read off the running server and the real files, never
+  described from memory.
+- **It says what it chose and why.** Which generator, which camera angle, what
+  it added to your prompt.
+
+### Bring your own art direction
+
+The prompt library ships **technique**, not a look. Each `prompts/*/_style.txt`
+carries the clauses that make an image convert cleanly to 3D, with an
+`<<< ART DIRECTION: ... >>>` slot in the middle. Put your project's style in
+that one phrase and change nothing else.
+
+`prompts/examples/` holds one project's filled-in version so you can see what a
+finished art direction looks like. Nothing in the default path reads from it.
+
+### MCP
+
+`.mcp.json` declares the servers this repo expects. Keys come from the
+environment, never the repo:
+
+```sh
+export MESHY_API_KEY=...
+```
+
+### The skills
 
 | Skill | For |
 |---|---|
@@ -94,12 +156,6 @@ claude plugin install /path/to/asset-engine
 | `ground-texture` | Tileable terrain, and fixing seams |
 | `mesh-budget` | Face counts, decimation, rigging heavy meshes |
 | `asset-cleanup` | Curate the keepers, sweep the rest |
-
-MCP keys come from the environment, never from the repo:
-
-```sh
-export MESHY_API_KEY=...
-```
 
 ## Documentation
 
@@ -115,13 +171,13 @@ It deploys to GitHub Pages on every push to `main`.
 
 | Page | For |
 |---|---|
-| [Install and first run](https://xander-rudolph.github.io/asset-engine/guide/install) | Getting it running |
-| [Make your first asset](https://xander-rudolph.github.io/asset-engine/guide/first-asset) | Ten minutes, end to end |
-| [Facings and camera angles](https://xander-rudolph.github.io/asset-engine/guide/facings) | Why a sprite faces the wrong way |
-| [Face counts and decimation](https://xander-rudolph.github.io/asset-engine/guide/decimation) | How much geometry you actually need |
-| [Rigging](https://xander-rudolph.github.io/asset-engine/guide/rigging) | Including heavy and scanned meshes |
-| [Ground and terrain](https://xander-rudolph.github.io/asset-engine/guide/terrain) | Tileable textures, and four ways to get seams wrong |
-| [Licensing](https://xander-rudolph.github.io/asset-engine/guide/licensing) | Read before shipping anything |
+| [Install and first run](https://xander-rudolph.github.io/game-asset-engine/guide/install) | Getting it running |
+| [Make your first asset](https://xander-rudolph.github.io/game-asset-engine/guide/first-asset) | Ten minutes, end to end |
+| [Facings and camera angles](https://xander-rudolph.github.io/game-asset-engine/guide/facings) | Why a sprite faces the wrong way |
+| [Face counts and decimation](https://xander-rudolph.github.io/game-asset-engine/guide/decimation) | How much geometry you actually need |
+| [Rigging](https://xander-rudolph.github.io/game-asset-engine/guide/rigging) | Including heavy and scanned meshes |
+| [Ground and terrain](https://xander-rudolph.github.io/game-asset-engine/guide/terrain) | Tileable textures, and four ways to get seams wrong |
+| [Licensing](https://xander-rudolph.github.io/game-asset-engine/guide/licensing) | Read before shipping anything |
 
 ## Licensing, briefly
 
@@ -132,7 +188,7 @@ rendering its output to a 2D sprite does not sidestep that.
 
 There is a route through this pipeline with no conditions at all, and it is the
 default in the walkthrough. See
-[licensing](https://xander-rudolph.github.io/asset-engine/guide/licensing).
+[licensing](https://xander-rudolph.github.io/game-asset-engine/guide/licensing).
 
 ## Credits
 

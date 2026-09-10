@@ -349,12 +349,12 @@ ARG CUDA_TAG=12.4.1-cudnn-devel-ubuntu22.04
 # maintainer and ref.name are inherited from the NVIDIA/Ubuntu base and are
 # actively misleading if left: they say NVIDIA owns this and that it is "ubuntu".
 LABEL maintainer="Xanderu" \
-      org.opencontainers.image.ref.name="asset-engine-comfy" \
-      org.opencontainers.image.title="Asset Engine ComfyUI" \
+      org.opencontainers.image.ref.name="game-asset-engine-comfy" \
+      org.opencontainers.image.title="Game Asset Engine ComfyUI" \
       org.opencontainers.image.description="ComfyUI with 3D-Pack, UniRig, CameraPack and mesh2motion pinned and built, plus the Asset Engine pipeline workflows and scripts. Model weights are NOT included; the container names the missing ones on boot." \
-      org.opencontainers.image.source="https://github.com/Xander-Rudolph/asset-engine" \
-      org.opencontainers.image.url="https://xander-rudolph.github.io/asset-engine/" \
-      org.opencontainers.image.documentation="https://xander-rudolph.github.io/asset-engine/guide/install" \
+      org.opencontainers.image.source="https://github.com/Xander-Rudolph/game-asset-engine" \
+      org.opencontainers.image.url="https://xander-rudolph.github.io/game-asset-engine/" \
+      org.opencontainers.image.documentation="https://xander-rudolph.github.io/game-asset-engine/guide/install" \
       org.opencontainers.image.vendor="Xanderu" \
       org.opencontainers.image.licenses="Apache-2.0 AND GPL-3.0-only AND GPL-2.0-or-later AND MIT AND LicenseRef-Tencent-Hunyuan-Community" \
       org.opencontainers.image.base.name="nvidia/cuda:${CUDA_TAG}" \

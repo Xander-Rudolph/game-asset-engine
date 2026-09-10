@@ -13,10 +13,10 @@ import { defineConfig } from 'vitepress'
 // The production build is unaffected, which is what makes it confusing: the
 // site builds and deploys fine while the dev server refuses to start.
 const isDev = process.argv.includes('dev')
-const base = process.env.DOCS_BASE ?? (isDev ? '/' : '/asset-engine/')
+const base = process.env.DOCS_BASE ?? (isDev ? '/' : '/game-asset-engine/')
 
 export default defineConfig({
-  title: 'Asset Engine',
+  title: 'Game Asset Engine',
   description:
     'Turn a written description into a textured, rigged, animated game asset on your own machine.',
   base,
@@ -43,7 +43,7 @@ export default defineConfig({
       { text: 'Credits', link: '/credits' },
       {
         text: 'Repo',
-        link: 'https://github.com/Xander-Rudolph/asset-engine',
+        link: 'https://github.com/Xander-Rudolph/game-asset-engine',
       },
     ],
 
@@ -109,7 +109,7 @@ export default defineConfig({
     outline: { level: [2, 3], label: 'On this page' },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/Xander-Rudolph/asset-engine' },
+      { icon: 'github', link: 'https://github.com/Xander-Rudolph/game-asset-engine' },
     ],
 
     footer: {
@@ -120,7 +120,7 @@ export default defineConfig({
 
     editLink: {
       pattern:
-        'https://github.com/Xander-Rudolph/asset-engine/edit/main/docs/:path',
+        'https://github.com/Xander-Rudolph/game-asset-engine/edit/main/docs/:path',
       text: 'Suggest a change to this page',
     },
   },
