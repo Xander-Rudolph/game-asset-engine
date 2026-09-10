@@ -113,9 +113,14 @@ faces, so it barely simplifies and the `Decimate` node is what actually meets a
 budget. A run at the shipped settings came out at exactly 48,000 faces, which is
 Decimate's target rather than anything TRELLIS chose.
 
-One more difference worth knowing before you compare outputs: StableGen applies an
-axis transform that the plain branch does not, so the two branches may not agree
-on orientation with each other or with TripoSG and Hunyuan3D output.
+StableGen applies an axis transform that the plain branch does not, which looked
+like a reason to expect disagreement with the other generators. **Measured, it is
+not.** The same concept was put through this graph and through
+`img2mesh_hunyuan3d21.json`, both rendered at 45/135/225/315, and every facing
+matched: comparing each TRELLIS cell against each Hunyuan cell, the aligned
+pairing scores a mean silhouette IoU of 0.823 against 0.65 to 0.68 for every
+90-degree rotation of the mapping. The transform brings this branch into the same
+frame as the others rather than out of it.
 
 ## The wiring
 
@@ -157,6 +162,19 @@ The generator takes `mode` (`single` or `multi`), `seed`, `ss_guidance_strength`
 (7.5), `ss_sampling_steps` (12), `slat_guidance_strength` (3.0),
 `slat_sampling_steps` (12) and `mesh_simplify` (0.95, range 0.9 to 1.0).
 
+## Runs are not byte-reproducible
+
+Worth knowing before you diff two outputs. Three fresh executions of this graph
+with the same seed and the same input produced three different files: same size,
+same 48,000 faces, three different checksums. The variation is GPU
+nondeterminism in the sparse-convolution and attention kernels, not anything you
+changed.
+
+If you re-run and the bytes differ, that is expected. Compare renders, not
+hashes. And note that a repeat with identical node inputs returns in about a
+second from ComfyUI's cache rather than re-executing, so a genuinely fresh run
+needs a changed input or a restart.
+
 ## The manifest, and what was wrong with it
 
 The `trellis` group used to list two entries, call itself roughly 10GB, and
@@ -178,14 +196,17 @@ rather than a fix.
 
 Done: the StableGen graph ships, its weights are declared, and it has been run.
 
+Verified since: orientation agrees with Hunyuan3D (above), and the
+`facebook/dinov2-large` download is confirmed unread by holding it out and
+re-running.
+
 Still open:
 
-1. **The unused `facebook/dinov2-large` entry.** 2.3GB that nothing reads. It is
-   annotated in `models.json` rather than removed, because removing it changes
-   what everyone downloads.
-2. **Orientation has not been compared** against a TripoSG or Hunyuan3D mesh.
-   This branch applies an axis transform the others do not, so they may disagree.
-3. **The plain branch is still unwired**, and needs the absolute-path workaround,
+1. **The unread `facebook/dinov2-large` entry**, 2.3GB. Annotated in
+   `models.json` rather than removed, because removing it changes what everyone
+   downloads. Note StableFast3D does want that model, but as a hub id resolved
+   through the HF cache, so this copy does not serve it either.
+2. **The plain branch is still unwired**, and needs the absolute-path workaround,
    an `InvertMask`, and a cut-out source.
 
 ::: warning You may need the spconv fix first

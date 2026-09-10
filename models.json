@@ -189,7 +189,7 @@
       "license": "Apache-2.0",
       "license_url": "https://huggingface.co/facebook/dinov2-large",
       "commercial": "yes",
-      "note": "NOTHING READS THIS. Kept only so an existing 2.3GB download is not orphaned. Both TRELLIS branches want a different file: the plain branch pulls dinov2_vitl14_reg through torch.hub into its own cache, and Stable3DGen wants the .pth entry below. This is HF transformers layout and the wrong variant (no registers). A candidate for removal."
+      "note": "NOTHING READS THIS PATH. Verified by holding the four HF-layout files out and re-running TRELLIS: identical result, 29s, 48000 faces. Neither TRELLIS branch wants them - the plain branch pulls dinov2_vitl14_reg through torch.hub into its own cache, Stable3DGen wants the .pth entry below. StableFast3D DOES use facebook/dinov2-large, but as a hub id resolved through HF_HOME, so this copy does not satisfy it either. A candidate for removal."
     },
     {
       "name": "TRELLIS normal v0.1 (Stable3DGen weights)",
