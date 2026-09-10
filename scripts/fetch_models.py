@@ -168,7 +168,12 @@ def plan(entry: dict, mdir: Path) -> list[tuple[str, Path, int | None]]:
     dest = mdir / entry["dest"]
 
     if kind == "url":
-        return [(entry["url"], dest, None)]
+        # An optional "size" restores the guarantee the HF kinds get for free:
+        # a file counts as present only when its size matches, so a truncated
+        # download is re-fetched rather than silently loaded and crashed on.
+        # Without it there is nothing to compare against and mere existence has
+        # to do, which is how a half-fetched 1.2GB checkpoint reads as ready.
+        return [(entry["url"], dest, entry.get("size"))]
 
     rtype = entry.get("repo_type", "model")
     if kind == "file":
@@ -321,7 +326,10 @@ def main() -> int:
         mark = "ok " if not missing else "MISS"
         detail = human(all_b) if not missing else f"{human(all_b - have_b)} to fetch"
         print(f"  {mark} {e['name']:<48} {detail}")
-        if e.get("note") and missing:
+        # Print the note whether or not the entry is missing. A note on a file
+        # you already have is the case that most needs saying: it is how you
+        # find out that 2.3GB on your disk is read by nothing.
+        if e.get("note"):
             print(f"       {e['note']}")
         if missing:
             todo.append((e, missing))

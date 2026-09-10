@@ -20,7 +20,7 @@
     "core": "SDXL image generation + TripoSR/TripoSG image-to-3D",
     "hunyuan": "Hunyuan3D 2.1 shape generation (best mesh quality, ~10GB)",
     "instantmesh": "Zero123++ multiview -> InstantMesh reconstruction",
-    "trellis": "TRELLIS image-to-3D (large, ~10GB)",
+    "trellis": "TRELLIS image-to-3D: both branches, ~9.6GB",
     "mvadapter": "MV-Adapter multiview / texturing on top of SDXL",
     "unique3d": "Unique3D + CharacterGen chain (SD1.5, IP-Adapter, ControlNet tile, RealESRGAN)",
     "extra": "LGM, CRM, TriplaneGaussian, PartCrafter",
@@ -188,7 +188,31 @@
       "dest": "3d_checkpoints/facebookresearch/dinov2",
       "license": "Apache-2.0",
       "license_url": "https://huggingface.co/facebook/dinov2-large",
-      "commercial": "yes"
+      "commercial": "yes",
+      "note": "NOTHING READS THIS. Kept only so an existing 2.3GB download is not orphaned. Both TRELLIS branches want a different file: the plain branch pulls dinov2_vitl14_reg through torch.hub into its own cache, and Stable3DGen wants the .pth entry below. This is HF transformers layout and the wrong variant (no registers). A candidate for removal."
+    },
+    {
+      "name": "TRELLIS normal v0.1 (Stable3DGen weights)",
+      "group": "trellis",
+      "kind": "snapshot",
+      "repo": "Stable-X/trellis-normal-v0-1",
+      "dest": "3d_checkpoints/Diffusers/Stable3DGen/trellis/trellis-normal-v0-1",
+      "license": "MIT",
+      "license_url": "https://huggingface.co/Stable-X/trellis-normal-v0-1",
+      "commercial": "yes",
+      "note": "The four ckpts/*.safetensors that Load StableGen Trellis Pipeline requires. Their matching .json configs already ship with the node pack; only the weights were missing."
+    },
+    {
+      "name": "DINOv2 ViT-L/14 with registers (Stable3DGen image encoder)",
+      "group": "trellis",
+      "kind": "url",
+      "url": "https://dl.fbaipublicfiles.com/dinov2/dinov2_vitl14/dinov2_vitl14_reg4_pretrain.pth",
+      "dest": "3d_checkpoints/facebookresearch/dinov2/dinov2_vitl14_reg.pth",
+      "size": 1217607321,
+      "license": "Apache-2.0",
+      "license_url": "https://github.com/facebookresearch/dinov2/blob/main/LICENSE",
+      "commercial": "yes",
+      "note": "Stable3DGen builds this exact path and filename, and downloads it at run time if absent. The upstream file is named dinov2_vitl14_reg4_pretrain.pth; the dest renames it to what the loader looks for."
     },
     {
       "name": "MV-Adapter",
