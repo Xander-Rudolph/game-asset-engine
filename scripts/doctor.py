@@ -43,6 +43,8 @@ def container() -> str:
     image and invites a 27GB rebuild to fix nothing.
     """
     return _container()
+
+
 URL = os.environ.get("COMFY_URL", "http://127.0.0.1:8188")
 IMAGE = os.environ.get("ATHANOR_COMFY_IMAGE_REPO", "ghcr.io/athanorgames/athanor-comfy")
 
@@ -231,6 +233,38 @@ def check_blender(rep: Report) -> None:
                 f"docker exec {container()} python3 -c 'import bpy'")
 
 
+def check_spconv(rep: Report) -> None:
+    """Can sparse convolution import at all?
+
+    Worth its own check because the failure is silent until you queue a graph,
+    and the error it finally raises names nothing you could search for:
+
+        could not convert default argument 'workspace: tv::Tensor' in method
+        'GemmTunerSimple.run_with_tuned_result' ... (type not registered yet?)
+
+    The usual cause is two cumm builds installed at once. The pack pins the CPU
+    `cumm` while spconv-cu124 requires `cumm-cu124`, they share one package
+    directory, and the CPU build's core_cc.so shadows the CUDA one.
+    """
+    code, out = run(["docker", "exec", container(), "python3", "-c",
+                     "import spconv.pytorch; print('ok')"], timeout=180)
+    if code == 0 and "ok" in out:
+        rep.add(OK, "spconv", "sparse convolution imports")
+        return
+
+    dup = run(["docker", "exec", container(), "bash", "-lc",
+               "pip list 2>/dev/null | grep -c '^cumm '"], timeout=60)[1].strip()
+    detail = "spconv will not import, so every sparse-convolution node fails"
+    if dup == "1":
+        detail += " (two cumm builds installed, CPU shadowing CUDA)"
+    rep.add(BAD, "spconv", detail,
+            f"docker exec -u 0 {container()} pip uninstall -y cumm && "
+            f"docker exec -u 0 {container()} pip install --force-reinstall "
+            f"--no-deps cumm-cu124==0.7.11 && docker restart {container()}   "
+            "That is the runtime remedy. The build-time fix is already in the "
+            "Dockerfile, so an image built from this repo does not need it.")
+
+
 def check_models(rep: Report) -> None:
     script = ROOT / "scripts" / "fetch_models.py"
     if not script.exists():
@@ -280,6 +314,7 @@ def main() -> int:
         if info:
             check_nodes(rep, info)
             check_blender(rep)
+            check_spconv(rep)
         if not args.skip_models:
             check_models(rep)
         check_writable(rep)

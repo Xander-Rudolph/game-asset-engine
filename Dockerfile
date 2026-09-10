@@ -124,6 +124,21 @@ RUN git clone https://github.com/MrForExample/ComfyUI-3D-Pack.git \
     git -C /app/custom_nodes/ComfyUI-3D-Pack checkout ${COMFY3D_REF}
 
 WORKDIR /app/custom_nodes/ComfyUI-3D-Pack
+# Two rewrites of the pack's own requirements, and the second one is not
+# cosmetic.  The pack pins `cumm==0.7.11` -- the CPU build -- while spconv-cu124
+# requires `cumm-cu124`.  Install the file as-is and you get BOTH: they share one
+# dist-packages/cumm/ directory, so whichever lands last wins and the CPU
+# core_cc.so shadows the CUDA one.  spconv then fails to import AT ALL, with a
+# pybind error that names none of this:
+#
+#   could not convert default argument 'workspace: tv::Tensor' in method
+#   'GemmTunerSimple.run_with_tuned_result' into a Python object
+#   (type not registered yet?)
+#
+# That takes down every sparse-convolution algorithm in the pack, Stable3DGen's
+# TRELLIS among them.  The published 0.1.0 image shipped with it broken; the
+# runtime remedy is in docs/guide/troubleshooting.md and doctor.py names it.
+#
 # Point the pack's wheel lookup at the combination that actually exists for
 # Linux (see the header): cu124 + torch 2.6.0.  Left as 12.8/2.7.0 it asks
 # for _Wheels_linux_py311_torch2.7.0_cu124, 404s, and compiles for an hour.
@@ -134,6 +149,7 @@ RUN sed -i \
         -e 's/version: "0\.0\.30"/version: "0.0.29.post3"/' \
         _Pre_Builds/_Build_Scripts/build_config.yaml && \
     sed -i 's/^spconv-cu126$/spconv-cu124/' requirements.txt && \
+    sed -i 's/^cumm==/cumm-cu124==/' requirements.txt && \
     grep -E 'cuda_version|version:' _Pre_Builds/_Build_Scripts/build_config.yaml
 
 RUN pip install --no-cache-dir -r requirements.txt && \

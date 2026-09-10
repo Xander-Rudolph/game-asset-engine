@@ -106,6 +106,42 @@ Copy your mesh over a filename that is already on the list and load through that
 The node reads the file at run time, so the contents are yours even though the
 name is not.
 
+## Anything using sparse convolution dies with "type not registered yet"
+
+The full error names nothing you could usefully search for:
+
+```
+could not convert default argument 'workspace: tv::Tensor' in method
+'GemmTunerSimple.run_with_tuned_result' into a Python object
+(type not registered yet?)
+```
+
+`spconv` cannot import at all, so every sparse-convolution node fails, TRELLIS
+included. `scripts/doctor.py` reports it as a failed `spconv` check.
+
+The cause is two `cumm` builds installed at once. The node pack pins the CPU
+`cumm`, while `spconv-cu124` requires `cumm-cu124`. Both install into the same
+`dist-packages/cumm/` directory, so whichever lands last wins, and the CPU
+build's `core_cc.so` shadows the CUDA one that registers the types spconv needs.
+
+The published 0.1.0 image shipped this way. The runtime remedy:
+
+```sh
+docker exec -u 0 comfyui-packaged pip uninstall -y cumm
+docker exec -u 0 comfyui-packaged pip install --force-reinstall --no-deps cumm-cu124==0.7.11
+docker restart comfyui-packaged
+```
+
+An image built from the current Dockerfile does not need this, because the
+requirements rewrite that fixes `spconv-cu126` now fixes `cumm` alongside it.
+
+::: warning A second, different error means the process is already poisoned
+If you see `generic_type: cannot initialize type "ExternalAllocator": an object
+with that name is already defined` instead, a failed import has already left
+partial state behind. Restart the container and read the first error, not this
+one.
+:::
+
 ## Skinning dies with torch.bfloat16
 
 Set precision to `fp16` rather than `auto`. On automatic it picks bfloat16 on
