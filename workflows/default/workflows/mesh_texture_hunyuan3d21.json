@@ -23,7 +23,7 @@
     "text": ""
    },
    "widgets_values": [
-    "MESH -> TEXTURED MESH -- Hunyuan3D 2.1 TexGen\n\nmesh_path is a path INSIDE THE CONTAINER: /app/output/mesh/<name>.glb.\nThe image is the same concept the shape was generated from.\n\nRun this as its own pass, after the shape.  3D-Pack pins its pipelines\noutside ComfyUI's model management, so shape and texture in one queue\nrun each other out of VRAM on 16GB -- all the shapes, then restart,\nthen all the textures.\n\n---\n\nTexture an EXISTING mesh with Hunyuan3D 2.1 TexGen. Separate\nfrom the shape pass on purpose: loading ShapeGen and TexGen in\none graph exceeds 16GB VRAM, and splitting also means a failed\ntexture never costs you the geometry, and that any generator's\nmesh can be textured. mesh_path is a CONTAINER path. The\nreference image should be the same concept the shape came from.\ncreate_pbr writes albedo + metallic + roughness. LICENCE:\nTencent Hunyuan Community License excludes the EU, UK and South\nKorea - see README.md#licensing."
+    "MESH -> TEXTURED MESH -- Hunyuan3D 2.1 TexGen\n\nmesh_path is a path INSIDE THE CONTAINER: /app/output/mesh/<name>.glb.\nThe image is the same concept the shape was generated from.\n\nRun this as its own pass, after the shape.  3D-Pack pins its pipelines\noutside ComfyUI's model management, so shape and texture in one queue\nrun each other out of VRAM on 16GB -- all the shapes, then restart,\nthen all the textures.\n\n---\n\nTexture an EXISTING mesh with Hunyuan3D 2.1 TexGen. Separate\nfrom the shape pass on purpose: loading ShapeGen and TexGen in\none graph exceeds 16GB VRAM, and splitting also means a failed\ntexture never costs you the geometry, and that any generator's\nmesh can be textured. mesh_path is a CONTAINER path. The\nreference image should be the same concept the shape came from.\ncreate_pbr writes albedo + metallic + roughness. LICENCE:\nTencent Hunyuan Community License excludes the EU, UK and South\nKorea - see README.md#licensing. MEMORY: 6 views at 512 is what\nfits. The graph shipped 8 at 768 while docs/guide/textures.md\nlisted 6/512 as the defaults, so anyone who ran it without\noverrides OOM'd a 16GB card on a setting the documentation said\nthey already had. Raise max_num_view only in multiples of 30\ndegrees - the model indexes its camera embedding by azim // 30 -\nand expect more views to cost time and to add more places for\ntwo painted views to disagree."
    ],
    "color": "#432",
    "bgcolor": "#653"
@@ -95,8 +95,8 @@
     "Node name for S&R": "[Comfy3D] Load Hunyuan3D 21 TexGen Pipeline"
    },
    "widgets_values": [
-    8,
-    768,
+    6,
+    512,
     true
    ]
   },

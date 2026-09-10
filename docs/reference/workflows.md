@@ -50,7 +50,7 @@ means it is silently reverted next time anyone runs the builder.
 | `img_edit_qwen.json` | Change part of an existing image |
 | `img_refine_sdxl.json` | Refine pass over an image |
 | `img2mesh_hunyuan3d21.json` | Image to mesh, shape only. Best geometry. Removes the background itself. Territory limited licence |
-| `img2mesh_triposg.json` | Image to mesh, TripoSG. Clean watertight shapes, MIT |
+| `img2mesh_triposg.json` | Image to mesh, TripoSG. Clean watertight shapes. Licence caveat in the licensing guide |
 | `img2mesh_triposr.json` | Image to mesh, fastest. Needs a cut out with transparency |
 | `mesh_texture_hunyuan3d21.json` | Paint texture maps onto an existing mesh |
 | `txt2mesh_qwen_hunyuan3d21.json` | Prompt to concept to mesh in one queue |

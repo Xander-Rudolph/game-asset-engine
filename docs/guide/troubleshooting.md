@@ -49,6 +49,44 @@ docker compose --profile comfy restart comfyui
 `scripts/asset_to_mesh.sh` does this for you. Do not interleave the two stages in
 your own scripts.
 
+## A batch reported every name and produced no files
+
+ComfyUI drops the connection mid-generation and the container restarts itself.
+`run_workflow.py` raises on the dead socket, the shell loop carries on to the
+next name, and the run *looks* like it worked - the failure is invisible unless
+you count the files afterwards. On one icon batch this cost eleven images before
+anyone noticed.
+
+The symptom in the log is `RemoteDisconnected` or a connection reset, sometimes
+with the container's own restart line just after it.
+
+```sh
+# Count what you actually got, before believing the log.
+ls output/icons/*.png | wc -l
+```
+
+What fixes it: check the server is answering before each item, restart it when
+it is not, and retry a few times. `scripts/run_workflow.py --retries 3` does
+this. Smaller batches make it rarer - the crash correlates with how long the
+server has been resident, not with any one prompt.
+
+## Every generation fails with "can't convert cuda:0 device type tensor to numpy"
+
+Raised from ComfyUI's quantised-loading path, on **every** generation, while
+`nvidia-smi` shows several gigabytes held with an empty queue.
+
+Restart the container. That clears it.
+
+It is worth knowing this one by name because the error says *numpy*, and this
+stack documents a genuine numpy dependency chain at length - so the natural
+reaction is to go hunting through the pins, which is the wrong tree. The root
+cause here was never established; the restart is the answer.
+
+```sh
+docker compose --profile packaged restart comfyui
+until curl -s -o /dev/null http://127.0.0.1:8188/object_info; do sleep 4; done
+```
+
 ## The rig came back as the previous model
 
 ComfyUI caches by node inputs. If every figure is loaded through the same file

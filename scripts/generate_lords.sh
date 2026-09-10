@@ -24,7 +24,7 @@ LORDS=("$@")
 echo "log: $LOG"
 for name in "${LORDS[@]}"; do
     printf '%-10s ' "$name"
-    if python3 scripts/run_workflow.py workflows/api/txt2img_qwen.json \
+    if python3 scripts/run_workflow.py workflows/api/txt2img_qwen.json --retries 3 \
             --prompt "$(cat "prompts/lords/$name.txt")" --negative "$NEG" \
             --set "Save.filename_prefix=lords_scratch/$name" >>"$LOG" 2>&1; then
         echo ok

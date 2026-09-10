@@ -35,7 +35,7 @@ echo "denoise=$DENOISE  ->  output/simplified/   (log: $LOG)"
 for src in "$@"; do
     name=$(basename "$src"); name="${name%.*}"
     printf '%-22s ' "$name"
-    if python3 scripts/run_workflow.py workflows/api/img_edit_qwen.json \
+    if python3 scripts/run_workflow.py workflows/api/img_edit_qwen.json --retries 3 \
             --image "$src" \
             --set "Positive.prompt=${PROMPT_TEXT:-$PROMPT}" \
             --set "denoise=$DENOISE" \

@@ -39,9 +39,13 @@ scripts/run_workflow.py workflows/api/img2mesh_triposg.json \
 You get untextured geometry in `output/mesh/golem.glb`. It has no colour yet, so
 it renders grey. That is expected, not a fault.
 
-TripoSG is the default here because it is MIT licensed and can ship anywhere.
-Hunyuan3D makes better meshes but cannot ship to the EU, UK or South Korea. See
-[licensing](/guide/licensing) before choosing.
+TripoSG is the default here because it is fast and clean, and because Hunyuan3D
+cannot ship to the EU, UK or South Korea.
+
+One caveat worth knowing before you rely on it: TripoSG is MIT upstream, but the
+copy vendored in this node pack ships a Tencent licence file carrying the same
+territorial exclusion. That is unresolved. If you are shipping into those
+regions, use TRELLIS. See [licensing](/guide/licensing).
 
 ## 3. Look at it
 

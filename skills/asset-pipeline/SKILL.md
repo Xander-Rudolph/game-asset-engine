@@ -102,7 +102,8 @@ Pick the generator and **say which one you picked and why**:
 
 | Use | When |
 |---|---|
-| `img2mesh_triposg.json` | **Default when the asset will ship.** MIT, no territory clause. Needs a cut out image, so pass one with alpha or let a Hunyuan graph cut it. |
+| `img2mesh_triposg.json` | Fast and clean. MIT upstream, but the copy in this pack ships a licence file with the EU/UK/Korea exclusion, which is unresolved. Needs a cut out image. |
+| TRELLIS | **The choice with no territory clause** (MIT), for anything shipping into the EU, UK or South Korea. No graph ships for it yet: the weights are in the `trellis` group and the nodes are loaded (`[Comfy3D] Trellis Structured 3D Latents Models`), so it needs a graph building. Say that rather than pretending there is a one-liner. |
 | `img2mesh_hunyuan3d21.json` | Best geometry, removes the background itself. **Licence excludes the EU, UK and South Korea.** Say so before using it for anything that ships. |
 | `mesh_texture_hunyuan3d21.json` | Paints an existing shape. Run after a shape graph. |
 | `img2mesh_triposr.json` | Fastest, lowest quality. Needs a cut out too. |

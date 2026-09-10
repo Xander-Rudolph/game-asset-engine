@@ -51,6 +51,25 @@ def api(path: str, payload=None, method=None):
                          "Is it up?  docker compose --profile comfy up -d")
 
 
+def _wait_for_server(timeout: float = 180.0) -> bool:
+    """Is ComfyUI answering again? Waits up to [timeout] for it to come back.
+
+    Used only by the retry path. A container that restarted itself takes
+    the better part of a minute to reload the node packs, and asking
+    during that window is what turns one dropped connection into a whole
+    batch of them.
+    """
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        try:
+            url = f"{SERVER.rstrip('/')}/object_info"
+            with urllib.request.urlopen(url, timeout=10):
+                return True
+        except Exception:
+            time.sleep(4)
+    return False
+
+
 def upload_image(path: Path) -> str:
     """Multipart POST to /upload/image; returns the server-side filename."""
     boundary = uuid.uuid4().hex
@@ -196,6 +215,9 @@ def main() -> int:
                     help="list node types the server has loaded, filtered")
     ap.add_argument("--dry-run", action="store_true",
                     help="print the resolved graph instead of queueing it")
+    ap.add_argument("--retries", type=int, default=0, metavar="N",
+                    help="on a dropped connection, wait for the server to come "
+                         "back and try again, up to N times. Use in batches")
     args = ap.parse_args()
 
     if args.list_nodes is not None:
@@ -234,14 +256,36 @@ def main() -> int:
 
     graph = {k: v for k, v in graph.items()
              if isinstance(v, dict) and "class_type" in v}
-    started = time.time()
-    res = api("/prompt", {"prompt": graph, "client_id": uuid.uuid4().hex})
-    if res.get("node_errors"):
-        print(json.dumps(res["node_errors"], indent=2))
-        return 1
-    pid = res["prompt_id"]
-    print(f"  queued {pid}")
-    return report(wait_for(pid), since=started)
+
+    # Retried, because the failure this guards is INVISIBLE.
+    #
+    # ComfyUI drops the connection mid-generation and the container
+    # restarts itself. Without a retry this raises, the shell loop around
+    # it moves on to the next name, and the batch reports every item while
+    # writing files for only some -- eleven icons went missing that way
+    # before anyone thought to count the output. So a batch should pass
+    # --retries: waiting for the server to answer again and trying once
+    # more turns a silent hole into a pause.
+    attempts = max(1, args.retries + 1)
+    for attempt in range(1, attempts + 1):
+        started = time.time()
+        try:
+            res = api("/prompt", {"prompt": graph,
+                                  "client_id": uuid.uuid4().hex})
+            if res.get("node_errors"):
+                print(json.dumps(res["node_errors"], indent=2))
+                return 1
+            pid = res["prompt_id"]
+            print(f"  queued {pid}")
+            return report(wait_for(pid), since=started)
+        except SystemExit:
+            # A graph the server rejects will be rejected again; only a
+            # dropped connection is worth another go, and `api` turns both
+            # into SystemExit. Tell them apart by asking whether the server
+            # is there at all.
+            if attempt == attempts or not _wait_for_server():
+                raise
+            print(f"  lost the server; retrying ({attempt}/{args.retries})")
 
 
 if __name__ == "__main__":

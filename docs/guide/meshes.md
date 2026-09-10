@@ -7,7 +7,7 @@ from the front view, which is why the concept art matters so much.
 
 | Workflow | Generator | Notes |
 |---|---|---|
-| `img2mesh_triposg.json` | TripoSG | Clean watertight shapes. MIT, ships anywhere. The safe default. |
+| `img2mesh_triposg.json` | TripoSG | Clean watertight shapes, fast. MIT upstream, but the copy in this pack ships a territory-limited licence file. See [licensing](/guide/licensing). |
 | `img2mesh_hunyuan3d21.json` | Hunyuan3D 2.1 | Best geometry here. Removes the background itself. Cannot ship to the EU, UK or South Korea. |
 | `mesh_texture_hunyuan3d21.json` | Hunyuan3D 2.1 | Paints an existing shape. Same licence limit. |
 | `img2mesh_triposr.json` | TripoSR | Fastest. Needs a cut out image with transparency. |
@@ -20,7 +20,7 @@ three. Rendering the mesh to a 2D sprite does not get around it either, because
 the licence covers results of the output.
 
 This is why concept images are kept rather than thrown away. Regenerating a mesh
-through TripoSG from the same concept image is the fix, and it is only possible
+through TRELLIS from the same concept image is the fix, and it is only possible
 if the image still exists. Record which generator made which shipped asset.
 [Full detail](/guide/licensing).
 :::

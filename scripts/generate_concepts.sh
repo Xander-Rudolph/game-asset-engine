@@ -40,7 +40,7 @@ for n in "${NAMES[@]}"; do
     [ -n "$subneg" ] && args+=(--negative "$subneg")
     [ -n "${WIDTH:-}" ] && args+=(--set "Latent.width=$WIDTH")
     [ -n "${HEIGHT:-}" ] && args+=(--set "Latent.height=$HEIGHT")
-    if python3 scripts/run_workflow.py workflows/api/txt2img_qwen.json "${args[@]}" >>"$LOG" 2>&1; then
+    if python3 scripts/run_workflow.py workflows/api/txt2img_qwen.json --retries 3 "${args[@]}" >>"$LOG" 2>&1; then
         echo ok
     else
         echo "FAILED (see $LOG)"

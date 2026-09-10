@@ -1,0 +1,107 @@
+Asset Engine
+Copyright 2026 Athanor Games
+
+This product includes software developed by Athanor Games, licensed under the
+Apache License, Version 2.0 (see LICENSE).
+
+--------------------------------------------------------------------------------
+WHAT THIS LICENCE COVERS
+--------------------------------------------------------------------------------
+
+The Apache-2.0 grant covers the contents of this repository only: the scripts,
+the ComfyUI workflow graphs authored here, the prompt libraries, the pose files,
+the skill definitions, the notebook and the documentation.
+
+It does NOT cover, and cannot grant you any rights in:
+
+  * ComfyUI, the node packs, or any other software fetched at container build
+    time. None of it is vendored here. Each carries its own licence, and those
+    licences reach you directly from their authors, not through this project.
+  * Any model weights. Weights are downloaded separately from their own
+    distributors under their own terms, several of which are materially more
+    restrictive than Apache-2.0.
+  * Any container image built from the Dockerfile in this repository. The image
+    is a distinct artefact containing third-party software, and redistributing
+    it carries obligations this licence does not discharge.
+
+--------------------------------------------------------------------------------
+THIRD-PARTY SOFTWARE THIS PROJECT ORCHESTRATES
+--------------------------------------------------------------------------------
+
+Verified by reading the licence files on disk at the revisions this project
+pins. Where a component's status could not be settled from its own files, that
+is stated rather than guessed.
+
+  ComfyUI                    GPL-3.0
+    https://github.com/comfyanonymous/ComfyUI  (pinned at v0.30.2)
+
+  ComfyUI-3D-Pack            MIT, for the pack author's own code
+    https://github.com/MrForExample/ComfyUI-3D-Pack
+    Copyright (c) 2024 MrForExample
+    The root MIT licence does not cover everything the pack vendors. See below.
+
+  ComfyUI-UniRig             GPL-3.0
+    https://github.com/PozzettiAndrea/ComfyUI-UniRig
+    The licence file is the bare GPLv3 text with the "or later" election in its
+    appendix left unfilled, so treat it as GPL-3.0-only.
+
+  ComfyUI-mesh2motion        MIT, declared in project metadata
+    https://github.com/jtydhr88/ComfyUI-mesh2motion
+    No LICENSE file and no named copyright holder ship with the pack, so MIT's
+    attribution clause has no notice to reproduce. Its README describes it as a
+    fork of Mesh2Motion by Scott Petrovic.
+
+  ComfyUI-CameraPack         MIT, declared in project metadata
+    https://github.com/PozzettiAndrea/ComfyUI-CameraPack
+    No LICENSE file ships with the pack.
+
+  Blender / bpy              GPL-2.0-or-later
+    https://www.blender.org
+    Installed as a compiled binary wheel. See "Redistributing the image".
+
+--------------------------------------------------------------------------------
+RESTRICTIONS WORTH KNOWING BEFORE YOU SHIP
+--------------------------------------------------------------------------------
+
+These are terms of third-party components, reproduced here because they are easy
+to miss and expensive to discover late. They are not terms of this project.
+
+TERRITORIAL EXCLUSIONS. Several licence files vendored inside ComfyUI-3D-Pack
+state on their face: "THIS LICENSE AGREEMENT DOES NOT APPLY IN THE EUROPEAN
+UNION, UNITED KINGDOM AND SOUTH KOREA". This affects the Tencent Hunyuan 3D
+2.0 and 2.1 licences, and the licence file shipped in the pack's TripoSG module.
+
+NON-COMMERCIAL. The Hunyuan3D-1 checkpoint licence vendored in the pack defines
+permitted use as "academic, research and education purposes only".
+
+UNRESOLVED PROVENANCE. The LICENSE file in the pack's TripoSG module is the
+Tencent Hunyuan FlashVDM Community License, not a TripoSG licence, and the module
+contains FlashVDM code paths. Upstream TripoSG is MIT. Which terms govern the
+code in this pack is not answerable from the files, and should be settled with
+the pack author before relying on it as territory-free.
+
+--------------------------------------------------------------------------------
+REDISTRIBUTING THE IMAGE
+--------------------------------------------------------------------------------
+
+Publishing a container image built from this repository is redistribution of the
+GPL-licensed software inside it, and carries obligations that this repository's
+Apache-2.0 licence does not satisfy on your behalf.
+
+ComfyUI, ComfyUI-UniRig and ComfyUI-Manager are pure Python and are present in
+the image as source, so their corresponding source travels with the object code.
+
+Blender's bpy is a compiled binary wheel, and its source is not in the image.
+GPL-2.0-or-later permits electing version 3 and satisfying the requirement under
+GPLv3 section 6(d), by offering the corresponding source from a network location
+alongside the image, for as long as the image is offered. Publish that pointer
+with the image.
+
+--------------------------------------------------------------------------------
+
+Animation clip libraries are covered by their own terms. mesh2motion's bundled
+art assets are stated by their author to be released under CC0. Mixamo assets are
+governed by Adobe's terms. Neither grant travels through this project.
+
+A fuller treatment, with the reasoning and the exact clauses, is in
+docs/guide/licensing.md.

@@ -71,7 +71,7 @@ restrictions travel with the model, not with a mesh you derive from a render.
 
 | The asset will | Generate it with |
 |---|---|
-| Ship in a build sold or distributed worldwide | **TripoSG** or **TRELLIS**, both MIT |
+| Ship in a build sold or distributed worldwide | **TRELLIS** (MIT). TripoSG is MIT upstream but ships a territory-limited licence file in this pack, see below |
 | Ship only outside the EU, UK and South Korea | Hunyuan3D is fine |
 | Never ship: concept, blockout, prototype, look development | Hunyuan3D, freely |
 
@@ -83,20 +83,105 @@ The territory question is unanswerable after the fact otherwise. `sources.json`
 in each curated asset folder is the place for it.
 
 If a Hunyuan3D mesh later needs to ship worldwide, the fix is to regenerate it
-from the same concept image through TripoSG. That only works if the concept image
+from the same concept image through TRELLIS. That only works if the concept image
 still exists, which is why they are kept rather than swept.
 :::
 
-## A route with no conditions at all
+## The licences of the tools themselves
 
-If you would rather not track any of this:
+Separate question from the weights, and easy to conflate with them.
 
-**Qwen-Image or SDXL, then TripoSG or TripoSR, then decimate, then UniRig or
-mesh2motion, then CC0 clips.**
+| Component | Licence |
+|---|---|
+| This repository | Apache-2.0 |
+| ComfyUI | GPL-3.0 |
+| ComfyUI-3D-Pack | MIT, for the pack author's own code |
+| ComfyUI-UniRig | **GPL-3.0** |
+| ComfyUI-mesh2motion | MIT, declared in metadata, no licence file shipped |
+| ComfyUI-CameraPack | MIT, declared in metadata, no licence file shipped |
+| Blender / bpy | GPL-2.0-or-later |
 
-Every link in that chain is MIT, CC0 or OpenRAIL. No territory clause, no revenue
-cap, no user threshold. It is the default in this repo's first asset walkthrough
-for that reason.
+::: warning Two corrections to what this page used to say
+Both were found by reading the licence files on disk rather than trusting the
+upstream project descriptions.
+
+**UniRig is GPL-3.0, not MIT.** Its licence file is 674 lines of verbatim GPLv3.
+The "or later" election in the appendix is unfilled, so treat it as GPL-3.0-only.
+This does not restrict your game assets, and it does not reach this repository's
+own code, which drives ComfyUI over HTTP and imports nothing from the pack. It
+does matter if you ever vendor or link that code.
+
+**TripoSG's status inside this pack is unresolved.** Upstream TripoSG is MIT, but
+the licence file shipped in `Gen_3D_Modules/TripoSG/` is the Tencent Hunyuan
+FlashVDM Community License, carrying the same EU, UK and South Korea exclusion as
+the Hunyuan licences, and the module contains FlashVDM code paths. Whether that
+file governs the code or was copied in error cannot be settled from the files.
+
+Until it is settled with the pack author, do not treat TripoSG in this install as
+unconditionally territory-free. TRELLIS (MIT) is the clean choice for anything
+shipping into those regions.
+
+One practical catch: **no workflow graph ships for TRELLIS yet.** Its weights are
+in the `trellis` group and its nodes load with the 3D pack
+(`[Comfy3D] Trellis Structured 3D Latents Models` and three others), so building
+a graph is straightforward, but it is not a one-liner today.
+:::
+
+## A route with the fewest conditions
+
+If you would rather track as little of this as possible:
+
+**Qwen-Image or SDXL, then TRELLIS, then decimate, then mesh2motion, then its CC0
+clips.**
+
+Qwen-Image is Apache-2.0, TRELLIS is MIT, and the clips are CC0. No territory
+clause, no revenue cap, no user threshold on any of them.
+
+Note what this route deliberately avoids and why: TripoSG because of the
+unresolved licence file above, and UniRig because it is GPL-3.0. The GPL does not
+restrict the assets you generate with it, so UniRig is fine for rigging things you
+ship. It is called out only so the choice is a choice.
+
+## This repository's own licence
+
+Apache-2.0. It covers the scripts, the workflow graphs authored here, the prompts,
+the poses, the skills, the notebook and these docs.
+
+It covers nothing else, and it cannot. None of the third-party software is
+vendored here: the Dockerfile fetches ComfyUI and the node packs at build time,
+and weights are downloaded separately. Those licences reach you from their
+authors directly.
+
+Apache-2.0 rather than MIT for two practical reasons. It has an express patent
+grant, which matters more for inbound contributions than for the code itself. And
+its NOTICE mechanism gives the attribution and third-party restrictions a place to
+travel with the code, which a project that orchestrates this many differently
+licensed components actually needs. See the `NOTICE` file.
+
+Apache-2.0 does not conflict with anything here. This repository imports no pack
+code, and GPLv3's own section 5 says that combining a covered work with separate
+independent works on the same distribution medium is mere aggregation and does not
+extend the GPL to the other parts.
+
+## Redistributing the container image
+
+Building the image for yourself carries no obligations. **Publishing it does**,
+and they are not discharged by this repository's licence.
+
+The image contains GPL-licensed software. ComfyUI, UniRig and ComfyUI-Manager are
+pure Python and are present as source, so their corresponding source already
+travels with the image.
+
+Blender's `bpy` is the exception and the one to act on. It is a compiled binary
+wheel and its source is not in the image. Blender is GPL-2.0-or-later, so you may
+elect version 3 and satisfy the requirement under section 6(d): publish a pointer
+to the exact Blender source alongside the image, and keep it reachable for as long
+as the image is offered.
+
+Also worth weighing before publishing publicly: the image contains the vendored
+Tencent-licensed code, which carries the territorial exclusion, and the
+non-commercial Hunyuan3D-1 checkpoint licence. A public registry reaches every
+territory.
 
 ## Hunyuan3D is kept here on purpose
 

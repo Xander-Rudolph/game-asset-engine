@@ -114,8 +114,9 @@ Not right? Change `SUBJECT` and run the cell again, or add
     md("""
 ## 3. Build the 3D shape
 
-TripoSG is the default here because it is MIT licensed and can ship anywhere.
-Hunyuan3D makes better meshes but cannot ship to the EU, UK or South Korea.
+TripoSG is fast and clean. Hunyuan3D makes better meshes but cannot ship to the
+EU, UK or South Korea, and TripoSG's licence status inside this node pack is
+unresolved, so check the licensing guide before shipping either.
 
 About a minute.
 """),

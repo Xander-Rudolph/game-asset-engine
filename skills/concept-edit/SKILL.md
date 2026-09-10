@@ -90,6 +90,29 @@ failed one, because it will be discovered after a mesh has been built from it.
 
 Then ask: approve / another edit / go back to the original.
 
+## Denoise is the control, not the prompt
+
+The single most useful number here, and it is not in the instruction you write.
+`--set denoise=` decides how much of the source survives, and it behaves like a
+**cliff rather than a dial**:
+
+| Denoise | What you get |
+|---|---|
+| 0.70 and below | The source dominates. A restyle or simplify does almost nothing. |
+| ~0.80 | Right for a small local swap - a pauldron, a colour, one prop. |
+| 0.85 | Painterly rendering kept, clutter genuinely reduced. Good default for simplifying. |
+| 0.93 | Pushed to clean game-ready forms, still shaded metal against leather. |
+| 1.00 | The model's own style prior wins and returns flat vector art. |
+
+At 1.0 the whole image is re-diffused, and no amount of prompt wording pulls it
+back: "NOT cartoon, NOT flat plastic, NOT a clay render", written three
+different ways, returned flat cartoon every time. **Negative phrasing in an edit
+prompt is weak; the sampler setting is the actual control.** Reach for denoise
+before adding words.
+
+The cliff moves with how busy the source is, so test one image before running a
+batch. `docs/guide/concept-art.md` has the measured numbers for two real sets.
+
 ## Why 20 steps and not the Lightning LoRA
 
 The 4-step Lightning LoRA exists for this model, but applying a bf16 LoRA to the
