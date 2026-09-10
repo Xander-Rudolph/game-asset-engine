@@ -165,23 +165,17 @@ extend the GPL to the other parts.
 
 ## Redistributing the container image
 
-Building the image for yourself carries no obligations. **Publishing it does**,
-and they are not discharged by this repository's licence.
+Building the image for yourself carries no obligations. Publishing it does, and
+they are not discharged by this repository's licence.
 
-The image contains GPL-licensed software. ComfyUI, UniRig and ComfyUI-Manager are
-pure Python and are present as source, so their corresponding source already
-travels with the image.
+There are two separate duties, and the image needs both: include the licence
+texts, and offer the corresponding source for the compiled binaries. It is not
+only Blender. There is 278 MB of GPL-3.0 mesh-processing binaries in there, two
+separate GPL ffmpeg builds, and the whole Ubuntu base layer.
 
-Blender's `bpy` is the exception and the one to act on. It is a compiled binary
-wheel and its source is not in the image. Blender is GPL-2.0-or-later, so you may
-elect version 3 and satisfy the requirement under section 6(d): publish a pointer
-to the exact Blender source alongside the image, and keep it reachable for as long
-as the image is offered.
-
-Also worth weighing before publishing publicly: the image contains the vendored
-Tencent-licensed code, which carries the territorial exclusion, and the
-non-commercial Hunyuan3D-1 checkpoint licence. A public registry reaches every
-territory.
+**[The full inventory is on its own page](/guide/redistributing)**, including what
+is self-satisfying, what needs an offer, the AGPL question that hosting raises,
+and what could not be determined.
 
 ## Hunyuan3D is kept here on purpose
 

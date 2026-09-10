@@ -84,18 +84,36 @@ the pack author before relying on it as territory-free.
 REDISTRIBUTING THE IMAGE
 --------------------------------------------------------------------------------
 
-Publishing a container image built from this repository is redistribution of the
+Publishing a container image built from this repository is redistribution of
 GPL-licensed software inside it, and carries obligations that this repository's
 Apache-2.0 licence does not satisfy on your behalf.
 
-ComfyUI, ComfyUI-UniRig and ComfyUI-Manager are pure Python and are present in
-the image as source, so their corresponding source travels with the object code.
+There are two separate duties and satisfying one does not satisfy the other:
+include a copy of the licence text, and offer the corresponding source for any
+compiled object code. Per-file SPDX headers are notices, not a licence copy.
 
-Blender's bpy is a compiled binary wheel, and its source is not in the image.
-GPL-2.0-or-later permits electing version 3 and satisfying the requirement under
-GPLv3 section 6(d), by offering the corresponding source from a network location
-alongside the image, for as long as the image is offered. Publish that pointer
-with the image.
+Source is present in the image, so distribution is self-satisfying, for:
+ComfyUI v0.30.2, comfyui-manager, ultralytics, plyfile, easydict,
+comfyui-embedded-docs and PyGithub.
+
+A source offer is required for, at least: bpy (Blender) 4.5.9, pymeshlab
+2025.7.post1, igraph 1.0.0, pymeshfix 0.18.1, comfy-3d-viewers 0.2.44, the two
+separate GPL ffmpeg builds, and the Ubuntu 22.04 base layer.
+
+Blender specifically: the wheel DOES ship 746 Python source files, 395 of them
+GPL-2.0-or-later, so the licence-copy duty applies; it ships no copy of the GPL
+text itself; and the C/C++ source behind its 213MB compiled object is absent, so
+the source-offer duty applies too. Its metadata declares GPL-3.0 while its shipped
+files say GPL-2.0-or-later.
+
+Unresolved: ultralytics is AGPL-3.0 and this image exists to serve a network
+port, which engages AGPL section 13 for anyone hosting it rather than running it
+locally. That was not analysed.
+
+Note that this inventory was taken from a container built from an earlier
+Dockerfile than the one in this repository. Rebuild and re-verify before relying
+on it. The full inventory, with what remains unresolved, is in
+docs/guide/redistributing.md.
 
 --------------------------------------------------------------------------------
 

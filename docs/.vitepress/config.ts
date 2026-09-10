@@ -75,6 +75,7 @@ export default defineConfig({
           items: [
             { text: 'Curating and cleanup', link: '/guide/cleanup' },
             { text: 'Licensing', link: '/guide/licensing' },
+            { text: 'Redistributing the image', link: '/guide/redistributing' },
             { text: 'When something breaks', link: '/guide/troubleshooting' },
           ],
         },
