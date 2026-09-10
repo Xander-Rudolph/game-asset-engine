@@ -210,10 +210,8 @@ textured = any(
 setup_scene(ob, textured)
 ref_img = render(cfg["shots"] + "/reference.png")
 
-rows = []
-for target in cfg["faces"]:
-    if target >= ref_faces:
-        continue
+def measure(target):
+    """Decimate a fresh copy to `target` and score it against the reference."""
     ob = load(src)
     t_start = time.time()
     me = ob.data
@@ -231,15 +229,55 @@ for target in cfg["faces"]:
     setup_scene(ob, textured)
     img = render(cfg["shots"] + f"/faces_{target}.png")
     iou, rgb, lost = compare(ref_img, img)
-    rows.append({
+    return {
         "target": target, "faces": len(t), "verts": len(v),
         "seconds": round(secs, 1), "surface": dev,
         "iou": iou, "rgb": rgb, "silhouette_lost_pct": lost,
-    })
+    }
+
+
+rows = []
+answer = None
+floor = None
+
+if cfg["target_iou"]:
+    # Bisect for the LOWEST face count whose silhouette still holds above the
+    # threshold. The search is on the measured render, not on a rule of thumb,
+    # which is the whole point: the number that matters for a 2D asset is how
+    # much of the outline survives at the size it ships at.
+    lo, hi = cfg["floor_faces"], ref_faces
+    best = None
+    for _ in range(cfg["max_iters"]):
+        mid = (lo + hi) // 2
+        if mid <= lo or mid >= hi:
+            break
+        row = measure(mid)
+        rows.append(row)
+        if row["iou"] >= cfg["target_iou"]:
+            best = row
+            hi = row["faces"]          # produced, not requested
+        else:
+            lo = mid
+        # Decimation refuses to go below what boundary edges allow, and it does
+        # so silently. Two probes landing on the same produced count means the
+        # floor has been hit, and no smaller request will ever be honoured.
+        same = [r for r in rows if r["faces"] == row["faces"]]
+        if len(same) > 1 and row["target"] != same[0]["target"]:
+            floor = row["faces"]
+            if row["iou"] >= cfg["target_iou"]:
+                best = row
+            break
+    answer = best
+else:
+    for target in cfg["faces"]:
+        if target >= ref_faces:
+            continue
+        rows.append(measure(target))
 
 print("REPORT " + json.dumps({
     "src": src, "ref_faces": ref_faces, "ref_verts": len(v0),
     "height": height, "textured": textured, "sprite": SIZE, "rows": rows,
+    "answer": answer, "floor": floor, "target_iou": cfg["target_iou"],
 }))
 '''
 
@@ -257,6 +295,17 @@ def main() -> int:
     ap.add_argument("--elevation", type=float, default=30.0)
     ap.add_argument("--azimuth", type=float, default=45.0)
     ap.add_argument("--json", type=Path, help="also write the raw numbers here")
+    ap.add_argument("--target-iou", type=float, metavar="IOU",
+                    help="instead of sweeping, bisect for the LOWEST face count "
+                         "whose silhouette IoU still holds at or above this. "
+                         "0.985 is a good starting threshold. Prints an answer "
+                         "rather than a table")
+    ap.add_argument("--floor-faces", type=int, default=200,
+                    help="lower bound for the bisection (default 200)")
+    ap.add_argument("--max-iters", type=int, default=8,
+                    help="bisection probes (default 8)")
+    ap.add_argument("--sweep", action="store_true",
+                    help="force the fixed sweep even with --target-iou set")
     ap.add_argument("--timeout", type=int, default=3600,
                     help="seconds before giving up on Blender (default 3600). A "
                          "sweep over many budgets is the slowest thing here")
@@ -288,6 +337,9 @@ def main() -> int:
         # describe can be looked at. They used to go to container /tmp, which
         # meant every measurement was unfalsifiable by eye.
         "shots": f"/app/output/_dec/{run_id}",
+        "target_iou": None if args.sweep else args.target_iou,
+        "floor_faces": args.floor_faces,
+        "max_iters": args.max_iters,
     }
     print(f"  renders {ROOT / 'output' / '_dec' / run_id}")
     info = exec_json(BLENDER, cfg, "REPORT ", timeout=args.timeout)
@@ -301,12 +353,27 @@ def main() -> int:
     print()
     print(f"  {'faces':>8}  {'ratio':>6}  {'surface p95':>11}  {'max':>6}  "
           f"{'silhouette':>10}  {'lost':>5}  {'texture':>7}  {'secs':>5}")
-    for row in info["rows"]:
+    for row in sorted(info["rows"], key=lambda r: -r["faces"]):
         print(f"  {row['faces']:>8,}  {row['faces']/info['ref_faces']:>5.1%}  "
               f"{row['surface']['p95']:>10.3f}%  {row['surface']['max']:>5.2f}%  "
               f"{row['iou']:>9.4f}  {row['silhouette_lost_pct']:>4.1f}%  "
               f"{row['rgb']:>6.1f}  {row['seconds']:>5.1f}")
     print()
+    if info.get("target_iou"):
+        a = info.get("answer")
+        if a:
+            print(f"  ANSWER: ship this at {a['faces']:,} faces "
+                  f"({a['faces'] / info['ref_faces']:.1%} of the original), "
+                  f"silhouette {a['iou']:.4f} at {info['sprite']}px")
+        else:
+            print(f"  NO ANSWER: nothing tested held IoU >= {info['target_iou']} "
+                  f"at {info['sprite']}px. The mesh may already be at its limit.")
+        if info.get("floor"):
+            print(f"  FLOOR: decimation bottoms out at {info['floor']:,} faces. "
+                  "Boundary edges stop it going lower, and it fails silently -- "
+                  "a smaller request returns this same count. See "
+                  "docs/guide/decimation.")
+        print()
     print("  surface = % of model height the surface moved (p95 of sampled points)")
     print("  silhouette = IoU of the rendered alpha vs the full-resolution render")
     print("  texture = mean RGB difference inside the shared silhouette, 0-255")

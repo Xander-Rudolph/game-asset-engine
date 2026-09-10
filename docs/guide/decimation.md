@@ -5,12 +5,32 @@ throw away before it shows, and the answer depends on what you are looking at.
 
 This page has measurements rather than opinions. You can reproduce all of them.
 
-## Measure it yourself
+## Get an answer
 
 ```sh
-scripts/decimation_report.py output/mesh/beast_chimera_textured.glb
+scripts/decimation_report.py output/mesh/golem.glb --target-iou 0.985 --sprite 128
+```
+
+Bisects for the **lowest** face count whose silhouette still holds at or above
+that threshold, at the size the sprite ships at, and prints a decision:
+
+```
+  ANSWER: ship this at 3,184 faces (6.6% of the original), silhouette 0.9855 at 128px
+```
+
+Eight probes by default. 0.985 is a sensible starting threshold for a 2D asset;
+raise it if the outline is doing more work than usual.
+
+## Or measure the whole curve
+
+```sh
+scripts/decimation_report.py output/mesh/golem.glb --sweep --faces 20000,8000,4000
 scripts/decimation_report.py input/3d/hero.glb --sprite 128 --json out.json
 ```
+
+The sweep is still worth running when you are learning an asset class rather
+than shipping one model, because the shape of the whole table is what teaches
+the trade-off. The sections below are read off exactly such a sweep.
 
 It reports three kinds of damage at each budget, because they do not arrive
 together:

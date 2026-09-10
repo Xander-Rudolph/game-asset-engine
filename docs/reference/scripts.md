@@ -63,9 +63,13 @@ orthographic. See [facings](/guide/facings).
 ### `decimation_report.py`
 
 ```sh
-scripts/decimation_report.py MODEL [--faces LIST] [--sprite PX]
+scripts/decimation_report.py MODEL [--target-iou IOU] [--sweep] [--faces LIST]
+                             [--sprite PX] [--floor-faces N] [--max-iters N]
                              [--elevation DEG] [--azimuth DEG] [--json PATH]
 ```
+
+`--target-iou` bisects for the lowest face count that holds the silhouette above
+the threshold and prints an answer. `--sweep` forces the full table instead.
 
 Pass `--sprite` at the size the asset is really seen at. Judging a budget at 340
 pixels and shipping at 128 wastes geometry.
