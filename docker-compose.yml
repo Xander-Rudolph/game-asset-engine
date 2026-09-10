@@ -70,7 +70,7 @@ services:
   # over the baked one is exactly how you get a server with no nodes in it.
   # Use the `comfy` profile when you want to edit node source on the host.
   comfyui-packaged:
-    image: ${ATHANOR_COMFY_IMAGE:-ghcr.io/athanorgames/athanor-comfy:latest}
+    image: ${ATHANOR_COMFY_IMAGE:-ghcr.io/athanorgames/asset-engine-comfy:latest}
     container_name: comfyui-packaged
     profiles: ["packaged"]
     ports:

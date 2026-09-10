@@ -21,7 +21,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-IMAGE="${ATHANOR_COMFY_IMAGE_REPO:-ghcr.io/athanorgames/athanor-comfy}"
+IMAGE="${ATHANOR_COMFY_IMAGE_REPO:-ghcr.io/athanorgames/asset-engine-comfy}"
 VERSION="${1:-}"
 DRY="${2:-}"
 
@@ -41,7 +41,15 @@ echo "== build =="
 # GPU here. That is fine and expected: the one step that needs to know about
 # CUDA without a device to query is diso, and the Dockerfile sets FORCE_CUDA=1
 # and TORCH_CUDA_ARCH_LIST for exactly that.
-docker build -t "$IMAGE:$VERSION" -t "$IMAGE:latest" .
+# The OCI labels are build args, not literals in the Dockerfile, so that
+# version/revision/created describe THIS build rather than whenever someone last
+# edited the file. An image whose labels lie about its provenance is worse than
+# one with no labels, because the lie is machine-readable.
+docker build \
+    --build-arg IMAGE_VERSION="$VERSION" \
+    --build-arg VCS_REF="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)" \
+    --build-arg BUILD_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    -t "$IMAGE:$VERSION" -t "$IMAGE:latest" .
 
 echo
 echo "== what came out =="

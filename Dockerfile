@@ -328,7 +328,36 @@ ENTRYPOINT ["/usr/local/bin/athanor-entrypoint"]
 CMD ["python3", "main.py", "--listen", "0.0.0.0", "--enable-manager"]
 
 # Labels, so the package page on GHCR says what this is and where it came from.
-LABEL org.opencontainers.image.title="Athanor ComfyUI" \
-      org.opencontainers.image.description="ComfyUI with 3D-Pack, UniRig, CameraPack and mesh2motion pinned and built, plus the Athanor asset-pipeline workflows and scripts. Model weights are not included; the container names the missing ones on boot." \
-      org.opencontainers.image.source="https://github.com/AthanorGames/athanor" \
-      org.opencontainers.image.licenses="MIT" 
+#
+# Passed in by scripts/publish_image.sh rather than hardcoded, because a version
+# or revision baked as a literal is wrong the moment anything moves.  Defaults
+# are deliberately obvious placeholders so an unlabelled image is visible as one.
+ARG IMAGE_VERSION=dev
+ARG VCS_REF=unknown
+ARG BUILD_DATE=unknown
+# CUDA_TAG is declared above the FROM, which scopes it to the FROM alone.
+# Re-declare it here or the base.name label expands to an empty string.
+ARG CUDA_TAG=12.4.1-cudnn-devel-ubuntu22.04
+#
+# On the licence label: the previous value was "MIT", which was wrong in a way
+# worth naming.  This image is not one work under one licence.  It bundles this
+# repo's Apache-2.0 scripts, GPL-3.0-only ComfyUI and UniRig, GPL-2.0-or-later
+# Blender, MIT node-pack code, and Tencent community licences that carry a
+# territorial exclusion and have no SPDX identifier -- hence the LicenseRef.
+# An SPDX expression is the honest form here; a single permissive id is not.
+# See docs/guide/redistributing.md before publishing this anywhere.
+# maintainer and ref.name are inherited from the NVIDIA/Ubuntu base and are
+# actively misleading if left: they say NVIDIA owns this and that it is "ubuntu".
+LABEL maintainer="Athanor Games" \
+      org.opencontainers.image.ref.name="asset-engine-comfy" \
+      org.opencontainers.image.title="Asset Engine ComfyUI" \
+      org.opencontainers.image.description="ComfyUI with 3D-Pack, UniRig, CameraPack and mesh2motion pinned and built, plus the Asset Engine pipeline workflows and scripts. Model weights are NOT included; the container names the missing ones on boot." \
+      org.opencontainers.image.source="https://github.com/AthanorGames/asset-engine" \
+      org.opencontainers.image.url="https://athanorgames.github.io/asset-engine/" \
+      org.opencontainers.image.documentation="https://athanorgames.github.io/asset-engine/guide/install" \
+      org.opencontainers.image.vendor="Athanor Games" \
+      org.opencontainers.image.licenses="Apache-2.0 AND GPL-3.0-only AND GPL-2.0-or-later AND MIT AND LicenseRef-Tencent-Hunyuan-Community" \
+      org.opencontainers.image.base.name="nvidia/cuda:${CUDA_TAG}" \
+      org.opencontainers.image.version="${IMAGE_VERSION}" \
+      org.opencontainers.image.revision="${VCS_REF}" \
+      org.opencontainers.image.created="${BUILD_DATE}" 
