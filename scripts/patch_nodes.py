@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 #: Where the node packs live. Normally `custom_nodes/` beside this script, but
 #: the image bakes the packs at /app/custom_nodes and runs this from
-#: /opt/athanor, so it has to be told. Set COMFY_CUSTOM_NODES to override.
+#: /opt/asset-engine, so it has to be told. Set COMFY_CUSTOM_NODES to override.
 NODES = Path(os.environ.get("COMFY_CUSTOM_NODES", ROOT / "custom_nodes"))
 
 # (file, find, replace, why)

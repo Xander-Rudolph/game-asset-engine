@@ -7,7 +7,7 @@ ComfyUI in Docker with the 3D, rigging and animation node packs on top, plus the
 scripts, prompt libraries, drop in workflows and Claude Code skills to drive the
 whole thing from a terminal.
 
-**[Read the guides](https://athanorgames.github.io/asset-engine/)**
+**[Read the guides](https://xander-rudolph.github.io/asset-engine/)**
 
 ```
 "a mossy stone golem"
@@ -75,7 +75,7 @@ scripts/decimation_report.py output/mesh/asset.glb --sprite 128
 
 Reports how far the surface moved, how much of the outline was lost, and how far
 the texture drifted, at each face budget, rendered from the camera your game
-uses. [What the numbers say](https://athanorgames.github.io/asset-engine/guide/decimation).
+uses. [What the numbers say](https://xander-rudolph.github.io/asset-engine/guide/decimation).
 
 ## Claude Code plugin
 
@@ -115,13 +115,13 @@ It deploys to GitHub Pages on every push to `main`.
 
 | Page | For |
 |---|---|
-| [Install and first run](https://athanorgames.github.io/asset-engine/guide/install) | Getting it running |
-| [Make your first asset](https://athanorgames.github.io/asset-engine/guide/first-asset) | Ten minutes, end to end |
-| [Facings and camera angles](https://athanorgames.github.io/asset-engine/guide/facings) | Why a sprite faces the wrong way |
-| [Face counts and decimation](https://athanorgames.github.io/asset-engine/guide/decimation) | How much geometry you actually need |
-| [Rigging](https://athanorgames.github.io/asset-engine/guide/rigging) | Including heavy and scanned meshes |
-| [Ground and terrain](https://athanorgames.github.io/asset-engine/guide/terrain) | Tileable textures, and four ways to get seams wrong |
-| [Licensing](https://athanorgames.github.io/asset-engine/guide/licensing) | Read before shipping anything |
+| [Install and first run](https://xander-rudolph.github.io/asset-engine/guide/install) | Getting it running |
+| [Make your first asset](https://xander-rudolph.github.io/asset-engine/guide/first-asset) | Ten minutes, end to end |
+| [Facings and camera angles](https://xander-rudolph.github.io/asset-engine/guide/facings) | Why a sprite faces the wrong way |
+| [Face counts and decimation](https://xander-rudolph.github.io/asset-engine/guide/decimation) | How much geometry you actually need |
+| [Rigging](https://xander-rudolph.github.io/asset-engine/guide/rigging) | Including heavy and scanned meshes |
+| [Ground and terrain](https://xander-rudolph.github.io/asset-engine/guide/terrain) | Tileable textures, and four ways to get seams wrong |
+| [Licensing](https://xander-rudolph.github.io/asset-engine/guide/licensing) | Read before shipping anything |
 
 ## Licensing, briefly
 
@@ -132,7 +132,7 @@ rendering its output to a 2D sprite does not sidestep that.
 
 There is a route through this pipeline with no conditions at all, and it is the
 default in the walkthrough. See
-[licensing](https://athanorgames.github.io/asset-engine/guide/licensing).
+[licensing](https://xander-rudolph.github.io/asset-engine/guide/licensing).
 
 ## Credits
 

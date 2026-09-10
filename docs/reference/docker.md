@@ -119,4 +119,4 @@ paths, because only one of them exercises that code.
 | `PUID`, `PGID` | Your `id -u` and `id -g`. Get these wrong and output lands owned by root. |
 | `COMFY_URL` | Where the server answers. Defaults to `http://127.0.0.1:8188`. |
 | `HF_TOKEN` | For the gated weight group. |
-| `ATHANOR_FETCH_MODELS` | Set to 1 to have the container fetch missing weights on boot. |
+| `ASSET_ENGINE_FETCH_MODELS` | Set to 1 to have the container fetch missing weights on boot. |

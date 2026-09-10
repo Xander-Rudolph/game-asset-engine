@@ -26,7 +26,7 @@ def container() -> str:
     Falls back to the first candidate so callers still produce a sensible error
     message when nothing is running, rather than a confusing empty string.
     """
-    override = os.environ.get("ATHANOR_CONTAINER")
+    override = os.environ.get("ASSET_ENGINE_CONTAINER")
     if override:
         return override
     try:

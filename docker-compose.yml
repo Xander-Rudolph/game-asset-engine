@@ -63,14 +63,14 @@ services:
   # extension compiled, and the workflows are already in ComfyUI's sidebar.
   # The two mounts left are the two things an image cannot carry: ~200GB of
   # weights, and the output you want to keep. The container names any missing
-  # weights on boot, and fetches them if ATHANOR_FETCH_MODELS=1.
+  # weights on boot, and fetches them if ASSET_ENGINE_FETCH_MODELS=1.
   #
   # Deliberately NOT mounting custom_nodes or workflows: a bind mount replaces
   # the path rather than merging with it, so mounting an empty host directory
   # over the baked one is exactly how you get a server with no nodes in it.
   # Use the `comfy` profile when you want to edit node source on the host.
   comfyui-packaged:
-    image: ${ATHANOR_COMFY_IMAGE:-ghcr.io/athanorgames/asset-engine-comfy:latest}
+    image: ${ASSET_ENGINE_IMAGE:-ghcr.io/xander-rudolph/asset-engine-comfy:latest}
     container_name: comfyui-packaged
     profiles: ["packaged"]
     ports:
@@ -80,7 +80,7 @@ services:
       - NVIDIA_DRIVER_CAPABILITIES=all
       - PYOPENGL_PLATFORM=egl
       - HF_HOME=/app/models/.hf
-      - ATHANOR_FETCH_MODELS=${ATHANOR_FETCH_MODELS:-0}
+      - ASSET_ENGINE_FETCH_MODELS=${ASSET_ENGINE_FETCH_MODELS:-0}
     volumes:
       - ${MODELS_DIR}:/app/models
       - ${MODELS_DIR}/3d_checkpoints:/app/custom_nodes/ComfyUI-3D-Pack/Checkpoints

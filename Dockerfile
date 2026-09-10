@@ -244,10 +244,10 @@ RUN for req in /app/custom_nodes/*/requirements.txt; do \
 # scripts/patch_nodes.py precisely because the bind mount hid whatever the
 # image did to its own copy; with the source baked, the right time to apply
 # them is here, once, where an unapplied patch fails the build.
-COPY scripts/patch_nodes.py /opt/athanor/scripts/patch_nodes.py
+COPY scripts/patch_nodes.py /opt/asset-engine/scripts/patch_nodes.py
 ENV COMFY_CUSTOM_NODES=/app/custom_nodes
-RUN python3 /opt/athanor/scripts/patch_nodes.py && \
-    python3 /opt/athanor/scripts/patch_nodes.py --check
+RUN python3 /opt/asset-engine/scripts/patch_nodes.py && \
+    python3 /opt/asset-engine/scripts/patch_nodes.py --check
 
 # Hunyuan3D-2.1's TexGen needs a pybind11 extension that ships as SOURCE ONLY.
 # Without it MeshRender.py's bare `except` swallows the ImportError and leaves
@@ -284,11 +284,11 @@ print('3D-Pack canary OK — numpy', numpy.__version__, '+ gpytoolbox + StableFa
 # `docker run` is the whole install.  models.json comes along so the container
 # can say which weights are missing by name, which is the one part of the set
 # too large to bake (~200GB of checkpoints).
-COPY scripts /opt/athanor/scripts
-COPY poses /opt/athanor/poses
-COPY prompts /opt/athanor/prompts
-COPY models.json /opt/athanor/models.json
-COPY workflows/api /opt/athanor/workflows/api
+COPY scripts /opt/asset-engine/scripts
+COPY poses /opt/asset-engine/poses
+COPY prompts /opt/asset-engine/prompts
+COPY models.json /opt/asset-engine/models.json
+COPY workflows/api /opt/asset-engine/workflows/api
 
 # The editor's own graphs, where ComfyUI looks for user workflows.
 COPY workflows/default/workflows /app/user/default/workflows
@@ -301,18 +301,18 @@ COPY workflows/default/workflows /app/user/default/workflows
 # entrypoint seeds an empty mount from here and leaves a non-empty one alone,
 # so the packaged case works with no mounts and the development case still
 # gets a host copy it can edit.
-RUN mkdir -p /opt/athanor/seed && \
-    cp -a /app/custom_nodes /opt/athanor/seed/custom_nodes && \
-    cp -a /app/user /opt/athanor/seed/user && \
-    du -sh /opt/athanor/seed
+RUN mkdir -p /opt/asset-engine/seed && \
+    cp -a /app/custom_nodes /opt/asset-engine/seed/custom_nodes && \
+    cp -a /app/user /opt/asset-engine/seed/user && \
+    du -sh /opt/asset-engine/seed
 
-COPY scripts/entrypoint.sh /usr/local/bin/athanor-entrypoint
-RUN chmod +x /usr/local/bin/athanor-entrypoint /opt/athanor/scripts/*.py \
-        /opt/athanor/scripts/*.sh 2>/dev/null || true
+COPY scripts/entrypoint.sh /usr/local/bin/asset-engine-entrypoint
+RUN chmod +x /usr/local/bin/asset-engine-entrypoint /opt/asset-engine/scripts/*.py \
+        /opt/asset-engine/scripts/*.sh 2>/dev/null || true
 
 # Where fetch_models.py looks, and where the compose file mounts the weights.
 ENV MODELS_DIR=/app/models \
-    ATHANOR_HOME=/opt/athanor
+    ASSET_ENGINE_HOME=/opt/asset-engine
 
 # Run as the host user (compose passes PUID/PGID from .env), so generated meshes
 # and sprites are owned by whoever has to move them into the game — not root.
@@ -324,7 +324,7 @@ ENV HOME=/app/.home
 
 WORKDIR /app
 EXPOSE 8188
-ENTRYPOINT ["/usr/local/bin/athanor-entrypoint"]
+ENTRYPOINT ["/usr/local/bin/asset-engine-entrypoint"]
 CMD ["python3", "main.py", "--listen", "0.0.0.0", "--enable-manager"]
 
 # Labels, so the package page on GHCR says what this is and where it came from.
@@ -348,14 +348,14 @@ ARG CUDA_TAG=12.4.1-cudnn-devel-ubuntu22.04
 # See docs/guide/redistributing.md before publishing this anywhere.
 # maintainer and ref.name are inherited from the NVIDIA/Ubuntu base and are
 # actively misleading if left: they say NVIDIA owns this and that it is "ubuntu".
-LABEL maintainer="Athanor Games" \
+LABEL maintainer="Alex Rudolph" \
       org.opencontainers.image.ref.name="asset-engine-comfy" \
       org.opencontainers.image.title="Asset Engine ComfyUI" \
       org.opencontainers.image.description="ComfyUI with 3D-Pack, UniRig, CameraPack and mesh2motion pinned and built, plus the Asset Engine pipeline workflows and scripts. Model weights are NOT included; the container names the missing ones on boot." \
-      org.opencontainers.image.source="https://github.com/AthanorGames/asset-engine" \
-      org.opencontainers.image.url="https://athanorgames.github.io/asset-engine/" \
-      org.opencontainers.image.documentation="https://athanorgames.github.io/asset-engine/guide/install" \
-      org.opencontainers.image.vendor="Athanor Games" \
+      org.opencontainers.image.source="https://github.com/Xander-Rudolph/asset-engine" \
+      org.opencontainers.image.url="https://xander-rudolph.github.io/asset-engine/" \
+      org.opencontainers.image.documentation="https://xander-rudolph.github.io/asset-engine/guide/install" \
+      org.opencontainers.image.vendor="Alex Rudolph" \
       org.opencontainers.image.licenses="Apache-2.0 AND GPL-3.0-only AND GPL-2.0-or-later AND MIT AND LicenseRef-Tencent-Hunyuan-Community" \
       org.opencontainers.image.base.name="nvidia/cuda:${CUDA_TAG}" \
       org.opencontainers.image.version="${IMAGE_VERSION}" \

@@ -21,7 +21,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-IMAGE="${ATHANOR_COMFY_IMAGE_REPO:-ghcr.io/athanorgames/asset-engine-comfy}"
+IMAGE="${ASSET_ENGINE_IMAGE_REPO:-ghcr.io/xander-rudolph/asset-engine-comfy}"
 VERSION="${1:-}"
 DRY="${2:-}"
 
@@ -62,12 +62,12 @@ echo "== smoke test =="
 docker run --rm --entrypoint bash "$IMAGE:$VERSION" -lc '
 set -e
 ls /app/custom_nodes | sed "s/^/  node pack: /"
-COMFY_CUSTOM_NODES=/app/custom_nodes python3 /opt/athanor/scripts/patch_nodes.py --check
+COMFY_CUSTOM_NODES=/app/custom_nodes python3 /opt/asset-engine/scripts/patch_nodes.py --check
 ls /app/custom_nodes/ComfyUI-3D-Pack/Gen_3D_Modules/Hunyuan3D_2_1/hy3dpaint/DifferentiableRenderer/mesh_inpaint_processor*.so >/dev/null \
     && echo "  mesh_inpaint_processor: built"
-echo "  api graphs:    $(ls /opt/athanor/workflows/api/*.json | wc -l)"
+echo "  api graphs:    $(ls /opt/asset-engine/workflows/api/*.json | wc -l)"
 echo "  editor graphs: $(ls /app/user/default/workflows/*.json | wc -l)"
-echo "  seed:          $(du -sh /opt/athanor/seed | cut -f1)"
+echo "  seed:          $(du -sh /opt/asset-engine/seed | cut -f1)"
 python3 -c "import torch; assert torch.__version__.startswith(\"2.6.0\"), torch.__version__; print(\"  torch\", torch.__version__)"
 '
 

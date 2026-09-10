@@ -5,7 +5,7 @@
 #
 #   1. Seed any bind mount that arrived empty. The image carries a pristine
 #      copy of the node source, the workflows, the poses and the prompts at
-#      /opt/athanor/seed. A bind mount HIDES whatever the image had at that
+#      /opt/asset-engine/seed. A bind mount HIDES whatever the image had at that
 #      path, so a fresh checkout with empty custom_nodes/ and workflows/
 #      would otherwise start a server with no nodes and no graphs -- the
 #      exact "missing workflows" this image exists to prevent. Seeding is
@@ -23,9 +23,9 @@
 # starting anyway: most of the graphs do not need most of the weights.
 set -euo pipefail
 
-SEED=/opt/athanor/seed
-say() { printf '\033[36m[athanor]\033[0m %s\n' "$*"; }
-warn() { printf '\033[33m[athanor]\033[0m %s\n' "$*" >&2; }
+SEED=/opt/asset-engine/seed
+say() { printf '\033[36m[asset-engine]\033[0m %s\n' "$*"; }
+warn() { printf '\033[33m[asset-engine]\033[0m %s\n' "$*" >&2; }
 
 # --- 1. seed the mounts ----------------------------------------------------
 
@@ -53,7 +53,7 @@ seed_if_empty() {
 }
 
 # Only the two paths a bind mount can plausibly cover. The poses and the
-# prompts stay at /opt/athanor, where the scripts read them from: copying
+# prompts stay at /opt/asset-engine, where the scripts read them from: copying
 # them under /app bought nothing and needed a root-owned directory the
 # container has no business writing to.
 seed_if_empty "$SEED/custom_nodes" /app/custom_nodes "node packs"
@@ -74,14 +74,14 @@ fi
 
 # --- 2. report on the weights ---------------------------------------------
 
-if [ "${ATHANOR_CHECK_MODELS:-1}" = "1" ] && [ -x /opt/athanor/scripts/fetch_models.py ]; then
-    if [ "${ATHANOR_FETCH_MODELS:-0}" = "1" ]; then
-        say "fetching any missing models (ATHANOR_FETCH_MODELS=1)"
-        python3 /opt/athanor/scripts/fetch_models.py --download || \
+if [ "${ASSET_ENGINE_CHECK_MODELS:-1}" = "1" ] && [ -x /opt/asset-engine/scripts/fetch_models.py ]; then
+    if [ "${ASSET_ENGINE_FETCH_MODELS:-0}" = "1" ]; then
+        say "fetching any missing models (ASSET_ENGINE_FETCH_MODELS=1)"
+        python3 /opt/asset-engine/scripts/fetch_models.py --download || \
             warn "model fetch failed; starting anyway"
     else
-        python3 /opt/athanor/scripts/fetch_models.py || true
-        say "set ATHANOR_FETCH_MODELS=1 to download the missing ones on boot"
+        python3 /opt/asset-engine/scripts/fetch_models.py || true
+        say "set ASSET_ENGINE_FETCH_MODELS=1 to download the missing ones on boot"
     fi
 fi
 

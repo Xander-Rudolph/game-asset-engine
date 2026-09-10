@@ -19,7 +19,7 @@ Output looks like this when everything is ready:
   [  ok  ] docker       engine 27.5.1
   [  ok  ] gpu runtime  nvidia runtime registered with docker
   [  ok  ] .env         MODELS_DIR=/models
-  [  ok  ] image        ghcr.io/athanorgames/asset-engine-comfy:latest
+  [  ok  ] image        ghcr.io/xander-rudolph/asset-engine-comfy:latest
   [  ok  ] container    comfyui is up 3 hours
   [  ok  ] server       http://127.0.0.1:8188 answering, 943 node types loaded
   [  ok  ] node packs   3D-Pack and UniRig both loaded
@@ -67,7 +67,7 @@ server starts, rather than letting it turn up as a red node an hour later.
 To have it fetch them itself:
 
 ```sh
-ATHANOR_FETCH_MODELS=1 docker compose --profile packaged up -d
+ASSET_ENGINE_FETCH_MODELS=1 docker compose --profile packaged up -d
 ```
 
 Or fetch them yourself, in groups:

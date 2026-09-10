@@ -293,11 +293,11 @@ run("scripts/cleanup.py")
     md("""
 ## Where to go next
 
-- [Face counts and decimation](https://athanorgames.github.io/asset-engine/guide/decimation) for what a budget really costs
-- [Facings and camera angles](https://athanorgames.github.io/asset-engine/guide/facings) if a sprite faces the wrong way
-- [Rigging](https://athanorgames.github.io/asset-engine/guide/rigging) for heavy meshes and weight transfer
-- [Ground and terrain](https://athanorgames.github.io/asset-engine/guide/terrain) for tileable textures
-- [Licensing](https://athanorgames.github.io/asset-engine/guide/licensing) before you ship anything
+- [Face counts and decimation](https://xander-rudolph.github.io/asset-engine/guide/decimation) for what a budget really costs
+- [Facings and camera angles](https://xander-rudolph.github.io/asset-engine/guide/facings) if a sprite faces the wrong way
+- [Rigging](https://xander-rudolph.github.io/asset-engine/guide/rigging) for heavy meshes and weight transfer
+- [Ground and terrain](https://xander-rudolph.github.io/asset-engine/guide/terrain) for tileable textures
+- [Licensing](https://xander-rudolph.github.io/asset-engine/guide/licensing) before you ship anything
 
 To clear the notebook's working files:
 
