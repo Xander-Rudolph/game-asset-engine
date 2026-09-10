@@ -3,7 +3,17 @@ import { defineConfig } from 'vitepress'
 // GitHub Pages serves a project site from /<repo>/, so the base has to match
 // the repo name. Set DOCS_BASE=/ when serving from a custom domain or a user
 // site, otherwise every asset 404s and the page loads unstyled.
-const base = process.env.DOCS_BASE ?? '/asset-engine/'
+//
+// The dev server is the exception and must run at '/'. With a non-root base,
+// Vite prefixes its own node_modules imports with it and then cannot resolve
+// them, so `vitepress dev` dies on:
+//
+//   Failed to resolve import ".../theme-default/styles/fonts.css"
+//
+// The production build is unaffected, which is what makes it confusing: the
+// site builds and deploys fine while the dev server refuses to start.
+const isDev = process.argv.includes('dev')
+const base = process.env.DOCS_BASE ?? (isDev ? '/' : '/asset-engine/')
 
 export default defineConfig({
   title: 'Asset Engine',
@@ -33,7 +43,7 @@ export default defineConfig({
       { text: 'Credits', link: '/credits' },
       {
         text: 'Repo',
-        link: 'https://github.com/AthanorGames/asset-engine',
+        link: 'https://github.com/Xander-Rudolph/asset-engine',
       },
     ],
 
@@ -99,18 +109,18 @@ export default defineConfig({
     outline: { level: [2, 3], label: 'On this page' },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/AthanorGames/asset-engine' },
+      { icon: 'github', link: 'https://github.com/Xander-Rudolph/asset-engine' },
     ],
 
     footer: {
       message:
         'Model weights carry their own licences. See the licensing guide before shipping anything.',
-      copyright: 'Athanor Games',
+      copyright: 'Alex Rudolph',
     },
 
     editLink: {
       pattern:
-        'https://github.com/AthanorGames/asset-engine/edit/main/docs/:path',
+        'https://github.com/Xander-Rudolph/asset-engine/edit/main/docs/:path',
       text: 'Suggest a change to this page',
     },
   },
