@@ -1,7 +1,7 @@
 # Models and weights
 
 Weights live outside the repo and outside the image. `MODELS_DIR` in `.env` says
-where. Expect about 190GB for `--all`, which leaves out the `gated` and
+where. Expect about 200GB for `--all`, which leaves out the `gated` and
 `noncommercial` groups.
 
 ```sh
@@ -39,6 +39,7 @@ node an hour later.
 | `mvadapter` | Multiview and texturing over SDXL | ~17GB |
 | `unique3d` | Unique3D and CharacterGen chain | ~23GB |
 | `extra` | LGM, CRM, TriplaneGaussian, PartCrafter | ~21GB |
+| `music` | ACE-Step 1.5 turbo, text to music. MIT, and its model card allows commercial use of the music | ~10GB |
 | `gated` | StableFast3D. Accept the licence on the hub first | ~4GB |
 | `noncommercial` | Excluded from `--all`, needs an explicit flag | under 1GB |
 

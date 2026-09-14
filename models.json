@@ -27,7 +27,8 @@
     "gated": "StableFast3D, ~4GB. Accept the licence on HF and set HF_TOKEN",
     "noncommercial": "Models whose licence forbids commercial use, ~0.5GB. Never fetched by --all",
     "qwen": "Qwen-Image text-to-image, ~48GB. Apache-2.0, far better prompt adherence than SDXL base. The concept presets need it",
-    "qwen_edit": "Qwen-Image-Edit 2509, ~19GB. Change one element of a concept without rerolling it"
+    "qwen_edit": "Qwen-Image-Edit 2509, ~19GB. Change one element of a concept without rerolling it",
+    "music": "ACE-Step 1.5 turbo text-to-music, ~10GB. MIT, and its model card allows commercial use of the music it makes"
   },
   "models": [
     {
@@ -484,6 +485,52 @@
       "license_url": "https://huggingface.co/Qwen/Qwen-Image-Edit",
       "commercial": "yes",
       "note": "Reuses the qwen_image text encoder and VAE from the 'qwen' group, so fetch that first or this model has nothing to run with."
+    },
+    {
+      "name": "ACE-Step 1.5 turbo music transformer",
+      "group": "music",
+      "kind": "file",
+      "repo": "Comfy-Org/ace_step_1.5_ComfyUI_files",
+      "file": "split_files/diffusion_models/acestep_v1.5_turbo.safetensors",
+      "dest": "diffusion_models/acestep_v1.5_turbo.safetensors",
+      "license": "MIT",
+      "license_url": "https://huggingface.co/ACE-Step/Ace-Step1.5",
+      "commercial": "yes",
+      "note": "ComfyUI's repack of ACE-Step/Ace-Step1.5. The repack repo is tagged Apache-2.0; the weights are ACE-Step's MIT release. The model card states generated music may be used commercially, and that the model was trained on licensed, royalty-free and synthetic music. Used by workflows/api/txt2music_acestep15.json, split rather than the all-in-one checkpoint because only a separate text encoder loader can put the encoders on the CPU (see the planner LM's note)."
+    },
+    {
+      "name": "ACE-Step 1.5 text encoder (Qwen3 0.6B)",
+      "group": "music",
+      "kind": "file",
+      "repo": "Comfy-Org/ace_step_1.5_ComfyUI_files",
+      "file": "split_files/text_encoders/qwen_0.6b_ace15.safetensors",
+      "dest": "text_encoders/qwen_0.6b_ace15.safetensors",
+      "license": "MIT (ACE-Step 1.5; the Qwen3-Embedding-0.6B it builds on is Apache-2.0)",
+      "license_url": "https://huggingface.co/ACE-Step/Ace-Step1.5",
+      "commercial": "yes"
+    },
+    {
+      "name": "ACE-Step 1.5 planner LM (1.7B)",
+      "group": "music",
+      "kind": "file",
+      "repo": "Comfy-Org/ace_step_1.5_ComfyUI_files",
+      "file": "split_files/text_encoders/qwen_1.7b_ace15.safetensors",
+      "dest": "text_encoders/qwen_1.7b_ace15.safetensors",
+      "license": "MIT",
+      "license_url": "https://huggingface.co/ACE-Step/Ace-Step1.5",
+      "commercial": "yes",
+      "note": "Loaded on the CPU by the graph's DualCLIPLoader. On this image's PyTorch 2.6 its sampling on the GPU produces NaN probabilities and the CUDA assert aborts the whole ComfyUI server (Comfy-Org/ComfyUI#12274, where the maintainer's answer is a newer PyTorch)."
+    },
+    {
+      "name": "ACE-Step 1.5 audio VAE",
+      "group": "music",
+      "kind": "file",
+      "repo": "Comfy-Org/ace_step_1.5_ComfyUI_files",
+      "file": "split_files/vae/ace_1.5_vae.safetensors",
+      "dest": "vae/ace_1.5_vae.safetensors",
+      "license": "MIT",
+      "license_url": "https://huggingface.co/ACE-Step/Ace-Step1.5",
+      "commercial": "yes"
     }
   ]
 }
