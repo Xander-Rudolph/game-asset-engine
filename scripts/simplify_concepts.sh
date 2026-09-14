@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Simplify existing concept art into game-ready versions, one file per source.
 #
-#   scripts/simplify_concepts.sh ../concept_art/singles/unit_*.png
-#   DENOISE=0.93 scripts/simplify_concepts.sh ../concept_art/singles/hero_*.png
+#   scripts/simplify_concepts.sh output/concept/*.png
+#   DENOISE=0.93 scripts/simplify_concepts.sh output/concept/ornate_knight.png
 #
 # Outputs land in output/simplified/<source name>.png — named after the source,
 # not the edit counter, because ComfyUI's SaveImage counter (edit_00001_,
@@ -25,11 +25,11 @@ PROMPT_TEXT=""
 
 # The prompt can be overridden for sources that need a harder push:
 #   PROMPT_FILE=/path/to/prompt.txt DENOISE=0.93 scripts/simplify_concepts.sh ...
-# The cliff moves with how busy the source is. The four unit portraits simplify
-# well at 0.85 and go flat at 1.0; the eight lords are so dense with chains and
-# filigree that 0.85 barely touches them, 0.93 is right, and 0.97 is already flat
-# vector art with the goggles and lantern gone. Test one before batching.
-PROMPT='Redraw this character as a cleaner game-ready version of the same illustration, keeping it recognisably the same person. Reduce the clutter: cut the many small glass vials, pouches, chains and hanging ornaments down to a few larger ones, replace the tiny buckles, rivets and engraved filigree with a few larger clean shapes, and give every cloth edge a straight clean hem with no ragged torn tatters. Simplify the armour and clothing into fewer, larger, bolder forms with a clear readable silhouette. KEEP the same face, hair and expression, the same standing pose, the same held items, the same colour palette and the same background. KEEP the full painterly rendering with real material contrast between metal, leather and cloth, with proper shading, highlights and surface texture. Do NOT flatten it into untextured plastic, do NOT remove the colours, do NOT make it a cartoon or a smooth clay toy.'
+# The cliff moves with how busy the source is. On four plainer figures, 0.85
+# simplified well and 1.0 went flat. On eight figures dense with chains and
+# filigree, 0.85 barely touched them, 0.93 was right, and 0.97 was already
+# flat vector art with their small props gone. Test one before batching.
+PROMPT='Redraw this character as a cleaner game-ready version of the same illustration, keeping it recognisably the same person. Reduce the clutter: cut the many small pouches, chains and hanging ornaments down to a few larger ones, replace the tiny buckles, rivets and engraved filigree with a few larger clean shapes, and give every cloth edge a straight clean hem with no ragged torn tatters. Simplify the armour and clothing into fewer, larger, bolder forms with a clear readable silhouette. KEEP the same face, hair and expression, the same standing pose, the same held items, the same colour palette and the same background. KEEP the full painterly rendering with real material contrast between metal, leather and cloth, with proper shading, highlights and surface texture. Do NOT flatten it into untextured plastic, do NOT remove the colours, do NOT make it a cartoon or a smooth clay toy.'
 
 echo "denoise=$DENOISE  ->  output/simplified/   (log: $LOG)"
 for src in "$@"; do

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Rig figures through UniRig, one at a time.
 #
-#   scripts/rig_units.sh unit_warrior unit_rogue
+#   scripts/rig_units.sh golem knight
 #
 # UniRigLoadMesh offers a COMBO of files, and comfy-env's isolated worker
 # snapshots that list when the node is scanned — a mesh dropped into
@@ -19,7 +19,7 @@
 # Two settings are load-bearing, both found by failing on a real asset:
 #   articulationxl, not mixamo — mixamo demands a fixed 52-bone humanoid
 #     and aborts ("Expected 52 bones ... got 22") on any figure whose arms
-#     hang against its body, which is most of ours.
+#     hang against its body, which is most generated figures.
 #   fp16, not auto — auto picks bf16 on Ampere/Ada and spconv 2.3.8 has no
 #     bfloat16 kernels, so skinning dies with a bare "WorkerError:
 #     torch.bfloat16".

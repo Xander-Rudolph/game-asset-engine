@@ -47,14 +47,14 @@ scripts/run_workflow.py workflows/api/img_edit_qwen.json \
 
 Phrase it as an **instruction, not a description**, and always say what to keep:
 
-> Replace the shoulder pauldron on the left of the image with a rounded glass
-> chamber of glowing amber fluid in a brass housing. Keep the pose, helm, arms,
-> legs, colours and grey background exactly the same.
+> Replace the shoulder pauldron on the left of the image with a plain rounded
+> steel pauldron edged in dark leather. Keep the pose, helm, arms, legs,
+> colours and grey background exactly the same.
 
 Rules that matter, learned by getting them wrong:
 
 - **Name the side by where it is in the image**, not the character's left or
-  right. "The warrior's left shoulder" is ambiguous — the model reads a picture,
+  right. "The knight's left shoulder" is ambiguous. The model reads a picture,
   not a body.
 - **Be explicit about singular.** Asking to replace "a pauldron" got *both*
   replaced. If only one should change, say "only ONE shoulder" and describe what
@@ -78,7 +78,7 @@ it actually has rather than guessing:
 ```sh
 scripts/run_workflow.py --list-nodes Qwen        # node types the server loaded
 scripts/validate_workflows.py                    # every graph checked against it
-docker logs --since 5m comfyui 2>&1 | grep -iE 'error|exception'
+docker logs --since 5m "$(python3 scripts/_engine.py)" 2>&1 | grep -iE 'error|exception'
 ```
 
 ## Always show the result

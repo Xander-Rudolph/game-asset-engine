@@ -110,7 +110,7 @@ def cut(src: Image.Image, tol: int) -> Image.Image:
     # The MEDIAN of the corners, not the mean.
     #
     # One corner is often not background at all: a glow thrown by the
-    # subject reaches into it, and the arts rune's did. Averaging let
+    # subject reaches into it, as it did on a glowing rune icon. Averaging let
     # that one corner drag the reference toward it, the real grey then
     # fell outside tolerance, and the whole frame survived the cut as a
     # grey box round the icon — at every tolerance, which is what made

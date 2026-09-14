@@ -151,7 +151,7 @@
     "Node name for S&R": "CLIPTextEncode"
    },
    "widgets_values": [
-    "photorealistic character costume, worn brass and gold metal with specular highlights and fine scratches, real leather grain, woven fabric texture, cinematic studio lighting, soft shadows, ambient occlusion, sharp focus, highly detailed realistic materials"
+    "photorealistic character costume, worn metal with specular highlights and fine scratches, real leather grain, woven fabric texture, cinematic studio lighting, soft shadows, ambient occlusion, sharp focus, highly detailed realistic materials"
    ]
   },
   {
@@ -366,7 +366,7 @@
     "Node name for S&R": "SaveImage"
    },
    "widgets_values": [
-    "lordtest/refined"
+    "concept/refined"
    ]
   }
  ],

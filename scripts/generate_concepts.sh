@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Generate concept images from a prompt directory, in the established art style.
+# Generate concept images from a prompt directory, one run per subject.
 #
 #   scripts/generate_concepts.sh prompts/buildings
 #   scripts/generate_concepts.sh prompts/creatures golem chimera
@@ -16,16 +16,19 @@
 # _style.txt is the single place art direction lives.
 #
 # Override the style file per run with STYLE=, which is how an alternate in the
-# same folder gets used:
+# same folder gets used. Here my_humanoid.txt stands for a humanoid subject you
+# have added to the folder:
 #
-#   STYLE=prompts/creatures/_hstyle.txt scripts/generate_concepts.sh prompts/creatures homunculus_a
+#   STYLE=prompts/creatures/_hstyle.txt scripts/generate_concepts.sh prompts/creatures my_humanoid
 #
 # Uses txt2img_qwen.json (20 steps, cfg 4.0), NOT the 4-step fast workflow: the
 # negative prompt is what keeps tatters, clutter and cartoon styling out, and at
 # the fast workflow's cfg 1.0 a negative prompt does nothing at all.
 #
 # Buildings want landscape (isometric dioramas are wider than tall); characters
-# and creatures want Qwen's 3:4 portrait, which is the workflow default.
+# and creatures want Qwen's 3:4 portrait, which is the workflow default. Ground
+# textures want a square, WIDTH=1024 HEIGHT=1024, or make_seamless.py stretches
+# the portrait into its square tile.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 DIR="${1:?usage: generate_concepts.sh <prompt-dir> [name...]}"; shift
@@ -34,10 +37,25 @@ LOG="logs/concepts-$(basename "$DIR")-$(date +%Y%m%d-%H%M%S).log"
 NEG=""; [ -f "$DIR/_negative.txt" ] && NEG=$(cat "$DIR/_negative.txt")
 STYLE_FILE="${STYLE:-$DIR/_style.txt}"
 STYLE_TEXT=""; [ -f "$STYLE_FILE" ] && STYLE_TEXT=$(cat "$STYLE_FILE")
+# The shipped _style.txt files carry a <<< ART DIRECTION: ... >>> slot for you
+# to fill in. Nothing downstream removes it: run_workflow.py copies --prompt
+# into the graph as it is, so an unfilled slot would reach the model as literal
+# text. Warn once and drop the slot, so the run gets the technique alone. The
+# match runs in bash rather than sed, so a slot that spans lines goes too.
+SLOT_RE='[[:space:]]*<<<[^<>]*>>>[.,;]?'
+if [[ "$STYLE_TEXT" =~ $SLOT_RE ]]; then
+    echo "warning: $STYLE_FILE has an unfilled <<< ... >>> slot. It is left out of" \
+         "the prompt, so these images get no art direction. Fill it in to set a look." >&2
+    while [[ "$STYLE_TEXT" =~ $SLOT_RE ]]; do
+        STYLE_TEXT="${STYLE_TEXT/"${BASH_REMATCH[0]}"/}"
+    done
+    STYLE_TEXT="${STYLE_TEXT#"${STYLE_TEXT%%[![:space:]]*}"}"
+fi
 # A subject can override the shared negative with <name>.neg.txt. The
-# creature lair needed it: the shared building style talks about roofs,
-# chimneys and lit windows, and that preamble put a cottage on top of what
-# should be a bare cave mouth however firmly its own line said otherwise.
+# creature lair needed it: the building style it was written against talked
+# about roofs, chimneys and lit windows, and that preamble put a cottage on
+# top of what should be a bare cave mouth however firmly its own line said
+# otherwise.
 OUT="output/$(basename "$DIR")"
 NAMES=("$@")
 if [ ${#NAMES[@]} -eq 0 ]; then

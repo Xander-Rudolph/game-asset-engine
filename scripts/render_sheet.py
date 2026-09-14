@@ -114,7 +114,7 @@ for ob in meshes:
         hi = Vector((max(hi[i], w[i]) for i in range(3)))
 # Fitted to THIS mesh unless a span is given, and that distinction is the
 # one people get wrong. Per-model fit is right for looking at a prop on its
-# own, or for baking an inventory icon -- a flask framed against a figure's
+# own, or for baking an inventory icon -- a coin framed against a figure's
 # height is a speck. It is wrong for a SET: fit every model to its own
 # bounding box and a dagger and a golem fill their cells identically, which
 # reaches the engine as every creature the same size on the map and is then
@@ -293,7 +293,7 @@ def main() -> int:
     ap.add_argument("--span", type=float, default=0.0, metavar="UNITS",
                     help="frame against this fixed world height instead of "
                          "the subject's own extent, so a set of assets shares "
-                         "a scale and a golem looms over a homunculus")
+                         "a scale and a golem looms over a goblin")
     ap.add_argument("--key", type=float, default=1.6, help="sun strength")
     ap.add_argument("--ambient", type=float, default=0.22, help="world light strength")
     ap.add_argument("--clay", action="store_true",
@@ -320,10 +320,10 @@ def main() -> int:
     poses = parse_poses(args.poses, model)
     # A 2:1 dimetric grid (tile 64 wide by 32 high, so screen =
     # ((u-v)*32, (u+v)*16)).  A ground vector's vertical
-    # screen component is sin(elevation), and isoTileH/isoTileW = 0.5, so the
-    # camera sits at exactly 30 degrees.  It looks down the diagonal BETWEEN the
-    # world axes, so a unit whose Facing is on a world axis (north/east/south/
-    # west) must be rendered at 45/135/225/315, not 0/90/180/270 — otherwise the
+    # screen component is sin(elevation), and tile height / tile width = 0.5, so
+    # the camera sits at exactly 30 degrees.  It looks down the diagonal BETWEEN
+    # the world axes, so a figure facing along a world axis (north/east/south/
+    # west) must be rendered at 45/135/225/315, not 0/90/180/270. Otherwise the
     # sprite faces square-on while the ground runs diagonally under it.
     start = 0.0 if args.flat else args.azimuth_start
     azimuths = [start + i * (360.0 / args.angles) for i in range(args.angles)]

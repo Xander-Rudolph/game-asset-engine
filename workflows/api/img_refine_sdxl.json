@@ -8,7 +8,7 @@
   },
   "3": {
     "class_type": "CLIPTextEncode",
-    "inputs": { "clip": ["2", 1], "text": "photorealistic character costume, worn brass and gold metal with specular highlights and fine scratches, real leather grain, woven fabric texture, cinematic studio lighting, soft shadows, ambient occlusion, sharp focus, highly detailed realistic materials" },
+    "inputs": { "clip": ["2", 1], "text": "photorealistic character costume, worn metal with specular highlights and fine scratches, real leather grain, woven fabric texture, cinematic studio lighting, soft shadows, ambient occlusion, sharp focus, highly detailed realistic materials" },
     "_meta": { "title": "Positive" }
   },
   "4": {
@@ -26,5 +26,5 @@
     "_meta": { "title": "Sampler" }
   },
   "7": { "class_type": "VAEDecode", "inputs": { "samples": ["6", 0], "vae": ["2", 2] }, "_meta": { "title": "Decode" } },
-  "8": { "class_type": "SaveImage", "inputs": { "images": ["7", 0], "filename_prefix": "lordtest/refined" }, "_meta": { "title": "Save" } }
+  "8": { "class_type": "SaveImage", "inputs": { "images": ["7", 0], "filename_prefix": "concept/refined" }, "_meta": { "title": "Save" } }
 }

@@ -11,7 +11,8 @@ a=[o for o in bpy.data.objects if o.type=='ARMATURE'][0]
 for b in a.data.bones: print(b.name, b.parent.name if b.parent else '-', list(round(v,2) for v in b.head_local))"
 ```
 
-For the alchemist warrior (28 bones), +x is one side, -x the other:
+This map is for one 28-bone humanoid, the rig that `walk.json`, `attack.json`,
+`hit.json` and `idle.json` were written for. +x is one side, -x the other:
 
 | bones | part |
 |---|---|
@@ -28,3 +29,19 @@ For the alchemist warrior (28 bones), +x is one side, -x the other:
 Rotations are XYZ Euler **degrees** in the bone's local space; a bone's own
 axis runs along Y, so bending a limb is usually X. Translations are Blender
 units along the bone's axes.
+
+## rig24 and rig47 poses
+
+A pose file only fits the skeleton it was written for, because the bone count
+and order differ per figure. `rig24_*.json` and `rig47_*.json` hold the same
+walk, attack and hit cycles, derived for two other skeletons from their limb
+chains:
+
+| files | bones | spine | arm swing, +x and -x | thigh and shin, +x | thigh and shin, -x |
+|---|---|---|---|---|---|
+| `rig24_*.json` | 24 | `bone_2` | `bone_7`, `bone_12` | `bone_16` `bone_17` | `bone_20` `bone_21` |
+| `rig47_*.json` | 47 | `bone_2` | `bone_6`, `bone_21` | `bone_35` `bone_36` | `bone_41` `bone_42` |
+
+The derivation picked the same bones on two 30-bone rigs, which only add two
+short chains off the root, so `rig24_*.json` applies to those too. Check a
+rig's own map against this table before using either set.
