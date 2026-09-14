@@ -5,6 +5,9 @@ hero:
   name: Game Asset Engine
   text: Written description in, game asset out
   tagline: A local ComfyUI setup that takes a sentence, draws the concept art, builds a 3D model, textures it, rigs it, and renders the sprite sheet your game actually loads. Everything runs on your own machine.
+  image:
+    src: /logo.svg
+    alt: An isometric wireframe cube
   actions:
     - theme: brand
       text: Start here
@@ -17,13 +20,17 @@ hero:
       link: /guide/first-asset
 
 features:
-  - title: One command per stage
+  - icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m4 17 6-5-6-5"/><path d="M12 19h8"/></svg>'
+    title: One command per stage
     details: Each stage is a script with the settings already chosen. You are picking subjects, not tuning samplers.
-  - title: The settings are the point
+  - icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h8M16 6h4M4 12h4M12 12h8M4 18h8M16 18h4"/><circle cx="14" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="14" cy="18" r="2"/></svg>'
+    title: The settings are the point
     details: Nearly every default here was found by something failing. Each page says what went wrong and why the number is what it is.
-  - title: Measured, not guessed
+  - icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><rect x="5" y="11" width="4" height="6" rx="1"/><rect x="10.5" y="7" width="4" height="10" rx="1"/><rect x="16" y="4" width="4" height="13" rx="1"/></svg>'
+    title: Measured, not guessed
     details: Face budgets, seam quality and camera angles come with numbers you can reproduce with the tools in the repo.
-  - title: Nothing leaves your machine
+  - icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M9 20h6M12 16v4"/></svg>'
+    title: Nothing leaves your machine
     details: No cloud service, no per-image cost, no upload of work in progress. A GPU and about 200GB of disk.
 ---
 

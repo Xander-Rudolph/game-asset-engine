@@ -1,0 +1,344 @@
+/* Game Asset Engine docs theme.
+ *
+ * The palette comes from the favicon: an amber wireframe on slate. Amber is
+ * the accent everywhere, tuned per colour scheme so text keeps its contrast.
+ * Light-mode amber is darkened and dark-mode amber is lifted. Measured on the
+ * built site: body text 10.9:1 light and 13.4:1 dark, links 5.5 and 9.5, the
+ * hero button 5.0 and 6.4, sidebar section labels 10.1 and 14.1. Do not use the
+ * raw #f59e0b from the favicon for text on white: it fails at 2.2:1.
+ */
+
+:root {
+  --vp-c-brand-1: #a3540a;
+  --vp-c-brand-2: #8a4607;
+  --vp-c-brand-3: #b45309;
+  --vp-c-brand-soft: rgba(180, 83, 9, 0.13);
+
+  --vp-button-brand-border: transparent;
+  --vp-button-brand-text: #ffffff;
+  --vp-button-brand-bg: var(--vp-c-brand-3);
+  --vp-button-brand-hover-border: transparent;
+  --vp-button-brand-hover-text: #ffffff;
+  --vp-button-brand-hover-bg: var(--vp-c-brand-2);
+  --vp-button-brand-active-bg: var(--vp-c-brand-2);
+
+  /* Tip blocks inherit the brand, so they read as "this is the house answer".
+     Warning stays amber-yellow and danger stays red: they must not look alike. */
+  --vp-c-tip-1: var(--vp-c-brand-1);
+  --vp-c-tip-2: var(--vp-c-brand-2);
+  --vp-c-tip-3: var(--vp-c-brand-3);
+  --vp-c-tip-soft: var(--vp-c-brand-soft);
+
+  --ae-grid-line: rgba(120, 83, 30, 0.2);
+  --ae-table-stripe: rgba(120, 83, 30, 0.04);
+  --ae-table-head: rgba(120, 83, 30, 0.07);
+}
+
+.dark {
+  --vp-c-brand-1: #f5b041;
+  --vp-c-brand-2: #ffc86b;
+  --vp-c-brand-3: #8a4a07;
+  --vp-c-brand-soft: rgba(245, 176, 65, 0.16);
+
+  /* A slate close to the favicon's own background, a shade cooler. */
+  --vp-c-bg: #15171c;
+  --vp-c-bg-alt: #0f1115;
+  --vp-c-bg-soft: #1b1e25;
+  --vp-c-bg-elv: #1b1e25;
+  --vp-c-divider: #2a2f39;
+  --vp-c-gutter: #23272f;
+
+  --vp-button-brand-text: #fff6e9;
+  --vp-button-brand-hover-bg: #a3560a;
+
+  --ae-grid-line: rgba(245, 176, 65, 0.14);
+  --ae-table-stripe: rgba(245, 176, 65, 0.035);
+  --ae-table-head: rgba(245, 176, 65, 0.07);
+}
+
+/* ---------------------------------------------------------------- type ---- */
+
+:root {
+  --vp-font-family-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo,
+    Consolas, 'Liberation Mono', monospace;
+}
+
+.vp-doc h1,
+.vp-doc h2,
+.vp-doc h3,
+.VPHero .name,
+.VPHero .text {
+  letter-spacing: -0.02em;
+}
+
+/* Long prose pages read better with a little more leading and a measure that
+   does not run the full width of a wide monitor. */
+.vp-doc p,
+.vp-doc li {
+  line-height: 1.75;
+}
+
+.vp-doc h2 {
+  margin-top: 3rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--vp-c-divider);
+}
+
+.vp-doc h2 + h3 {
+  margin-top: 1.5rem;
+}
+
+/* --------------------------------------------------------------- hero ---- */
+
+.VPHero .name {
+  background: linear-gradient(110deg, #f59e0b 10%, #ea6a25 60%, #d4530a);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.VPHero .text {
+  max-width: 22ch;
+}
+
+.VPHero .tagline {
+  max-width: 60ch;
+}
+
+:root {
+  --vp-home-hero-image-background-image: linear-gradient(
+    -45deg,
+    rgba(245, 158, 11, 0.5),
+    rgba(217, 119, 6, 0.16) 65%
+  );
+  --vp-home-hero-image-filter: blur(56px);
+}
+
+@media (min-width: 640px) {
+  :root {
+    --vp-home-hero-image-filter: blur(68px);
+  }
+}
+
+/* A faint isometric grid behind the hero, which is what the whole pipeline is
+   pointed at. Kept under 4% so it never competes with the text. */
+.VPHome {
+  position: relative;
+}
+
+.VPHome::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 520px;
+  background-image: repeating-linear-gradient(
+      30deg,
+      var(--ae-grid-line) 0 1px,
+      transparent 1px 64px
+    ),
+    repeating-linear-gradient(-30deg, var(--ae-grid-line) 0 1px, transparent 1px 64px);
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent 80%);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent 80%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.VPHome .VPHero,
+.VPHome .VPFeatures,
+.VPHome .vp-doc {
+  position: relative;
+  z-index: 1;
+}
+
+/* ----------------------------------------------------------- features ---- */
+
+.VPFeatures .VPFeature {
+  background-color: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+}
+
+.VPFeatures .VPFeature:hover {
+  border-color: var(--vp-c-brand-1);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px -18px rgba(0, 0, 0, 0.5);
+}
+
+.VPFeatures .VPFeature .icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--vp-c-brand-soft);
+  border-radius: 10px;
+  color: var(--vp-c-brand-1);
+}
+
+.VPFeatures .VPFeature .icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.VPFeatures .VPFeature .title {
+  letter-spacing: -0.01em;
+}
+
+/* --------------------------------------------------------------- code ---- */
+
+.vp-doc :not(pre) > code {
+  background-color: var(--vp-c-brand-soft);
+  color: var(--vp-c-text-1);
+  font-size: 0.86em;
+  padding: 2px 5px;
+  border-radius: 5px;
+}
+
+.vp-doc a > code {
+  color: var(--vp-c-brand-1);
+}
+
+.vp-doc div[class*='language-'] {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 10px;
+}
+
+.dark .vp-doc div[class*='language-'] {
+  background-color: #0f1115;
+}
+
+.vp-doc [class*='language-'] code {
+  line-height: 1.6;
+}
+
+/* On a phone VitePress runs code blocks edge to edge, where a rounded border
+   would be clipped by the viewport. */
+@media (max-width: 639px) {
+  .vp-doc div[class*='language-'] {
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+}
+
+/* Code blocks scroll horizontally rather than wrap, so the scrollbar shows on
+   every long command. Keep it thin instead of a full-height track. */
+.vp-doc div[class*='language-'] > pre::-webkit-scrollbar {
+  height: 6px;
+}
+
+.vp-doc div[class*='language-'] > pre::-webkit-scrollbar-thumb {
+  background-color: var(--vp-c-divider);
+  border-radius: 3px;
+}
+
+.vp-doc div[class*='language-'] > pre {
+  scrollbar-width: thin;
+}
+
+/* ------------------------------------------------------------- tables ---- */
+
+/* Measurement tables are most of this site's evidence, so numbers line up in
+   columns and rows stay easy to track across. */
+.vp-doc table {
+  display: table;
+  width: 100%;
+  margin: 1.25rem 0;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.vp-doc tr {
+  border-top: 1px solid var(--vp-c-divider);
+  background-color: transparent;
+}
+
+.vp-doc thead tr {
+  border-top: 0;
+}
+
+.vp-doc th {
+  background-color: var(--ae-table-head);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--vp-c-text-2);
+}
+
+.vp-doc tbody tr:nth-child(2n) {
+  background-color: var(--ae-table-stripe);
+}
+
+.vp-doc th,
+.vp-doc td {
+  border: 0;
+  padding: 9px 14px;
+}
+
+/* ------------------------------------------------------ custom blocks ---- */
+
+.vp-doc .custom-block {
+  border: 1px solid var(--vp-c-divider);
+  border-left-width: 4px;
+  border-radius: 8px;
+  padding: 14px 18px 10px;
+}
+
+.vp-doc .custom-block.tip {
+  border-left-color: var(--vp-c-brand-1);
+}
+.vp-doc .custom-block.warning {
+  border-left-color: var(--vp-c-warning-1);
+}
+.vp-doc .custom-block.danger {
+  border-left-color: var(--vp-c-danger-1);
+}
+
+.vp-doc .custom-block-title {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.vp-doc blockquote {
+  border-left: 3px solid var(--vp-c-brand-soft);
+  color: var(--vp-c-text-2);
+}
+
+/* ----------------------------------------------------------- chrome ------ */
+
+.VPNavBarTitle .logo {
+  height: 22px;
+  margin-right: 8px;
+}
+
+/* Uppercase section labels are small, so they take the strong text colour.
+   --vp-c-text-3 measured 2.87:1 here, which fails AA for 12px bold. */
+.VPSidebarItem.level-0 > .item > .text {
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--vp-c-text-1);
+}
+
+.VPDocFooter .edit-link-button {
+  color: var(--vp-c-brand-1);
+}
+
+.vp-doc img {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+}
+
+::selection {
+  background-color: var(--vp-c-brand-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .VPFeatures .VPFeature,
+  .VPFeatures .VPFeature:hover {
+    transition: none;
+    transform: none;
+  }
+}
