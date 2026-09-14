@@ -51,6 +51,12 @@ flask, because a wedge easily covers a tenth of the area of a thin bottle.
 Specks smaller than 2% of the biggest piece are dropped separately, wherever
 they are, as cut-edge crumbs.
 
+A flood fill leaves a second kind of pocket that this rule never reaches:
+background fenced in *inside* the subject, like sky between a tree's trunk and
+its canopy. It never touches the canvas edge. Icons are mostly solid shapes and
+rarely have one; props often do. See
+[Props and scenery](/guide/props#clear-the-pockets-the-fill-cannot-reach).
+
 ## Where to stop
 
 Painting every icon is not the goal. If your UI already uses emoji, replace the

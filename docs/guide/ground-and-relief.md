@@ -199,16 +199,25 @@ different values, a **flank** is drawn between them built from both numbers, so
 the ground is closed whether it fused or not. You do not need every pair to
 agree; you need every disagreement to be filled.
 
-### Pick the taper below the smallest step you want to keep visible
+### Pick the taper by what the view is for
 
-The tempting value is the largest step your movement rules let a figure climb,
-so a wall is drawn exactly where a step becomes impassable. That was wrong. A
-full-height step was still passable, only at an extra movement cost, and fusing
-it turned terraced ground into a featureless ramp and hid that cost from the
-player.
+The taper was first set to one half-step, below the full-height step the
+movement rules still allow at an extra cost. Fusing that step had turned
+terraced ground into a featureless ramp and hidden the cost. On a map where
+height is decoration, that is still right: hills and swells flow, terraces and
+craters keep their steps, and a mesa's face and a crag stay sheer.
 
-What worked: a taper of one half-step. Hills and swells flow; terraces and
-craters keep their steps; a mesa's face and a crag stay sheer.
+On a battlefield it read the other way. With a half-step taper every
+full-height step was a sheer wall, the field looked like stacked boxes, and the
+picture said "wall" about ground a soldier could walk up. Setting the
+battlefield's taper to the largest step anyone on foot can climb (two
+half-steps) drew every climbable rise as a slope and kept walls only where the
+rules refuse the climb. A steeper slope still shades darker than a gentle one,
+so the extra cost is not invisible.
+
+So pick it per view. On a map that is read for its shape, set it below the
+smallest step you want seen. On a board that is read for its rules, set it at
+the climb limit.
 
 ### Height must not be excused where terrain is
 
@@ -278,34 +287,167 @@ in two views of one map, so switching between the views flipped the sun.
 Feed the terrain the same shading function the figures use, in every view. Then
 delete the hand-tuned constants rather than re-tuning them.
 
+### Some per-pixel tricks exist on one backend only
+
+Two ways of shaping ground per pixel look available in a 2D canvas API and are
+not, at least in Flutter's Impeller renderer (its Android default):
+
+- **A colour filter on a textured triangle draw is dropped in silence.** The
+  same filter works in the web renderer. A blend that sharpened its edges with a
+  per-pixel threshold would have shipped on one platform and quietly not on the
+  other, so it was cut rather than kept as a web-only look.
+- **A custom fragment shader on triangles with texture coordinates is not run
+  per pixel.** Impeller renders it into an offscreen texture at one texel per
+  texture-coordinate unit, then samples that onto the mesh with nearest
+  filtering, every frame. A shader does run per pixel on a rectangle draw, so
+  the route that stays open is baking blended ground into an image and drawing
+  that like any other texture.
+
+Anything that must look the same everywhere has to be built from what every
+backend does: textures, vertex colours and ordinary blending.
+
+### Find where cliffs come from before styling them
+
+Every cliff on one generated map turned out to be a coastline. Relief was built
+as swells falling a half-step per tile and merged by taking the highest, so two
+land tiles side by side could never differ by more than a half-step. A sheer
+step only appeared where land met water pinned at zero. Styling "cliffs" meant
+styling coasts, and most coasts should not be cliffs at all.
+
+What worked: a pass that lowers land toward the water so most coasts become
+shoreline, while a genuine range that reaches the sea keeps its cliff. It only
+ever lowers, and it never lowers a crown (anything at the height that paints
+rock), so terrain, buildings and every random stream that depends on them stay
+where they were. Checked over twenty seeds, not one tile's terrain or building
+moved.
+
+### A wall needs its own material, its own texture scale and a foot
+
+Three things made walls read as streaky sand:
+
+- **The wall wore the ground's material.** A cliff above water now takes the
+  rock material, and land lips keep their own ground.
+- **Its texture was squashed.** Down the wall, the texture was mapped by the
+  exaggerated height unit the lighting uses (3×), which squeezed the strata 2.7
+  times. Map down the wall by the true height, and along it by a coordinate
+  anchored to the screen, so the texture carries round a corner rather than
+  restarting at every tile.
+- **It had no foot.** Darken each wall toward its base (up to 30% for a tall
+  drop), and lay a soft dark wash on the ground below it that fades in with the
+  drop's height, so a low step gets none.
+
+Light textured walls more gently than flat-coloured ones. At the flat-colour
+gain the walls went to mud; at 0.45 of it they kept their texture and still read
+as walls. A board where light is the only thing separating an unclimbable face
+from a walkable slope keeps the stronger gain on purpose.
+
+**Draw the fog over the walls too.** A veil drawn only over tile tops left the
+walls at full light, glowing through unexplored ground.
+
+### Water lies level
+
+A pool grown downhill from a spring ran down a hillside in steps, and the relief
+drew it as a ramp of blue. Grow pools only across ground level with their
+spring, never up against a pool at a different height, and draw every water
+tile's corners at its own height. Ground within a taper of the water bends down
+to meet it; anything higher keeps a wall. Level-only pouring cost about a tenth
+of the water, and every map that had water still did.
+
+### A tactical board drawn as boxes
+
+A tile board can look like a stack of boxes even with continuous ground under
+it. Three things did it, none of them the ground itself:
+
+- **A grid line over every tile.** Tactics games mostly show no grid until the
+  player is choosing a move. Drop it, and show cells faintly, only inside a
+  highlighted reach.
+- **A reach drawn as a net.** Stroke each highlighted tile and the area reads as
+  a lattice. Fill per tile, and run one bright line round the region's outside.
+- **Height light in bands.** A flat "higher is brighter" wash per tile steps at
+  every tile edge. Light it at the corners instead, so a slope brightens along
+  its length.
+
+The fourth thing was the taper ([above](#pick-the-taper-by-what-the-view-is-for)):
+walls drawn where the rules allowed a climb.
+
 ---
 
 ## Part 3: Blending one country into the next
 
-### Fade to HALF at the shared edge, not to full
+### Don't fade neighbours in over each tile
 
-The natural first implementation fades the neighbour's material in across the
-shared edge, opaque at the edge and gone at the far corners. The neighbour does
-the same thing back. So at the boundary **each tile wears the other's
-material**, and the line between them is not softened. It is *flipped*: forest
-fading to water, a hard edge, then forest again fading to water.
+The first two attempts both faded a neighbour's ground in over each tile along
+their shared edge. At full strength from both sides the boundary *flipped*: each
+tile wore the other's material at the join. At half strength from both sides it
+stopped flipping and went wrong in three new ways, all visible at once:
 
-At a half, both sides land on the same fifty-fifty mix along the edge they
-share. That is what makes the handover continuous rather than merely gradual.
+- **Double exposure.** Two photographs cross-faded across the band read as
+  patchy, and a crossfade between a dark texture and a light one passes through
+  mud.
+- **Straight seams at corners.** Where only one edge of a corner changed
+  material, the fade dropped from half to nothing across the line from the
+  corner to the tile's centre, drawing hard radial lines and diamond staircases.
+- **Blending across cliffs.** The fade ignored height, so water was painted onto
+  a plateau's rim and rock onto the water at its foot.
 
-### Blend only the quarter of the tile nearest that edge
+Shipped grid games do it differently. One side covers at full strength through a
+mask chosen from all the terrains at a corner (Age of Empires II's blend masks,
+Warcraft III's per-corner terrain), so nothing is double-exposed and the shape
+follows every tile at the corner rather than one edge.
 
-Fading across the whole tile leaves a quarter of the neighbour's ground sitting
-on this tile's middle, so a single lake tints every field around it. One
-triangle from the two shared-edge corners to the tile's centre is the region
-that should blend, and it is also cheaper.
+### One weight per corner, shared by every tile that touches it
 
-### Carry the alpha on the geometry
+Give each grid corner a blend weight per material: the fraction of the tiles
+meeting there that wear it. Every tile touching the corner computes the *same
+number*, so the blend is continuous across every shared edge by construction,
+exactly as the relief is ([a seam is a shared number](#a-seam-is-a-shared-number-not-a-shared-shape)).
+Edge midpoints take half and half where the edge fuses, and a tile's centre is
+its own material. Interpolate between those points across a finer mesh inside
+the tile.
 
-If a draw call can carry only one texture or shader, fading a textured fill
-needs either an offscreen layer per edge (four per tile, hundreds per frame) or
-the alpha on the vertices. Drawing the vertices with a multiply blend multiplies
-the texture by the corner colours, alpha included, in one draw call.
+**Count only the tiles in your own run.** The corner's height run (from the
+relief) already says which tiles fuse there, so a tile across a cliff gets no
+say in your corner's blend. That is the "no blending across cliffs" rule, and it
+needs no separate definition: two tiles share a run exactly when no wall is
+drawn between them. Gating on exactly equal corner heights instead is stricter,
+and wrong: a taper can draw two fused tiles at slightly different corner values,
+and exact equality then notches the blend right where a cliff tapers into a
+beach.
+
+### Draw it as stacked layers, not a crossfade
+
+To show those weights with ordinary blending, fix a global order of materials.
+Draw the lowest material present opaque, then each later material over it at
+
+`alpha_j = w_j / (w_1 + ... + w_j)`, taking 0/0 as 0.
+
+At every vertex the result is exactly the weighted sum of the textures, and
+because both tiles at an edge compute the same weights, they compute the same
+alphas. It needs no special blend mode: each layer is a textured triangle draw
+with vertex colours, as the ground already was. A tile of a single material
+draws exactly as before, at the same cost.
+
+Giving one side priority everywhere (one "higher" material floods its
+neighbours) was ruled out on structure, not taste: to stay continuous, a lone
+tile's material has to flood every tile touching its corners, which erases a
+one-tile lake.
+
+### Sharpen the weights, with noise pinned to the world
+
+Linear weights still draw a soft band. Shape them (a gamma curve in log space,
+plus a little value noise) so the boundary is organic and fairly crisp rather
+than a gradient. Key the noise to the world, not to the screen or the tile: a
+position that stays the same whichever way the camera turns, wrapped by the
+map's size if the map wraps. A hash does not "just" repeat at the map's edge.
+The wrap has to be explicit, and a test caught the unwrapped version failing at
+the seam.
+
+### Judge the terrain set in pairs, on the grid
+
+Brightness across one set of nine ground materials spanned 3.3 times, from a
+dark forest floor to pale desert. A blend between a far-apart pair passes
+through mud, and no technique fixes a pair that should never touch. Render the
+common pairs blended on the grid before accepting a set, not each texture alone.
 
 ### A blend cannot make an impossible boundary plausible
 
@@ -363,6 +505,18 @@ enough that a hand-picked field will not contain any. So:
   must not have got more expensive.
 - **Write the test against the naive implementation first and watch it fail.** A
   green test that has never been red is a guess.
+- **Make sure a test reaches the textured path at all.** No test ever loaded a
+  ground material, so the whole textured branch, where the old blend's corner
+  seams lived, was never drawn by any test. Build small images inside the test
+  and paint whole frames through that branch, at every camera quarter.
+- **Sweep blend agreement over whole generated worlds, not a hand-built field.**
+  At every grid corner, every pair of tiles either draws the identical weight
+  vector or is provably in a different height run. Three seeds at four camera
+  quarters is over a hundred thousand pairs. A field small enough to check by
+  hand contains none of the arrangements that break a seam.
+- **Image creation that needs real async hangs inside a test that fakes the
+  clock.** Create the test images outside the fake-clock body (in setup, or in
+  a plain test), then use them inside.
 
 And for hit-testing raised ground, ask the right question. "Is the answer the
 tile I aimed at" **cannot be asked**. Ground in front is *allowed* to cover

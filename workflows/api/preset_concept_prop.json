@@ -41,7 +41,7 @@
         "3",
         0
       ],
-      "text": "<<< SUBJECT: describe the one thing you want, then queue >>>\n\nA single small game scenery prop, one isolated object standing on a small patch of bare ground, seen in three-quarter isometric view from slightly above at about thirty degrees, the whole object fitting in frame with clear space around it. <<< ART DIRECTION: describe your project's look for props here - materials, palette, level of wear >>>. Simple bold readable shape with a strong silhouette and restrained detail, built as a clean low-detail game asset that stays legible at small size. Detailed painted illustration with realistic materials and soft even daylight, plain white background."
+      "text": "<<< SUBJECT: describe the one thing you want, then queue >>>\n\nA single small game scenery prop, one isolated object shown as a clean cut-out on a plain flat neutral 50% grey background with nothing around or beneath it: no ground, no soil, no base, no tile and no shadow under it, the object simply ending where it ends. Seen in three-quarter isometric view from slightly above at about thirty degrees, the whole object fitting in frame with clear space around it. <<< ART DIRECTION: describe your project's look for props here - materials, palette, level of wear >>>. Simple bold readable shape with a strong silhouette and restrained detail, built as a clean low-detail game asset that stays legible at small size. Detailed painted illustration with realistic materials and soft even daylight."
     },
     "_meta": {
       "title": "Positive"
@@ -54,7 +54,7 @@
         "3",
         0
       ],
-      "text": "multiple objects, scattered clutter, a forest, a scene, landscape, horizon, sky, buildings, people, characters, animals, text, watermark, cropped, cut off, top down, flat side view, cartoon, cel shaded, flat vector art, plastic toy, blurry, busy background"
+      "text": "multiple objects, scattered clutter, a forest, a scene, landscape, horizon, sky, buildings, people, characters, animals, text, watermark, cropped, cut off, top down, flat side view, cartoon, cel shaded, flat vector art, plastic toy, blurry, busy background, ground patch, soil, dirt base, plinth, pedestal, platform, square tile, slab, diorama base, cast shadow, drop shadow, shadow on the ground, contact shadow, shadow beneath the object, pebbles, gravel, gradient background, vignette"
     },
     "_meta": {
       "title": "Negative"

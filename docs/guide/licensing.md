@@ -1,7 +1,8 @@
 # Licensing
 
-If you are making a game to sell, this is the page that matters. Two separate
-questions: the animations you apply, and the models that generate the mesh.
+If you are making a game to sell, this is the page that matters. Three separate
+questions: the animations you apply, the models that generate the mesh, and the
+software those models run through. Music has [its own section](#music-and-sound).
 
 None of this is legal advice. The linked licences are the authority.
 
@@ -69,6 +70,70 @@ backgrounds.
 OpenRAIL-M. Commercial use of the images is permitted. The licence's use
 restrictions travel with the model, not with a mesh you derive from a render.
 
+## Music and sound
+
+Nothing in this repository makes audio yet. The question still comes up as soon
+as a project ships a soundtrack, and the best-known open model is the one to
+avoid.
+
+### MusicGen: the weights are non-commercial
+
+Meta's MusicGen comes under two licences. The
+[code](https://github.com/facebookresearch/audiocraft/blob/main/LICENSE) is MIT.
+The [weights](https://github.com/facebookresearch/audiocraft/blob/main/LICENSE_weights)
+are **Attribution-NonCommercial 4.0 (CC BY-NC 4.0)**, and every MusicGen
+checkpoint on Hugging Face carries the same tag, small, large, melody and stereo
+alike ([for example](https://huggingface.co/facebook/musicgen-large)). Loading
+them through `transformers`, which is Apache-2.0, does not change the licence of
+the weights. MAGNeT, from the same repository, is non-commercial as well.
+
+The licence allows use "for NonCommercial purposes only". Asked for a commercial
+licence, a contributor to the repository answered: "This is not possible, as mentioned by
+@rsxdalv the rights were negociated for a research purpose"
+([issue #198](https://github.com/facebookresearch/audiocraft/issues/198)). The
+model was trained on music licensed from Shutterstock, Pond5 and Meta's own
+collection, and those rights were negotiated for research.
+
+::: danger Unsettled is not the same as allowed
+Neither the licence nor the model card mentions generated audio, and the same
+issue thread argues both ways about whether the non-commercial term reaches it.
+Nobody has settled it. Don't ship MusicGen tracks in something you sell. If one
+has already shipped, at least don't credit it as licence-free.
+:::
+
+### What a commercial project can use instead
+
+Checked against the linked licences and terms on 2026-09-14. Terms change, so
+check again before relying on one.
+
+| Option | Licence or terms | In a game you sell |
+|---|---|---|
+| [ACE-Step v1](https://huggingface.co/ACE-Step/ACE-Step-v1-3.5B) | Apache-2.0 | Allowed |
+| [ACE-Step 1.5](https://huggingface.co/ACE-Step/Ace-Step1.5) | MIT, and its model card says the generated music may be used commercially | Allowed |
+| [Stable Audio Open 1.0](https://huggingface.co/stabilityai/stable-audio-open-1.0) | [Stability AI Community License](https://stability.ai/community-license-agreement), gated download | Allowed below US$1M total annual revenue, with registration and attribution terms |
+| [YuE v1](https://github.com/multimodal-art-projection/YuE/tree/YuE-v1) | Apache-2.0 | Allowed. YuE2, now on the same repository's main branch, is CC BY-NC 4.0 and is not |
+| [AudioLDM 2](https://huggingface.co/cvssp/audioldm2) | CC BY-NC-SA 4.0 | Not allowed |
+| [Suno](https://suno.com/terms) | Service terms | Paid plans only, for tracks downloaded under them |
+| [Udio](https://www.udio.com/terms-of-service) | Service terms | Not allowed on any plan |
+| [ElevenLabs Music](https://elevenlabs.io/eleven-music-model-specific-terms) | Service terms | Excludes "Studio Games", roughly a game that earns money and is on more than one platform, except on its Enterprise Music plan |
+
+**The nearest to ready is ACE-Step.** This install's ComfyUI already has its nodes
+(`TextEncodeAceStepAudio` and `TextEncodeAceStepAudio1.5`) along with the audio
+VAE and save nodes, so it needs only weights and a graph. Neither ships here yet.
+
+### Or don't generate it
+
+- [OpenGameArt's music, filtered to CC0](https://opengameart.org/art-search-advanced?field_art_type_tid%5B%5D=12&field_art_licenses_tid%5B%5D=4)
+  needs no credit. Its CC-BY and OGA-BY tracks need one.
+- [Kenney's Music Jingles](https://kenney.nl/assets/music-jingles) are CC0.
+- [incompetech](https://incompetech.com/music/royalty-free/licenses/) is CC BY 4.0
+  and needs a credit, or a paid licence that drops it.
+- FreePD, often recommended, has closed.
+
+Whichever you choose, write down where each track came from and under what
+licence, next to the file. This section exists because a soundtrack made with
+MusicGen was credited as licence-free.
+
 ## Decide per asset, before it ships
 
 | The asset will | Generate it with |
@@ -103,6 +168,19 @@ This is a separate question from the model weights, and easy to mix up with them
 | ComfyUI-mesh2motion | MIT, declared in metadata, no licence file shipped |
 | ComfyUI-CameraPack | MIT, declared in metadata, no licence file shipped |
 | Blender / bpy | GPL-2.0-or-later |
+| nvdiffrast 0.3.3 | **NVIDIA Source Code License, research and evaluation use only** |
+| diff-gaussian-rasterization | **Inria Gaussian-Splatting License, research and evaluation use only** |
+
+::: danger Two rasterisers in the image are research-only
+3D texturing code leans on a few compiled rasterisers, and two in this image
+forbid commercial use outright: `nvdiffrast` and `diff_gaussian_rasterization`.
+Unlike the GPL rows above, these limit what you may *use* the software for, not
+what you may do with its code. Plain TRELLIS bakes its colour texture through
+both, which is why that texture is no clean replacement for Hunyuan3D's paint
+([the run and the licence text](/guide/trellis#why-the-colour-is-research-only)).
+Before trusting any texturing route, read the licence file of every rasteriser
+it imports, not just the model card.
+:::
 
 ::: warning Two corrections to what this page used to say
 Both were found by reading the licence files on disk, not by trusting upstream
@@ -122,7 +200,7 @@ alone cannot tell you whether that licence governs the code or was copied in by
 mistake.
 
 Until the pack author settles it, don't treat TripoSG in this install as safe for
-those regions. TRELLIS (MIT) is the clean choice for anything shipping there.
+those regions. TRELLIS (MIT) is the clean choice for a shape shipping there.
 `img2mesh_trellis.json` ships and has been run end to end, and it removes the
 background itself, so it needs no cut-out.
 [Details, and the second TRELLIS branch that is still unwired](/guide/trellis).
@@ -140,10 +218,11 @@ clause, no revenue cap, no user threshold on any of them.
 
 This route ends with an untextured mesh. The only texture graph that ships,
 `mesh_texture_hunyuan3d21.json`, runs Hunyuan3D 2.1 and brings the territory
-clause back. The plain TRELLIS branch returns a mesh with a colour texture and no
-territory clause, but no graph ships for it yet.
-[TRELLIS](/guide/trellis#plain-trellis-weights-present-wiring-awkward) lists what
-wiring it would take.
+clause back. The plain TRELLIS branch does return a coloured mesh with no
+territory clause, but it bakes that colour through two research-only
+rasterisers, so it is no way round the clause for anything you sell
+([TRELLIS](/guide/trellis#plain-trellis-was-run-the-colour-works-and-its-licence-does-not)).
+So far, no texturing route here is both proven and free of restrictions.
 
 Note what this route deliberately avoids and why: Hunyuan3D texturing because of
 its territory clause, TripoSG because of the unresolved licence file above (it

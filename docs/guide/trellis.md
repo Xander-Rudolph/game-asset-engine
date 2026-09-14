@@ -1,8 +1,15 @@
 # TRELLIS
 
 TRELLIS is MIT and carries no territorial clause, which makes it the choice for
-anything shipping into the EU, UK or South Korea. See
+a **shape** shipping into the EU, UK or South Korea. See
 [licensing](/guide/licensing).
+
+::: danger Its colour texture is another matter
+The plain branch can return a coloured mesh, and it was run to find out whether
+that texture could replace Hunyuan3D's paint. It can't in anything you sell: the
+texture is baked through two libraries licensed for research and evaluation use
+only. [What was run, what came out, and the licence text](#plain-trellis-was-run-the-colour-works-and-its-licence-does-not).
+:::
 
 ```sh
 scripts/fetch_models.py --download --group trellis
@@ -171,6 +178,113 @@ The generator takes `mode` (`single` or `multi`), `seed`, `ss_guidance_strength`
 (7.5), `ss_sampling_steps` (12), `slat_guidance_strength` (3.0),
 `slat_sampling_steps` (12) and `mesh_simplify` (0.95, range 0.9 to 1.0).
 
+## Plain TRELLIS was run: the colour works, and its licence does not
+
+The plain branch was run on a character concept, a warrior on a light grey
+background, to find out whether its colour texture could replace Hunyuan3D
+2.1's. Hunyuan3D's territory clause is the reason to look.
+
+### Two things in this install stop it running
+
+Neither is part of the wiring above, and both fail after the model has loaded.
+
+- **The image encoder comes from a moving branch.** The pipeline fetches DINOv2
+  with `torch.hub.load('facebookresearch/dinov2', ...)`, which takes the
+  repository's `main` branch. Its current `hubconf.py` imports
+  `dinov2.hub.cell_dino`, and inside the ComfyUI process that import fails with
+  `No module named 'dinov2.hub.cell_dino'`. The same file imports cleanly in a
+  fresh Python process. The 3D pack vendors older copies of `dinov2` that lack
+  `cell_dino`, and one of them being importable in the ComfyUI process is the
+  likely cause. That part is inferred, not traced.
+- **`utils3d` changed its API underneath it.** The pack installs `utils3d` from
+  the head of its repository, which is version 1.7 here. That version no longer
+  has `utils3d.torch.perspective_from_fov_xy` or several other functions
+  TRELLIS's post-processing calls, so a run gets through sampling and then fails
+  while filling holes. The older commit
+  `9a4eb15e4021b67b12c460c7057d642626897ec8`, which TRELLIS's own setup script
+  installs, still has them all. Installing it over the image's copy would break
+  anything else that expects 1.7.
+
+What worked was a separate Python process inside the container. The pinned
+`utils3d` was installed into a private folder with `pip install --no-deps
+--target` and put first on the path, and the process called the same pipeline
+and post-processing the node calls. That avoids both problems without touching
+the ComfyUI process. The concept went in as a plain RGB image, so TRELLIS cut the
+subject out itself with rembg; no cut-out was needed.
+
+### What came out
+
+On a 16GB card:
+
+| | Measured |
+|---|---|
+| Time | 28 s to load the pipeline and sample, 57 s to a saved `.glb` |
+| Mesh | 16,057 faces with UVs and a 1024px colour texture |
+| Facing | The same as Hunyuan3D 2.1's mesh of the same concept: mean silhouette IoU 0.868 with the facings aligned, against 0.68 for each 90-degree rotation |
+| Size | Silhouettes 1 to 4% larger than Hunyuan3D's at each facing, both normalised to the same height |
+| Decimation | Blender took it to 12,000 faces and re-baked the texture intact: its mean brightness was identical before and after |
+
+That decimation result doesn't contradict the warning above. It is ComfyUI's
+`Decimate Mesh` node that scrambles UVs. A Blender decimate that re-bakes the
+texture onto the result does not.
+
+The colour is the weak part. Mean brightness (luma) and colourfulness (chroma,
+the largest channel minus the smallest), over each texture's used pixels:
+
+| | Luma | Chroma |
+|---|---|---|
+| The concept, cut out | 51.7 | 29.1 |
+| Hunyuan3D 2.1's texture | 56.8 | 36.6 |
+| Plain TRELLIS's texture | 31.1 | 15.7 |
+
+TRELLIS's texture came out 40% darker than the concept with about half its
+colour, and a figure drawn with it read brown where the concept is brass. Those
+numbers were measured on the texture inside TRELLIS's own `.glb`, before any
+conversion, so the loss is TRELLIS's own; which step causes it was not traced.
+The back of the cloak, which the concept never shows, came out a washed-out
+grey-white. Hunyuan3D also invented a paler back, less starkly.
+
+### Why the colour is research-only
+
+TRELLIS does not predict the texture onto the mesh directly. It renders its
+Gaussian appearance model from 100 views and bakes those renders onto the UVs,
+and two of the libraries that do that are licensed for research only. Both
+licence files are in the image:
+
+- **`diff_gaussian_rasterization`** renders the views. Its `LICENSE.md` is the
+  Inria and Max Planck Institute "Gaussian-Splatting License". It says the
+  software "may be used 'non-commercially', i.e., for research and/or evaluation
+  purposes only", and: "THE USER CANNOT USE, EXPLOIT OR DISTRIBUTE THE SOFTWARE
+  FOR COMMERCIAL PURPOSES WITHOUT PRIOR AND EXPLICIT CONSENT OF LICENSORS."
+- **`nvdiffrast`** 0.3.3 rasterises the bake. Its `LICENSE.txt` is the NVIDIA
+  Source Code License (1-Way Commercial). Section 3.3 says "The Work and any
+  derivative works thereof only may be used or intended for use
+  non-commercially", where non-commercially "means for research or evaluation
+  purposes only and not for any direct or indirect monetary gain". Only NVIDIA
+  may use it commercially, which is what "1-Way" means.
+
+These limit **what you use the software for**, not who owns what it makes.
+Running them to make art for a game that earns money is the use they rule out.
+That is a tighter limit than Hunyuan3D's: its territory clause leaves the rest
+of the world open, and these close all of it. None of this is legal advice.
+
+::: tip The shape branch uses neither
+`img2mesh_trellis.json` (StableGen) asks the pipeline for `formats=["mesh"]` and
+simplifies with trimesh. A trace of that code path found no call into either
+library: nothing in the Stable3DGen module imports its one `nvdiffrast` file
+(`trellis/utils/_rasterization.py`), and nothing there imports the rendering or
+post-processing utilities. That is a reading of the code, not a runtime check.
+:::
+
+### A lead that has not been tested
+
+TRELLIS's mesh decoder predicts colour at the vertices as well: its config
+(`slat_dec_mesh_swin8_B_64l8m256c_fp16.json`) sets `use_color` to true. Baking
+those vertex colours into a texture in Blender would skip both restricted
+libraries. Nobody has run it, so its quality is unknown. The decoder builds its
+mesh with a modified FlexiCubes whose licence file is missing from the pack's
+copy of TRELLIS, so check that licence upstream before relying on this route.
+
 ## Runs are not byte-reproducible
 
 Worth knowing before you diff two outputs. Three fresh executions of this graph
@@ -215,8 +329,11 @@ Still open:
    `models.json` rather than removed, because removing it changes what everyone
    downloads. Note StableFast3D does want that model, but as a hub id resolved
    through the HF cache, so this copy does not serve it either.
-2. **The plain branch is still unwired**, and needs the absolute-path workaround,
-   an `InvertMask`, and a cut-out source.
+2. **The plain branch is still unwired as a graph.** It has been run outside
+   ComfyUI ([above](#plain-trellis-was-run-the-colour-works-and-its-licence-does-not)).
+   A graph would need the absolute-path workaround, an `InvertMask`, a cut-out
+   source and both install fixes, and its colour would still be research-only.
+   The untested vertex-colour route is the one worth trying next.
 
 ::: warning You may need the spconv fix first
 TRELLIS is a sparse-convolution model, and the published 0.1.0 image shipped

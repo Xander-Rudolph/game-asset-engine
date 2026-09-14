@@ -189,14 +189,14 @@ game rather than here.
 **Bake several variants** and pick one by hashing the tile position. Four per
 terrain is enough to break the pattern.
 
-**Blend at the boundaries between different terrains.** One warning from doing
-this wrong: painting a neighbour's ground at full opacity along a shared edge, and
-having the neighbour do the same back, does not soften the boundary. It flips it.
-Each tile wears the other's material at the join. Blend at half strength from
-both sides, so both land on the same fifty fifty mix along the edge they share,
-and only across the part of the tile nearest that edge. Fading across a whole
-tile leaves a quarter of the neighbour's ground sitting in this tile's middle, and
-one lake tints every field around it.
+**Blend at the boundaries between different terrains**, but not by fading each
+neighbour's ground in over a tile. At full opacity from both sides that flips
+the boundary. At half strength from both sides it double-exposes two textures
+across the join, which reads patchy, and it leaves hard straight seams wherever
+only one edge at a corner changes. What works is one blend weight per grid
+corner that every tile touching the corner agrees on, with the materials drawn
+stacked in a fixed order. See
+[Blending one country into the next](/guide/ground-and-relief#part-3-blending-one-country-into-the-next).
 
 **Some pairs should never touch at all.** A blend can soften a boundary, it
 cannot make an impossible one plausible. Noise based world generation will

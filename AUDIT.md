@@ -253,6 +253,8 @@ MERGES candidates 6, 43 and 90. VERIFIED: textures.md:101-103 names the problem 
 
 *Evidence:* textures.md:101-103 gives only the prompt-side fix; docs/reference/scripts.md:48-52 lists --key/--ambient with no guidance; render_sheet.py:277-285 defaults --key 1.6 with no textured distinction; zero hits for 'baked light', 'lighting curve' or 'compress' in docs/guide
 
+**Partly resolved 2026-09-14:** the renderer-side half, for textured cliff walls, is folded into docs/guide/ground-and-relief.md#a-wall-needs-its-own-material-its-own-texture-scale-and-a-foot (light at 0.45 of the flat-colour gain). textures.md, facings.md and scripts.md's render_sheet.py block still lack it.
+
 ### The asset filename IS the convention, and a near miss fails in silence
 
 **medium** &middot; belongs in `docs/guide/terrain.md (naming), a new docs/guide/integrating.md referenced from docs/guide/cleanup.md and docs/guide/first-asset.md, and skills/asset-cleanup/SKILL.md rules`
@@ -260,6 +262,8 @@ MERGES candidates 6, 43 and 90. VERIFIED: textures.md:101-103 names the problem 
 MERGES candidates 8 and 78. VERIFIED: terrain.md:15-17 and skills/ground-texture/SKILL.md:56,120 tell you to write output/materials/plains.jpg and forest.jpg, and concept-art.md:137 covers naming outputs after the source file — but nothing covers the handoff into a consuming engine's lookup, and docs/guide/first-asset.md ends at step 7 (cleanup.py keep) with no 'move it into your game' step at all. In a consuming engine the FILE NAME is usually the whole convention: grass.jpg where the code wants plains.jpg, or Plains.jpg where it wants lowercase, looks perfectly reasonable, matches nothing, and is ignored in SILENCE while the map goes on drawing its generated fallback with no error anywhere. The general form is stronger and also absent: every missed asset in the source project was two lists of names drifting apart, none of which could fail loudly — so name each shipped asset in ONE place, make the matcher its own tested function, and add a test that walks that list against the bundle. The same failure recurred inside the code when a preview bench kept its own copy of the model-to-atlas mapping. This is the bridge between 'the pipeline produced a file' and 'the game actually draws it', and the repo currently stops one step short of it. (AUDIT.md:292 records a related idea — a test deriving the expected asset set from the code's own enums — so this is corroborated internally.)
 
 *Evidence:* first-asset.md ends at step 7 (cleanup) with no integration step; concept-art.md:137 covers output naming only; terrain.md:15-17 and ground-texture/SKILL.md:56 give filenames with no convention warning; AUDIT.md:292 records the enum-derived test idea
+
+**Partly resolved 2026-09-14:** the silent near miss, and the test that walks the shipped folder against the keys the game looks up, are written up in docs/guide/props.md#a-file-named-off-by-one-capital-is-ignored-in-silence. The integration page, first-asset.md's missing step and the terrain naming warning are still open.
 
 ### cut_icon.py takes the MEDIAN of the four corners, and icons.md explains neither that nor any of the tool's flags
 
@@ -292,6 +296,8 @@ MERGES candidates 15, 94 and 95. VERIFIED absent: grep for 'weapon', 'carried', 
 MERGES candidates 84 and the set-level half of 9. VERIFIED: skills/ground-texture/SKILL.md:81-97 checks ONE texture tiled 3x3 and looks for recognisable repeats, and terrain.md judges a texture on its own merits — seam score, contrast std, tiled preview. The set-level criterion is missing everywhere: nine terrains that cannot be confused for one another is the whole job, and the individual photographs are largely interchangeable. Three of nine terrain materials had to be picked TWICE because, rendered on the isometric grid at game scale, 'broken' read as snow, highlands read as moss rather than rock, and swamp was indistinguishable from forest. None of those failures is visible in a single-texture tiled preview; the check is to render the whole set on the grid together. The skill's 'Rules' block is the natural home, since it already carries 'Never hand over a texture you have not seen tiled' — the missing sibling is 'never hand over a set you have not seen side by side on the grid'.
 
 *Evidence:* skills/ground-texture/SKILL.md:81-97 checks a single texture tiled; its Rules block ends at 'Never hand over a texture you have not seen tiled'; no doc anywhere mentions comparing terrains against each other
+
+**Partly resolved 2026-09-14:** the pairs half is in docs/guide/ground-and-relief.md#judge-the-terrain-set-in-pairs-on-the-grid (brightness spanned 3.3× across one nine-material set, and a blend between far-apart pairs passes through mud). terrain.md and the skill's Rules block still lack the set-level check.
 
 ### Golden and snapshot tests are useless for anything with art in it — measure geometry instead
 

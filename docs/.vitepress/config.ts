@@ -74,6 +74,7 @@ export default defineConfig({
               link: '/guide/ground-and-relief',
             },
             { text: 'Icons', link: '/guide/icons' },
+            { text: 'Props and scenery', link: '/guide/props' },
           ],
         },
         {

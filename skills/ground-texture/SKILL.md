@@ -114,9 +114,13 @@ perfect.
 
 - **One texture per terrain is wallpaper.** Suggest four variants picked by
   hashing the tile position, and boundary blending between different terrains.
-- **Blend at half strength from both sides.** Painting a neighbour's ground at
-  full opacity along a shared edge, with the neighbour doing the same back, flips
-  the boundary rather than softening it.
+- **Do not blend by fading a neighbour in over each tile, at any strength.** At
+  full opacity from both sides it flips the boundary. At half strength it
+  double-exposes the two textures (patchy) and seams straight across wherever
+  only one edge of a corner changes. Suggest one weight per grid corner that
+  every tile touching it agrees on, the materials stacked in a fixed order, and
+  no blending across a cliff. The long version is Part 3 of
+  `docs/guide/ground-and-relief.md`.
 - **Never hand over a texture you have not seen tiled.**
 - Materials go in `output/materials/`. Save as `.jpg` at quality 92 with no
   chroma subsampling for ground, which is what the tool does by default.
