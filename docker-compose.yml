@@ -51,7 +51,18 @@ x-comfyui-base: &comfyui-base
   # No --lowvram: 3D-Pack keeps several pipelines resident and lowvram thrashes
   # them.  Normal VRAM handling is the default and current ComfyUI no longer
   # accepts an explicit --normalvram, so the flag is simply absent.
-  command: python3 main.py --listen 0.0.0.0 --enable-manager
+  # --disable-pinned-memory is not optional on a 32 GB host. ComfyUI pins up to
+  # 90% of system RAM for weight offloading (comfy/model_management.py,
+  # MAX_PINNED_MEMORY = ram * 0.90) and page-locked memory cannot be swapped, so
+  # 28.6 GB is reserved and the kernel OOM-kills the server mid-sample the moment
+  # a browser is also open. Seen on 2026-09-10: Qwen text-to-image died at
+  # 22 GB RSS with "Out of memory: Killed process ... (python3)" in dmesg, one
+  # image into a batch. --cache-none is the other half: the Qwen text encoder is
+  # 7.9 GB and would otherwise still be resident when the 20 GB unet loads, and
+  # a 16 GB card means most of that unet lives in host RAM. Caching it costs an
+  # encoder reload per image and buys the headroom that stops the kill.
+  # Drop both flags only on a host with far more RAM.
+  command: python3 main.py --listen 0.0.0.0 --enable-manager --disable-pinned-memory --cache-none
 
 services:
   # The preconfigured package: everything but the weights, already built.
@@ -81,6 +92,7 @@ services:
       - PYOPENGL_PLATFORM=egl
       - HF_HOME=/app/models/.hf
       - ASSET_ENGINE_FETCH_MODELS=${ASSET_ENGINE_FETCH_MODELS:-0}
+    command: python3 main.py --listen 0.0.0.0 --enable-manager --disable-pinned-memory --cache-none
     volumes:
       - ${MODELS_DIR}:/app/models
       - ${MODELS_DIR}/3d_checkpoints:/app/custom_nodes/ComfyUI-3D-Pack/Checkpoints
