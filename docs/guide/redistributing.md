@@ -1,8 +1,8 @@
 # Redistributing the image
 
-Building the image for yourself carries no obligations. **Publishing it does**, and
-this repository's Apache-2.0 licence does not discharge them, because the
-obligations belong to software this repository does not own and does not contain.
+Building the image for yourself carries no obligations. **Publishing it does**,
+and this repository's Apache-2.0 licence can't meet them. They belong to software
+in the image that this repository does not own and does not contain.
 
 None of this is legal advice. It is an inventory taken by reading the image, so
 that the question is at least answerable.
@@ -20,8 +20,8 @@ any of this as describing what you actually published.
 
 ## Two duties, not one
 
-The commonest mistake here is collapsing these into each other. They are separate,
-and satisfying one does not satisfy the other.
+The common mistake is treating these as one. They're separate, and meeting one
+does not meet the other.
 
 **Include the licence text.** If you distribute GPL software, in source or binary
 form, you must give recipients a copy of the licence itself. Per-file SPDX headers
@@ -36,10 +36,10 @@ A component can need one, both, or neither.
 
 ## What is in the image
 
-### Source is present, so distribution is self-satisfying
+### Source is present, so the source duty is already met
 
-These carry their own source, so conveying them conveys the corresponding source
-too. Nothing extra to do beyond leaving them intact.
+These carry their own source, so shipping them ships the source too. There is
+nothing extra to do, as long as you leave them intact.
 
 | Component | Licence | Why it is satisfied |
 |---|---|---|
@@ -72,8 +72,7 @@ GPL ffmpeg builds, and the entire base layer are in exactly the same position.
 
 ### Blender is the interesting one
 
-It is worth stating precisely, because the obvious summary is wrong in both
-directions.
+This needs precision because the obvious answers are both wrong.
 
 **Some Blender source *is* in the image.** The wheel ships 746 Python files under
 `bpy/4.5/scripts/`, 395 of them headed `SPDX-License-Identifier: GPL-2.0-or-later`.

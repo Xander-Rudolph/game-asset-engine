@@ -14,7 +14,7 @@ whole thing from a terminal.
         |
    concept image       Qwen-Image, about 30 seconds
         |
-    3D shape           Hunyuan3D or TripoSG, about a minute
+    3D shape           TRELLIS or Hunyuan3D, under a minute
         |
     textures           colour, metal and roughness maps
         |
@@ -27,9 +27,13 @@ whole thing from a terminal.
 
 ```sh
 cp .env.example .env          # set MODELS_DIR to where the weights should live
+scripts/fetch_models.py --download --group core --group qwen    # about 68GB
 scripts/doctor.py --fix       # checks everything, starts what it can
 docker compose --profile packaged up -d
 ```
+
+The health check looks for the `core` group. The example below runs on
+Qwen-Image, which is in the `qwen` group.
 
 Then <http://localhost:8188>, or make something from the terminal:
 
@@ -87,9 +91,23 @@ plain language; the skills carry the settings, the gates and the checks.
 /plugin install game-asset-engine@game-asset-engine
 ```
 
-Or from a shell with `claude plugin marketplace add ...` then
-`claude plugin install ... --scope user`. Or skip installing and run Claude Code
-from the repo root, which finds the skills without any setup.
+Or from a shell:
+
+```sh
+claude plugin marketplace add Xander-Rudolph/game-asset-engine
+claude plugin install game-asset-engine@game-asset-engine --scope user
+```
+
+Or skip installing and load your working copy for one session. From the repo
+root:
+
+```sh
+claude --plugin-dir .
+```
+
+Plain `claude` in the repo root does not find the skills. A `skills/` folder at
+the root is the plugin layout, and Claude Code only picks up project skills on
+its own from `.claude/skills/`.
 
 ### What to say
 
@@ -108,9 +126,10 @@ picked from its description:
 ### What Claude will do first, every time
 
 Run `scripts/doctor.py`. Nothing starts until it says ready, because almost
-every confusing failure here is one of a few ordinary things (no GPU runtime,
-container down, weights missing, spconv broken) that otherwise surface much
-later disguised as a broken workflow. If it is not ready, Claude walks you
+every confusing failure here is something ordinary the health check looks at
+(Docker, the GPU runtime, `.env`, the image, the container, the server, the node
+packs, Blender, sparse convolution, the weights, the output folders) that would
+otherwise surface much later disguised as a broken workflow. If it is not ready, Claude walks you
 through the fix rather than guessing.
 
 ### How the skills are meant to behave
@@ -203,5 +222,5 @@ authors and the CC0 animation library. Full list in [CREDITS.md](CREDITS.md).
 
 ## Requirements
 
-A CUDA GPU with 12GB or more, about 200GB of disk for weights, 27GB for the
+A CUDA GPU with 12GB or more, about 200GB of disk for weights, about 28GB for the
 image, Docker with the NVIDIA container toolkit. Linux.

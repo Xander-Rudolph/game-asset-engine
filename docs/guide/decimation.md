@@ -1,9 +1,10 @@
 # Face counts and decimation
 
-Decimation is throwing away triangles. The question is always how many you can
-throw away before it shows, and the answer depends on what you are looking at.
+Decimation means simplifying a mesh by removing triangles. The key question is
+how many you can remove before it looks wrong. The answer depends on what you're
+looking at.
 
-This page has measurements rather than opinions. You can reproduce all of them.
+This page uses measurements, not opinions. You can reproduce everything here.
 
 ## Get an answer
 
@@ -11,15 +12,16 @@ This page has measurements rather than opinions. You can reproduce all of them.
 scripts/decimation_report.py output/mesh/golem.glb --target-iou 0.985 --sprite 128
 ```
 
-Bisects for the **lowest** face count whose silhouette still holds at or above
-that threshold, at the size the sprite ships at, and prints a decision:
+Finds the lowest face count whose silhouette still holds at or above the
+threshold, at the sprite size you actually use, and prints the answer:
 
 ```
   ANSWER: ship this at 3,184 faces (6.6% of the original), silhouette 0.9855 at 128px
 ```
 
-Eight probes by default. 0.985 is a sensible starting threshold for a 2D asset;
-raise it if the outline is doing more work than usual.
+Each probe decimates and renders the model once, then halves the range left to
+search. Eight probes by default. 0.985 is a sensible starting threshold for a 2D
+asset; raise it if the outline is doing more work than usual.
 
 ## Or measure the whole curve
 
@@ -28,30 +30,33 @@ scripts/decimation_report.py output/mesh/golem.glb --sweep --faces 20000,8000,40
 scripts/decimation_report.py input/3d/hero.glb --sprite 128 --json out.json
 ```
 
-The sweep is still worth running when you are learning an asset class rather
-than shipping one model, because the shape of the whole table is what teaches
-the trade-off. The sections below are read off exactly such a sweep.
+The sweep is worth running when you're learning about an asset class, not just
+shipping one model. The full table shows the trade-offs. The sections below are
+from actual sweep data.
 
-It reports three kinds of damage at each budget, because they do not arrive
-together:
+It reports three kinds of changes at each face count. They don't all happen at
+the same time:
 
-- **Surface**: how far the surface moved, as a percentage of the model's own
-  height. Read the 95th percentile. The maximum is one spike on one spur and
-  says little.
-- **Silhouette**: overlap of the rendered outline against the full resolution
-  render, at the size the asset is actually seen. For a 2D game this is the
-  number that matters, because a sprite is its outline.
-- **Texture**: mean colour difference inside the shared outline, on a 0 to 255
-  scale. UVs survive decimation but the triangles under them do not, so a
-  texture starts to slide before the outline breaks.
+- **Surface**: how far points moved, as a percentage of the model's height. Read
+  the 95th percentile, not the max (which is one spike on a corner).
+- **Silhouette**: how well the outline matches the full resolution render, at
+  the size you actually use. It is the area both outlines share divided by the
+  area either one covers (IoU), so it runs from 0 to 1 and 1 means identical.
+  For 2D games this is the one that matters, because a sprite is just its
+  outline. The "Outline lost" column is the part of the original outline that
+  is gone.
+- **Texture**: average colour difference inside the shared outline, on a scale
+  of 0 to 255. UVs stay in place, but the triangles beneath them move. Texture
+  problems appear before outline problems.
 
-The camera used is the isometric one, so the silhouette figure comes from the
-angle the game will use rather than a flattering three quarter view.
+The camera is isometric, so you're seeing the angle your game will use, not a
+flattering three-quarter view.
 
 ## A generated mesh, measured
 
-A textured creature straight out of the pipeline. 39,956 faces, single shell,
-watertight. Silhouette measured at 128 pixels.
+A textured creature straight out of the pipeline: 39,956 faces. It is one main
+shell holding 99% of the faces, plus 29 tiny loose pieces of 46 faces or fewer
+and a handful of open edges. Silhouette measured at 128 pixels.
 
 | Faces | Of original | Surface p95 | Silhouette | Outline lost | Texture |
 |---:|---:|---:|---:|---:|---:|
@@ -94,7 +99,7 @@ painted across have moved.
 
 ## Where it stops working: the floor
 
-Now the same test on a 642,547 face multi part model, the kind you get from a
+Now the same test on a 642,547 face multi-part model, the kind you get from a
 scan or an asset store. Seven separate objects, joined.
 
 | Faces asked for | Faces produced | Surface p95 | Silhouette | Outline lost |

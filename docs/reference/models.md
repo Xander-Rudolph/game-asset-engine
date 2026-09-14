@@ -1,16 +1,26 @@
 # Models and weights
 
 Weights live outside the repo and outside the image. `MODELS_DIR` in `.env` says
-where. Expect about 200GB with everything fetched.
+where. Expect about 190GB for `--all`, which leaves out the `gated` and
+`noncommercial` groups.
 
 ```sh
-scripts/fetch_models.py                       # report on the core group
-scripts/fetch_models.py --all                 # report on everything
+scripts/fetch_models.py                       # check the core group
+scripts/fetch_models.py --all                 # check all but two groups (above)
 scripts/fetch_models.py --download            # fetch the missing core models
-scripts/fetch_models.py --download --group hunyuan --group qwen
+scripts/fetch_models.py --download --group qwen --group trellis --group hunyuan
 scripts/fetch_models.py --list-groups
 scripts/fetch_models.py --licenses
 ```
+
+Only `--download` fetches weights, but a check still writes to disk. Every mode
+except `--licenses` and `--list-groups` first creates `MODELS_DIR` if it is
+missing and copies in any config files it lacks, as described
+[below](#the-configs-the-pack-expects-to-already-exist).
+
+The [first asset walkthrough](/guide/first-asset) needs `qwen`, `trellis` and
+`hunyuan`, which is the fourth line above. `core` holds SDXL, TripoSR and
+TripoSG, and the walkthrough uses none of them.
 
 `models.json` is the manifest. The container reads it on boot and names anything
 missing **before** the server starts, rather than letting it turn up as a red
@@ -20,23 +30,23 @@ node an hour later.
 
 | Group | What it buys you | Size |
 |---|---|---|
-| `core` | SDXL, TripoSR, TripoSG | ~21GB |
-| `qwen` | Qwen-Image plus the 4 step Lightning LoRA. Apache 2.0, the default concept generator | ~20GB |
+| `core` | SDXL, TripoSR, TripoSG | ~20GB |
+| `qwen` | Qwen-Image, plus the 4 step Lightning LoRA and a pre-merged 4 step copy. Apache 2.0, the default concept generator | ~48GB |
 | `qwen_edit` | Qwen-Image-Edit, for changing one part of an image | ~19GB |
-| `hunyuan` | Hunyuan3D 2.1 shape generation and texturing. Best meshes. Territory limited licence | ~25GB |
+| `hunyuan` | Hunyuan3D 2.1 shape generation and texturing. Best meshes. Territory limited licence | ~24GB |
 | `instantmesh` | Zero123++ multiview into InstantMesh | ~10GB |
-| `trellis` | TRELLIS image to 3D | ~5GB |
+| `trellis` | TRELLIS image to 3D, both branches | ~9GB |
 | `mvadapter` | Multiview and texturing over SDXL | ~17GB |
-| `unique3d` | Unique3D and CharacterGen chain | ~24GB |
+| `unique3d` | Unique3D and CharacterGen chain | ~23GB |
 | `extra` | LGM, CRM, TriplaneGaussian, PartCrafter | ~21GB |
-| `gated` | StableFast3D. Accept the licence on the hub first | ~1GB |
-| `noncommercial` | Excluded from `--all`, needs an explicit flag | small |
+| `gated` | StableFast3D. Accept the licence on the hub first | ~4GB |
+| `noncommercial` | Excluded from `--all`, needs an explicit flag | under 1GB |
 
 ## Size matching, not existence checks
 
-A file counts as present only when its size matches what the hub reports. A half
-finished download is fetched again rather than silently loaded and crashed on.
-Downloads resume.
+A file counts as present only when its size matches what the hub reports. A
+partial download is fetched again, rather than loaded without warning and then
+crashing. Downloads resume.
 
 Set `HF_TOKEN` for the gated group.
 
@@ -53,14 +63,22 @@ at all.
 
 ## Licences in one line each
 
-Run `scripts/fetch_models.py --licenses` for the authoritative list. The three
-that are not MIT or Apache:
+Run `scripts/fetch_models.py --licenses` for the authoritative list. Every model
+not listed below is MIT, Apache 2.0 or BSD. The four that are not:
 
 - **Hunyuan3D 2 and 2.1**: royalty free but territorially limited. Does not apply
   in the EU, UK or South Korea.
 - **StableFast3D**: free under 1 million dollars annual revenue.
 - **RMBG-1.4**: non commercial without a paid agreement. Not needed. Hunyuan3D
-  and TripoSG remove backgrounds internally with an Apache 2.0 tool.
+  and TRELLIS remove backgrounds internally with rembg (MIT) and its u2net model
+  (Apache 2.0).
+- **SDXL and SD 1.5**: OpenRAIL-M (OpenRAIL++-M for SDXL). Commercial use of the
+  images is permitted. The use restrictions travel with the model.
+
+TripoSG is listed as MIT, and it is MIT upstream. But its copy in this pack
+ships a Tencent licence file with the same EU, UK and South Korea exclusion, and
+which licence governs it is unresolved. See
+[licensing](/guide/licensing#the-licences-of-the-tools-themselves).
 
 Full detail, including why rendering to 2D does not sidestep a territory clause,
 is in [licensing](/guide/licensing).

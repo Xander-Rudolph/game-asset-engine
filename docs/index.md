@@ -29,16 +29,16 @@ features:
 
 ## What you get
 
-A written brief goes in one end. Out the other comes a folder holding the concept
-image, the model, its texture maps, a skeleton, and a sprite sheet of animation
-frames rendered from the camera angle your game uses.
+Write a description. You get back a folder with the concept image, the 3D model,
+texture maps, a skeleton, and a sprite sheet of animation frames rendered at the
+camera angle your game uses.
 
 ```
 "a mossy stone golem"
         |
-   concept image       Qwen-Image, about 30 seconds
+   concept image       Qwen-Image, 30 seconds fast, 2 minutes careful
         |
-    3D shape           Hunyuan3D or TripoSG, about a minute
+    3D shape           TRELLIS or Hunyuan3D, under a minute
         |
     textures           colour, metal and roughness maps
         |
@@ -49,16 +49,16 @@ frames rendered from the camera angle your game uses.
 
 ## Who this is for
 
-People building 2D or 3D games who need a lot of art, cannot draw all of it, and
-would rather own the pipeline than rent one. It suits isometric and top down
-games particularly well, because the last stage renders a 3D model to flat
-frames at whatever angle your map uses.
+Game makers who need lots of art, can't draw all of it, and would rather own
+the tools than rent them. It works especially well for isometric and top down
+games, since it renders 3D models to 2D sprite sheets at exactly the camera
+angle your map uses.
 
 ## What it costs to run
 
-A CUDA GPU with 12GB or more, about 200GB of disk for the weights, and roughly
-27GB for the prebuilt image. There are no per asset fees. A concept image takes
-about 30 seconds, a mesh about a minute, a rig a few minutes.
+A CUDA GPU with 12GB or more, about 200GB of disk for the model weights, and
+about 28GB for the prebuilt image. There are no per-asset fees. A concept image
+takes 30 seconds to 2 minutes, a mesh about a minute, a rig a few minutes.
 
 ## Where to go next
 

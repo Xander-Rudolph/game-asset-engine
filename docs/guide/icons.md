@@ -11,62 +11,70 @@ scripts/cut_icon.py output/icons/gold_00001_.png output/icons/res_gold.png
 
 ## Generate on a flat background on purpose
 
-The icon prompts ask for a plain flat background, and that is not a style choice.
-It makes cutting the icon out a flood fill rather than a matting model.
+The icon prompts ask for a flat plain mid-grey background, and that is not a
+style choice. It makes cutting the icon out a flood fill rather than a matting
+model.
 
 The four corners are background by construction, so the fill starts there and
 spreads while the colour stays close. That handles the soft gradient some
 generations come out with, which a single colour key would tear a hole in.
 
-## Two details that matter at 20 pixels
+In practice one corner often isn't background: a glow from the subject reaches
+into it. So the fill compares against the median of the four corner colours, not
+their average. With an average, that one corner dragged the reference colour
+off, and the whole frame survived the cut as a grey box round the icon at every
+`--tol`.
 
-**Feather the alpha, do not threshold it.** A hard cut leaves a ring of
-background coloured pixels around the icon. On a white page you will not notice.
-On a coloured or textured background it reads as a grey halo.
+## Two critical details at 20 pixels
 
-**Trim to the ink, then pad evenly.** The generator centres the subject by eye,
-not by pixel. A two percent drift is invisible in one icon and a visible wobble in
-a row of five.
+**Fade the edges, don't cut them hard.** A sharp cutout leaves a ring of
+background-coloured pixels around the icon. The background is mid-grey, so that
+ring shows as a grey halo on any UI that is not the same grey. `cut_icon.py`
+pulls the edge in by a pixel before it softens it, so the ring goes with the
+edge rather than being blurred back in.
 
-## Islands the fill cannot reach
+**Trim tight, then pad evenly.** The generator centres the subject by eye, not
+by pixel. A 2% drift is invisible in one icon but a visible wobble in a row of
+five.
 
-A flood fill only reaches background it has a path to. A corner that the subject
-fences off survives as a pale scrap beside the icon.
+## Isolated background pockets
 
-Nothing about its colour marks it out. Its shape does, in a specific way: **it
-touches the edge of the canvas**, and the subject never does, because the prompt
-asked for the subject centred with space around it.
+A flood fill only reaches background it can spread to. A corner cut off by the
+subject leaves behind a scrap of grey background beside the icon.
 
-Sizing the rule by area instead was tried first and let a corner wedge through
-beside a flask, because a wedge is easily a tenth of a thin bottle. Small specks
-are dropped separately as cut edge crumbs.
+Nothing about its colour marks it out. Its shape does: **it touches the canvas
+edge**, and the subject never does, because the prompt asks for the subject
+centred with clear space around it.
+
+A rule based on size was tried first. It let a corner wedge through beside a
+flask, because a wedge easily covers a tenth of the area of a thin bottle.
+Specks smaller than 2% of the biggest piece are dropped separately, wherever
+they are, as cut-edge crumbs.
 
 ## Where to stop
 
-Painting every icon is not the goal. In the project this came from, 417 emoji
-across 83 kinds were replaced with painted art, but only the frequent ones. A one
-off mark that appears in a single screen costs a generated image to say what an
-emoji already says.
+Painting every icon is not the goal. If your UI already uses emoji, replace the
+frequent ones with painted art and leave the rest. A one-off mark that appears
+on a single screen costs a generated image to say what an emoji already says.
 
-Punctuation was deliberately left alone. Ticks, crosses, arrows and stars are
-typography doing a typographic job, and painting a tick makes it a picture of a
-tick.
+Leave typographic symbols alone. Ticks, crosses, arrows and stars are typography
+doing a typographic job, and painting a tick makes it a picture of a tick.
 
 ## Swapping art in without rewriting strings
 
-Worth knowing if you are retrofitting icons into an existing UI.
+Worth knowing if you're adding icons to an existing UI.
 
-The costs and labels in that project were written as strings with emoji inside
-them, like `Recruit 1👥 40🍞 20⚗️`. Rewriting each into a widget tree would have
-meant touching every call site, and would have made a cost line unreadable in
-source and unloggable in a text log.
+Say your costs and labels are strings with emoji inside them, such as a cost
+line `Build 40🪵 20🪙`. Rewriting each one as a row of text and image elements
+means rebuilding every call site, and a cost line would no longer read cleanly
+in the source or in a text log.
 
-Instead a text widget walks the string, swaps any glyph that has painted art for
-an inline image, and leaves the rest as type. Ninety call sites became one word
-longer, and no string changed.
+Instead, have the text component walk the string and swap any emoji that has
+painted art for an inline image, leaving the rest as text. Each call site
+changes only which text component it uses, and no string changes.
 
-One bug worth repeating: the first version walked the string by index, which
-iterates UTF-16 code units. Every emoji above the basic plane is a surrogate
-pair, so it could never match. That silently painted only the older glyphs and
-left every newer one as type. A test caught it. Iterate by rune or by grapheme,
-not by index.
+One bug worth knowing: the first version walked the string by index, which in
+many languages counts UTF-16 code units. Emoji outside the basic plane are
+surrogate pairs, so they never matched. Nothing errored: symbols inside the
+basic plane got painted, and every emoji outside it silently stayed as text. A
+test caught it. Iterate by code point or by grapheme, not by index.

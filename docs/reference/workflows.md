@@ -50,10 +50,11 @@ means it is silently reverted next time anyone runs the builder.
 | `img_edit_qwen.json` | Change part of an existing image |
 | `img_refine_sdxl.json` | Refine pass over an image |
 | `img2mesh_hunyuan3d21.json` | Image to mesh, shape only. Best geometry. Removes the background itself. Territory limited licence |
-| `img2mesh_triposg.json` | Image to mesh, TripoSG. Clean watertight shapes. Licence caveat in the licensing guide |
-| `img2mesh_triposr.json` | Image to mesh, fastest. Needs a cut out with transparency |
-| `mesh_texture_hunyuan3d21.json` | Paint texture maps onto an existing mesh |
-| `txt2mesh_qwen_hunyuan3d21.json` | Prompt to concept to mesh in one queue |
+| `img2mesh_trellis.json` | Image to mesh, TRELLIS. MIT, no territory clause. Removes the background itself. Needs the `trellis` weight group. [Details](/guide/trellis) |
+| `img2mesh_triposg.json` | Image to mesh, TripoSG. Does not currently produce usable meshes in this install: a cage of fragments, whatever the input. Licence caveat in the licensing guide |
+| `img2mesh_triposr.json` | Image to mesh, TripoSR. Does not work as wired, going by the node source: the mask from `LoadImage` is inverted. Would need an `InvertMask` and a cut-out |
+| `mesh_texture_hunyuan3d21.json` | Paint texture maps onto an existing mesh. Territory limited licence, which covers the painted mesh too |
+| `txt2mesh_qwen_hunyuan3d21.json` | Prompt to concept to mesh in one queue. Territory limited licence |
 | `txt2mesh_sdxl_hunyuan3d21.json` | The same, the older way |
 | `mesh_render_sprites.json` | Mesh to 8 facings, unlit. Silhouette check |
 | `mesh_rig_unirig.json` | Mesh to skeleton and skin, out as FBX |
@@ -65,7 +66,7 @@ means it is silently reverted next time anyone runs the builder.
 scripts/run_workflow.py workflows/api/txt2img_qwen.json \
     --prompt 'a mossy stone golem' --negative 'cartoon, blurry'
 
-scripts/run_workflow.py workflows/api/img2mesh_triposg.json \
+scripts/run_workflow.py workflows/api/img2mesh_trellis.json \
     --image output/concept/golem_00001_.png --set target=12000
 
 scripts/run_workflow.py --list-nodes Comfy3D    # what the server actually loaded
@@ -104,7 +105,7 @@ scripts/api_to_ui.py txt2img_qwen # or one
 They then appear in the sidebar under **Workflows**, because the compose file
 mounts `workflows/` as ComfyUI's user directory.
 
-::: danger The widget order is the whole difficulty
+::: danger Widget order is the core challenge
 Node values are stored as a **positional array** in the editor format, and the
 position depends on the order the node declares its inputs, which is only
 knowable from a running server.

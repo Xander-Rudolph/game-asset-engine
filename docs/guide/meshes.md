@@ -7,12 +7,12 @@ from the front view, which is why the concept art matters so much.
 
 | Workflow | Generator | Notes |
 |---|---|---|
-| `img2mesh_triposg.json` | TripoSG | Clean watertight shapes, fast. MIT upstream, but the copy in this pack ships a territory-limited licence file. See [licensing](/guide/licensing). |
-| `img2mesh_hunyuan3d21.json` | Hunyuan3D 2.1 | Best geometry here. Removes the background itself. Cannot ship to the EU, UK or South Korea. |
-| `mesh_texture_hunyuan3d21.json` | Hunyuan3D 2.1 | Paints an existing shape. Same licence limit. |
-| `img2mesh_triposr.json` | TripoSR | Fastest. Needs a cut out image with transparency. |
-| `txt2mesh_qwen_hunyuan3d21.json` | Both | Prompt to concept to mesh in one queue. |
 | `img2mesh_trellis.json` | TRELLIS | MIT, no territory clause, so the choice for shipping into the EU, UK or South Korea. Removes the background itself, so no cut-out needed. [Details](/guide/trellis). |
+| `img2mesh_hunyuan3d21.json` | Hunyuan3D 2.1 | Best geometry here. Removes the background itself. Cannot ship to the EU, UK or South Korea. |
+| `mesh_texture_hunyuan3d21.json` | Hunyuan3D 2.1 | Paints an existing shape. Same licence limit, and it covers any shape it paints, a TRELLIS one included. |
+| `txt2mesh_qwen_hunyuan3d21.json` | Qwen-Image, then Hunyuan3D 2.1 | Prompt to concept to mesh in one queue. Same licence limit. |
+| `img2mesh_triposg.json` | TripoSG | Does not currently produce usable meshes in this install. It returns a cage of fragments instead of the subject, whatever the input. MIT upstream, but the copy in this pack ships a territory-limited licence file. See [licensing](/guide/licensing). |
+| `img2mesh_triposr.json` | TripoSR | Does not work as wired, going by the node source (not run). The mask it takes from `LoadImage` is inverted, so a cut-out's subject is greyed out, and an image with no transparency fails. It would need an `InvertMask` added, plus a cut-out. [The same trap on the TRELLIS page](/guide/trellis#plain-trellis-weights-present-wiring-awkward). |
 
 ::: danger Decide the generator before the asset ships, not after
 Hunyuan3D produces the best meshes in this stack, and its licence does not apply
@@ -26,22 +26,25 @@ if the image still exists. Record which generator made which shipped asset.
 [Full detail](/guide/licensing).
 :::
 
-## Watertight versus multi part
+## Watertight versus multi-part
 
-This distinction turns up again at decimation, at rigging, and at texture time,
-so it is worth naming early.
+Two types of mesh behave very differently when you decimate them (cut their
+face count) or rig them.
 
-**Generated meshes are watertight and single shell.** One closed surface, no
-holes, no separate pieces. TripoSG and Hunyuan3D both produce these. They
-decimate smoothly, rig without surprises, and can be simplified a long way.
+**Generated meshes have one main shell.** Hunyuan3D and TRELLIS put almost all
+the faces into one piece, sometimes with a few tiny loose pieces beside it. The
+creature measured in [decimation](/guide/decimation#a-generated-mesh-measured)
+has 99% of its faces in its main shell and only a handful of open edges
+(boundary edges). Meshes like this decimate smoothly, rig without surprises, and
+can be cut down a long way.
 
-**Scanned or assembled meshes are multi shell.** Separate objects for body,
-clothes, eyes and hair, each with its own boundary edges. These behave quite
-differently. In particular they refuse to decimate below a floor set by their
-boundaries, which is covered in [decimation](/guide/decimation#the-floor).
+**Scanned or assembled meshes are multi-part.** Body, clothes, eyes and hair are
+whole separate parts, each with its own open edges. They refuse to decimate
+below a floor set by those boundaries. See
+[decimation](/guide/decimation#where-it-stops-working-the-floor) for details.
 
-If you did not generate the mesh here, assume multi shell until you have counted
-the pieces.
+If you didn't generate the mesh here, assume it is multi-part until you have
+counted the pieces.
 
 ## Face budgets
 
@@ -49,7 +52,7 @@ Every image to mesh graph ends with a decimation step at 18,000 faces, then
 saves. Change it per run:
 
 ```sh
-scripts/run_workflow.py workflows/api/img2mesh_triposg.json \
+scripts/run_workflow.py workflows/api/img2mesh_trellis.json \
     --image concept.png --set target=12000
 ```
 
@@ -134,6 +137,6 @@ What to look for, in order of how often it goes wrong:
 3. **Thin parts.** Straps, staffs and horns come out either thick and clumsy or
    broken. If the asset depends on one, say so in the concept prompt and make it
    larger than realistic.
-4. **The silhouette at size.** Render at 128 pixels. That is the size a map token
-   is drawn at, and detail invisible there is detail you are paying for and not
-   getting.
+4. **The silhouette at size.** Render at the size your game draws the asset,
+   such as 128 pixels. Detail invisible there is detail you are paying for and
+   not getting.

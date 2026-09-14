@@ -32,9 +32,10 @@ They do not compose. mesh2motion rigs onto its own skeleton and plays its own
 clips. UniRig produces a different skeleton and plays Mixamo clips. There is no
 path from one to the other.
 
-## Two settings that are load bearing
+## Two critical settings
 
-Both were found by failing on real assets. Both are set in `rig_units.sh`.
+Both were discovered after failing on real assets, and both are set in
+`rig_units.sh`.
 
 ### Use articulationxl, not mixamo
 
@@ -63,33 +64,36 @@ Nothing in that message points at precision. Set `fp16` and it works.
 
 ## The decimate then rig shortcut
 
-This is how high resolution models get rigged at all, and it has a consequence
-that catches people out.
+If your mesh has more faces than the rigger's budget, the rigger decimates it
+first (cuts its face count down) and solves the skeleton against that lighter
+copy. This is how high-resolution models get rigged at all, but there's a side
+effect that catches people out.
 
-**What happens.** Before solving anything, the rigger joins the mesh objects,
-applies transforms, triangulates, and then decimates to `target_face_count`
-using collapse decimation. The skeleton and the skin weights are solved against
-that decimated mesh.
+**What it does:** Before solving anything, the rigger joins separate pieces,
+applies transformations and triangulates. If the triangulated mesh has more
+faces than `target_face_count`, it is decimated to that count using collapse
+decimation, which merges neighbouring vertices to remove faces. The skeleton and
+skin weights are solved against this decimated mesh.
 
-**Why it helps.** The solver is a neural network with a fixed appetite. Handing
-it 600,000 faces is not slow, it is impossible. Decimating first means you can
-point it at a photogrammetry scan or a sculpt and get a usable skeleton in a few
-minutes, without preparing anything by hand.
+**Why it's useful:** The skeleton solver is a neural network that can only take
+so much. Given 600,000 faces it doesn't just run slowly, it can't run at all.
+Decimating first means you can point it at a high-resolution scan or sculpt and
+get a usable skeleton in a few minutes, without manual preparation.
 
-**The catch.** The FBX it hands back contains the decimated mesh. Not your mesh.
-The skinning stage takes the vertices and faces recorded by the skeleton stage,
-which are the decimated ones, and writes those into the output.
+**The important part:** The FBX it gives you contains the decimated mesh, not
+yours. The output uses the vertices and faces from the decimated version.
 
-::: warning Above the budget, your model is replaced by the proxy
-Feed a 642,000 face model in with the budget at 48,000, and you get a 48,000
-face model with a skeleton in it. The skeleton is good. The detail is gone, and
-nothing warns you.
+::: warning Above the budget, your original model gets replaced
+If your mesh has 642,000 faces but the budget is 48,000, you get back a 48,000
+face model with a skeleton. The skeleton is fine, but the original detail is
+gone. Nothing warns you about this.
 :::
 
-**The budget is a ceiling, not a target.** Below it, nothing happens at all. A
-39,996 face mesh rigged with the budget at 48,000 comes back as 39,996 faces
-with 47 bones, untouched. That is the normal case for this pipeline, because
-meshes are saved at 18,000 faces and the budget is well above it.
+**The budget is a maximum, not a goal.** If your mesh is smaller than the
+budget, it passes through untouched. A 39,996 face mesh rigged with a 48,000
+face budget comes back with 39,996 faces and 47 bones, unchanged. This is the
+normal case here, since meshes are saved at 18,000 faces and the budget is much
+higher.
 
 So there are only two situations:
 
@@ -117,17 +121,18 @@ unweighted.
   unweighted 0 verts (0.00%)
 ```
 
-Two details make it work, and getting either wrong produces a mess that looks
-like a bad rig:
+Two details make this work. Get either one wrong and the rig looks broken:
 
-- **The meshes have to be aligned first.** The rigger normalises its output,
-  centring and scaling the model into a unit box, so the original almost never
-  sits on top of it. The script matches bounding boxes before transferring. Skip
-  that and every weight is read from the wrong part of the body.
-- **Interpolate across the nearest face, not the nearest vertex.** Snapping to
-  the proxy's much sparser vertices quantises the weights and gives visible
-  banding at the joints. The proxy and the original describe the same surface,
-  so a point on one lands inside a face on the other.
+- **Align the meshes first.** The rigger normalises its output by scaling and
+  centring into a unit box, so the original mesh rarely lines up with it. The
+  script matches their bounding boxes before transferring. Skip this step and
+  every weight gets read from the wrong part of the body.
+- **Use face-based interpolation, not vertex-based.** The proxy has far fewer
+  vertices than the original, so snapping to the nearest one quantises the
+  weights (they jump in steps) and you see bands at the joints. Both meshes
+  describe the same surface, so a point on the original almost always lands
+  inside a face of the proxy, and the script blends the weights across that
+  face.
 
 The script reports how many vertices ended up with no weight at all. Anything
 above 1% means the alignment failed, not that the transfer is imprecise. A
@@ -149,7 +154,7 @@ So a hand written pose file does not survive being pointed at a second model.
 Dump the map before authoring anything:
 
 ```sh
-docker exec comfyui python3 -c "
+docker exec "$(python3 scripts/_engine.py)" python3 -c "
 import bpy; bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.ops.import_scene.fbx(filepath='/app/output/rigged/golem.fbx')
 a=[o for o in bpy.data.objects if o.type=='ARMATURE'][0]
@@ -175,32 +180,36 @@ For a 28 bone humanoid from this pipeline the map came out as:
 | `bone_20` to `bone_23` | one thigh, shin, foot, toe |
 | `bone_24` to `bone_27` | the other thigh, shin, foot, toe |
 
-Or let a script work it out from the skeleton's own geometry, which is what
-`tool/make_cycles.py` in the game repo does: the root is the bone with no
-parent, the legs are the two chains descending furthest below it, the spine is
-the chain that rises, and the arms are the two chains branching off near the top.
+Or let a script work it out from the skeleton's own geometry. None ships here
+yet, but the rules are short: the root is the bone with no parent, the legs are
+the two chains descending furthest below it, the spine is the chain that rises,
+and the arms are the two chains branching off near the top. See
+[deriving cycles automatically](/guide/animation#deriving-cycles-automatically).
 
-## Two batch scripting traps
+## Batch rigging quirks
 
-Both of these come from `rig_units.sh` and both cost real time to find.
+All three are handled in `rig_units.sh`, and each took real time to find.
 
-**The file list is snapshotted.** The mesh loader offers a dropdown of files,
-and the isolated worker process snapshots that list when the node is first
-scanned. A mesh dropped into `input/3d/` afterwards is rejected with
-`value_not_in_list`, and restarting the container does not refresh it. The
-script works around this by copying each figure over a file that is already in
-the list and loading through that. The node reads the file at run time, so no
-restart is needed between figures.
+**The file list is fixed when the nodes load.** The mesh loader offers a
+dropdown of files, and the rigger's isolated worker process snapshots that list
+when it first scans the node. A mesh you add to `input/3d/` after that is
+rejected with `value_not_in_list`. Restarting the container doesn't help either.
+The script works around this by copying each mesh over a file that was already
+in the list. The node reads the actual file when it runs, so you don't need to
+restart between figures.
 
-**Set a different output name per figure or you get the previous one.** Every
-figure is loaded through the same slot path, so without changing something,
-ComfyUI sees identical node inputs, serves the cached result, reports done in 0s
-and hands back the previous figure's rig. Setting `fbx_name` per figure both
-names the output and breaks the cache.
+**Change the output name for each figure, or you get the previous one.** Every
+figure is loaded through the same input slot, so ComfyUI sees identical inputs
+and serves its cached result. It reports done in 0s and hands back the previous
+figure's rig. Changing `fbx_name` per figure both names the output and breaks
+the cache.
 
-**Find the output by time, not by counting.** The rigger names its output after
-the mesh, so a rerun overwrites rather than adds, and a file count never moves.
-The script touches a timestamp file before the run and takes whatever is newer.
+**Track output by timestamp, not by file count.** The rigger writes its `.fbx`
+into `output/`, named from `fbx_name`. A file of that name can already be there
+from an earlier run that was never moved, such as one run by hand, and then
+neither a file count nor a name check can tell the new result from the old one.
+The script creates an empty timestamp file before each run, takes the `.fbx` in
+`output/` that is newer than it, and moves that to `output/rigged/`.
 
 ## Checking a rig
 
@@ -208,8 +217,12 @@ Render it. A rig that solved badly is obvious in one sheet and invisible in a lo
 
 ```sh
 scripts/render_sheet.py output/rigged/golem.fbx --poses transforms:poses/walk.json \
-    --angles 4 --size 220 --out output/sheets/golem_walk.png
+    --angles 4 --size 220 --out output/sheets/golem_walk.png --check
 ```
+
+`--check` exits non-zero on a fault it can measure, such as an empty or clipped
+cell, or a pose row identical to the first row at every angle. It cannot tell a
+good walk from a bad one.
 
 Then open the image and look at it. A mis solved shoulder produces a confident,
 well rendered, wrong walk cycle.

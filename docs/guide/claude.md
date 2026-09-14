@@ -5,34 +5,39 @@ and the MCP server definitions that go with them.
 
 ## Install
 
-Installing from GitHub goes through a marketplace: the first command registers
-this repo as one, the second installs the plugin from it.
+First add the repo as a marketplace, then install the plugin.
 
-**In a Claude Code session:**
+**In Claude Code:**
 
 ```
 /plugin marketplace add Xander-Rudolph/game-asset-engine
 /plugin install game-asset-engine@game-asset-engine
 ```
 
-**Or from a shell:**
+**Or from the command line:**
 
 ```sh
 claude plugin marketplace add Xander-Rudolph/game-asset-engine
 claude plugin install game-asset-engine@game-asset-engine --scope user
 ```
 
-`--scope` is `user` (you, everywhere), `project` (committed, shared with
-collaborators) or `local` (you, this repo only).
+`--scope` can be `user` (just you, in every project), `project` (committed to
+this repo, so collaborators get it too), or `local` (just you, in this repo
+only).
 
-Or skip installing entirely and run Claude Code from the repo root, which finds
-`skills/` without any setup. That is the better option while you are still
-editing the repo, because you are always testing what is on disk.
+**Or skip installing and load it straight from disk.** From the repo root:
 
-::: tip A private repo works, if git does
-The clone uses your git credentials, so a private repo installs fine when your
-GitHub CLI or SSH auth is already set up. If it is not, the marketplace add
-fails at the clone rather than saying anything about permissions.
+```sh
+claude --plugin-dir .
+```
+
+It loads the plugin for that session only. This is better while you're still
+editing the repo, since you always test what is on disk.
+
+::: tip Private repos need working git credentials
+`marketplace add` clones the repo with your git credentials. If GitHub CLI or
+SSH auth is already set up, a private repo installs fine. If not, the add fails
+at the clone step, and the error says nothing about permissions.
 :::
 
 ## Check it took
@@ -94,16 +99,14 @@ would actually say.
 
 Every skill runs `scripts/doctor.py` before doing anything.
 
-This is not ceremony. Almost every confusing failure in this pipeline is one of a
-handful of ordinary things: no GPU runtime, no `.env`, the container stopped,
-weights missing, Blender not importable, sparse convolution broken. Each of them
-surfaces much later disguised as a broken workflow. Two seconds of checking
-removes the guessing, and if something is missing the skill walks you through it
-rather than guessing around it.
+It's not ceremony. Almost every confusing failure is something ordinary that
+the health check looks at: Docker, the GPU runtime, `.env`, the image, the
+container, the server, the node packs, Blender, sparse convolution, the weights
+and the output folders. Each surfaces much later disguised as a broken
+workflow. Checking first removes the guessing. If something is missing, the
+skill walks you through fixing it instead of trying to work around it.
 
 ## How the skills are meant to behave
-
-Worth knowing, because it is how you tell when something has gone wrong.
 
 **One stage per turn.** Concept art is shown and approved before a mesh is built,
 and the mesh before a rig. The gates are deliberate: a rejected mesh three stages

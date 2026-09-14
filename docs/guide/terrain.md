@@ -3,36 +3,39 @@
 Ground textures are the one asset type here that never becomes a mesh. You
 generate a flat image and make it tile.
 
-::: tip There is a longer version of this page
-[Ground relief and blending](/guide/ground-and-relief) goes further: the
-arithmetic for laying ground on terrain that rises and falls, how one country
-hands over to the next, lighting slopes so they read, and how to test ground you
-cannot see. Read that one when you get past generating the texture.
+::: tip There's more detail on the next page
+[Ground relief and blending](/guide/ground-and-relief) repeats the generation
+lessons at more length, then covers what your own map code has to get right:
+corner heights so tiles on slopes meet without seams, lighting slopes so they
+read, blending one terrain into the next, a soft edge for shading over
+unexplored ground, and how to test ground you can't easily look at. Read it
+after you get the texture working.
 :::
 
 ```sh
-scripts/generate_concepts.sh prompts/ground
+WIDTH=1024 HEIGHT=1024 scripts/generate_concepts.sh prompts/ground
 scripts/make_seamless.py output/ground/plains_00001_.png \
     --out output/materials/plains.jpg --size 1024 --check
 ```
 
-## Writing a ground prompt
+## How to write a ground prompt
 
-Ground is not a picture of a place. It is a close crop of a surface, and the
-prompt has to say so in several ways, because the generator's instinct is to
-compose a scene.
+Ground is not a landscape photo. It's a close-up of a surface. The generator
+wants to compose scenes, so the prompt has to say so in several ways.
 
-Here is the working prompt shape, with each part doing a job:
+Here's the prompt for forest ground:
 
 > A seamless tileable ground texture of **dense woodland floor of fallen leaves,
 > moss, twigs and needles**, photographed from directly overhead looking straight
 > down. Fine even detail spread uniformly across the whole frame, the same
 > density everywhere, no large shapes and no focal point, like a close macro crop
 > of a much larger surface. Flat shadowless overcast light, painted game texture,
-> crisp small scale detail.
+> crisp small-scale detail.
 
-Only the bold part changes per terrain type. The rest is fixed, and each clause
-is preventing a specific failure:
+Only the bold part changes per terrain type. Water is the one exception: its
+prompt swaps the middle sentence for one asking for even ripples and no
+gradient. Everywhere else the rest is fixed, and each clause is preventing a
+specific failure:
 
 | Clause | Stops |
 |---|---|
@@ -44,11 +47,11 @@ is preventing a specific failure:
 
 The negative prompt matters as much:
 
-> horizon, sky, perspective, vanishing point, buildings, figures, people, path,
-> road, river, fence, text, watermark, border, frame, vignette, drop shadow,
-> strong directional shadow, single large object, centred subject, large shapes,
-> sweeping curves, composition, focal point, tilt shift, blur, depth of field,
-> mosaic, tiles, bricks
+> horizon, sky, perspective, vanishing point, buildings, figures, people,
+> animals, path, road, river, fence, text, watermark, signature, border, frame,
+> vignette, drop shadow, strong directional shadow, single large object, centred
+> subject, large shapes, sweeping curves, arcs, swirls, composition, focal
+> point, tilt shift, blur, depth of field, mosaic, tiles, bricks
 
 Note that mosaic, tiles and bricks are in there. Ask for a tileable texture and
 the generator will helpfully draw a picture of tiles.
@@ -57,6 +60,11 @@ the generator will helpfully draw a picture of tiles.
 
 Generate at **1024 pixels**, not 512. The difference between detail that reads as
 rock and detail that reads as coloured noise is mostly resolution.
+
+Generate square, too. `generate_concepts.sh` uses the Qwen graph's default size,
+a 3:4 portrait, unless `WIDTH` and `HEIGHT` are set. `make_seamless.py` scales
+whatever it gets to a square of `--size` pixels (1024 by default), so a portrait
+comes out squashed.
 
 Aim for real contrast, and measure it rather than trusting a thumbnail. A desert
 material shipped looking fine and read as flat colour on the live build.
@@ -67,17 +75,16 @@ Measured across a set of nine, the grey channel spread told the whole story:
 | Standard deviation | **3.0** | **3.7** | 12.4 to 33.1 |
 
 Seventeen grey levels. Nothing was broken. It was a truthful photograph of very
-even sand. `--check` prints contrast alongside the seam score and warns below a
-floor, because a texture that even reads as a painted rectangle at map scale.
+even sand. `make_seamless.py` prints the contrast (the standard deviation) next
+to the seam score on every run, and warns when it falls under 8, because a
+texture with so little contrast reads as a painted rectangle at map scale.
 
 ## Scale is set by how big things in the texture should look
 
-This is the constant that is easiest to reason about wrongly.
-
-The temptation is to maximise texel density, picking the repeat that maps one
-texel to one screen pixel. That gives a large repeat, and a large repeat is also
-less obviously repeating because the pattern's period is longer. Both arguments
-are true, and both lose to the third one.
+The temptation is to maximise texel density: pick the repeat that maps one
+texel (one pixel of the texture) to one screen pixel. That gives a large repeat,
+and a large repeat is harder to spot. Both arguments are true, and both lose to
+a third: how big the things in the texture look.
 
 A repeat spanning eight tiles put a leaf **25 screen pixels across, against a
 person of about 34**. Leaves the size of a soldier. Four tiles to a repeat puts
@@ -98,12 +105,14 @@ scripts/make_seamless.py in.png --out out.jpg --size 1024 --check
 
 ### Four approaches that failed
 
-Each of these measured as fine. That is the point of writing them down.
+Each of these seemed sensible and failed when tested. That's why they're here.
 
-**Rolling the image by half does nothing.** This is the trick everyone reaches for
-first. It is a phase shift. A tile repeats exactly as badly after it, because
-whether the right column continues into the left one is not something a shift can
-change. Measured, it took an 81% seam to 78%.
+**Rolling by half doesn't fix the seam.** Rolling shifts the image by half its
+width and height, wrapping round at the edges. Everyone tries it first, but it's
+only a phase shift. A tile repeats exactly as badly after rolling, because a
+shift moves the break but cannot remove it. Measured, it took an 81% seam to
+78%, on the metric at the end of this list that scored even a perfect texture at
+81%.
 
 **Blending the rolled image back toward the unrolled one** puts the discontinuity
 straight back on the edge. It measured as doing nothing because it did nothing.
@@ -135,7 +144,8 @@ repair.
 
 ### Reading the score
 
-`--check` reports two numbers and you need both.
+Every run prints two seam numbers, and you need both. `--check` adds the ratio
+from before the fix, so you can see what the fix did.
 
 The **ratio** compares how much the edge columns differ against how much any two
 adjacent columns differ. A tiling texture's edges are neighbours, so 1.0 is

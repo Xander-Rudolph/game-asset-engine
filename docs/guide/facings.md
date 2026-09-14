@@ -24,13 +24,15 @@ The camera elevation has to match the shape of your ground tiles, or figures sit
 at a different angle from the ground they stand on. It looks subtly wrong in a
 way that is hard to name and impossible to unsee.
 
-The rule is short:
+The formula is:
 
 > **elevation = arcsin(tile height / tile width)**
 
-Because with an orthographic camera at elevation θ, a flat vector on the ground
-takes up sin(θ) of its length vertically on screen. That ratio is exactly what
-your tile proportions describe.
+With an orthographic camera, a line on the ground that points straight away
+from the camera shows up on screen as a vertical line, shortened to
+sin(elevation) of its real length. A line running across the screen keeps its
+full length. A square tile seen corner on has one diagonal of each kind, so its
+height on screen is sin(elevation) times its width. That is your tile ratio.
 
 | Your ground | Tile ratio | Elevation | Also called |
 |---|---|---|---|
@@ -49,11 +51,11 @@ degrees. That is the default here.
 
 ## Which way the model is turned
 
-Now the part that actually causes wrong facing sprites.
+Now the part that actually breaks facing sprites.
 
-An isometric camera does not look along the world axes. It looks down the
-diagonal between them. So a unit facing north in the game is not facing the
-camera, it is facing away and to one side.
+An isometric camera doesn't look along the world axes. It looks down the
+diagonal between them. So a unit facing north in the game isn't facing the
+camera, it's facing away and to one side.
 
 That means the four facings have to be rendered at **45, 135, 225 and 315
 degrees**, not at 0, 90, 180 and 270.
@@ -113,12 +115,12 @@ Whether you call cell 0 south or south east depends on whether your game names
 directions by the screen or by the world grid. Pick one and write it down, because
 this is where the confusion comes from later.
 
-::: tip Verify it once per project, then never again
-Render the sheet, look at it, and pick the cell where the figure faces down and to
-the right on screen. That is your first facing. Everything else follows by 90
-degree steps.
-
-Two minutes of looking beats an afternoon of reasoning about handedness.
+::: tip Check it once per project
+Add `--check` when you render, and the script names the cell where the figure
+faces down and to the right, because it already knows the angle of every cell.
+Then open the sheet once and confirm that cell really is the down-and-right
+view. That's your first facing. Everything else follows from there in 90 degree
+steps.
 :::
 
 ## Eight facings
@@ -174,7 +176,7 @@ Two flags, and which you want depends on what the sheet is for:
 | | For |
 |---|---|
 | default, per model | A prop on its own, an inventory icon, anything judged by itself. A flask framed against a figure's height is a speck. |
-| `--span <units>` | A **set**. Frames against a fixed world height instead, so a golem looms over a homunculus. |
+| `--span <units>` | A **set**. Frames against a fixed world height instead, so a golem looms over a goblin. |
 
 ::: danger A wrong scale renders perfectly
 This is the trap the flags exist for. Because the default frames each model to
@@ -218,7 +220,8 @@ your render is grey, the mesh has not been textured yet.
 **Each run gets its own frame folder.** Two renders running at once used to
 interleave their frames into one shared folder, and each composed a sheet
 containing the other model. That happened for real when a batch overlapped a
-manual render.
+manual render. The folder is deleted once the sheet is composed. Pass
+`--keep-frames` to keep the per-cell PNGs under `output/_sheet_frames/`.
 
 ## Sizes
 
@@ -227,7 +230,7 @@ Render at the size the sprite will be used, then judge it there.
 | Use | Size |
 |---|---|
 | Map token | 128 px |
-| Battlefield figure | 220 px |
+| Close-up play view | 220 px |
 | Portrait or inspection view | 340 px and up |
 
 Judging a walk cycle at 340 pixels and shipping it at 128 is how you get a cycle

@@ -6,8 +6,10 @@ Start here, always:
 scripts/doctor.py
 ```
 
-Most confusing failures are one of six ordinary things, and the health check
-names which one. What follows is for when it says everything is fine and
+Most confusing failures are something ordinary that the health check looks at:
+Docker, the GPU runtime, `.env`, the image, the container, the server, the node
+packs, Blender, sparse convolution, the weights and the output folders. It names
+the one that is wrong. What follows is for when it says everything is fine and
 something still goes wrong.
 
 ## The server is up but a workflow fails
@@ -31,19 +33,19 @@ and a graph using them fails with a message about an unknown node type.
 The reason is only ever in the startup log:
 
 ```sh
-docker logs comfyui 2>&1 | grep -i -A5 'error\|traceback' | head -40
+docker logs "$(python3 scripts/_engine.py)" 2>&1 | grep -i -A5 'error\|traceback' | head -40
 ```
 
 ## Out of memory during mesh generation
 
-Almost always the staging problem. The texture model stays resident in GPU memory
-after it runs, and a request to free memory does not release it. The next shape
-run then dies inside its loader.
+Almost always a staging problem. The texture model stays resident in GPU memory
+after it runs. Requests to free memory don't release it. The next shape run
+crashes in its loader.
 
 Restart the container, then run shapes and textures in separate passes:
 
 ```sh
-docker compose --profile comfy restart comfyui
+docker restart "$(python3 scripts/_engine.py)"
 ```
 
 `scripts/asset_to_mesh.sh` does this for you. Do not interleave the two stages in
@@ -53,7 +55,7 @@ your own scripts.
 
 ComfyUI drops the connection mid-generation and the container restarts itself.
 `run_workflow.py` raises on the dead socket, the shell loop carries on to the
-next name, and the run *looks* like it worked - the failure is invisible unless
+next name, and the run *looks* like it worked. The failure is invisible unless
 you count the files afterwards. On one icon batch this cost eleven images before
 anyone noticed.
 
@@ -67,7 +69,7 @@ ls output/icons/*.png | wc -l
 
 What fixes it: check the server is answering before each item, restart it when
 it is not, and retry a few times. `scripts/run_workflow.py --retries 3` does
-this. Smaller batches make it rarer - the crash correlates with how long the
+this. Smaller batches make it rarer: the crash correlates with how long the
 server has been resident, not with any one prompt.
 
 ## Every generation fails with "can't convert cuda:0 device type tensor to numpy"
@@ -78,12 +80,12 @@ Raised from ComfyUI's quantised-loading path, on **every** generation, while
 Restart the container. That clears it.
 
 It is worth knowing this one by name because the error says *numpy*, and this
-stack documents a genuine numpy dependency chain at length - so the natural
+stack documents a genuine numpy dependency chain at length, so the natural
 reaction is to go hunting through the pins, which is the wrong tree. The root
 cause here was never established; the restart is the answer.
 
 ```sh
-docker compose --profile packaged restart comfyui
+docker restart "$(python3 scripts/_engine.py)"
 until curl -s -o /dev/null http://127.0.0.1:8188/object_info; do sleep 4; done
 ```
 
@@ -127,9 +129,9 @@ build's `core_cc.so` shadows the CUDA one that registers the types spconv needs.
 The published 0.1.0 image shipped this way. The runtime remedy:
 
 ```sh
-docker exec -u 0 comfyui-packaged pip uninstall -y cumm
-docker exec -u 0 comfyui-packaged pip install --force-reinstall --no-deps cumm-cu124==0.7.11
-docker restart comfyui-packaged
+docker exec -u 0 "$(python3 scripts/_engine.py)" pip uninstall -y cumm
+docker exec -u 0 "$(python3 scripts/_engine.py)" pip install --force-reinstall --no-deps cumm-cu124==0.7.11
+docker restart "$(python3 scripts/_engine.py)"
 ```
 
 An image built from the current Dockerfile does not need this, because the
@@ -167,6 +169,11 @@ The bone names in your pose file are not in this rig. Bone names differ per
 model. Dump the map and re author. See
 [rigging](/guide/rigging#bone-names-are-not-human-readable).
 
+A pose can also do nothing when every bone name is right, for example when a
+rotation cancels out or goes to an axis with no effect. Then no line is printed.
+Render with `--check`: it flags a pose row identical to the first row at every
+angle, and exits non-zero.
+
 ## The model renders as a featureless grey blob
 
 It has no texture yet, and the render tools give untextured meshes a grey clay
@@ -202,7 +209,8 @@ Two things that confuse this further:
 
 Fixed, but worth knowing if you see it in an old script. Renders used to share one
 frame folder, so two running at once interleaved their frames. Each run now gets
-its own folder.
+its own folder, and it is deleted once the sheet is put together. Pass
+`--keep-frames` to keep it.
 
 ## Output files are owned by root
 

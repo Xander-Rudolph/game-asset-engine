@@ -10,37 +10,44 @@ scripts/run_workflow.py workflows/api/img2mesh_trellis.json \
     --image input/concept.png --set 'save_path=mesh/asset.glb'
 ```
 
-`img2mesh_trellis.json` uses the Stable3DGen branch. It has been run end to end:
-a 1104x1472 character concept on a plain grey background produced a clean
-48,000-face mesh in 29 seconds, with the background removed automatically.
+`img2mesh_trellis.json` uses the StableGen branch (Stable3DGen weights). It has
+been run end to end: a 1104x1472 character concept on a plain grey background
+produced a clean 48,000-face mesh in 29 seconds, with the background removed
+automatically.
 
-::: tip It needs no cut-out, unlike TripoSG
-This is the practical reason to reach for it beyond the licence. The pipeline
-runs rembg with u2net itself, so a plain grey-background concept render works
-directly. `img2mesh_triposg.json` needs an RGBA cut-out and there is no node in
-this install that makes one.
+::: tip No cut-out needed
+Beyond the licence, this is the practical advantage. The pipeline runs rembg
+with the u2net model itself, so a plain grey background concept works directly.
+
+TripoSG has no background removal step, but that is not the reason to pass it
+over. In this install it does not produce usable meshes at all. A plain grey
+background, a white one, a transparent cut-out, square framing and the non-flash
+decoder all gave the same result: a cage of disconnected fragments instead of
+the subject. TRELLIS made a clean, recognisable figure from the same grey
+concept.
 :::
 
 The rest of this page is why there are two TRELLIS branches, why only one of
 them ships as a graph, and what the other would need.
 
-## There are two TRELLIS branches and they do not mix
+## Two TRELLIS branches that can't mix
 
-Four nodes are registered, forming two independent chains. They share no pipeline
-type, so you cannot swap halves.
+Four nodes are registered, but they form two separate chains. They use different
+pipeline types, so you can't mix parts of one with parts of the other.
 
 | Branch | Loader | Generator | Pipeline type |
 |---|---|---|---|
 | Plain TRELLIS | `[Comfy3D] Load Trellis Structured 3D Latents Models` | `[Comfy3D] Trellis Structured 3D Latents Models` | `TRELLIS_PIPE` |
 | StableGen | `[Comfy3D] Load StableGen Trellis Pipeline` | `[Comfy3D] StableGen Trellis Image To 3D` | `DIFFUSERS_PIPE` |
 
-::: danger The type check will not protect you on the StableGen branch
-`TRELLIS_PIPE` has exactly one producer, so that branch is self-checking.
+::: danger The type check won't protect you on the StableGen branch
+`TRELLIS_PIPE` has exactly one producer, so on the plain branch ComfyUI rejects
+wrong wiring before anything runs.
 
 `DIFFUSERS_PIPE` is generic and has **fourteen** producers, including the TripoSG
-and Hunyuan loaders. ComfyUI will happily let you wire a TripoSG pipeline into
-`StableGen Trellis Image To 3D`, and it will fail at run time rather than at
-validation.
+and Hunyuan loaders. ComfyUI will let you wire a TripoSG pipeline into
+`StableGen Trellis Image To 3D`, and the graph then fails when it runs instead of
+being rejected when you queue it.
 :::
 
 ## Which branch to choose
@@ -71,8 +78,8 @@ Set `repo_id` to the absolute in-container path instead:
 GitHub repo and pulls about 1.2GB into the torch hub cache. The `facebook/dinov2-large`
 entry that `models.json` fetches is in Hugging Face transformers layout, is a
 different variant with no registers, and **nothing in the pack loads it**. That
-2.3GB is currently downloaded and unused. See [the manifest bug](#the-manifest-bug)
-below.
+2.3GB is currently downloaded and unused. See
+[the manifest bug](#the-manifest-and-what-was-wrong-with-it) below.
 
 **`reference_mask` is a required socket with no producer in the house pattern.**
 Every other image-to-mesh graph here feeds a `LoadImage` straight into the
@@ -88,8 +95,10 @@ generator. That cannot work here, and it fails twice over:
 
 So the plain branch needs an `InvertMask` between `LoadImage` slot 1 and
 `reference_mask`, and it needs a cut-out to begin with. The obvious in-graph
-route to one is unavailable: `LoadBackgroundRemovalModel` is registered but its
-model list is empty, so `RemoveBackground` has nothing to feed it.
+routes to one do not work here. `LoadBackgroundRemovalModel` is registered but
+its model list is empty, so `RemoveBackground` has nothing to feed it.
+`Multi Background Remover` outputs a `LIST` for the multiview Hunyuan3D 2 nodes,
+not an image. The Bria and Recraft background removers are online services.
 
 **Do not put `Decimate Mesh` after it.** This generator returns a *textured* mesh,
 carrying UV coordinates and an albedo. The decimation node reassigns only vertices
@@ -181,7 +190,7 @@ The `trellis` group used to list two entries, call itself roughly 10GB, and
 report complete. All three were wrong about what a run needs, and the group could
 not produce a mesh on either branch.
 
-It now declares four entries totalling about 9.6GB: the plain branch's TRELLIS
+It now declares four entries totalling about 9GB: the plain branch's TRELLIS
 image-large, the StableGen weights, the `.pth` DINOv2 that Stable3DGen actually
 loads, and the original `facebook/dinov2-large`.
 

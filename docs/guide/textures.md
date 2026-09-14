@@ -3,17 +3,25 @@
 A generated shape has no colour. Texturing paints it, using the concept image as
 the reference.
 
+::: warning This stage runs Hunyuan3D
+The texture graph runs Hunyuan3D 2.1, whose licence excludes the EU, UK and South
+Korea. The textured model, and any sprite rendered from it, is a result of that
+model, whichever generator made the shape. If the asset will ship in any of
+those regions, leave it untextured. See [licensing](/guide/licensing).
+:::
+
 ```sh
 scripts/run_workflow.py workflows/api/mesh_texture_hunyuan3d21.json \
     --image output/concept/golem_00001_.png \
     --set "mesh_path=/app/output/mesh/golem.glb" \
     --set "TexGen Pipeline.max_num_view=6" \
-    --set "TexGen Pipeline.resolution=512"
+    --set "TexGen Pipeline.resolution=512" \
+    --set "save_path=mesh/golem_textured.glb"
 ```
 
-The concept image goes in a second time here. The texture stage renders the model
-from several angles, paints each view to match the drawing, and projects the
-result back onto the surface. Without the drawing it has nothing to match.
+You pass the concept image again. The texture stage renders the model from
+several angles, paints each view to match the concept, and projects the painted
+views back onto the surface. It needs the concept image to know what to paint.
 
 ## Settings that matter
 
@@ -22,18 +30,22 @@ result back onto the surface. Without the drawing it has nothing to match.
 | `max_num_view` | 6 | How many angles are painted and projected back |
 | `resolution` | 512 | Size of each painted view |
 
-More views cover more of the model but take longer and can disagree with each
-other where they overlap. Six is a working compromise for a character. A tall
-thin subject benefits from more; a compact one does not.
+More views cover more surface but take longer and can conflict where they
+overlap. Six is a working compromise for a character. Tall thin subjects benefit
+from more views. Compact ones do not.
 
-Higher resolution is not free either. The map you end up with is limited by how
-much of the model each view covers, so doubling the view resolution on a model
-where each view sees a third of the surface does not double the useful detail.
+Higher resolution has limits too. The final map is limited by what each view can
+see. Doubling resolution when each view covers only a third of the surface won't
+double the useful detail.
+
+On a 16GB card, six views at 512 is what fits. Eight views at 768 ran out of
+memory.
 
 ## What comes out
 
 You get a textured `.glb` and a set of maps. The maps are colour, metal and
-roughness.
+roughness. The `.glb` goes where `save_path` says. Leave that out and it gets a
+timestamped name, `output/mesh/textured_<date and time>.glb`.
 
 ::: danger Copy the maps out before the next asset
 The texture stage always writes its maps to the same fixed paths. Generate a
@@ -59,24 +71,24 @@ Two consequences:
 
 ## Memory, and why texture runs are batched separately
 
-The texture model stays resident in GPU memory after it runs. About 5GB, and a
-request to free memory does not release it, because the node pack keeps its
-pipelines in its own cache outside ComfyUI's model management.
+The texture model stays in GPU memory after it runs, about 5GB. Asking ComfyUI
+to free memory does not release it, because the node pack keeps its models in
+its own cache, outside ComfyUI's control.
 
-So the next asset's shape stage dies with an out of memory error inside its
-loader. It looks like a broken workflow. It is not.
+The next asset's shape stage then crashes inside its loader with
+`torch.OutOfMemoryError: Allocation on device`. It looks like a broken workflow.
+It's not.
 
-The fix is ordering, not tuning: restart, run every shape, restart, run every
-texture. That is what `asset_to_mesh.sh` does. Never interleave the two stages in
-your own scripts.
+The fix is the order you run things in, not a setting: restart the container,
+run all shapes, restart again, run all textures. `asset_to_mesh.sh` does this
+automatically. Don't mix the stages in your own scripts.
 
-## Untextured is grey, and that is on purpose
+## Grey means untextured, not broken
 
-When a mesh has no texture, the render tools give it a mid grey clay material.
-Blender's default is white, and white against a white world light renders as a
-featureless blob with no readable form.
-
-So grey means "not textured yet". It does not mean the texture failed.
+The render tools give an untextured mesh a mid-grey clay material. Blender's
+default material is white, and white against a white world light renders as a
+featureless blob. So grey is on purpose. It means "not textured yet", not
+"texture failed".
 
 Force clay on a textured mesh with `--clay` when you want to judge shape without
 colour distracting you. It is the honest way to check a silhouette.

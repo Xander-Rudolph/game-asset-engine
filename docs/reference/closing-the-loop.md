@@ -1,11 +1,28 @@
 # Closing the loop
 
+::: tip Status: built on 2026-09-10
+Almost everything under [What to build](#what-to-build) was built on 2026-09-10:
+
+- `scripts/normalise_mesh.py`
+- `decimation_report.py --target-iou`
+- `scripts/sheet_check.py`, plus `render_sheet.py --check`
+- the smaller items: the Blender tools share one call with a `--timeout`,
+  decimation renders are saved under `output/_dec/`, and frame folders are
+  cleaned up unless you pass `--keep-frames`
+
+The one gap is the last check in item 3, silhouette area at ship size.
+`sheet_check.py` does not measure it.
+
+The sections below describe the repo as it was when this note was written, so
+their line numbers and their claims about what is missing are out of date. See
+the [scripts reference](/reference/scripts) for the tools as they are now.
+:::
+
 A design note, written 2026-09-10, prompted by looking at what GPT-6 Astra does
 with Blender and asking what is worth taking from it.
 
-The short answer: the interesting part is not the model. It is the shape of the
-loop, and this repo already has both halves of that loop with no wire between
-them.
+The interesting part isn't the model. It's the shape of the loop. This repo
+already has both halves of that loop, with no wire between them.
 
 ## What the comparison actually showed
 
@@ -43,11 +60,11 @@ anyone.
 step titled "Look at it, then say what you see", and the rule "do not hand over a
 sheet you have not looked at".
 
-That rule is right for taste. It is doing too much work for arithmetic. The
-sharpest example: the skill asks the agent to find, by eye, which cell shows the
-figure facing down and to the right. `render_sheet.py` computes that azimuth list
-arithmetically and prints it. **The script already knows the answer and asks the
-picture instead.**
+That rule is right for taste, but it is also being used for checks whose answer
+is a number. The sharpest example: the skill asks the agent to find, by eye,
+which cell shows the figure facing down and to the right. `render_sheet.py`
+computes the azimuth list and prints it. **The script already knows the answer
+and asks the picture instead.**
 
 ## The principle
 
@@ -74,7 +91,7 @@ by footprint.
 
 This is first because of a specific trap. `render_sheet.py` frames every model to
 its own bounding box, so **a mis-scaled model renders perfectly and ships wrong**.
-The error is invisible in exactly the artefact the docs tell you to inspect.
+The error is invisible in the very sheet the docs tell you to check.
 
 Nothing in `scripts/` currently scales a mesh to a world size.
 

@@ -64,42 +64,51 @@ Render it:
 
 ```sh
 scripts/render_sheet.py output/rigged/golem.fbx \
-    --poses transforms:poses/walk.json --angles 4 --size 220
+    --poses transforms:poses/walk.json --angles 4 --size 220 --check
 ```
+
+`--check` exits non-zero if the sheet has a fault it can measure, such as an
+empty cell or a pose that did nothing. More on that
+[below](#a-typo-costs-you-the-whole-sheet).
 
 `--poses` also takes `static` for one pose, `frames:1,7,13` to sample a baked
 animation, and `even:4` to spread frames across a clip's range.
 
-::: danger Two tools, two rotation conventions
-This has caused real confusion, so read it twice.
+::: danger Pose rotations are in each bone's own space
+This causes confusion, so read it carefully.
 
-`render_sheet.py` applies rotations in the **bone's own local space**. It sets
-the pose bone's Euler rotation directly.
+`render_sheet.py` rotates bones in their **own local coordinate space**. It
+sets each pose bone's Euler rotation directly.
 
-`pose_frames.py`, the tool that bakes frames out as models, applies them in
-**world space**, converting per bone.
+That is simple for a single model, but a pose file does not carry over to
+another rig. The automatic rigger gives each bone whatever roll (twist along its
+length) the solve landed on, so the axis that swings a leg forward changes from
+rig to rig. It was X on one model here and Z on another.
 
-They are both right for what they do, and a pose file written for one is not
-correct for the other. Local space is simpler for a single model. World space
-exists because the automatic rigger gives each bone whatever roll the solve
-landed on, so the axis that swings a leg forward differs between rigs. It was X
-on one model here and Z on another. Authoring in world space means one pose file
-works on every skeleton.
+Authoring in **world space** avoids that: convert each rotation from the world's
+axes into the bone's own axes before applying it, and the same numbers give the
+same motion on any skeleton. Nothing in this repo does that conversion yet, so a
+pose file here is local space and belongs to the rig it was written for.
 
-If a pose file produces a sensible cycle in one tool and sprawling nonsense in
-the other, this is why.
+If a pose that looked right on one figure sprawls on another, a different bone
+roll is the likely reason.
 :::
 
 ## Which axis does what
 
-Established by probing a real rig, not guessed:
+Established by probing a real rig with `render_sheet.py`, not guessed. So these
+are local space axes, and they hold for that rig:
 
 - **X bends a limb or the spine forward and back.** This is the swing axis and it
   does most of the work in every cycle.
 - **Z splays a limb outward** from the body.
 - **Y twists** along the bone.
 
-A bone's own axis runs along Y, which is why bending is X.
+A bone's own axis runs along Y, so Y twists on every rig. X and Z are the two
+bending axes, and which one swings forward depends on the bone's roll. That is
+the part that changed between rigs, as the box above says. On a new rig, turn
+one thigh about X in a test pose and see which way it moves before you write a
+whole cycle.
 
 ## Exaggerate more than feels right
 
@@ -131,15 +140,23 @@ If you see that line, the pose did nothing and the sheet you just rendered is th
 rest pose four times. Re read the bone map. Bone names differ per model, which is
 covered in [rigging](/guide/rigging#bone-names-are-not-human-readable).
 
+That line only catches a wrong name. Render with `--check` as well. It flags a
+pose row identical to the first row at every angle and exits non-zero, which
+catches a pose that did nothing even when every bone name was right: a rotation
+that cancelled out, was zero, or went to an axis with no visible effect.
+
 ## Deriving cycles automatically
 
 Because bone names differ per model, a hand written pose file does not survive
-being pointed at a second one. The game repo's `tool/make_cycles.py` reads the
-skeleton's geometry and works out which chains are legs, spine and arms, then
-writes walk, attack and hit files for that specific rig.
+being pointed at a second one. A script can read the skeleton's geometry, work
+out which chains are legs, spine and arms, and then write walk, attack and hit
+files for that specific rig. None ships here yet.
+[Rigging](/guide/rigging#bone-names-are-not-human-readable) shows how to tell the
+chains apart from the bone positions.
 
 That is the approach to copy if you are rigging many characters. Derive the
-limbs, then apply a cycle expressed in terms of limbs rather than bone names.
+limbs, then apply a cycle expressed in terms of limbs rather than bone names, and
+in world space rather than each bone's own axes, so bone roll does not matter.
 
 ## Frames as models, not as a sheet
 

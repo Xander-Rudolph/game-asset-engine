@@ -14,36 +14,31 @@ its mistakes. This is the cheapest stage to redo and the most expensive to skip.
 
 ## The fast workflow ignores negative prompts
 
-The fast graph runs at guidance scale 1.0, because that is what the four step
-Lightning LoRA needs. At guidance 1.0 there is no negative prompt. Not a weak
-one. None at all. The negative text is not used.
+The fast graph runs at guidance scale 1.0, which the four step Lightning model
+needs. At that setting, negative prompts don't work. They're read but not used.
 
-This matters because the negative prompt is what keeps ragged hems, clutter and
-cartoon styling out of the picture. So the fast graph is for finding a
-composition, and the 20 step graph is for producing the image you will actually
-build on.
+In this pipeline, the negative prompt is what keeps ragged hems, clutter and
+cartoon styling out of the picture. So the fast graph is for exploring
+compositions, and the 20 step graph is for the real image you'll build on.
 
-If you are wondering why your carefully written negative prompt did nothing, this
-is almost always why.
+If your negative prompt had no effect, this is almost always why.
 
-## How prompts are organised
+## How prompts work
 
-Prompts live in `prompts/`, one folder per subject type, one text file per
-subject. Two files in each folder start with an underscore and are shared:
+Prompts live in `prompts/`, one folder per subject type, one file per subject.
+Files starting with an underscore are shared by the subjects in that folder:
 
-- `_style.txt` carries the **technique**: one subject, whole thing in frame,
-  plain background, even lighting, large readable shapes. Those clauses are the
-  same whatever you are making. In the middle of it is an
-  `<<< ART DIRECTION: ... >>>` slot. **Replace that one phrase with your
-  project's look and change nothing else.**
-- `_negative.txt` is passed as the negative prompt for every subject in that
-  folder.
+- `_style.txt` contains the **technique part**: one subject, fully in frame,
+  plain background, even lighting, large readable shapes. These are the same for
+  everything you make. It has a `<<< ART DIRECTION: ... >>>` slot. **Replace
+  only that phrase with your project's style. Don't change anything else.**
+- `_negative.txt` becomes the negative prompt for every subject in the folder.
 
-That split is deliberate. A shared style file is the single highest-leverage
-place to contaminate a whole asset set: bake a house style into the default and
-every generation silently carries someone else's project. `prompts/examples/`
-holds one project's filled-in version, to show what a completed art direction
-looks like. Nothing in the default path reads from it.
+The split is deliberate. One change to a shared style file reaches every asset
+made from that folder. Bake a house style into the default and every generation
+silently carries someone else's project. `prompts/examples/` holds one project's
+filled-in art direction, to show what a finished one looks like. Nothing in the
+default path reads from it.
 
 Generate a whole folder:
 
@@ -83,14 +78,18 @@ Four things every subject prompt states:
 
 1. **The whole subject is in frame** with space around it. A cropped figure
    becomes a cropped mesh.
-2. **Plain flat background.** The mesh generators cut the subject out
-   themselves, and a plain background makes that reliable. It also lets icons be
-   cut out with a flood fill instead of a matting model.
+2. **Plain flat background.** Use TRELLIS or Hunyuan3D for the mesh (Hunyuan3D's
+   licence excludes the EU, UK and South Korea). Both cut the subject out
+   themselves, and a plain background makes that reliable.
+   TripoSG does not currently produce usable meshes here, whatever the
+   background, and the TripoSR graph does not work as wired, so skip both. See
+   [meshes](/guide/meshes#which-generator). A plain background also lets icons
+   be cut out with a flood fill instead of a matting model.
 3. **Large simple shapes with a clear silhouette.** Small detail does not survive
    the trip to 3D and then down to a sprite. It becomes noise.
 4. **Real materials and lighting.** Say metal, leather and cloth with proper
-   shading. Say it plainly, because the alternative is flat vector art, and flat
-   art gives the mesh generator nothing to read depth from.
+   shading. Say it plainly. The alternative is flat vector art, which gives the
+   mesh generator no depth information to work with.
 
 Here is a filled-in character style, as an example of all four:
 
@@ -98,7 +97,7 @@ Here is a filled-in character style, as an example of all four:
 > viewer, the entire figure visible from the top of the head to the boots with
 > clear space above and below. Simple bold game ready character design built
 > from a few large clean shapes with a strong readable silhouette. Detailed
-> painted fantasy illustration with realistic materials and lighting: worn brass
+> painted fantasy illustration with realistic materials and lighting: worn metal
 > with real specular highlights, leather with visible grain, woven fabric with
 > natural folds, soft cinematic studio lighting and gentle shadows. Plain light
 > grey background.
@@ -129,13 +128,11 @@ If you have concept art that is too busy to convert, `img_edit_qwen.json` can
 redraw it more simply while keeping the same character.
 
 ```sh
-scripts/simplify_concepts.sh concept_art/unit_*.png
-DENOISE=0.93 scripts/simplify_concepts.sh concept_art/lord_*.png
+scripts/simplify_concepts.sh output/concept/*.png
+DENOISE=0.93 scripts/simplify_concepts.sh output/concept/ornate_knight.png
 ```
 
 ### Denoise behaves like a cliff, not a dial
-
-This is the single most useful number on the page.
 
 | Denoise | What you get |
 |---|---|
@@ -144,19 +141,19 @@ This is the single most useful number on the page.
 | 0.93 | Pushed further to clean game ready forms, still shaded. |
 | 1.00 | The model's own style takes over and returns flat vector art, no matter how many times the prompt says not cartoon. |
 
-The cliff moves depending on how busy the source is. Four unit portraits
+The cliff moves depending on how busy the source is. Four plainer figures
 simplified well at 0.85 and went flat at 1.0. Eight heavily detailed figures,
 dense with chains and filigree, were barely touched at 0.85, right at 0.93, and
-already flat vector art at 0.97 with their goggles and lanterns gone.
+already flat vector art at 0.97 with their small props gone.
 
 Test one image before running a batch.
 
 ## Naming outputs
 
-Outputs are named after the source file, not after ComfyUI's own counter. The
-counter records nothing about which input or which settings produced a file, and
-becomes unreadable within a dozen runs. When you write your own batch script,
-set `Save.filename_prefix` per item.
+Outputs are named after the source file, not ComfyUI's counter. The counter
+doesn't record which input or settings produced a file, so it becomes unreadable
+within a dozen runs. When you write your own batch script, set
+`Save.filename_prefix` per item.
 
 ## Checking a batch without opening a file manager
 

@@ -1,40 +1,40 @@
 # Docker and versions
 
-Every version in this stack is pinned, and the pins are a chain. Changing one
-breaks the next. This page says why, so the chain can be escaped deliberately
-rather than by accident.
+Every version here is pinned, and they depend on each other. Change one and the
+next breaks. This page explains the chain so you can make deliberate changes
+instead of accidental ones.
 
-## The chain
+## The dependency chain
 
-**The host driver decides CUDA.** On a 550 series driver, CUDA cannot go above
-12.4, because consumer cards get no forward compatibility.
+**The host driver determines CUDA.** A 550-series driver caps out at CUDA 12.4,
+because consumer cards get no forward compatibility.
 
-**CUDA decides Python and torch.** The 3D node pack does not compile its CUDA
-extensions. It downloads prebuilt wheels keyed on operating system, Python
-version, torch version and CUDA version. The only Linux plus CUDA 12.4 set that
-repository publishes is for Python 3.11 and torch 2.6.0.
+**CUDA determines Python and PyTorch.** The 3D node pack doesn't compile its
+CUDA extensions. It downloads prebuilt wheels from a separate wheel repository,
+picking the set that matches your operating system, Python, torch and CUDA
+version. The only set for Linux and CUDA 12.4 in that repository is for
+Python 3.11 and torch 2.6.0.
 
-So: **Python 3.11, torch 2.6.0, CUDA 12.4**, not the 3.12, 2.7.0 and 12.8 that
-the pack's own README defaults to. The Dockerfile rewrites that config during the
-build.
+So we use **Python 3.11, torch 2.6.0, CUDA 12.4**, not the torch 2.7.0 and
+CUDA 12.8 that the pack's build config asks for by default. Those need a newer
+driver, so the Dockerfile rewrites that config during the build.
 
-Change any one of the three and the installer silently falls back to compiling
-several large CUDA libraries from source. That is why the base image is a
-development image carrying the CUDA compiler, and why the build takes an hour
-when it happens.
+If you change any of these three, the installer silently falls back to
+compiling several large CUDA libraries from source, which takes an hour. That's
+why the base image is a development image with the CUDA compiler in it.
 
-**Torch decides the ComfyUI version.** ComfyUI is held at v0.30.2, not master. A
-dependency declares torch custom operations using builtin generic type hints, and
-torch 2.6 rejects those. The server dies on import before a single node loads:
+**PyTorch determines the ComfyUI version.** We use ComfyUI v0.30.2, not the
+latest. A dependency (`comfy-kitchen`) uses type hints that torch 2.6 rejects,
+so the server dies on start-up before a single node loads:
 
 ```
 ValueError: infer_schema(func): Parameter kernel_size has unsupported type list[int]
 ```
 
-The last version of that dependency which runs on torch 2.6 is pinned in the
-constraints file alongside torch, so nothing can bump it back. v0.30.2 is the
-newest ComfyUI release pinning it, and it still ships the API that the rigging
-nodes are written against.
+The last `comfy-kitchen` release that runs on torch 2.6 is 0.2.26. It is pinned
+in the constraints file next to torch, so no later `pip install` can move it.
+v0.30.2 is the newest ComfyUI release that pins that version, and it still has
+the API the rigging nodes need.
 
 ## How to escape the pin
 
@@ -59,36 +59,36 @@ docker compose --profile comfy up -d
 docker compose --profile comfy logs -f
 ```
 
-::: warning A bind mount replaces, it does not merge
-Mounting an empty `./custom_nodes` over the baked one is exactly how you get a
-server with no nodes in it. The packaged profile therefore mounts no source. The
-`comfy` profile's entrypoint seeds an empty mount from the image's own copy and
-leaves a non empty one alone, so both a fresh checkout and an edited one work.
+::: warning A mounted host folder hides what the image has
+Mounting an empty `./custom_nodes` folder hides the nodes baked into the image.
+The packaged profile doesn't mount source at all. Under the `comfy` profile, the
+start-up script copies the baked nodes in only when the folder is empty, so a
+fresh checkout works and your edits are never overwritten.
 :::
 
 ## Node packs
 
-`custom_nodes/` is bind mounted under the `comfy` profile, so the image holds
-each pack's **compiled dependencies** while the host holds the **source ComfyUI
-imports**. Keep the node pack revision in the Dockerfile and in `setup.sh` in
-step. Drift between them shows up as an import error with no obvious cause.
+Under the `comfy` profile, `custom_nodes/` is mounted from the host. The image
+holds each pack's **compiled dependencies**, and the host holds the **source
+code** ComfyUI imports. Keep the node pack commits in the Dockerfile and
+`setup.sh` the same. If they drift, you get import errors that don't point to
+the real problem.
 
-The rigging pack installs into an isolated environment with its own bundled
-Blender, which is why it is built by `postinstall.sh` inside the **running**
-container rather than at image build time. Built during the image build it would
-land in a layer that the host mount then hides. Its first run is slow and needs
-the network.
+The rigging pack has its own bundled Blender in an isolated environment. That's
+why it's installed by `postinstall.sh` in the **running container**, not during
+image build. If it were built at image time, the host mount would hide it. Its
+first run is slow and needs network access.
 
 ## Publishing the image
 
 ```sh
-scripts/publish_image.sh 0.1.0
-scripts/publish_image.sh 0.1.0 --dry
+scripts/publish_image.sh 0.1.2
+scripts/publish_image.sh 0.1.2 --dry
 ```
 
-Built locally rather than in CI on purpose. The image is 27.5GB and a hosted
-runner gives you about 14GB free on the volume Docker's data root lives on, so
-the build dies partway through the CUDA layers with no space left.
+We build locally, not in CI. The image is 27.6GB. A hosted runner has only
+about 14GB free on the disk Docker stores images on, so the build dies partway
+through the CUDA layers with `no space left on device`.
 
 Log in once first. The token needs package write permission:
 
@@ -96,18 +96,18 @@ Log in once first. The token needs package write permission:
 echo "$GITHUB_TOKEN" | docker login ghcr.io -u <you> --password-stdin
 ```
 
-Two things about that build each cost a round trip to learn:
+Two things to know about the build:
 
-**BuildKit reads the whole context when the build starts.** Editing a file while
-a long build runs does not reach the image, even if the instruction that copies it
-is second to last. The first image shipped with a superseded entrypoint for
-exactly this reason. Finish editing, then build.
+**Finish editing before you build.** The build reads all files when it starts.
+Changes made during the build don't make it in, even if the copy instruction is
+near the end. The first shipped image had an outdated start-up script for exactly
+this reason.
 
-**A named volume is not a bind mount.** Docker copies the image's content into an
-empty named volume on first use, so the packaged profile's workflows arrive
-whether or not anything seeds them. An empty bind mount gets no such help. It
-hides the image's copy, which is what the entrypoint's seeding is for. Test both
-paths, because only one of them exercises that code.
+**A named volume is not a mounted host folder.** Docker fills an empty named
+volume from the image on first use, so the packaged profile's workflows arrive
+even if the start-up script's seeding is broken. An empty host folder gets no
+such help. It hides the image's copy, and only the seeding fills it. Test both,
+because only the empty host folder case runs the seeding.
 
 ## Environment
 

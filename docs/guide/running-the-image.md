@@ -14,17 +14,17 @@ ghcr.io/xander-rudolph/game-asset-engine-comfy:latest
 
 ## Authenticating
 
-The package is private until it is made public, so a pull needs a token. Use a
-GitHub personal access token with `read:packages`:
+A pull needs a GitHub token only while the package is private. While it is, log
+in with a personal access token that has `read:packages` permission:
 
 ```sh
 echo "$GITHUB_TOKEN" | docker login ghcr.io -u <your-github-username> --password-stdin
 ```
 
-::: warning An unauthorised pull looks like a missing image
-If the package is private and you have not logged in, `docker pull` reports
-`denied` or `manifest unknown` rather than anything about permissions. That reads
-as a wrong tag. Check you are logged in before chasing the tag.
+::: warning Permission errors look like missing images
+If the package is private and you're not logged in, `docker pull` reports
+`denied` or `manifest unknown`, not a permission error. That looks like a wrong
+tag. Check you're logged in before chasing the tag.
 :::
 
 ## With compose, which is the short way
@@ -64,23 +64,23 @@ docker run -d \
   ghcr.io/xander-rudolph/game-asset-engine-comfy:latest
 ```
 
-Every one of those lines earns its place:
+Each flag solves a specific problem:
 
 | Flag | Why |
 |---|---|
-| `--gpus all` | Nothing generates without it |
-| `--shm-size 16g` | The default 64MB is not enough for the dataloaders; you get an opaque worker crash |
-| `--user $(id -u):$(id -g)` | Otherwise every mesh, sprite and sheet lands owned by root and you cannot move it into your game |
-| `PYOPENGL_PLATFORM=egl` | The renderer draws headless through EGL |
-| `HF_HOME` inside the models mount | Keeps the Hugging Face cache with the rest of the weights instead of in the container's writable layer, where a recreate would lose it |
-| `3d_checkpoints` mount | The 3D pack hardcodes its checkpoints path inside its own node directory, so ours is mounted over it |
-| `unirig-home` volume | The rigging pack builds an ~11GB environment on first use. A named volume survives `down` and `--force-recreate` |
-| `comfy-user` volume | Graphs you save in the editor live here. Without it, a recreate throws them away |
+| `--gpus all` | Required for generation |
+| `--shm-size 16g` | The default 64MB is too small for the dataloaders, and the worker crash you get doesn't say why |
+| `--user $(id -u):$(id -g)` | Without it, every mesh, sprite and sheet is owned by root, and you can't move it into your game without `sudo` |
+| `PYOPENGL_PLATFORM=egl` | Enables headless rendering |
+| `HF_HOME` inside the models mount | Keeps the Hugging Face cache with the weights. Otherwise it sits inside the container, and recreating the container loses it |
+| `3d_checkpoints` mount | The 3D pack only looks for checkpoints inside its own node folder, so the ones in your models folder are mounted there |
+| `unirig-home` volume | The rigging pack builds an environment of about 11GB on first use. A named volume keeps it through `down` and `--force-recreate` |
+| `comfy-user` volume | Graphs you save in the editor live here. Without it, `down` or `--force-recreate` deletes them |
 
-::: danger Do not bind mount an empty directory over custom_nodes
-A bind mount replaces a path rather than merging with it. Mounting an empty
-`./custom_nodes` over the baked one is exactly how you get a server with no nodes
-in it. The packaged profile deliberately mounts no source at all.
+::: danger Don't mount an empty folder over custom_nodes
+A mounted host folder replaces what the image has at that path. It doesn't add
+to it. An empty `./custom_nodes` hides all the baked-in nodes. The packaged
+profile doesn't mount source for this reason.
 :::
 
 ## Weights are separate
@@ -90,12 +90,16 @@ container reads `models.json` on boot and names anything missing **before** the
 server starts, rather than letting it turn up as a red node an hour later.
 
 ```sh
-scripts/fetch_models.py                    # report on the core group
+scripts/fetch_models.py                    # check core; no weights, but seeds MODELS_DIR
 scripts/fetch_models.py --download         # fetch the missing core models
+scripts/fetch_models.py --download --group qwen   # the concept graphs need it, about 48GB
 scripts/fetch_models.py --list-groups      # what groups exist, and their sizes
 ```
 
-Or have the container fetch them itself on boot:
+The [first asset walkthrough](/guide/first-asset#fetch-the-weights-once) also
+uses the `trellis` and `hunyuan` groups and fetches them in its first step.
+
+Or have the container fetch the core group itself on boot (about 20GB):
 
 ```sh
 ASSET_ENGINE_FETCH_MODELS=1 docker compose --profile packaged up -d
@@ -107,7 +111,7 @@ ASSET_ENGINE_FETCH_MODELS=1 docker compose --profile packaged up -d
 scripts/doctor.py
 ```
 
-Ten checks, including two that are easy to miss and expensive to discover late:
+Eleven checks, including two that are easy to miss and expensive to discover late:
 whether Blender is importable inside the container, and whether sparse
 convolution imports. See [when something breaks](/guide/troubleshooting).
 
@@ -130,7 +134,7 @@ docker compose --profile packaged up -d
 
 ::: warning `docker image prune -a` is expensive here
 It removes anything not used by a *running* container, which includes this image
-when it is stopped. Getting it back is a 27.6GB pull, or an hour of CUDA layers
+when it is stopped. Getting it back is a 17GB download that unpacks to 27.6GB, or an hour of CUDA layers
 if you rebuild. Prune by repository rather than with `-a` when clearing build
 clutter.
 :::
