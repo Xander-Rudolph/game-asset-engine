@@ -40,7 +40,8 @@ and shipped at 128 wastes geometry.
 
 ## What the numbers usually say
 
-Measured on a watertight generated creature, 39,956 faces:
+Measured on a generated creature of 39,956 faces, one main shell holding 99% of
+them plus 29 tiny loose pieces:
 
 | Faces | Silhouette | Outline lost | Texture |
 |---:|---:|---:|---:|

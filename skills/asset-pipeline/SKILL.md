@@ -1,6 +1,6 @@
 ---
 name: asset-pipeline
-description: Generate a game asset from a text prompt through a local ComfyUI, stopping for approval at each stage - concept image, then 3D mesh, then rigging, then sprite frames. Use when the user wants to make a 3D game asset, character, creature or prop from a description, or asks to run the asset pipeline. Also use when they want to redo one stage of an asset they already made.
+description: Generate a game asset from a text prompt through a local ComfyUI, stopping for approval at each stage (concept image, then 3D mesh, then rigging, then sprite frames). Use when the user wants to make a 3D game asset, character, creature or prop from a description, or asks to run the asset pipeline. Also use when they want to redo one stage of an asset they already made.
 ---
 
 # Asset pipeline: prompt to rigged model, with a gate at every stage
@@ -27,11 +27,11 @@ If it is not ready, walk the user through it rather than doing it silently:
 | `docker` missing | Docker is not installed or they are not in the `docker` group. The fix is printed. Adding a group needs a re-login. |
 | `gpu runtime` warning | The NVIDIA container toolkit is missing. Mesh generation will not work without it. Give them the `nvidia-ctk` command it prints. |
 | `.env` missing | Offer to run `scripts/doctor.py --fix`, which writes it from the example. They still need to set `MODELS_DIR`. |
-| `image` missing | 27GB pull. Say the size before starting it. `docker pull ghcr.io/xander-rudolph/game-asset-engine-comfy:latest` |
+| `image` missing | About 17GB to download, 27.6GB on disk. Say the size before starting it. `docker pull ghcr.io/xander-rudolph/game-asset-engine-comfy:latest`. While the package is private, log in first with a GitHub token that has `read:packages`: `echo "$GITHUB_TOKEN" \| docker login ghcr.io -u <github-username> --password-stdin`. Without that the pull fails with `denied` or `manifest unknown`, which looks like a wrong tag. |
 | `container` not running | `docker compose --profile packaged up -d`, or offer `--fix`. |
-| `server` not answering | The container can be up while ComfyUI is still importing nodes. That takes a minute or two on a cold start. Wait, do not restart. `docker logs -f comfyui` shows progress. |
-| `node packs` not loaded | A pack failed to import. The reason is only in the startup log: `docker logs comfyui 2>&1 \| grep -i -A5 error \| head -40` |
-| `weights` missing | `scripts/fetch_models.py --download`. Core is about 21GB. Say the size first. |
+| `server` not answering | The container can be up while ComfyUI is still importing nodes. That takes a minute or two on a cold start. Wait, do not restart. `docker logs -f "$(python3 scripts/_engine.py)"` shows progress. |
+| `node packs` not loaded | A pack failed to import. The reason is only in the startup log: `docker logs "$(python3 scripts/_engine.py)" 2>&1 \| grep -i -A5 error \| head -40` |
+| `weights` missing | The check covers the `core` group (SDXL, TripoSR and TripoSG), about 20GB, which `scripts/fetch_models.py --download` fetches. The default path below needs other groups: `--download --group qwen` for stage 1 (about 48GB), `--group trellis` for the TRELLIS shape graph (about 9GB), and `--group hunyuan` for either Hunyuan graph (about 24GB). Say the size first. |
 
 If the user has never run this before, offer to run `scripts/doctor.py --fix`
 and then walk the remaining steps with them one at a time.
@@ -102,14 +102,14 @@ Pick the generator and **say which one you picked and why**:
 
 | Use | When |
 |---|---|
-| `img2mesh_triposg.json` | Fast and clean. MIT upstream, but the copy in this pack ships a licence file with the EU/UK/Korea exclusion, which is unresolved. Needs a cut out image. |
-| TRELLIS | **The choice with no territory clause** (MIT), for anything shipping into the EU, UK or South Korea. No graph ships for it yet: the weights are in the `trellis` group and the nodes are loaded (`[Comfy3D] Trellis Structured 3D Latents Models`), so it needs a graph building. Say that rather than pretending there is a one-liner. |
+| `img2mesh_trellis.json` | **The choice with no territory clause** (MIT), for anything shipping into the EU, UK or South Korea. Removes the background itself, so a plain-background concept works as is. Needs the `trellis` weight group: `scripts/fetch_models.py --download --group trellis`. |
 | `img2mesh_hunyuan3d21.json` | Best geometry, removes the background itself. **Licence excludes the EU, UK and South Korea.** Say so before using it for anything that ships. |
-| `mesh_texture_hunyuan3d21.json` | Paints an existing shape. Run after a shape graph. |
-| `img2mesh_triposr.json` | Fastest, lowest quality. Needs a cut out too. |
+| `mesh_texture_hunyuan3d21.json` | Paints an existing shape. Run after a shape graph. It runs Hunyuan3D 2.1, so **the licence excludes the EU, UK and South Korea** for the textured model and every sprite rendered from it, even when TRELLIS made the shape. Say so before texturing anything that ships. |
+| `img2mesh_triposr.json` | **Does not work as wired.** Read from the source, not run: the graph feeds `LoadImage`'s mask straight into `reference_mask`, and that mask is 1 minus alpha. A transparent cut-out comes out with the subject greyed and the background kept, and an image with no transparency fails on a mask size mismatch. It would need an `InvertMask` before `reference_mask`, plus a cut-out. |
+| `img2mesh_triposg.json` | **Do not use for now.** In this install it returns a cage of fragments instead of the subject, whatever the input: plain grey background, white background, a transparent cut-out, square framing and the non-flash decoder all failed the same way. Its licence status inside this pack is also unresolved. |
 
 ```sh
-scripts/run_workflow.py workflows/api/img2mesh_hunyuan3d21.json \
+scripts/run_workflow.py workflows/api/img2mesh_trellis.json \
     --image output/concept/character_00002_.png \
     --set 'save_path=mesh/<name>.glb'
 ```
@@ -120,22 +120,29 @@ A mesh cannot be displayed, so render it and read the render:
 
 ```sh
 scripts/render_sheet.py output/mesh/<name>.glb --angles 4 --size 320 \
-    --out output/sheets/<name>.png
+    --out output/sheets/<name>.png --check
 ```
+
+`--check` exits non-zero if a cell is empty, the subject touches its cell border
+or its size swings a lot between angles. Passing it does not make the mesh good.
 
 Read that file. Then get the numbers, because the picture hides things:
 
 ```sh
-docker exec comfyui python3 -c "
+docker exec "$(python3 scripts/_engine.py)" python3 -c "
 import trimesh; m = trimesh.load('/app/output/mesh/<name>.glb', force='mesh')
-print('faces', len(m.faces), '| bodies', m.body_count, '| watertight', m.is_watertight)"
+big = max(len(p.faces) for p in m.split(only_watertight=False)) / len(m.faces)
+print('faces', len(m.faces), '| bodies', m.body_count, '| largest piece', f'{big:.0%}',
+      '| watertight', m.is_watertight)"
 ```
 
 What to flag rather than let the user discover later:
 
-- **`bodies` well above 1** means disconnected pieces. A few is normal for a
-  detailed creature. Twenty or more from a small mesh means the generator failed,
-  usually from a bad input image. Offer to go back to stage 1.
+- **A small `largest piece`** means the generator failed. A good mesh keeps
+  nearly all its faces in one piece: the meshes measured here held 99% or more,
+  with anywhere from 3 to 30 `bodies`. The failed TripoSG runs held 30% or less.
+  So do not judge by `bodies` alone, because a few dozen tiny loose pieces are
+  normal. Offer to go back to stage 1 or to try a different generator.
 - **A near empty render** means the same thing.
 - **Grey clay** in the render means no texture yet, which is expected from a
   shape only workflow. Say so rather than letting it read as a failure.
@@ -167,7 +174,7 @@ its budget of 48,000 faces and hands back the decimated version, not the
 original. Under the budget, nothing happens. Check:
 
 ```sh
-docker exec comfyui python3 -c "
+docker exec "$(python3 scripts/_engine.py)" python3 -c "
 import bpy; bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.ops.import_scene.fbx(filepath='/app/output/rigged/<name>.fbx')
 ms=[o for o in bpy.data.objects if o.type=='MESH']
@@ -189,7 +196,7 @@ carries the skeleton and OBJ cannot carry one at all.
 scripts/list_animations.py                    # what is actually installed
 scripts/render_sheet.py output/rigged/<name>.fbx \
     --poses transforms:poses/walk.json --angles 4 --size 220 \
-    --out output/sheets/<name>_walk.png
+    --out output/sheets/<name>_walk.png --check
 ```
 
 **Ask which camera the game uses before rendering.** The default is isometric,
@@ -198,8 +205,13 @@ elevation 30 with facings starting at 45 degrees. A top down game needs
 square on while the ground runs diagonally underneath, and it is not obvious in a
 single frame.
 
-Read the sheet. A mis signed rotation produces a confident, well rendered, wrong
-cycle, and no log line will tell you.
+`--check` exits non-zero on a fault it can measure, including a pose row
+identical to the first row at every angle, which means the pose did nothing even
+if every bone name was right. It also names the cell that faces down and to the
+right, which is where the game's facing mapping starts.
+
+Then read the sheet. A mis signed rotation produces a confident, well rendered,
+wrong cycle, and neither the check nor a log line will tell you.
 
 ---
 
@@ -215,4 +227,4 @@ cycle, and no log line will tell you.
 - After editing any workflow, run `scripts/validate_workflows.py`. It checks node
   names and wiring against the live server.
 - If a stage errors, read the real cause before retrying:
-  `docker logs --since 3m comfyui 2>&1 | grep -iE 'error|exception'`
+  `docker logs --since 3m "$(python3 scripts/_engine.py)" 2>&1 | grep -iE 'error|exception'`

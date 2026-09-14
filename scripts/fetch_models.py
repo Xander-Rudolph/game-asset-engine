@@ -5,8 +5,8 @@ missing ones.
 Stdlib only, on purpose: this runs on the host before the image exists, so it
 cannot lean on huggingface_hub.  It talks to the HF tree API directly.
 
-    scripts/fetch_models.py                      # report on the 'core' group
-    scripts/fetch_models.py --all                # report on everything
+    scripts/fetch_models.py                      # check the 'core' group
+    scripts/fetch_models.py --all                # check everything
     scripts/fetch_models.py --download           # fetch missing 'core' models
     scripts/fetch_models.py --download --group hunyuan --group trellis
     scripts/fetch_models.py --download --all
@@ -16,6 +16,10 @@ cannot lean on huggingface_hub.  It talks to the HF tree API directly.
 A file counts as present when it exists and its size matches what the hub
 reports; a short file is a resumed-download casualty and gets re-fetched.
 Set HF_TOKEN for gated repos.
+
+Only --download fetches weights, but a check is not read-only. Every mode
+except --licenses and --list-groups first creates MODELS_DIR if it is missing
+and copies in any 3D-Pack config files it lacks (the --seed-only step).
 """
 from __future__ import annotations
 
@@ -250,10 +254,12 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--download", action="store_true",
-                    help="actually fetch what is missing (default: report only)")
+                    help="actually fetch what is missing (default: list it and fetch "
+                         "no weights; MODELS_DIR is still created and seeded)")
     ap.add_argument("--group", action="append", default=[],
                     help="group to include; repeatable (default: core)")
-    ap.add_argument("--all", action="store_true", help="every group except 'gated'")
+    ap.add_argument("--all", action="store_true",
+                    help="every group except 'gated' and 'noncommercial'")
     ap.add_argument("--gated", action="store_true", help="include the 'gated' group too")
     ap.add_argument("--seed-only", action="store_true",
                     help="only lay down the 3D-Pack Checkpoints skeleton")

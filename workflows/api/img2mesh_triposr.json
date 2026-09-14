@@ -1,5 +1,5 @@
 {
-  "_comment": "Fastest path, ~10s on a 4070 Ti Super. TripoSR wants a cut-out: feed it an RGBA PNG so LoadImage's alpha becomes the mask, or the whole background is reconstructed as geometry.",
+  "_comment": "Fastest path, ~10s on a 4070 Ti Super. AS WIRED THIS GRAPH DOES NOT WORK. LoadImage's MASK output is 1 - alpha, and the TripoSR node uses reference_mask AS the alpha channel, then composites the image over grey. So a transparent cut-out greys out the subject and keeps the background, and an image with no alpha gives a 64x64 zero mask that cannot be joined to the full-size image. It needs an InvertMask between LoadImage slot 1 and reference_mask, and a transparent cut-out. Established from the node source, not yet run.",
   "1": {
     "class_type": "LoadImage",
     "inputs": {

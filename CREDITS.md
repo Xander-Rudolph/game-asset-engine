@@ -40,7 +40,7 @@ which all of the above extends.
 - **Stable Diffusion XL** and **SD 1.5** by Stability AI.
 - **InstantMesh**, **Zero123++**, **MV-Adapter**, **Unique3D**, **CharacterGen**,
   **LGM**, **CRM**, **TriplaneGaussian**, **PartCrafter**, **StableFast3D**.
-- **rembg** and **u2net** for background removal. Apache 2.0.
+- **rembg** (MIT) and its **u2net** model (Apache 2.0), for background removal.
 
 ## Animation
 

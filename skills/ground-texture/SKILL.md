@@ -28,7 +28,7 @@ scripts/run_workflow.py workflows/api/preset_ground_texture.json \
 Or generate a whole set from the prompt library:
 
 ```sh
-scripts/generate_concepts.sh prompts/ground
+WIDTH=1024 HEIGHT=1024 scripts/generate_concepts.sh prompts/ground
 ```
 
 The preset carries a fixed sentence and **only the subject phrase should
@@ -58,7 +58,8 @@ scripts/make_seamless.py output/ground/texture_00001_.png \
 
 ## 3. Read the numbers, both of them
 
-`--check` prints a ratio and an absolute figure, and you need both.
+Every run prints a ratio, an absolute figure and the contrast, and you need all
+three. `--check` also prints the seam score from before the fix.
 
 The **ratio** compares how much the edge columns differ against how much any two
 adjacent columns differ. Edges of a tiling texture are neighbours, so 1.0 is

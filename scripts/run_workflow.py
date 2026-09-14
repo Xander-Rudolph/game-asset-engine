@@ -4,8 +4,8 @@
     scripts/run_workflow.py workflows/api/txt2img_sdxl.json \
         --set 'prompt=a mossy stone golem, game asset, neutral grey background'
 
-    scripts/run_workflow.py workflows/api/img2mesh_triposr.json \
-        --image concept.png --set faces=18000
+    scripts/run_workflow.py workflows/api/img2mesh_trellis.json \
+        --image concept.png --set target=12000
 
     scripts/run_workflow.py --list-nodes 3D          # what the server loaded
 

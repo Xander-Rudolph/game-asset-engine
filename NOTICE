@@ -92,7 +92,7 @@ There are two separate duties and satisfying one does not satisfy the other:
 include a copy of the licence text, and offer the corresponding source for any
 compiled object code. Per-file SPDX headers are notices, not a licence copy.
 
-Source is present in the image, so distribution is self-satisfying, for:
+Source is present in the image, so the source duty is already met, for:
 ComfyUI v0.30.2, comfyui-manager, ultralytics, plyfile, easydict,
 comfyui-embedded-docs and PyGithub.
 

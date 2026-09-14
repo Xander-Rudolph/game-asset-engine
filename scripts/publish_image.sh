@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # Build the preconfigured image and push it to GHCR.
 #
-#     scripts/publish_image.sh 0.1.0          # build, tag, push
-#     scripts/publish_image.sh 0.1.0 --dry    # build and tag, push nothing
+#     scripts/publish_image.sh 0.1.2          # build, tag, push
+#     scripts/publish_image.sh 0.1.2 --dry    # build and tag, push nothing
 #
 # WHY THIS IS NOT A GITHUB ACTION, unlike every other thing this project
-# publishes: the image is 26GB. A hosted runner gives you about 14GB free on
+# publishes: the image is 27.6GB. A hosted runner gives you about 14GB free on
 # the volume Docker's data root lives on, so the build does not fit -- it dies
-# partway through the CUDA layers with no space left on device. The rest of
-# the release pipeline (`ci.yml`, `play.yml`, `docs.yml`) runs on hosted
-# runners because a Flutter build is small. This one is built where the GPU
-# stack already is, and pushed from here.
+# partway through the CUDA layers with no space left on device. The docs
+# site builds on a hosted runner (`.github/workflows/docs.yml`) because it
+# is small. This one is built where the GPU stack already is, and pushed
+# from here.
 #
 # Log in first, once:
 #
@@ -27,7 +27,7 @@ DRY="${2:-}"
 
 if [ -z "$VERSION" ]; then
     echo "usage: $0 <version> [--dry]" >&2
-    echo "e.g.:  $0 0.1.0" >&2
+    echo "e.g.:  $0 0.1.2" >&2
     exit 2
 fi
 
@@ -79,7 +79,7 @@ fi
 
 echo
 echo "== push =="
-echo "26GB or so; this takes a while and resumes badly, so let it finish."
+echo "About 17GB to upload once compressed; this takes a while and resumes badly, so let it finish."
 docker push "$IMAGE:$VERSION"
 docker push "$IMAGE:latest"
 
@@ -87,6 +87,7 @@ echo
 echo "published $IMAGE:$VERSION"
 echo "  docker compose --profile packaged up -d"
 echo
-echo "The package starts PRIVATE. Make it public on the package page if you"
-echo "want it pullable without a token:"
-echo "  https://github.com/orgs/AthanorGames/packages"
+PKG="${IMAGE#ghcr.io/}"
+echo "The package starts PRIVATE. Make it public if you want it pullable without"
+echo "a token: open the package, then Package settings, then Change visibility."
+echo "  https://github.com/${PKG%%/*}?tab=packages   (package: ${PKG#*/})"

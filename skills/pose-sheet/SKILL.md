@@ -60,7 +60,7 @@ asset and **must be read before authoring poses**. Two characters from this same
 pipeline came out with 47 and 28 bones.
 
 ```sh
-docker exec comfyui python3 -c "
+docker exec "$(python3 scripts/_engine.py)" python3 -c "
 import bpy; bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.ops.import_scene.fbx(filepath='/app/output/rigged/<name>.fbx')
 a=[o for o in bpy.data.objects if o.type=='ARMATURE'][0]
@@ -116,7 +116,10 @@ scripts/render_sheet.py output/rigged/<name>.fbx \
 `--poses` also takes `static`, `frames:1,7,13` and `even:N`.
 
 Other flags: `--angles`, `--azimuth-start`, `--elevation`, `--size`, `--zoom`,
-`--persp`, `--key`, `--ambient`, `--clay-color`, `--flat`.
+`--persp`, `--span`, `--key`, `--ambient`, `--clay`, `--clay-color`, `--flat`,
+`--check`, `--keep-frames` and `--timeout`. The per-cell PNGs under
+`output/_sheet_frames/` are deleted once the sheet is composed unless you pass
+`--keep-frames`.
 
 ## 5. Check what is arithmetic, then look at what is not
 

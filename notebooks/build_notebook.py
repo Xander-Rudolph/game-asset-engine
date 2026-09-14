@@ -114,9 +114,10 @@ Not right? Change `SUBJECT` and run the cell again, or add
     md("""
 ## 3. Build the 3D shape
 
-TripoSG is fast and clean. Hunyuan3D makes better meshes but cannot ship to the
-EU, UK or South Korea, and TripoSG's licence status inside this node pack is
-unresolved, so check the licensing guide before shipping either.
+This uses Hunyuan3D, which makes the best meshes here and removes the background
+itself. Its licence does not cover the EU, UK or South Korea, so for anything
+that will ship there, swap in `workflows/api/img2mesh_trellis.json` (MIT, no
+territory clause). The licensing guide has the detail.
 
 About a minute.
 """),
@@ -160,6 +161,10 @@ Read the silhouette column. For a 2D game, a sprite is its outline.
 
 The concept image goes in again here, because the texture stage paints the model
 to match the drawing.
+
+This stage runs Hunyuan3D 2.1, so the textured model, and any sprite rendered
+from it, carries its licence: it does not cover the EU, UK or South Korea. Skip
+this cell for an asset that will ship there.
 
 Two to four minutes.
 """),
@@ -212,8 +217,12 @@ print(rig, rig.exists())
 
     md("### What did the rigger actually produce?\n\nCheck rather than assume. This reads the file itself."),
     code('''
+# The container is comfyui-packaged for the published image and comfyui for a
+# source build. Ask the same resolver the scripts use.
+container = subprocess.run(["python3", "scripts/_engine.py"],
+                           capture_output=True, text=True).stdout.strip()
 probe = subprocess.run([
-    "docker", "exec", "comfyui", "python3", "-c",
+    "docker", "exec", container, "python3", "-c",
     "import bpy; bpy.ops.wm.read_factory_settings(use_empty=True);"
     "bpy.ops.import_scene.fbx(filepath='/app/output/rigged/nb_asset.fbx');"
     "ms=[o for o in bpy.data.objects if o.type=='MESH'];"
@@ -247,7 +256,7 @@ If that came back as the same pose four times, look for a line saying
 `! bones not in the rig`. Bone names differ per model. Dump this rig's own map:
 """),
     code('''
-subprocess.run(["docker", "exec", "comfyui", "python3", "-c",
+subprocess.run(["docker", "exec", container, "python3", "-c",
     "import bpy; bpy.ops.wm.read_factory_settings(use_empty=True);"
     "bpy.ops.import_scene.fbx(filepath='/app/output/rigged/nb_asset.fbx');"
     "a=[o for o in bpy.data.objects if o.type=='ARMATURE'][0];"

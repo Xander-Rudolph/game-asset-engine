@@ -12,22 +12,22 @@
     "  Checkpoints/Diffusers/<repo>  for the diffusers pipelines",
     "",
     "groups: 'core' is fetched by default.  Everything else is opt-in with",
-    "--group NAME, or --all for the lot.  'gated' needs HF_TOKEN.",
+    "--group NAME, or --all for all but 'gated' and 'noncommercial'.  'gated' needs HF_TOKEN.",
     "",
     "Every entry carries 'license', 'license_url' and 'commercial'. `fetch_models.py --licenses` prints them, and --download refuses a non-commercial model unless you pass --accept-noncommercial."
   ],
   "groups": {
-    "core": "SDXL image generation + TripoSR/TripoSG image-to-3D",
-    "hunyuan": "Hunyuan3D 2.1 shape generation (best mesh quality, ~10GB)",
-    "instantmesh": "Zero123++ multiview -> InstantMesh reconstruction",
-    "trellis": "TRELLIS image-to-3D: both branches, ~9.6GB",
-    "mvadapter": "MV-Adapter multiview / texturing on top of SDXL",
-    "unique3d": "Unique3D + CharacterGen chain (SD1.5, IP-Adapter, ControlNet tile, RealESRGAN)",
-    "extra": "LGM, CRM, TriplaneGaussian, PartCrafter",
-    "gated": "StableFast3D - accept the licence on HF and set HF_TOKEN",
-    "noncommercial": "Models whose licence forbids commercial use - never fetched by --all",
-    "qwen": "Qwen-Image text-to-image - Apache-2.0, far better prompt adherence than SDXL base",
-    "qwen_edit": "Qwen-Image-Edit 2509 - change one element of a concept without rerolling it"
+    "core": "SDXL image generation + TripoSR/TripoSG image-to-3D, ~20GB",
+    "hunyuan": "Hunyuan3D 2.1 shape and PBR texture generation, plus the 2.0 turbo shape model (best mesh quality, ~24GB)",
+    "instantmesh": "Zero123++ multiview -> InstantMesh reconstruction, ~10GB",
+    "trellis": "TRELLIS image-to-3D: both branches, ~9GB",
+    "mvadapter": "MV-Adapter multiview / texturing on top of SDXL, ~17GB",
+    "unique3d": "Unique3D + CharacterGen chain (SD1.5, IP-Adapter, ControlNet tile, RealESRGAN), ~23GB",
+    "extra": "LGM, CRM, TriplaneGaussian, PartCrafter, ~21GB",
+    "gated": "StableFast3D, ~4GB. Accept the licence on HF and set HF_TOKEN",
+    "noncommercial": "Models whose licence forbids commercial use, ~0.5GB. Never fetched by --all",
+    "qwen": "Qwen-Image text-to-image, ~48GB. Apache-2.0, far better prompt adherence than SDXL base. The concept presets need it",
+    "qwen_edit": "Qwen-Image-Edit 2509, ~19GB. Change one element of a concept without rerolling it"
   },
   "models": [
     {
@@ -95,7 +95,7 @@
       "license": "BRIA RMBG-1.4",
       "license_url": "https://bria.ai/bria-huggingface-model-license-agreement/",
       "commercial": "NO — non-commercial without a BRIA agreement",
-      "note": "Not required — Hunyuan3D/TripoSG remove backgrounds with rembg's u2net (Apache-2.0) internally.  Only fetch this if you have a BRIA commercial agreement, or the project is non-commercial."
+      "note": "Not required. Hunyuan3D and TRELLIS remove backgrounds themselves with rembg (MIT) and its u2net model (Apache-2.0); TripoSG does not remove backgrounds.  Only fetch this if you have a BRIA commercial agreement, or the project is non-commercial."
     },
     {
       "name": "Hunyuan3D-2.1 DiT (fp16)",

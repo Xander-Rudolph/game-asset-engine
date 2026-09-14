@@ -82,3 +82,9 @@ def exec_json(script: str, cfg: dict, sentinel: str, timeout: int = 3600):
         sys.stderr.write(r.stdout[-3000:] + "\n" + r.stderr[-4000:] + "\n")
         return None
     return json.loads(line[len(sentinel):])
+
+
+if __name__ == "__main__":
+    # Prints the container the scripts would use, for commands in the docs and
+    # skills: docker exec "$(python3 scripts/_engine.py)" python3 -c ...
+    print(container())

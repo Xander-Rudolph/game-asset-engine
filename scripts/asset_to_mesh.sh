@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # concept images -> shapes -> textures -> turntables -> curated assets.
 #
-#   scripts/asset_to_mesh.sh output/lords/salt.png lord_salt output/lords/sulfur.png lord_sulfur
+#   scripts/asset_to_mesh.sh output/concept/golem.png golem output/concept/chimera.png chimera
 #
 # STAGED, NOT PER-ASSET, and that is the whole design. ComfyUI-3D-Pack holds its
 # Hunyuan pipelines in its own node cache, outside ComfyUI's model management, so
@@ -20,7 +20,9 @@ LOG="logs/tomesh-$(date +%Y%m%d-%H%M%S).log"
 echo "log: $LOG"
 
 restart() {
-    docker compose --profile comfy restart comfyui >/dev/null 2>&1
+    # The container is comfyui-packaged for the published image and comfyui for a
+    # source build, so ask the same resolver the other scripts use.
+    docker restart "$(python3 scripts/_engine.py)" >/dev/null 2>&1
     until curl -s -o /dev/null "${COMFY_URL:-http://127.0.0.1:8188}/object_info"; do sleep 4; done
     sleep 2
 }

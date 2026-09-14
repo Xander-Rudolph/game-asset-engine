@@ -9,7 +9,7 @@ and wait ninety seconds for the same news:
   * a required input left unwired
 
     scripts/validate_workflows.py
-    scripts/validate_workflows.py workflows/api/img2mesh_triposg.json
+    scripts/validate_workflows.py workflows/api/img2mesh_trellis.json
 """
 from __future__ import annotations
 

@@ -86,8 +86,8 @@ everything in the positive, or switch to txt2img_qwen for a real one.""",
 
 Load the image to change in LoadImage, then say what to change in the
 TextEncodeQwenImageEditPlus 'prompt' box -- an instruction, not a
-description: "replace the left pauldron with a glass chamber of green
-fluid", not "a figure with a glass pauldron".
+description: "replace the pauldron on the left of the image with a plain
+steel pauldron", not "a figure with a steel pauldron".
 
 Denoise is a cliff, not a slider.  Below about 0.75 nothing moves;
 above it the whole figure is redrawn.  If the edit will not take, it is
@@ -98,21 +98,26 @@ Shape only, no colour: it comes out grey clay.  It removes the
 background itself, so a plain concept render is the right input.
 
 LICENCE: Hunyuan3D's terms exclude the EU, the UK and South Korea.
-Use img2mesh_triposg (MIT, no territory clause) for anything shipping
-worldwide -- but TripoSG does NOT remove the background and needs an
-alpha cut-out.
+Use img2mesh_trellis (MIT, no territory clause) for anything shipping
+worldwide.  It removes the background itself too.
 
 Decimate Mesh's target is a CEILING, not a target: a simpler mesh
 stays simpler.""",
-    "img2mesh_triposg": """CONCEPT -> MESH -- TripoSG (MIT, ~20s)
+    "img2mesh_triposg": """CONCEPT -> MESH -- TripoSG.  DO NOT USE FOR NOW.
 
-No territory clause, so this is the one for anything that ships.
+In this install it returns a cage of fragments instead of the subject,
+whatever the input: grey or white background, a transparent cut-out,
+square framing and the non-flash decoder all fail the same way.
 
-It does NOT remove the background.  Feed it an RGBA cut-out; a
-grey-background render comes back as a fragmented blob.""",
-    "img2mesh_triposr": """CONCEPT -> MESH -- TripoSR
+Use img2mesh_trellis instead (MIT, no territory clause, removes the
+background itself).""",
+    "img2mesh_triposr": """CONCEPT -> MESH -- TripoSR.  DOES NOT WORK AS WIRED.
 
-Fastest and roughest.  Needs an RGBA cut-out, like TripoSG.""",
+LoadImage's mask is 1 - alpha, and TripoSR uses it as the alpha
+channel, so a cut-out's subject is greyed out and an image with no
+alpha fails.  It would need an InvertMask between LoadImage slot 1
+and reference_mask, plus a cut-out.  Read from the node source, not
+yet run.""",
     "mesh_texture_hunyuan3d21": """MESH -> TEXTURED MESH -- Hunyuan3D 2.1 TexGen
 
 mesh_path is a path INSIDE THE CONTAINER: /app/output/mesh/<name>.glb.

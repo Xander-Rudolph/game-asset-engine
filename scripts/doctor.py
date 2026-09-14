@@ -7,10 +7,11 @@
     scripts/doctor.py --json     # machine-readable, for skills
 
 Every skill in this repo runs this first. The reason is narrow and practical:
-almost every confusing failure in this pipeline is one of six ordinary things
-(no Docker, no GPU, no .env, no image, container down, weights missing), and
-each of them shows up much later as something that looks like a broken
-workflow. Checking takes two seconds and removes the guessing.
+almost every confusing failure in this pipeline is something ordinary that
+this checks (Docker, the GPU runtime, .env, the image, the container, the
+server, the node packs, Blender, sparse convolution, the weights, the output
+folders), and each of them shows up much later as something that looks like a
+broken workflow. Checking first takes a few seconds and removes the guessing.
 
 Exit codes: 0 everything ready, 1 something is missing, 2 could not check.
 """
@@ -151,7 +152,7 @@ def check_image(rep: Report) -> bool:
         rep.add(OK, "image", ", ".join(tags[:3]))
         return True
     rep.add(BAD, "image", "no ComfyUI image built or pulled",
-            f"docker pull {IMAGE}:latest   (27GB), then "
+            f"docker pull {IMAGE}:latest   (about 17GB; log in to ghcr.io first if the package is private), then "
             "docker compose --profile packaged up -d")
     return False
 
@@ -275,7 +276,8 @@ def check_models(rep: Report) -> None:
         rep.add(OK, "weights", tail[:90] or "core group present")
     else:
         rep.add(WARN, "weights", tail[:90] or "some weights are missing",
-                "scripts/fetch_models.py --download   (core is about 21GB)")
+                "scripts/fetch_models.py --download   (core is about 20GB. The "
+                "concept presets also need --download --group qwen, about 48GB)")
 
 
 def check_writable(rep: Report) -> None:

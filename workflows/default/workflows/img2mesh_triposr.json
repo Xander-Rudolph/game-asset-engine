@@ -23,7 +23,7 @@
     "text": ""
    },
    "widgets_values": [
-    "CONCEPT -> MESH -- TripoSR\n\nFastest and roughest.  Needs an RGBA cut-out, like TripoSG.\n\n---\n\nFastest path, ~10s on a 4070 Ti Super. TripoSR wants a cut-out:\nfeed it an RGBA PNG so LoadImage's alpha becomes the mask, or\nthe whole background is reconstructed as geometry."
+    "CONCEPT -> MESH -- TripoSR.  DOES NOT WORK AS WIRED.\n\nLoadImage's mask is 1 - alpha, and TripoSR uses it as the alpha\nchannel, so a cut-out's subject is greyed out and an image with no\nalpha fails.  It would need an InvertMask between LoadImage slot 1\nand reference_mask, plus a cut-out.  Read from the node source, not\nyet run.\n\n---\n\nFastest path, ~10s on a 4070 Ti Super. AS WIRED THIS GRAPH DOES\nNOT WORK. LoadImage's MASK output is 1 - alpha, and the TripoSR\nnode uses reference_mask AS the alpha channel, then composites\nthe image over grey. So a transparent cut-out greys out the\nsubject and keeps the background, and an image with no alpha\ngives a 64x64 zero mask that cannot be joined to the full-size\nimage. It needs an InvertMask between LoadImage slot 1 and\nreference_mask, and a transparent cut-out. Established from the\nnode source, not yet run."
    ],
    "color": "#432",
    "bgcolor": "#653"
