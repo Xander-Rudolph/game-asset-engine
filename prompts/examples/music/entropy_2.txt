@@ -1,0 +1,8 @@
+bpm: 56
+key: F minor
+time: 4
+seconds: 200
+seed: 1
+lufs: -16
+
+Dark ambient: a decaying, hollow soundscape of corrupted land. A slow, unbroken heartbeat pulse on a muffled bass drum over a continuous bed of grinding low strings and eerie glassy textures, heavy and constant. Instrumental background score for a fantasy strategy game about rival alchemist guilds, made to loop: an even, steady piece that holds one intensity from start to finish, with a clean, warm, cinematic mix.

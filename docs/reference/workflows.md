@@ -59,6 +59,7 @@ means it is silently reverted next time anyone runs the builder.
 | `mesh_render_sprites.json` | Mesh to 8 facings, unlit. Silhouette check |
 | `mesh_rig_unirig.json` | Mesh to skeleton and skin, out as FBX |
 | `rig_apply_animation.json` | Rigged FBX plus a clip, out as animated FBX |
+| `txt2music_acestep15.json` | Caption to an instrumental music track with ACE-Step 1.5 turbo, saved as FLAC. MIT, and the model card allows commercial use of the music. Needs the `music` weight group. [Details](/guide/music) |
 
 ## Running one
 

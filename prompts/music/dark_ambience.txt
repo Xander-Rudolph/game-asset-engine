@@ -1,0 +1,8 @@
+bpm: 60
+key: B minor
+time: 4
+seconds: 200
+seed: 1
+lufs: -16
+
+Dark ambient: an ominous, creeping soundscape. Low drones, detuned bowed metal, distant deep drum hits and a sparse, dissonant cello phrase, slow, cold and unsettling.

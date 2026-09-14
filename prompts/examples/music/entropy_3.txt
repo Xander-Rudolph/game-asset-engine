@@ -1,0 +1,8 @@
+bpm: 64
+key: C# minor
+time: 4
+seconds: 200
+seed: 1
+lufs: -16
+
+Dark ambient: a tense, smouldering soundscape beside a dark furnace, built on a constant low furnace rumble and a sustained brass and cello drone that carries through the whole piece. A slow, steady pulse on a muffled deep drum and a dark metallic shimmer woven through it, oppressive and patient. Instrumental background score for a fantasy strategy game about rival alchemist guilds, made to loop: an even, steady piece that holds one intensity from start to finish, with a clean, warm, cinematic mix.

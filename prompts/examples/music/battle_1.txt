@@ -1,0 +1,19 @@
+bpm: 132
+key: E minor
+time: 4
+seconds: 150
+seed: 1
+lufs: -14
+planner: yes
+
+Epic orchestral battle music, heroic and relentless, pounding war drums and a snare ostinato, driving staccato strings, bold brass calls, punchy, powerful, polished cinematic mix. Instrumental soundtrack for a fantasy strategy game, made to loop: it keeps one steady intensity from start to finish.
+---
+[Battle Theme - drums and staccato strings]
+
+[Brass Calls - high energy]
+
+[Battle Theme - full orchestra]
+
+[Brass Calls - high energy]
+
+[Battle Theme - drums and staccato strings]

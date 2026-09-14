@@ -1,0 +1,8 @@
+bpm: 72
+key: Bb major
+time: 6
+seconds: 200
+seed: 1
+lufs: -16
+
+Seafaring fantasy: gentle ocean voyage music with a lilting, swaying feel. A steady, continuous bed of low strings and soft marimba in an unbroken rocking rhythm, with harp arpeggios and a distant horn melody on top, calm and vast. Instrumental background score for a fantasy strategy game about rival alchemist guilds, made to loop: an even, steady piece that holds one intensity from start to finish, with a clean, warm, cinematic mix.

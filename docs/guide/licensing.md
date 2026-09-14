@@ -117,9 +117,8 @@ check again before relying on one.
 | [Udio](https://www.udio.com/terms-of-service) | Service terms | Not allowed on any plan |
 | [ElevenLabs Music](https://elevenlabs.io/eleven-music-model-specific-terms) | Service terms | Excludes "Studio Games", roughly a game that earns money and is on more than one platform, except on its Enterprise Music plan |
 
-**The nearest to ready is ACE-Step.** This install's ComfyUI already has its nodes
-(`TextEncodeAceStepAudio` and `TextEncodeAceStepAudio1.5`) along with the audio
-VAE and save nodes, so it needs only weights and a graph. Neither ships here yet.
+**ACE-Step 1.5 is the one this repository uses.** It runs on ComfyUI's own nodes,
+and its weights, a graph and a loop tool ship here: see [Music](/guide/music).
 
 ### Or don't generate it
 

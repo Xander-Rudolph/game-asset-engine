@@ -23,6 +23,7 @@ Full detail, including the second manifest that GitHub installation needs, is in
 | `ground-texture` | Tileable terrain textures and fixing seams |
 | `mesh-budget` | Choosing face counts, decimating, rigging heavy meshes |
 | `asset-cleanup` | Curating the keepers and sweeping the rest |
+| `game-music` | Licence-clear instrumental music, looped seamlessly at a set loudness |
 
 Each one starts by running `scripts/doctor.py`, so a session never begins by
 guessing whether ComfyUI is up. If it is not, the skill walks the user through

@@ -34,6 +34,7 @@ buildings/    isometric building dioramas
 scenery/      small props
 ground/       tileable overhead ground textures
 icons/        UI icons on a flat background
+music/        instrumental game music: one track file per loop, for generate_music.py
 examples/     one project's filled-in art direction, kept as worked examples
 ```
 
@@ -67,7 +68,8 @@ feature and colours into them.
 ## The examples folder
 
 `examples/` holds the art direction from the project this pipeline was built for,
-including a complete set of eight character subjects. It is there to show what a
+including a complete set of eight character subjects and, in `examples/music/`,
+the prompt folder behind that game's twelve music tracks. It is there to show what a
 filled-in `<<< ART DIRECTION >>>` looks like in practice, and what a consistent
 set reads like. Nothing in the default path reads from it.
 

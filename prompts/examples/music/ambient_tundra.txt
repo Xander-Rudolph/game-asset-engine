@@ -1,0 +1,8 @@
+bpm: 66
+key: F# minor
+time: 4
+seconds: 200
+seed: 1
+lufs: -16
+
+Frozen tundra: cold, glassy music for an icy wilderness, built on a continuous deep drone and sustained high strings that carry through the whole piece. Crystalline bells and soft piano notes with long reverb drift over them, slow, still and even. Instrumental background score for a fantasy strategy game about rival alchemist guilds, made to loop: an even, steady piece that holds one intensity from start to finish, with a clean, warm, cinematic mix.

@@ -1,0 +1,8 @@
+bpm: 92
+key: G major
+time: 4
+seconds: 200
+seed: 1
+lufs: -16
+
+Pastoral fantasy: open, sunlit music for crossing wide grasslands. Acoustic guitar and hammered dulcimer, a gentle wooden flute melody, soft string pads and a light hand drum, hopeful and unhurried. Instrumental background score for a fantasy strategy game about rival alchemist guilds, made to loop: an even, steady piece that holds one intensity from start to finish, with a clean, warm, cinematic mix.

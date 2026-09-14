@@ -1,0 +1,8 @@
+bpm: 92
+key: G major
+time: 4
+seconds: 200
+seed: 1
+lufs: -16
+
+Pastoral folk: open, sunlit exploration music. Acoustic guitar and hammered dulcimer, a gentle wooden flute melody, soft string pads and a light hand drum, hopeful and unhurried.

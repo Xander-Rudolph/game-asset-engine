@@ -24,6 +24,9 @@ every time round. This does five things, in order:
      matches, so the beats line up through the join even if the model drifted
      off the tempo it was asked for, which a cut at whole bars would not;
    - length, lightly: a longer loop repeats less, so it wins a near tie.
+   A take that stops dead part way, as the planner's takes often do, is
+   searched a stretch at a time between its silences, so the loop never
+   holds one; the whole take is searched only if no stretch is long enough.
 3. **Joins.** The end's last bars are crossfaded over the start's first and
    the track is cut there, so the file's last sample leads straight into its
    first: the join is continuous by construction. The fade keeps the level
@@ -138,7 +141,8 @@ def onset_envelope(mono: np.ndarray) -> np.ndarray:
 
 
 def find_loop(env: np.ndarray, power: np.ndarray, m: int, start_limit: int,
-              end_limit: int, step: int, min_frames: int, typical_db: float) -> dict:
+              end_limit: int, step: int, min_frames: int, typical_db: float,
+              required: bool = True) -> dict | None:
     """The start and end frames scoring best (see the module docstring).
 
     `env` is the onset envelope, `power` the mean square per hop frame, `m`
@@ -156,6 +160,8 @@ def find_loop(env: np.ndarray, power: np.ndarray, m: int, start_limit: int,
     e_lo = max(3 * m, n - end_limit)
     ends = np.arange(e_lo, n + 1)
     if ends.size == 0:
+        if not required:
+            return None
         sys.exit("the track is too short for this crossfade")
     # The tails' norms after removing their means, for a normalised
     # correlation; the head has its mean removed, so the tails' means drop
@@ -191,8 +197,33 @@ def find_loop(env: np.ndarray, power: np.ndarray, m: int, start_limit: int,
             best = {"cost": float(cost[i]), "start": s, "end": int(ends[i]),
                     "match": float(match[i]), "jump": float(jump[i])}
     if best is None:
+        if not required:
+            return None
         sys.exit("the track is too short for this crossfade and --min-loop")
     return best
+
+
+def sounding_spans(x: np.ndarray, frames: int, shortest: int) -> list[tuple[int, int]]:
+    """The stretches between silences, as [start, end) onset frames, that are
+    at least `shortest` frames long. Silence is a half second under -50 dBFS,
+    the same test the report makes of the finished loop."""
+    half = SR // 2
+    loud = window_db(x, half) >= -50
+    if loud.all():
+        return [(0, frames)]
+    spans, i = [], 0
+    while i < len(loud):
+        if not loud[i]:
+            i += 1
+            continue
+        j = i
+        while j < len(loud) and loud[j]:
+            j += 1
+        lo, hi = i * half // HOP, min(frames, j * half // HOP)
+        if hi - lo >= shortest:
+            spans.append((lo, hi))
+        i = j
+    return spans
 
 
 def join(x: np.ndarray, start: int, end: int, xfade: int):
@@ -329,10 +360,27 @@ def main() -> int:
     env = onset_envelope(x.mean(axis=1))
     n = len(env)
     power = (x[: n * HOP].astype(np.float64) ** 2).mean(axis=1).reshape(n, HOP).mean(axis=1)
-    reach = round(n * min(max(a.search, 0.0), 0.5))
-    pick = find_loop(env, power, m, start_limit=reach, end_limit=reach,
-                     step=max(1, round(beat_s * SR / HOP)),
-                     min_frames=round(a.min_loop * SR / HOP), typical_db=typical_db)
+    share = min(max(a.search, 0.0), 0.5)
+    step = max(1, round(beat_s * SR / HOP))
+    min_frames = round(a.min_loop * SR / HOP)
+    pick = None
+    for lo, hi in sounding_spans(x, n, min_frames + 3 * m):
+        reach = round((hi - lo) * share)
+        got = find_loop(env[lo:hi], power[lo:hi], m, start_limit=reach, end_limit=reach,
+                        step=step, min_frames=min_frames, typical_db=typical_db,
+                        required=False)
+        if got is None:
+            continue
+        # Its length term was against the stretch; score it against the take.
+        got["cost"] += LENGTH_WEIGHT * (n - (hi - lo)) * HOP / SR
+        got["start"] += lo
+        got["end"] += lo
+        if pick is None or got["cost"] < pick["cost"]:
+            pick = got
+    if pick is None:
+        reach = round(n * share)
+        pick = find_loop(env, power, m, start_limit=reach, end_limit=reach, step=step,
+                         min_frames=min_frames, typical_db=typical_db)
     xfade = m * HOP
     start, end = pick["start"] * HOP, min(pick["end"] * HOP, len(x))
     loop, rho, swell_db, dip_db = join(x, start, end, xfade)

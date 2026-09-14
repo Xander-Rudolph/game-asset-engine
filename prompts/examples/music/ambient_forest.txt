@@ -1,0 +1,8 @@
+bpm: 78
+key: E minor
+time: 4
+seconds: 210
+seed: 1
+lufs: -16
+
+Enchanted forest: mysterious woodland exploration music. Plucked harp and kalimba, a low alto flute, soft string swells and gentle wooden percussion, calm and curious. Instrumental background score for a fantasy strategy game about rival alchemist guilds, made to loop: an even, steady piece that holds one intensity from start to finish, with a clean, warm, cinematic mix.

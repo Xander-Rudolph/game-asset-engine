@@ -27,6 +27,7 @@ Everything in `scripts/`. Each takes `--help`.
 | `asset_to_mesh.sh` | Concepts to shapes to textures to sheets to curated assets, correctly staged. |
 | `rig_units.sh` | Rig figures one at a time, with the settings that work. |
 | `list_animations.py` | What animation clips are actually installed, read from the files. |
+| `generate_music.py` | Generate a folder of music prompts with ACE-Step 1.5. `--loop DIR` makes each take a seamless loop, and `--keep-best` keeps the take that loops best. Resumable: seeds already in `DIR/picks.json` are skipped, and `--reloop` loops the recorded takes again without generating. A take the server already made, for a run that died, is used rather than made again, and `--no-wait` queues the missing takes and exits. A track file can carry a section script as its lyrics, after a line of `---`. |
 
 ## Looking at results
 
@@ -39,6 +40,7 @@ Everything in `scripts/`. Each takes `--help`.
 | `normalise_mesh.py` | Scale a mesh to a declared world size and record the rule. `--check` gates a whole folder. |
 | `make_seamless.py` | Make a texture tile, and say whether it worked. |
 | `cut_icon.py` | Cut an icon out of its background and size it for a UI. |
+| `make_loop.py` | Make a music track loop without a seam at a set loudness: it chooses where in the take the loop starts and ends, keeps any silence in the take out of the loop, and reports what you would hear where it comes round. |
 | `cleanup.py` | Curate the keepers, then sweep the rest. |
 
 ## The ones worth reading before using

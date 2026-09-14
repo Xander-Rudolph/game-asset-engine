@@ -1,0 +1,19 @@
+bpm: 96
+key: D minor
+time: 4
+seconds: 150
+seed: 1
+lufs: -16
+planner: yes
+
+Epic fantasy orchestral march, noble and heroic, a steady string ostinato and snare drum under a soaring melody on French horns and strings, full orchestra throughout, warm, lush, studio-polished cinematic mix.
+---
+[Main Theme - horns over string ostinato]
+
+[Variation - strings over snare]
+
+[Main Theme - full orchestra]
+
+[Variation - horns over string ostinato]
+
+[Main Theme - full orchestra]

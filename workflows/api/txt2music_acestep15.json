@@ -1,0 +1,154 @@
+{
+  "_comment": "Text to music with ACE-Step 1.5 turbo: MIT, and its model card allows commercial use of what it makes. The sampler settings are the official ComfyUI template's: 8 steps at cfg 1.0, euler with the simple scheduler, AuraFlow sampling shift 3, and a zeroed negative (the model takes no negative prompt). Put a caption in Music.tags and [Instrumental] in Music.lyrics for a track with no singing. Music.duration and Length.seconds are separate inputs that nothing ties together: set both to the same length. THE PLANNER IS OFF HERE (Music.generate_audio_codes false), and anything with a tune should turn it on: its 1.7B language model writes codes that carry the melody and the orchestration, and a menu theme, a chamber piece and two battle tracks made without it were rejected by ear, while ambient beds held up. With only [Instrumental] in Music.lyrics it lays the track out as a song, with an intro, breaks and an ending; with a section script there instead ([Main Theme - strings], [Variation - horns], no intro, breakdown or outro) six battle takes of six held together. A slow theme still fell silent for half a minute; the same theme as a march over an ostinato did not. It is slow: about 4.5 minutes on the CPU for 150 seconds of music. THE TEXT ENCODERS RUN ON THE CPU ON PURPOSE: on this image's PyTorch 2.6 the planner's sampling on the GPU produces NaN probabilities, and the CUDA assert aborts the whole ComfyUI server, taking every queued job with it (Comfy-Org/ComfyUI#12274). On the CPU it works, at about 2.3 s of planning per second of music. Saves FLAC, so the loop and encode step works from lossless audio. Needs the 'music' weight group. scripts/generate_music.py drives this from a prompt folder.",
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "acestep_v1.5_turbo.safetensors",
+      "weight_dtype": "default"
+    },
+    "_meta": {
+      "title": "Music Model"
+    }
+  },
+  "2": {
+    "class_type": "ModelSamplingAuraFlow",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "shift": 3.0
+    },
+    "_meta": {
+      "title": "Sampling Shift"
+    }
+  },
+  "3": {
+    "class_type": "TextEncodeAceStepAudio1.5",
+    "inputs": {
+      "clip": [
+        "9",
+        0
+      ],
+      "tags": "<<< CAPTION: the genre, then a sentence or two on mood, instruments and pace >>>",
+      "lyrics": "[Instrumental]",
+      "seed": 1,
+      "bpm": 90,
+      "duration": 120.0,
+      "timesignature": "4",
+      "language": "en",
+      "keyscale": "D minor",
+      "generate_audio_codes": false,
+      "cfg_scale": 2.0,
+      "temperature": 0.85,
+      "top_p": 0.9,
+      "top_k": 0,
+      "min_p": 0.0
+    },
+    "_meta": {
+      "title": "Music"
+    }
+  },
+  "4": {
+    "class_type": "ConditioningZeroOut",
+    "inputs": {
+      "conditioning": [
+        "3",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Negative"
+    }
+  },
+  "5": {
+    "class_type": "EmptyAceStep1.5LatentAudio",
+    "inputs": {
+      "seconds": 120.0,
+      "batch_size": 1
+    },
+    "_meta": {
+      "title": "Length"
+    }
+  },
+  "6": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "2",
+        0
+      ],
+      "seed": 1,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "positive": [
+        "3",
+        0
+      ],
+      "negative": [
+        "4",
+        0
+      ],
+      "latent_image": [
+        "5",
+        0
+      ],
+      "denoise": 1.0
+    },
+    "_meta": {
+      "title": "Sampler"
+    }
+  },
+  "7": {
+    "class_type": "VAEDecodeAudio",
+    "inputs": {
+      "samples": [
+        "6",
+        0
+      ],
+      "vae": [
+        "10",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Decode"
+    }
+  },
+  "8": {
+    "class_type": "SaveAudio",
+    "inputs": {
+      "audio": [
+        "7",
+        0
+      ],
+      "filename_prefix": "music/track"
+    },
+    "_meta": {
+      "title": "Save"
+    }
+  },
+  "9": {
+    "class_type": "DualCLIPLoader",
+    "inputs": {
+      "clip_name1": "qwen_0.6b_ace15.safetensors",
+      "clip_name2": "qwen_1.7b_ace15.safetensors",
+      "type": "ace",
+      "device": "cpu"
+    },
+    "_meta": {
+      "title": "Text Encoders"
+    }
+  },
+  "10": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "ace_1.5_vae.safetensors"
+    },
+    "_meta": {
+      "title": "VAE"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+bpm: 68
+key: A minor
+time: 3
+seconds: 150
+seed: 1
+lufs: -16
+planner: yes
+
+Fantasy chamber music, candlelit and warm, a solo cello melody over a continuous harp and lute accompaniment in a gentle waltz sway, soft sustained strings throughout, intimate, high-fidelity recording. Instrumental soundtrack for a fantasy strategy game, made to loop: it keeps one steady intensity from start to finish.
+---
+[Main Theme - cello over harp and lute]
+
+[Variation - lute melody over harp]
+
+[Main Theme - cello and strings over harp]
+
+[Variation - lute and harp]
+
+[Main Theme - cello over harp and lute]

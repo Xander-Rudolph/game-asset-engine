@@ -1,0 +1,8 @@
+bpm: 60
+key: B minor
+time: 4
+seconds: 200
+seed: 1
+lufs: -16
+
+Dark ambient: an ominous, creeping soundscape for a blighted wasteland, built on a continuous low drone that sustains throughout. Detuned bowed metal and a slow, dissonant cello line move over it above a steady, muffled pulse, cold and unsettling. Instrumental background score for a fantasy strategy game about rival alchemist guilds, made to loop: an even, steady piece that holds one intensity from start to finish, with a clean, warm, cinematic mix.

@@ -1,0 +1,8 @@
+bpm: 84
+key: A minor
+time: 4
+seconds: 195
+seed: 1
+lufs: -16
+
+Highland fantasy: windswept mountain music. A solemn low whistle melody over a drone, frame drum, bowed cello and wide string chords, lonely but proud. Instrumental background score for a fantasy strategy game about rival alchemist guilds, made to loop: an even, steady piece that holds one intensity from start to finish, with a clean, warm, cinematic mix.

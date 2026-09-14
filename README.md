@@ -198,6 +198,7 @@ It deploys to GitHub Pages on every push to `main`.
 | [Face counts and decimation](https://xander-rudolph.github.io/game-asset-engine/guide/decimation) | How much geometry you actually need |
 | [Rigging](https://xander-rudolph.github.io/game-asset-engine/guide/rigging) | Including heavy and scanned meshes |
 | [Ground and terrain](https://xander-rudolph.github.io/game-asset-engine/guide/terrain) | Tileable textures, and four ways to get seams wrong |
+| [Music](https://xander-rudolph.github.io/game-asset-engine/guide/music) | Licence-clear music that loops without a seam |
 | [Licensing](https://xander-rudolph.github.io/game-asset-engine/guide/licensing) | Read before shipping anything |
 
 ## Licensing, briefly
