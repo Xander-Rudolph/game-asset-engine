@@ -276,14 +276,60 @@ library: nothing in the Stable3DGen module imports its one `nvdiffrast` file
 post-processing utilities. That is a reading of the code, not a runtime check.
 :::
 
-### A lead that has not been tested
+### The vertex-colour route: licence-clean, and just as dark
 
 TRELLIS's mesh decoder predicts colour at the vertices as well: its config
-(`slat_dec_mesh_swin8_B_64l8m256c_fp16.json`) sets `use_color` to true. Baking
-those vertex colours into a texture in Blender would skip both restricted
-libraries. Nobody has run it, so its quality is unknown. The decoder builds its
-mesh with a modified FlexiCubes whose licence file is missing from the pack's
-copy of TRELLIS, so check that licence upstream before relying on this route.
+(`slat_dec_mesh_swin8_B_64l8m256c_fp16.json`) sets `use_color` to true, and
+FlexiCubes passes the colours through a sigmoid, so they arrive in 0 to 1. The
+route was run on the same warrior concept, asking the pipeline for
+`formats=["mesh"]` only.
+
+- **Nothing research-only loaded.** The run blocked any import of `nvdiffrast`
+  or `diff_gaussian_rasterization` before TRELLIS was imported, and finished
+  with no attempt to load either. Those imports live in `trellis/renderers/`
+  and `trellis/utils/postprocessing_utils.py`, and a mesh-only run never
+  reaches them.
+- **The FlexiCubes question is settled.** The modified FlexiCubes TRELLIS
+  builds its meshes with is `MaxtirError/FlexiCubes`, a fork of
+  `nv-tlabs/FlexiCubes`. Both repositories carry the Apache License 2.0, and
+  TRELLIS's README says the modified version is licensed under it. The copies
+  in the pack have no licence file, which is what made it look doubtful.
+- **31 seconds** to load, sample and extract on a 16GB card: 466,404 faces and
+  233,172 coloured vertices.
+- **The bake is Blender's.** The coloured mesh went out as a PLY. A copy was
+  decimated to 12,000 faces and unwrapped, and Cycles baked the full mesh's
+  colour, fed to an emission shader, onto the copy (selected to active,
+  1 sample, on the CPU) at 1024px, using 91.5% of the atlas.
+
+::: warning A PLY is Z-up
+TRELLIS's glTF export turns its Z-up mesh Y-up. A PLY written the same way
+arrives in Blender lying on its back, because Blender reads a PLY as Z-up, and
+normalising to a height then scales the figure by its depth. Leave the PLY
+Z-up, or stand the mesh up before measuring anything.
+:::
+
+The colour is TRELLIS's own, so it is as dark as the Gaussian bake was:
+
+| | Luma | Chroma |
+|---|---|---|
+| The concept, cut out | 51.7 | 29.1 |
+| Hunyuan3D 2.1's texture | 56.8 | 36.4 |
+| Plain TRELLIS, Gaussian bake | 31.1 | 15.8 |
+| TRELLIS vertex colours, baked in Blender | 22.8 | 13.2 |
+| The same, colour matched to the concept | 52.0 | 28.4 |
+
+The darkness is mostly a shift, so it can be moved back. A Reinhard transfer
+in CIE Lab, which sets the used texels' mean and spread in each channel to the
+concept cut-out's, brought the figures up to the concept's. At the game's
+128px sprite size the matched figure reads close to Hunyuan3D's: brass armour,
+green sleeves, the violet crystal. Up close it is softer than Hunyuan3D's
+texture, the cloak comes out browner than the concept's, and the back of the
+cloak, which the concept never shows, is grey-white, as it was in the Gaussian
+bake.
+
+Match against a tight cut-out. A cut-out that kept a halo of the grey
+background measured luma 89.7, and matching to that would have washed the
+figure grey.
 
 ## Runs are not byte-reproducible
 

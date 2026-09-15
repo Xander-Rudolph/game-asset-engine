@@ -177,6 +177,8 @@ Unlike the GPL rows above, these limit what you may *use* the software for, not
 what you may do with its code. Plain TRELLIS bakes its colour texture through
 both, which is why that texture is no clean replacement for Hunyuan3D's paint
 ([the run and the licence text](/guide/trellis#why-the-colour-is-research-only)).
+Its mesh decoder's vertex colours, baked in Blender instead, load neither
+([the vertex-colour route](/guide/trellis#the-vertex-colour-route-licence-clean-and-just-as-dark)).
 Before trusting any texturing route, read the licence file of every rasteriser
 it imports, not just the model card.
 :::
@@ -221,7 +223,13 @@ clause back. The plain TRELLIS branch does return a coloured mesh with no
 territory clause, but it bakes that colour through two research-only
 rasterisers, so it is no way round the clause for anything you sell
 ([TRELLIS](/guide/trellis#plain-trellis-was-run-the-colour-works-and-its-licence-does-not)).
-So far, no texturing route here is both proven and free of restrictions.
+
+The one texture route with no conditions is TRELLIS's own vertex colours,
+baked in Blender: a run with both research-only rasterisers blocked finished
+cleanly, and the FlexiCubes code it builds meshes with is Apache-2.0. It is a
+tested method, not a shipped graph yet, and its colour comes out dark enough
+to need matching to the concept afterwards
+([the numbers](/guide/trellis#the-vertex-colour-route-licence-clean-and-just-as-dark)).
 
 Note what this route deliberately avoids and why: Hunyuan3D texturing because of
 its territory clause, TripoSG because of the unresolved licence file above (it
