@@ -18,7 +18,7 @@ Everything in `scripts/`. Each takes `--help`.
 
 | Script | Does |
 |---|---|
-| `run_workflow.py` | Queue a graph, wait, report the outputs. |
+| `run_workflow.py` | Queue a graph, wait, report the outputs. On a preset, `--subject` fills only the SUBJECT slot and keeps the house technique, which `--prompt` would replace. `--free`, `--interrupt PROMPT_ID` and `--delete PROMPT_ID` manage the queue, and refuse to touch a job that is not the one named. |
 | `validate_workflows.py` | Check every graph against a live server's node definitions. |
 | `api_to_ui.py` | Convert graphs into the editor's format. `--check` verifies every value survived. |
 | `build_presets.py` | Generate the drop in presets from base graphs plus the prompt library. |
@@ -41,7 +41,16 @@ Everything in `scripts/`. Each takes `--help`.
 | `make_seamless.py` | Make a texture tile, and say whether it worked. |
 | `cut_icon.py` | Cut an icon out of its background and size it for a UI. |
 | `make_loop.py` | Make a music track loop without a seam at a set loudness: it chooses where in the take the loop starts and ends, keeps any silence in the take out of the loop, and reports what you would hear where it comes round. |
-| `cleanup.py` | Curate the keepers, then sweep the rest. |
+| `cleanup.py` | Curate the keepers, then sweep the rest. Folders `keep` cannot claim, such as music takes and icons, are protected from the sweep. `keep --generator --source --licence --licence-url` records provenance rows in `sources.json`. |
+
+## Keeping the repo honest
+
+Run both before a commit, with `npm run docs:build`.
+
+| Script | Does |
+|---|---|
+| `check_docs_sync.py` | Fails when a skill, graph or script is missing from a table or count that lists it: the README, the Claude guide, the skills and workflows references, this page and the editor-graph notes. `--untracked` also counts files git does not track yet. |
+| `check_vendored_licences.py` | Fails when a tracked file outside `docs/` and `research/` carries a sign of pasted licence-restricted content, such as a Valve or Daz copyright line or the body of a GPL or share-alike licence. `--markers` lists what it looks for and why. |
 
 ## The ones worth reading before using
 
