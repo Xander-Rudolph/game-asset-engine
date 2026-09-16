@@ -31,21 +31,29 @@ getting it running rather than failing later in a confusing way.
 
 ## The rules they share
 
-These are written into every skill because each one was learned by getting it
-wrong.
+Each of these was learned by getting it wrong. Not every skill needs every rule,
+so this says which skills carry which.
 
-**Check, do not assume.** Every skill has commands for asking the running server
-what it actually loaded, reading a mesh's real face and body counts, and dumping
-a rig's real bone names. Nothing describes what a file probably contains.
+**Check the engine first.** All seven start with `scripts/doctor.py`.
 
-**Show, do not report.** An image that was generated gets read back into the
-conversation so the person can see it. Printing a path is not showing a picture.
+**Check, do not assume.** Each skill carries the commands for its own checks, so
+nothing describes what a file probably contains. `asset-pipeline` reads a mesh's
+real face and body counts and prints a rig's bone count. `pose-sheet` dumps the
+rig's real bone names. `concept-edit` asks the running server which node types it
+loaded. `mesh-budget` measures a face budget rather than guessing one.
 
-**One stage per turn.** The pipeline gates at each stage because a rejected mesh
-three stages later costs far more than a rerolled concept image.
+**Show, do not report.** The skills that make images, `asset-pipeline`,
+`concept-edit`, `pose-sheet` and `ground-texture`, read each one back into the
+conversation, because printing a path is not showing a picture. `game-music`
+makes audio, which the conversation cannot show, so it puts every take in front
+of the person to listen to.
 
-**Say what was chosen and why.** Which generator, which camera angle, what was
-added to the prompt.
+**One stage per turn.** Only `asset-pipeline` has stages, and it gates each one,
+because a rejected mesh three stages later costs far more than a rerolled
+concept image.
+
+**Say what was chosen and why.** `asset-pipeline` names the generator, the camera
+angle and what it added to the prompt.
 
 ## MCP servers
 
@@ -77,9 +85,25 @@ export MESHY_API_KEY=...        # in your shell profile, not in the repo
 ```
 :::
 
-Meshy costs credits per call. If you use it, note that its exports are
-photogrammetry scale, often around two million triangles, which is far more than
-this pipeline's assets. See [decimation](/guide/decimation) before importing one.
+Four things to know before using it, checked on 2026-09-16 against the
+[Meshy MCP server README](https://github.com/meshy-dev/meshy-mcp-server#readme)
+and the 0.5.1 package:
+
+- **The API key needs a Pro plan or above**, and most tools cost credits. The
+  README lists the price of each.
+- **Downloads land in `meshy_output/`** under the directory the server runs in.
+  Claude Code starts it in the project you opened, so for someone who installed
+  the plugin that is their own game repo. Add `meshy_output/` to that repo's
+  ignore file.
+- **Polycount is a setting, not a given.** An export can be photogrammetry
+  scale, often around two million triangles, which is far more than this
+  pipeline's assets. Smart topology takes a configurable polycount, and the
+  remesh tool takes a `target_polycount` from 100 to 300,000. Either way, see
+  [decimation](/guide/decimation) before importing one.
+- **The version is not pinned.** `.mcp.json` runs
+  `npx -y @meshy-ai/meshy-mcp-server` with no version, so a new release can be
+  picked up the next time the server starts. 0.5.1 was the current release on
+  2026-09-16.
 
 ## Writing your own skill
 

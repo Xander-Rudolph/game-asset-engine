@@ -9,7 +9,7 @@ Work in the asset-engine repo root. Workflow: `workflows/api/img_edit_qwen.json`
 Qwen-Image-Edit 2509, Apache-2.0.
 
 **Use this whenever the user says "use that one, but…".** Regenerating with an
-adjusted prompt will not preserve the approved design — even on the same seed, a
+adjusted prompt will not preserve the approved design. Even on the same seed, a
 changed prompt produces a different picture. Editing is the only way to keep what
 was approved.
 
@@ -31,17 +31,22 @@ scripts/fetch_models.py --download --group qwen_edit    # 19GB if missing
 ```
 
 It reuses the `qwen` group's text encoder and VAE, so that group must be present
-too — the edit model alone has nothing to run with.
+too. The edit model alone has nothing to run with.
 
 ## Run it
 
 ```sh
 scripts/run_workflow.py workflows/api/img_edit_qwen.json \
     --image output/concept/<approved>.png \
-    --set 'Positive.prompt=<instruction>'
+    --set 'Positive.prompt=<instruction>' \
+    --set 'Sampler.denoise=0.80'
 ```
 
 ~130s. It writes `output/concept/edit_NNNNN_.png`.
+
+**Always pass a denoise.** The graph's default is 1.0, where the model's own
+style prior wins and returns flat vector art. 0.80 suits a small local swap;
+the table under "Denoise is the control" has the rest.
 
 ## Writing the instruction
 
@@ -84,7 +89,7 @@ docker logs --since 5m "$(python3 scripts/_engine.py)" 2>&1 | grep -iE 'error|ex
 ## Always show the result
 
 **Read the output file** so the user sees it, and **compare it against the
-input** — say plainly what changed, including anything that changed which
+input**. Say plainly what changed, including anything that changed which
 shouldn't have. An edit that silently altered something else is worse than a
 failed one, because it will be discovered after a mesh has been built from it.
 
@@ -93,8 +98,8 @@ Then ask: approve / another edit / go back to the original.
 ## Denoise is the control, not the prompt
 
 The single most useful number here, and it is not in the instruction you write.
-`--set denoise=` decides how much of the source survives, and it behaves like a
-**cliff rather than a dial**:
+`--set 'Sampler.denoise=...'` decides how much of the source survives, and it
+behaves like a **cliff rather than a dial**:
 
 | Denoise | What you get |
 |---|---|

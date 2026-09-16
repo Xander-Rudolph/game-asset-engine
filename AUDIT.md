@@ -401,7 +401,9 @@ MERGES candidates 68, 69, 67, 70, 86, 93, 42, 101, 39 and 109 — the genuinely 
 
 ### The two-pass route — simplify with Qwen edit, then re-render with SDXL — is documented nowhere but one workflow comment
 
-**high** &middot; **fixed 2026-09-10** &middot; belongs in `docs/guide/concept-art.md (a section after "Simplifying art you already have"), and skills/concept-edit/SKILL.md`
+**high** &middot; **open** &middot; belongs in `docs/guide/concept-art.md (a section after "Simplifying art you already have"), and skills/concept-edit/SKILL.md`
+
+**Re-checked 2026-09-16:** the "fixed 2026-09-10" marker was wrong, because `docs/guide/concept-art.md` still ran from "Simplifying art you already have" to "Naming outputs" with no refine section; it gained "A second pass for materials" on 2026-09-16, but `grep -ci 'refine\|realism' skills/concept-edit/SKILL.md` still returns 0, so this stays open.
 
 prompts/realism_pass.txt and workflows/api/img_refine_sdxl.json both exist, but no guide page teaches the route. docs/guide/concept-art.md's workflow table lists only four graphs and stops at the simplify pass; docs/reference/workflows.md gives img_refine_sdxl.json one row, "Refine pass over an image". The lessons missing from the prose: (1) one job per pass beats one prompt doing both — asking Qwen-Image-Edit to simplify AND re-render realistically in a single prompt was worse than two passes, and that, not wording, is what moved the needle; (2) "photorealistic" alone was only a modest gain and true photorealism is not reachable through this model at all, because Qwen-Image-Edit's prior is illustrative and no amount of prompt wording overrides it — the same shape as "NOT cartoon" failing at denoise 1.0; (3) the way out is a different model for the render pass — SDXL base as a low-denoise refiner, where denoise is the whole control: 0.25-0.35 adds material detail and keeps the design, above ~0.5 SDXL starts reinventing shapes; (4) the CivitAI realism checkpoints sitting on this box (cyberrealistic, intorealism and the rest) are deliberately not used — NSFW-oriented with unclear licensing, wrong for a pipeline that ships game assets, where SDXL base is CreativeML OpenRAIL++-M and commercially clear.
 
@@ -553,7 +555,9 @@ animation.md and pose-sheet/SKILL.md state 'X bends forward and back, Z splays, 
 
 ### The Hunyuan shape workflow's _comment states the opposite of what was measured
 
-**high** &middot; **fixed 2026-09-10** &middot; belongs in `workflows/api/img2mesh_hunyuan3d21.json and workflows/api/txt2mesh_sdxl_hunyuan3d21.json, the closing sentence of each "_comment"`
+**high** &middot; **fixed 2026-09-16** &middot; belongs in `workflows/api/img2mesh_hunyuan3d21.json and workflows/api/txt2mesh_sdxl_hunyuan3d21.json, the closing sentence of each "_comment"`
+
+**Re-checked 2026-09-16:** the "fixed 2026-09-10" marker was wrong, because both graphs at HEAD still said "ComfyUI evicts it when it needs to"; both `_comment`s now say ComfyUI does not evict it and POST /free does not release it, and `grep -rn 'ComfyUI evicts' workflows scripts docs skills README.md` returns nothing.
 
 workflows/api/img2mesh_hunyuan3d21.json and txt2mesh_sdxl_hunyuan3d21.json both end their _comment with 'Keeping the pipeline resident costs VRAM; ComfyUI evicts it when it needs to.' It does not. 3D-Pack keeps its pipelines in its own cache outside ComfyUI's model management, which is precisely why 5178 MiB stayed held after /free and why asset_to_mesh.sh has to restart the container twice per batch. The file the reader is most likely to open contradicts the script header that got it right, and the reassuring version is the wrong one — it invites exactly the interleaved shape/texture loop the rest of the docs forbid.
 
@@ -561,7 +565,11 @@ workflows/api/img2mesh_hunyuan3d21.json and txt2mesh_sdxl_hunyuan3d21.json both 
 
 ### Requirements say 12GB; every measured failure is on a 16GB card
 
-**high** &middot; **fixed 2026-09-10** &middot; belongs in `README.md Requirements, scripts/doctor.py check_gpu() warn string, docs/guide/install.md`
+**high** &middot; **fixed 2026-09-16** &middot; belongs in `README.md Requirements, scripts/doctor.py check_gpu() warn string, docs/guide/install.md`
+
+**Re-checked 2026-09-16:** the "fixed 2026-09-10" marker was wrong, because README.md:228, docs/guide/index.md:56, docs/index.md:66 and scripts/doctor.py:126 still said 12GB at HEAD; all four now name the RTX 4070 Ti SUPER and call a 12GB card untested, and docs/guide/install.md states no GPU memory figure.
+
+**Note 2026-09-16:** the reference card is an RTX 4070 Ti SUPER (16376 MiB by `nvidia-smi`), not the "RTX 4070 16GB" that the finding and the transcript quote below say.
 
 README.md:148 says 'A CUDA GPU with 12GB or more', and scripts/doctor.py:111 repeats 'mesh generation needs a CUDA GPU with 12GB or more'. The entire pipeline was developed and every OOM measured on an RTX 4070 16GB (15.7GB usable) with 31GB of host RAM, and the shipped defaults still OOM there — the LoRA dequantize spike, TexGen at 8/768, both pipelines in one graph, a 19GB Qwen model that offloads constantly. A 12GB card is not a tested configuration and would fail at more places, not fewer. The docs should name the reference machine so every number in them is anchored, and state 16GB as the tested floor.
 

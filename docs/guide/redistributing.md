@@ -96,6 +96,22 @@ The C and C++ source that *does* ship, under `addons_core/cycles/source/`, is th
 Cycles render kernel and is Apache-2.0, BSD-3-Clause, MIT and Zlib. It is not the
 corresponding source for the binary, and it is not GPL. Do not count it as either.
 
+### Two research-only libraries: not copyleft, still conditional
+
+Neither needs a source offer, and neither is in the GPL rows above. Both carry
+their own conditions on distribution and on use. Their licence files, in each
+package's `dist-info` in the image, were read on 2026-09-16.
+
+| Component | Licence | Distribution | Use |
+|---|---|---|---|
+| nvdiffrast 0.3.3 | NVIDIA Source Code License (1-Way Commercial) | Section 3.1: "only if (a) you do so under this License, (b) you include a complete copy of this License with your distribution" | Section 3.3: "only may be used or intended for use non-commercially", which "means for research or evaluation purposes only and not for any direct or indirect monetary gain" |
+| diff_gaussian_rasterization | Inria and MPII Gaussian-Splatting License | Section 4.1: "only if (a) you do so under this License, (b) you include a complete copy of this License with your distribution" | Section 5: "THE USER CANNOT USE, EXPLOIT OR DISTRIBUTE THE SOFTWARE FOR COMMERCIAL PURPOSES WITHOUT PRIOR AND EXPLICIT CONSENT OF LICENSORS." |
+
+The licence copies already ship inside the packages, so leave the `dist-info`
+folders intact. What the use limits mean for texturing is in
+[licensing](/guide/licensing#the-licences-of-the-tools-themselves) and
+[TRELLIS](/guide/trellis#why-the-colour-is-research-only).
+
 ## The AGPL question, which is not answered here
 
 `ultralytics` is AGPL-3.0, and the entire purpose of this image is to serve
@@ -120,6 +136,9 @@ locally, resolve it before you do.
 5. **Remember the territorial and non-commercial terms** on the vendored Tencent
    code, covered in [licensing](/guide/licensing). A public registry reaches every
    territory, including the three the Hunyuan licences exclude.
+6. **Keep the two research-only licences with their packages**, and read their
+   use limits ([above](#two-research-only-libraries-not-copyleft-still-conditional))
+   before publishing for anyone who will use the image commercially.
 
 ## What is still unresolved
 
@@ -132,8 +151,6 @@ Recorded so the gaps are visible rather than implied to be absent.
 - **libigl and gpytoolbox each ship two licence files** (a GPL text alongside
   MPL-2.0 and MIT respectively). Which files each governs is not answerable from
   the wheel.
-- **nvdiffrast** carries a restrictive NVIDIA licence upstream. Not copyleft, but
-  it has its own terms and they were not read.
 - **Per-file licensing inside ComfyUI-3D-Pack** was not re-audited here. That is a
   file-level audit rather than a metadata sweep.
 - **The pixi environment UniRig builds on first run** provisions further components

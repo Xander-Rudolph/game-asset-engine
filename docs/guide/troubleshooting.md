@@ -48,8 +48,16 @@ Restart the container, then run shapes and textures in separate passes:
 docker restart "$(python3 scripts/_engine.py)"
 ```
 
-`scripts/asset_to_mesh.sh` does this for you. Do not interleave the two stages in
-your own scripts.
+**On a shared server, run `curl -s http://127.0.0.1:8188/queue` first.** A
+restart ends every running and queued job on it, not only yours. The reply
+lists them under `queue_running` and `queue_pending`; restart only when both
+hold nothing but your own.
+
+`scripts/asset_to_mesh.sh` does the restart for you, twice per batch. Before
+each one it reads `/queue` and stops, naming the jobs, if anything is running or
+pending; `ASSET_ENGINE_FORCE_RESTART=1` skips that check, so set it only when
+those jobs are yours to lose. Do not interleave the two stages in your own
+scripts.
 
 ## A batch reported every name and produced no files
 
@@ -77,7 +85,8 @@ server has been resident, not with any one prompt.
 Raised from ComfyUI's quantised-loading path, on **every** generation, while
 `nvidia-smi` shows several gigabytes held with an empty queue.
 
-Restart the container. That clears it.
+Restart the container. That clears it. On a shared server, check
+`curl -s http://127.0.0.1:8188/queue` first: a restart ends everyone's jobs.
 
 It is worth knowing this one by name because the error says *numpy*, and this
 stack documents a genuine numpy dependency chain at length, so the natural
@@ -86,6 +95,13 @@ cause here was never established; the restart is the answer.
 
 ```sh
 docker restart "$(python3 scripts/_engine.py)"
+```
+
+If the server is shared, run `curl -s http://127.0.0.1:8188/queue` before that
+restart: it ends every running and queued job, not only yours. Then wait for
+the server to answer again:
+
+```sh
 until curl -s -o /dev/null http://127.0.0.1:8188/object_info; do sleep 4; done
 ```
 
@@ -134,6 +150,9 @@ docker exec -u 0 "$(python3 scripts/_engine.py)" pip install --force-reinstall -
 docker restart "$(python3 scripts/_engine.py)"
 ```
 
+If the server is shared, run `curl -s http://127.0.0.1:8188/queue` before that
+restart: it ends every running and queued job, not only yours.
+
 An image built from the current Dockerfile does not need this, because the
 requirements rewrite that fixes `spconv-cu126` now fixes `cumm` alongside it.
 
@@ -141,7 +160,8 @@ requirements rewrite that fixes `spconv-cu126` now fixes `cumm` alongside it.
 If you see `generic_type: cannot initialize type "ExternalAllocator": an object
 with that name is already defined` instead, a failed import has already left
 partial state behind. Restart the container and read the first error, not this
-one.
+one. On a shared server, check `curl -s http://127.0.0.1:8188/queue` before
+restarting: a restart ends every running and queued job.
 :::
 
 ## Skinning dies with torch.bfloat16
@@ -201,6 +221,8 @@ Two things that confuse this further:
   cached result and returns in about a second. If you are trying to test whether
   some change matters, that cache will happily show you an identical result for
   the wrong reason. Change an input or restart the container to force a real run.
+  On a shared server, change an input: a restart ends every running and queued
+  job, so check `curl -s http://127.0.0.1:8188/queue` before one.
 - **Face counts are not evidence either** when a `Decimate` node is in the graph,
   because it clamps to its target. Two runs both reporting 48,000 faces may have
   produced quite different geometry.

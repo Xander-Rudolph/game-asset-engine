@@ -86,6 +86,23 @@ Translations are Blender units.
 ]
 ```
 
+**Probe every new rig before authoring anything.** The rigger gives each bone
+whatever roll its solve landed on, so the axis that swings a leg can change
+between rigs: it was X on one model here and Z on another.
+`poses/_axis_probe.json` is a rest frame, then `bone_20` (a thigh) at X 35 and
+at Z 35, `bone_14` (an upper arm) at X -60 and `bone_2` (the middle of the
+spine) at X 25, as `poses/_bones.md` maps them. A `bone_N` name means a
+different bone on a different rig, so copy it, replace each with this rig's
+thigh, upper arm and spine bone from step 2, and render it:
+
+```sh
+scripts/render_sheet.py output/rigged/<name>.fbx \
+    --poses transforms:poses/<name>_axis_probe.json --angles 4 --size 220 \
+    --out output/sheets/<name>_probe.png --check
+```
+
+Read which way each row moved before trusting the convention below.
+
 **Axis convention, established by probing a real rig. Do not guess.**
 
 - **X bends a limb or the spine forward and back.** The swing axis, and it does
@@ -154,8 +171,19 @@ a confident, well rendered, wrong cycle. Judge it at the size it ships at, not a
 
 ## Rules
 
-- **Orthographic by default.** Keep it. It is what makes two assets rendered on
-  different days share a scale. Use `--persp` only if asked.
+- **Orthographic by default.** Keep it. It keeps one asset the same size across
+  its own angles and frames, **not across assets**: each model is framed to its
+  own bounding box, so a dagger and a golem fill their cells alike. A set drawn
+  at one scale needs the same `--span <units>` on every render, on meshes
+  given one world size by `scripts/normalise_mesh.py <meshes> --height <units>`
+  (`--footprint <units>` for anything tile bound; it overwrites in place unless
+  given `--suffix` or `--out-dir`) and confirmed by the same command with
+  `--check`. **Never normalise a rigged FBX:** the file it writes has no
+  skeleton. Normalising before rigging is undone too: the rigger rescales each
+  model so its largest dimension is 2.0 units (four upright figures rigged here
+  measured 2.000 tall), so upright figures under one `--span` render the same
+  height and a model longer than it is tall comes back shorter. Say so. Use
+  `--persp` only if asked.
 - **Untextured meshes get grey clay automatically**, because Blender's default
   white against a white world light renders as a featureless blob. Say that
   rather than letting grey read as a bug.

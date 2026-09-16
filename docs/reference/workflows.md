@@ -96,15 +96,27 @@ scripts/run_workflow.py workflows/api/mesh_rig_unirig.json \
 ## Editing graphs in the ComfyUI editor
 
 The API format is a flat dictionary of nodes, which the web editor cannot open.
-The converter writes editor versions into the folder ComfyUI reads:
+The converter writes editor versions into `workflows/default/workflows/`:
 
 ```sh
 scripts/api_to_ui.py --check      # all of them, verified
 scripts/api_to_ui.py txt2img_qwen # or one
 ```
 
-They then appear in the sidebar under **Workflows**, because the compose file
-mounts `workflows/` as ComfyUI's user directory.
+Where they appear depends on the compose profile:
+
+- **`comfy` and `comfy-local` (built from source).** The shared service block
+  mounts `./workflows:/app/user` (`docker-compose.yml:32`), so a regenerated
+  graph shows up in the sidebar under **Workflows**.
+- **`packaged` (the published image).** It deliberately mounts no workflows
+  (`docker-compose.yml:79-81`) and gives `/app/user` the named volume
+  `comfy-user` instead (`:105-109`). The image already carries the editor
+  graphs: the Dockerfile copies `workflows/default/workflows` into
+  `/app/user/default/workflows`, and `scripts/entrypoint.sh` copies in any
+  graph whose file name is not already in the volume. It skips a name that is
+  already there, so a graph you regenerate on the host reaches neither the
+  running server nor a recreated container. Open a regenerated file in that
+  editor by hand, or use the `comfy` profile.
 
 ::: danger Widget order is the core challenge
 Node values are stored as a **positional array** in the editor format, and the

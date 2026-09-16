@@ -23,10 +23,17 @@ There is a tool for this. Run it before recommending a budget, because the answe
 differs per model:
 
 ```sh
-scripts/decimation_report.py output/mesh/<name>.glb --sprite 128
+scripts/decimation_report.py output/mesh/<name>.glb --target-iou 0.985 --sprite 128
 ```
 
-It reports three kinds of damage at each budget, and they do not arrive together:
+It bisects for the lowest face count whose silhouette still holds at 0.985 and
+prints one answer, `ANSWER: ship this at N faces`. It renders from the isometric
+camera, elevation 30 and azimuth 45; for a game that uses another camera, pass
+`--elevation` and `--azimuth` to match.
+
+For the whole curve, drop `--target-iou`, and pick budgets with
+`--faces 20000,8000,4000` if the default list is too long. The sweep reports
+three kinds of damage at each budget, and they do not arrive together:
 
 - **surface**: how far the surface moved, as a percentage of model height. Read
   the p95. The max is one spike on one spur.
@@ -96,6 +103,17 @@ There is a second signal in that data worth repeating: the surface error stopped
 improving at 8,000 faces while the silhouette kept getting worse. That is thin
 parts being deleted rather than displaced. Averaged surface error cannot see a
 fringe disappear.
+
+**A graph's Decimate node that ignores its target has a different cause.**
+3D-Pack's Decimate Mesh passes its widgets positionally, so its `remesh` setting
+lands in the wrong argument and remeshing puts the faces straight back: asking
+for 18000 gave 48491. `scripts/patch_nodes.py` binds them by keyword. Check the
+patch is in place (exits 1 if not):
+
+```sh
+scripts/patch_nodes.py --check                       # custom_nodes/ on the host
+docker exec -i "$(python3 scripts/_engine.py)" python3 - --check < scripts/patch_nodes.py   # packaged image
+```
 
 ## Rigging a high resolution mesh
 

@@ -55,7 +55,7 @@ Component inventory
   MCP servers (1)  meshy
 
 Projected token cost
-  Always-on:   ~824 tok   added to every session
+  Always-on:   ~845 tok   added to every session
 ```
 
 Skills are discovered from `skills/<name>/SKILL.md`. You do not list them in
@@ -160,10 +160,23 @@ export MESHY_API_KEY=...
 
 Meshy is a hosted service, so it complements this pipeline rather than being part
 of it. It is useful when you want a mesh without a local GPU, or to compare a
-hosted generator against the local one. It costs credits per call, and its
-exports are photogrammetry scale, often around two million triangles, which is
-far more than anything here produces. See
-[face counts and decimation](/guide/decimation) before importing one.
+hosted generator against the local one. Checked on 2026-09-16 against the
+[Meshy MCP server README](https://github.com/meshy-dev/meshy-mcp-server#readme)
+and the 0.5.1 package:
+
+- **The API key needs a Pro plan or above**, and most tools cost credits. The
+  README lists the price of each.
+- **Downloads are saved to `meshy_output/`** under the directory the server runs
+  in, which Claude Code sets to the project you opened. If you installed the
+  plugin, that is your own game repo, so add `meshy_output/` to its ignore file.
+- **The face count can be set.** An export can be photogrammetry scale, often
+  around two million triangles, far more than anything here produces. Smart
+  topology takes a configurable polycount, and remeshing takes a
+  `target_polycount` from 100 to 300,000. See
+  [face counts and decimation](/guide/decimation) before importing one.
+- **The version is not pinned.** `.mcp.json` runs
+  `npx -y @meshy-ai/meshy-mcp-server` with no version, so each start can pick
+  up a new release. 0.5.1 was current on 2026-09-16.
 
 ## The skills
 

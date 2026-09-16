@@ -38,9 +38,18 @@ Qwen-Image, which is in the `qwen` group.
 Then <http://localhost:8188>, or make something from the terminal:
 
 ```sh
-scripts/run_workflow.py workflows/api/preset_concept_creature.json \
-    --prompt "a mossy stone golem, thick moss on the shoulders"
+scripts/run_workflow.py workflows/api/preset_ground_texture.json \
+    --subject "dense woodland floor of fallen leaves, moss, twigs and needles"
 ```
+
+`--subject` fills the preset's subject slot and keeps its technique text;
+`--prompt` would replace the whole text, technique and all. The character,
+creature, building and prop presets also carry an `<<< ART DIRECTION: ... >>>`
+slot that `--subject` leaves alone; `run_workflow.py` warns about it and
+queues anyway. Fill it first, as
+[Bring your own art direction](#bring-your-own-art-direction) describes, and run
+`scripts/build_presets.py`, or the placeholder reaches the model as literal
+text.
 
 There is a [click through notebook](notebooks/asset_pipeline.ipynb) that walks
 the whole pipeline one cell at a time.
@@ -225,5 +234,6 @@ authors and the CC0 animation library. Full list in [CREDITS.md](CREDITS.md).
 
 ## Requirements
 
-A CUDA GPU with 12GB or more, about 200GB of disk for weights, about 28GB for the
-image, Docker with the NVIDIA container toolkit. Linux.
+A CUDA GPU. Tested on an RTX 4070 Ti SUPER (16GB) with 31GB of RAM; a 12GB card
+is untested. About 200GB of disk for weights, about 28GB for the image, Docker
+with the NVIDIA container toolkit. Linux.

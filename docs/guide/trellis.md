@@ -342,7 +342,9 @@ changed.
 If you re-run and the bytes differ, that is expected. Compare renders, not
 hashes. And note that a repeat with identical node inputs returns in about a
 second from ComfyUI's cache rather than re-executing, so a genuinely fresh run
-needs a changed input or a restart.
+needs a changed input or a restart. On a shared server, change an input: a
+restart ends every running and queued job, so check
+`curl -s http://127.0.0.1:8188/queue` before one.
 
 ## The manifest, and what was wrong with it
 
@@ -379,7 +381,10 @@ Still open:
    ComfyUI ([above](#plain-trellis-was-run-the-colour-works-and-its-licence-does-not)).
    A graph would need the absolute-path workaround, an `InvertMask`, a cut-out
    source and both install fixes, and its colour would still be research-only.
-   The untested vertex-colour route is the one worth trying next.
+   The vertex-colour route has since been run
+   ([above](#the-vertex-colour-route-licence-clean-and-just-as-dark)): it
+   loaded neither research-only rasteriser. It is a tested method, not a
+   graph yet either.
 
 ::: warning You may need the spconv fix first
 TRELLIS is a sparse-convolution model, and the published 0.1.0 image shipped

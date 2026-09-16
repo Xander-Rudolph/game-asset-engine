@@ -120,3 +120,68 @@ because only the empty host folder case runs the seeding.
 | `COMFY_URL` | Where the server answers. Defaults to `http://127.0.0.1:8188`. |
 | `HF_TOKEN` | For the gated weight group. |
 | `ASSET_ENGINE_FETCH_MODELS` | Set to 1 to have the container fetch missing weights on boot. |
+
+## Port 8188 answers anyone who can reach it
+
+Checked on 2026-09-16 against `docker-compose.yml` and the running
+`comfyui-packaged` container.
+
+**Every profile publishes the port on every interface.** The shared service
+block and the packaged service both publish `"8188:8188"`
+(`docker-compose.yml:14` and `:88`), and both start ComfyUI with
+`--listen 0.0.0.0` (`:65` and `:95`). On the reference machine,
+`docker port comfyui-packaged` printed `0.0.0.0:8188` and `[::]:8188`.
+
+**Nothing on that port asks who is calling.** ComfyUI has no login, and
+neither has ComfyUI-Manager, which `--enable-manager` loads into the same
+server. Anyone who can reach the host on 8188 can queue jobs, upload images,
+interrupt a run, clear the queue and download what the server wrote.
+
+Manager does check a security level. Its `config.ini` in that container
+(`/app/user/__manager/config.ini`) says `security_level = normal` and
+`network_mode = public`. In the Manager 4.2.2 code in the image, those
+settings refuse node pack and model installs while ComfyUI listens on an
+address that is not loopback. Updating, enabling, disabling and uninstalling
+node packs still go through at those settings, and so does rebooting the
+server, which ends every job on it.
+
+The compose default stays as it is, because other machines can reach the
+server only through a port published beyond loopback. If yours should answer
+only this machine, publish the port on loopback. A plain second `ports` entry
+in an override file is added to the first rather than replacing it, so use
+Compose's `!override` tag. Compose reads `docker-compose.override.yml` next to
+`docker-compose.yml` on its own:
+
+```yaml
+# docker-compose.override.yml
+services:
+  comfyui-packaged:
+    ports: !override
+      - "127.0.0.1:8188:8188"
+  comfyui:
+    ports: !override
+      - "127.0.0.1:8188:8188"
+  comfyui-local:
+    ports: !override
+      - "127.0.0.1:8188:8188"
+```
+
+With Docker Compose 2.32.4, `docker compose --profile <profile> config`
+showed `host_ip: 127.0.0.1` for each of the three profiles with this file.
+Without the tag it showed two port entries for the packaged service. Port
+bindings are fixed when a container is created, so the file applies from the
+next recreate, and a recreate ends every job on the server too.
+
+Leave `--listen 0.0.0.0` inside the container alone. A published port reaches
+the container on its network interface, not on its own loopback.
+
+**A host firewall may not cover it.** Docker's
+[packet filtering page](https://docs.docker.com/engine/network/packet-filtering-firewalls/),
+read on 2026-09-16, says that when you publish a port, "traffic to and from
+that container gets diverted before it goes through the ufw firewall
+settings". To keep the port published but limit who reaches it, Docker's
+[iptables page](https://docs.docker.com/engine/network/firewall-iptables/)
+says to "insert a negated rule at the top of the DOCKER-USER filter chain",
+for example `iptables -I DOCKER-USER -i ext_if ! -s 192.0.2.0/24 -j DROP`,
+with `ext_if` changed to the host's external interface. That example is IPv4,
+and the port here is bound on `[::]` as well.
