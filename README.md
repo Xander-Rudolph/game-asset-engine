@@ -120,6 +120,7 @@ picked from its description:
 | "use that one but swap the shoulder pauldron" | `concept-edit`, changes one element without redrawing |
 | "render walk and attack sheets for the golem" | `pose-sheet`, sprite sheets and facings |
 | "I need a tileable swamp ground texture" | `ground-texture`, generation plus seam fixing |
+| "I need a looping battle theme for the boss fight" | `game-music`, licence-clear music looped without a seam |
 | "how many faces should this be" / "rig this 600k mesh" | `mesh-budget`, measured budgets and heavy-mesh rigging |
 | "tidy up, I'm done with this asset" | `asset-cleanup`, curate the keepers and sweep the rest |
 
@@ -175,6 +176,7 @@ export MESHY_API_KEY=...
 | `concept-edit` | Change one element of an approved image |
 | `pose-sheet` | Sprite sheets, facing sheets, bone poses |
 | `ground-texture` | Tileable terrain, and fixing seams |
+| `game-music` | Licence-clear instrumental music, looped without a seam |
 | `mesh-budget` | Face counts, decimation, rigging heavy meshes |
 | `asset-cleanup` | Curate the keepers, sweep the rest |
 

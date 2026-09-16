@@ -1,6 +1,6 @@
 # Installing it for Claude
 
-This repo is a Claude Code plugin. It ships six skills that drive the pipeline
+This repo is a Claude Code plugin. It ships seven skills that drive the pipeline
 and the MCP server definitions that go with them.
 
 ## Install
@@ -51,11 +51,11 @@ The second prints the component inventory and what each skill costs in tokens:
 
 ```
 Component inventory
-  Skills (6)  asset-cleanup, asset-pipeline, concept-edit, ground-texture, mesh-budget, pose-sheet
+  Skills (7)  asset-cleanup, asset-pipeline, concept-edit, game-music, ground-texture, mesh-budget, pose-sheet
   MCP servers (1)  meshy
 
 Projected token cost
-  Always-on:   ~714 tok   added to every session
+  Always-on:   ~824 tok   added to every session
 ```
 
 Skills are discovered from `skills/<name>/SKILL.md`. You do not list them in
@@ -88,6 +88,7 @@ you want in ordinary language and the right one is chosen.
 | "use that one but swap the shoulder pauldron" | `concept-edit` |
 | "render walk and attack sheets for the golem" | `pose-sheet` |
 | "I need a tileable swamp ground texture" | `ground-texture` |
+| "I need a looping battle theme for the boss fight" | `game-music` |
 | "how many faces should this be", "rig this 600k mesh" | `mesh-budget` |
 | "tidy up, I'm done with this asset" | `asset-cleanup` |
 
@@ -172,6 +173,7 @@ far more than anything here produces. See
 | `concept-edit` | Change one element of an approved image without redrawing it |
 | `pose-sheet` | Sprite sheets, facing sheets, and authoring bone poses |
 | `ground-texture` | Tileable terrain, and fixing seams |
+| `game-music` | Licence-clear instrumental music, looped without a seam |
 | `mesh-budget` | Face counts, decimation, rigging heavy meshes |
 | `asset-cleanup` | Curate the keepers, sweep the rest |
 

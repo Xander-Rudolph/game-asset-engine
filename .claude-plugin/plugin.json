@@ -4,5 +4,5 @@
   "description": "Concept art to rigged, animated game asset: skills for driving a local ComfyUI install through the whole pipeline.",
   "author": { "name": "Xanderu" },
   "homepage": "https://github.com/Xander-Rudolph/game-asset-engine",
-  "keywords": ["comfyui", "3d", "game-assets", "rigging", "sprites", "textures"]
+  "keywords": ["comfyui", "3d", "game-assets", "rigging", "sprites", "textures", "music"]
 }
