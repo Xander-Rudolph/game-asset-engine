@@ -171,6 +171,12 @@ angle.
 They can share the resting figure's texture, because posing moves vertices and
 does not touch UVs. So only the geometry is written per frame.
 
+## Faces and lip sync
+
+Nothing here animates a face yet. How to turn a voice line into mouth shapes,
+and why a talking face belongs on a portrait rather than on a sprite sheet, is
+researched in [lip sync](/reference/lip-sync).
+
 ## Licensing, briefly
 
 All three animation sources are clear for a commercial game:

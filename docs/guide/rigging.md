@@ -211,6 +211,16 @@ neither a file count nor a name check can tell the new result from the old one.
 The script creates an empty timestamp file before each run, takes the `.fbx` in
 `output/` that is newer than it, and moves that to `output/rigged/`.
 
+## Faces
+
+Neither rigger makes a face. A UniRig figure measured for the lip sync research
+had no jaw, eye or mouth bones and no shape keys, and mesh2motion's human rig
+stops at the head ([lip sync](/reference/lip-sync#the-riggers-give-you-no-face)).
+How Valve built faces for the Source engine out of muscle shapes, and which of
+its ideas carry over, is in [Source Filmmaker](/reference/source-filmmaker#how-valve-s-facial-system-is-built).
+Human bases that do ship a face rig, and what their licences let a game do, are
+compared in [DAZ Genesis](/reference/daz-genesis#other-character-bases-compared).
+
 ## Checking a rig
 
 Render it. A rig that solved badly is obvious in one sheet and invisible in a log:

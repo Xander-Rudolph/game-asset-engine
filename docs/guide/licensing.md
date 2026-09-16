@@ -133,6 +133,25 @@ Whichever you choose, write down where each track came from and under what
 licence, next to the file. This section exists because a soundtrack made with
 MusicGen was credited as licence-free.
 
+## Researched, not shipped
+
+Three research notes check licences for things this pipeline does not do yet.
+Each is dated and links the text it read.
+
+- **Voice lines.** Several open text-to-speech models pair permissive code with
+  weights or training data that bar commercial use, XTTS-v2 and Piper's lessac
+  voice among them. [Lip sync](/reference/lip-sync#text-to-speech-whose-lines-may-ship)
+  sorts them into allowed, allowed with conditions, not allowed and unsettled.
+- **DAZ Genesis figures.** Sprites and portraits rendered from them may ship
+  under the standard Daz EULA. The mesh, rig or morphs inside a build need an
+  Interactive License for each product, and the EULA's AI clause puts feeding
+  Daz content to this pipeline's models in doubt
+  ([DAZ Genesis](/reference/daz-genesis#licences)).
+- **Source engine tools.** None is in the image. The Source SDK code may be used
+  only to develop a Source 1 mod of a Valve game, and content made with Valve's
+  developer tools, such as studiomdl, is non-commercial by default
+  ([Source Filmmaker](/reference/source-filmmaker#licences-copy-learn-from-never-vendor)).
+
 ## Decide per asset, before it ships
 
 | The asset will | Generate it with |
