@@ -28,7 +28,9 @@ from collections import deque
 try:
     from PIL import Image, ImageFilter
 except ImportError:
-    sys.exit("needs Pillow: pip install --user Pillow")
+    sys.exit("needs Pillow. On Debian or Ubuntu: sudo apt install python3-pil. "
+             "Or in a venv: python3 -m venv ~/.venvs/asset && ~/.venvs/asset/bin/pip install Pillow, "
+             "then run this script with ~/.venvs/asset/bin/python")
 
 
 def _drop_scraps(mask: Image.Image, w: int, h: int,
@@ -113,7 +115,7 @@ def cut(src: Image.Image, tol: int) -> Image.Image:
     # subject reaches into it, as it did on a glowing rune icon. Averaging let
     # that one corner drag the reference toward it, the real grey then
     # fell outside tolerance, and the whole frame survived the cut as a
-    # grey box round the icon — at every tolerance, which is what made
+    # grey box round the icon, at every tolerance, which is what made
     # it look like the picture rather than the fill was wrong. A median
     # over four samples ignores a single outlier.
     corners = [px[c] for c in ((0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1))]
@@ -182,9 +184,9 @@ def main():
     share = covered / (args.size * args.size)
     print(f"{dst}  {out.size[0]}px  {share:.0%} ink")
     if share < 0.05:
-        print("  ! almost nothing survived the cut — raise --tol", file=sys.stderr)
+        print("  ! almost nothing survived the cut; raise --tol", file=sys.stderr)
     if share > 0.92:
-        print("  ! almost nothing was cut — lower --tol", file=sys.stderr)
+        print("  ! almost nothing was cut; lower --tol", file=sys.stderr)
 
 
 if __name__ == "__main__":

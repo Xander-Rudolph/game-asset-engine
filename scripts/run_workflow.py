@@ -1,18 +1,28 @@
 #!/usr/bin/env python3
 """Run a ComfyUI API-format workflow from the command line.
 
-    scripts/run_workflow.py workflows/api/txt2img_sdxl.json \
+    scripts/run_workflow.py workflows/api/txt2img_sdxl.json \\
         --set 'prompt=a mossy stone golem, game asset, neutral grey background'
 
-    scripts/run_workflow.py workflows/api/img2mesh_trellis.json \
+    scripts/run_workflow.py workflows/api/preset_ground_texture.json \\
+        --subject 'moss and fallen pine needles'   # fills the preset's SUBJECT slot
+
+    scripts/run_workflow.py workflows/api/img2mesh_trellis.json \\
         --image concept.png --set target=12000
 
     scripts/run_workflow.py --list-nodes 3D          # what the server loaded
+    scripts/run_workflow.py --free                   # unload ComfyUI's models
+    scripts/run_workflow.py --interrupt PROMPT_ID    # stop your own running job
 
 --set takes either a title-addressed override, `NodeTitle.widget=value`, or a
 bare `name=value` that matches any node input named `name`.  Values are parsed
 as JSON when they parse, otherwise kept as strings, so `steps=20` is an int and
 `prompt=20 golems` is a string.
+
+--prompt replaces the whole Positive text.  The concept and ground texture
+presets (preset_concept_*.json and preset_ground_texture.json) carry the house
+technique in that text around a `<<< SUBJECT: ... >>>` slot, so on those use
+--subject, which fills the slot and keeps the technique.
 
 Outputs (images and meshes alike) are reported by path under output/.
 """
@@ -22,6 +32,7 @@ import argparse
 import json
 import mimetypes
 import os
+import re
 import sys
 import time
 import urllib.error
@@ -33,6 +44,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SERVER = os.environ.get("COMFY_URL", "http://127.0.0.1:8188")
 
+# The body ComfyUI's POST /free reads: unload every model it manages, then
+# reset the executor's cache and free what that held.
+FREE_BODY = {"unload_models": True, "free_memory": True}
+
 
 def api(path: str, payload=None, method=None):
     url = f"{SERVER.rstrip('/')}/{path.lstrip('/')}"
@@ -42,13 +57,16 @@ def api(path: str, payload=None, method=None):
         headers={"Content-Type": "application/json"} if data else {})
     try:
         with urllib.request.urlopen(req, timeout=120) as r:
-            return json.load(r)
+            raw = r.read()
     except urllib.error.HTTPError as e:
         body = e.read().decode(errors="replace")
         raise SystemExit(f"{e.code} from {url}\n{body[:4000]}")
     except urllib.error.URLError as e:
         raise SystemExit(f"Cannot reach ComfyUI at {SERVER}: {e.reason}\n"
-                         "Is it up?  docker compose --profile comfy up -d")
+                         "Is it up?  docker compose --profile packaged up -d  (published image)\n"
+                         "       or  docker compose --profile comfy up -d     (source build)")
+    # /free, /interrupt and POST /queue answer 200 with an empty body.
+    return json.loads(raw) if raw.strip() else {}
 
 
 def _wait_for_server(timeout: float = 180.0) -> bool:
@@ -92,6 +110,67 @@ def upload_image(path: Path) -> str:
     return name
 
 
+# ------------------------------------------------------------ queue control
+
+def queue_ids() -> tuple[list[str], list[str]]:
+    """(running, pending) prompt ids, read from GET /queue.
+
+    Each queue item is (number, prompt_id, prompt, extra_data, outputs), so
+    the id is the second field."""
+    q = api("/queue")
+
+    def ids(items):
+        return [str(i[1]) for i in items or [] if isinstance(i, list) and len(i) > 1]
+    return ids(q.get("queue_running")), ids(q.get("queue_pending"))
+
+
+def cmd_interrupt(prompt_id: str, dry_run: bool) -> int:
+    # POST /interrupt with no body stops WHATEVER is running, and on a shared
+    # server that is usually someone else's job. Newer servers also honour a
+    # prompt_id in the body, but an older one ignores it, so check first.
+    running, pending = queue_ids()
+    if prompt_id not in running:
+        if prompt_id in pending:
+            why = "is still pending, not running. Remove it with --delete instead"
+        else:
+            now = ", ".join(running) if running else "nothing"
+            why = f"is not running (running now: {now})"
+        raise SystemExit(f"--interrupt: {prompt_id} {why}. Nothing was interrupted.")
+    if dry_run:
+        print(f"  dry run: would POST /interrupt {{'prompt_id': {prompt_id!r}}}",
+              file=sys.stderr)
+        return 0
+    api("/interrupt", {"prompt_id": prompt_id})
+    print(f"  interrupted {prompt_id}")
+    return 0
+
+
+def cmd_delete(prompt_ids: list[str], dry_run: bool) -> int:
+    running, pending = queue_ids()
+    for pid in prompt_ids:
+        if pid in running:
+            raise SystemExit(f"--delete: {pid} is running, and a delete only removes "
+                             "pending jobs. Stop it with --interrupt instead.")
+        if pid not in pending:
+            raise SystemExit(f"--delete: {pid} is not in the queue. Nothing was deleted.")
+    if dry_run:
+        print(f"  dry run: would POST /queue {{'delete': {prompt_ids!r}}}", file=sys.stderr)
+        return 0
+    api("/queue", {"delete": prompt_ids})
+    for pid in prompt_ids:
+        print(f"  deleted {pid}")
+    return 0
+
+
+def cmd_free(dry_run: bool) -> int:
+    if dry_run:
+        print(f"  dry run: would POST /free {FREE_BODY}", file=sys.stderr)
+        return 0
+    api("/free", FREE_BODY)
+    print("  asked ComfyUI to unload its models and free memory (POST /free)")
+    return 0
+
+
 # ------------------------------------------------------------------ overrides
 
 def parse_value(raw: str):
@@ -121,7 +200,7 @@ def apply_override(graph: dict, spec: str, allow_many: bool = False) -> None:
         raise SystemExit(f"--set {spec}: no input named {widget!r} {where}")
     if len(hits) > 1 and not title and not allow_many:
         # Silently writing to every match is how a bare `--set text=...` used to
-        # overwrite the NEGATIVE prompt with the positive one — the run succeeded
+        # overwrite the NEGATIVE prompt with the positive one: the run succeeded
         # and quietly produced a worse image.  Make the caller choose.
         names = [n.get("_meta", {}).get("title", n["class_type"]) for _, n in hits]
         raise SystemExit(
@@ -131,6 +210,58 @@ def apply_override(graph: dict, spec: str, allow_many: bool = False) -> None:
     for nid, node in hits:
         node["inputs"][widget] = val
         print(f"  set {node['_meta'].get('title', node['class_type'])}.{widget} = {val!r}")
+
+
+# A fill-in slot in a prompt, as the presets and the prompt library write them:
+# `<<< NAME: what to put here >>>`. The non-greedy match lets one span lines.
+SLOT = re.compile(r"<<<(.*?)>>>", re.S)
+SUBJECT_SLOT = re.compile(r"<<<\s*SUBJECT\b.*?>>>", re.S)
+
+
+def positive_texts(graph: dict) -> list[dict]:
+    """The nodes titled Positive whose `text` input is a string."""
+    return [n for n in graph.values()
+            if isinstance(n, dict) and "class_type" in n
+            and n.get("_meta", {}).get("title") == "Positive"
+            and isinstance(n.get("inputs", {}).get("text"), str)]
+
+
+def apply_subject(graph: dict, subject: str, source: Path) -> None:
+    """Put [subject] where the Positive text's SUBJECT slot is, and nothing else.
+
+    A prefix strip would be wrong: preset_ground_texture.json puts the slot in
+    the middle of a sentence."""
+    nodes = positive_texts(graph)
+    filled = 0
+    for node in nodes:
+        # A function, not a string, so a backslash in the subject stays literal.
+        text, n = SUBJECT_SLOT.subn(lambda _m: subject, node["inputs"]["text"])
+        if n:
+            node["inputs"]["text"] = text
+            filled += n
+    if not filled:
+        if nodes:
+            raise SystemExit(f"--subject: {source} has no <<< SUBJECT: ... >>> slot in "
+                             "its Positive text. Use --prompt to replace the whole "
+                             "Positive text instead.")
+        raise SystemExit(f"--subject: {source} has no node titled 'Positive' with a "
+                         "text input, so no <<< SUBJECT: ... >>> slot. Address the "
+                         "prompt widget with --set 'NodeTitle.widget=...' instead.")
+    print(f"  set Positive.text SUBJECT slot = {subject!r}")
+
+
+def warn_unfilled_slots(graph: dict, source: Path) -> None:
+    names = []
+    for node in positive_texts(graph):
+        for inner in SLOT.findall(node["inputs"]["text"]):
+            name = " ".join(inner.split(":", 1)[0].split()) or "..."
+            if name not in names:
+                names.append(name)
+    if names:
+        slots = ", ".join(f"<<< {n} >>>" for n in names)
+        noun = "an unfilled slot" if len(names) == 1 else "unfilled slots"
+        print(f"warning: the Positive text of {source} still has {noun} "
+              f"({slots}); it reaches the model as literal text.", file=sys.stderr)
 
 
 # ----------------------------------------------------------------------- main
@@ -179,7 +310,7 @@ def report(entry: dict, since: float = 0.0) -> int:
                 elif isinstance(it, str) and ("/" in it or "." in it):
                     print(f"  {it}")
                     found += 1
-    # Comfy3D's Save 3D Mesh is an OUTPUT_NODE but records nothing in history —
+    # Comfy3D's Save 3D Mesh is an OUTPUT_NODE but records nothing in history:
     # it returns the path as a STRING and never populates `ui`.  So the meshes
     # land on disk and the API says nothing about them.  Sweep for what appeared.
     out_dir = ROOT / "output"
@@ -206,7 +337,14 @@ def main() -> int:
     ap.add_argument("--set-all", action="append", default=[], metavar="K=V",
                     help="override a widget on EVERY node that has it")
     ap.add_argument("--prompt", metavar="TEXT",
-                    help="shorthand for --set 'Positive.text=TEXT'")
+                    help="replace the WHOLE Positive text (shorthand for --set "
+                         "'Positive.text=TEXT'). On preset_concept_*.json and "
+                         "preset_ground_texture.json that drops the house technique "
+                         "too; use --subject there")
+    ap.add_argument("--subject", metavar="TEXT",
+                    help="fill only the <<< SUBJECT: ... >>> slot in the Positive "
+                         "text and keep the rest of it. Refused with --prompt, and "
+                         "on a graph whose Positive text has no SUBJECT slot")
     ap.add_argument("--negative", metavar="TEXT",
                     help="shorthand for --set 'Negative.text=TEXT'")
     ap.add_argument("--image", type=Path,
@@ -214,11 +352,40 @@ def main() -> int:
     ap.add_argument("--list-nodes", nargs="?", const="", metavar="SUBSTR",
                     help="list node types the server has loaded, filtered")
     ap.add_argument("--dry-run", action="store_true",
-                    help="print the resolved graph instead of queueing it")
+                    help="print the resolved graph instead of queueing it. With "
+                         "--free, --interrupt or --delete, check but send nothing")
     ap.add_argument("--retries", type=int, default=0, metavar="N",
                     help="on a dropped connection, wait for the server to come "
                          "back and try again, up to N times. Use in batches")
+    ap.add_argument("--free", action="store_true",
+                    help="POST /free to unload the models ComfyUI manages and free "
+                         "memory, then exit, or queue the workflow if one is given. "
+                         "The server acts on it once the running job, if any, ends. "
+                         "It does NOT release ComfyUI-3D-Pack's Hunyuan pipelines, "
+                         "which the pack caches itself; only a container restart does")
+    ap.add_argument("--interrupt", metavar="PROMPT_ID",
+                    help="stop PROMPT_ID, only if it is the job running now. "
+                         "/interrupt stops whatever is running, so this reads /queue "
+                         "first and refuses any other id. Stop only jobs you started")
+    ap.add_argument("--delete", action="append", default=[], metavar="PROMPT_ID",
+                    help="remove a pending job from the queue; repeatable. Refuses "
+                         "an id that is running or not queued")
     args = ap.parse_args()
+
+    if args.subject is not None and args.prompt is not None:
+        ap.error("--subject and --prompt cannot be combined: --prompt replaces the "
+                 "whole Positive text, --subject fills only its SUBJECT slot")
+
+    controlled = False
+    if args.interrupt:
+        controlled = True
+        cmd_interrupt(args.interrupt, args.dry_run)
+    if args.delete:
+        controlled = True
+        cmd_delete(args.delete, args.dry_run)
+    if args.free:
+        controlled = True
+        cmd_free(args.dry_run)
 
     if args.list_nodes is not None:
         info = api("/object_info")
@@ -229,6 +396,8 @@ def main() -> int:
         return 0
 
     if not args.workflow:
+        if controlled:
+            return 0
         ap.error("a workflow file is required (or use --list-nodes)")
     graph = json.loads(args.workflow.read_text())
 
@@ -243,12 +412,15 @@ def main() -> int:
 
     if args.prompt is not None:
         apply_override(graph, f"Positive.text={args.prompt}")
+    if args.subject is not None:
+        apply_subject(graph, args.subject, args.workflow)
     if args.negative is not None:
         apply_override(graph, f"Negative.text={args.negative}")
     for spec in args.set:
         apply_override(graph, spec)
     for spec in args.set_all:
         apply_override(graph, spec, allow_many=True)
+    warn_unfilled_slots(graph, args.workflow)
 
     if args.dry_run:
         print(json.dumps(graph, indent=2))

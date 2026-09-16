@@ -123,7 +123,8 @@ def check_gpu(rep: Report) -> None:
     else:
         rep.add(WARN, "gpu runtime", "no NVIDIA GPU found",
                 "The pipeline runs on CPU only in theory. In practice mesh "
-                "generation needs a CUDA GPU with 12GB or more.")
+                "generation needs a CUDA GPU. It was measured on an "
+                "RTX 4070 Ti SUPER with 16GB and 31GB of host RAM; 12GB is untested.")
 
 
 def check_env(rep: Report, fix: bool) -> None:

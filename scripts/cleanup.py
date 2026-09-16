@@ -6,24 +6,47 @@ A finished asset is a **concept image**, a **model**, its **textures** and its
 were composed into a sheet, unlit silhouette checks, UV working files, rejected
 concepts, superseded meshes.
 
-Nothing on disk records which concept produced which mesh — the filenames are
-counters and timestamps — so this tool never guesses. You name the keepers once,
+Nothing on disk records which concept produced which mesh (the filenames are
+counters and timestamps), so this tool never guesses. You name the keepers once,
 they are copied into `output/assets/<name>/`, and only then is anything swept.
 
-    # 1. see what is scratch, and what is unclaimed
+    # 1. see what is scratch, what is protected, and what is unclaimed
     scripts/cleanup.py
 
     # 2. curate one asset (copies, never moves)
     scripts/cleanup.py keep warrior \\
         --concept output/concept/qwen_00002_.png \\
         --model   output/mesh/textured_2026-09-08-22-22-18.glb \\
-        --rig     output/rigged_1788911741_articulationxl.fbx \\
+        --rig     output/rigged/warrior.fbx \\
         --sheets  output/sheets/warrior_walk.png output/sheets/warrior_attack.png
+
+    #    and record where it came from, copying licence and URL from models.json.
+    #    The Nth of each flag belong together: this records two rows.
+    scripts/cleanup.py keep warrior --concept output/concept/qwen_00002_.png \\
+        --generator txt2img_qwen --source Qwen/Qwen-Image \\
+        --licence Apache-2.0 --licence-url https://huggingface.co/Qwen/Qwen-Image \\
+        --generator img2mesh_hunyuan3d21 --source tencent/Hunyuan3D-2.1 \\
+        --licence 'Tencent Hunyuan Community' \\
+        --licence-url https://huggingface.co/tencent/Hunyuan3D-2.1/blob/main/LICENSE
 
     # 3. sweep
     scripts/cleanup.py sweep            # dry run - always
     scripts/cleanup.py sweep --delete   # scratch only
-    scripts/cleanup.py sweep --delete --unclaimed   # also anything not curated
+    scripts/cleanup.py sweep --delete --unclaimed   # also anything not curated,
+                                                    # outside the protected folders
+
+The protected folders (music, icons, scenery, ground, materials) hold finished
+work that `keep` has no way to claim, so --unclaimed leaves them alone unless
+you also pass --include-protected.
+
+--generator, --source, --licence and --licence-url record where an asset came
+from, as rows in the "provenance" list of its sources.json. Each row has a
+generator, source, licence and licence_url field. The flags are repeatable, and
+the Nth use of each makes row N, so every flag you use must be given the same
+number of times; `keep` refuses mismatched counts rather than pair a source
+with the wrong licence. A later `keep` of the same name appends its rows and
+skips only a row that is already recorded whole. A flag you leave out records
+nothing: no field is ever filled with a guess.
 """
 from __future__ import annotations
 
@@ -51,6 +74,27 @@ SCRATCH_GLOBS = [
     ("**/*_uv.npz", "UV working files written by Load 3D Mesh"),
     ("**/*.part", "interrupted downloads"),
     ("**/*.bak", "backups"),
+]
+
+# Finished work that `keep` cannot claim: it curates a concept, a model, a rig,
+# sheets and textures, and has no slot for a music take, an icon, a prop, a
+# ground tile or a material. Without this list every file in them reads as
+# unclaimed, and `sweep --delete --unclaimed` would delete them. They are
+# skipped unless the sweep is given --include-protected.
+PROTECTED_DIRS = [
+    ("music", "music takes and loops from generate_music.py"),
+    ("icons", "icon concepts and the icons cut from them"),
+    ("scenery", "scenery prop concepts"),
+    ("ground", "ground texture takes, the input to make_seamless.py"),
+    ("materials", "seamless materials written by make_seamless.py"),
+]
+
+# Provenance flags on `keep`, as (row key in sources.json, argparse dest).
+PROVENANCE = [
+    ("generator", "generator"),
+    ("source", "source"),
+    ("licence", "licence"),
+    ("licence_url", "licence_url"),
 ]
 
 
@@ -85,6 +129,17 @@ def find_scratch() -> list[tuple[Path, str]]:
     return hits
 
 
+def find_protected() -> list[tuple[Path, str, int, int]]:
+    """(folder, why, file count, bytes) for each protected folder that exists."""
+    hits = []
+    for name, why in PROTECTED_DIRS:
+        d = OUT / name
+        if d.is_dir():
+            files = [f for f in d.rglob("*") if f.is_file()]
+            hits.append((d, why, len(files), sum(f.stat().st_size for f in files)))
+    return hits
+
+
 def curated_files() -> set[Path]:
     if not ASSETS.is_dir():
         return set()
@@ -106,21 +161,25 @@ def curated_sources() -> set[Path]:
         try:
             for rel in json.loads(man.read_text()).get("sources", []):
                 out.add((ROOT / rel).resolve())
-        except (OSError, ValueError):
+        except (OSError, ValueError, AttributeError):
             print(f"  ! could not read {man.relative_to(ROOT)}; treating its "
                   f"sources as unclaimed", file=sys.stderr)
     return out
 
 
-def find_unclaimed() -> list[Path]:
-    """Generated files outside output/assets/ that no curated copy matches."""
+def find_unclaimed(include_protected: bool = False) -> list[Path]:
+    """Generated files outside output/assets/ that no curated copy matches.
+
+    The protected folders are left out unless [include_protected]."""
     claimed = curated_sources()
-    scratch_roots = {OUT / n for n, _ in SCRATCH_DIRS}
+    skip_roots = {OUT / n for n, _ in SCRATCH_DIRS}
+    if not include_protected:
+        skip_roots |= {OUT / n for n, _ in PROTECTED_DIRS}
     out: list[Path] = []
     for f in OUT.rglob("*"):
         if not f.is_file():
             continue
-        if ASSETS in f.parents or any(r in f.parents or r == f for r in scratch_roots):
+        if ASSETS in f.parents or any(r in f.parents or r == f for r in skip_roots):
             continue
         if f.resolve() in claimed:
             continue
@@ -130,8 +189,83 @@ def find_unclaimed() -> list[Path]:
 
 # --------------------------------------------------------------------- keep
 
+def _as_list(value) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return [str(v) for v in value]
+    return [str(value)]
+
+
+def provenance_rows(args) -> list[dict]:
+    """One row per position: the Nth --generator, --source, --licence and
+    --licence-url make row N.
+
+    Values are never stored as four independent lists, because removing a
+    repeated licence from one list would shift it against the sources and
+    give a source someone else's licence. A flag that was not given is left
+    out of every row; mismatched counts are refused, not padded or guessed."""
+    given = {key: _as_list(getattr(args, dest_attr, None))
+             for key, dest_attr in PROVENANCE}
+    given = {key: values for key, values in given.items() if values}
+    if not given:
+        return []
+    counts = {len(values) for values in given.values()}
+    if len(counts) > 1:
+        flags = ", ".join(f"--{key.replace('_', '-')} {len(values)} "
+                          f"time{'' if len(values) == 1 else 's'}"
+                          for key, values in given.items())
+        sys.exit(f"keep: got {flags}. Give each provenance flag you use the same "
+                 "number of times: the Nth of each form one row, so unequal counts "
+                 "cannot say which licence belongs to which source. Nothing was copied.")
+    return [{key: values[i] for key, values in given.items()}
+            for i in range(counts.pop())]
+
+
+def merge_rows(prior: list[dict], new: list[dict]) -> tuple[list[dict], int]:
+    """Prior rows first, then each new row that is not already recorded whole.
+
+    A row is only ever dropped as a duplicate of an identical row, never
+    because one of its fields matches another row's. Returns the rows and how
+    many were added."""
+    rows = list(prior)
+    added = 0
+    for row in new:
+        if row not in rows:
+            rows.append(row)
+            added += 1
+    return rows, added
+
+
+def read_prior(man: Path) -> dict:
+    """The sources.json an earlier keep wrote, or {} when there is none.
+
+    Refuses a file it cannot read rather than overwrite it, because it may
+    hold the only record of where the asset came from and under which licence."""
+    if not man.exists():
+        return {}
+    try:
+        prior = json.loads(man.read_text())
+    except (OSError, ValueError) as e:
+        sys.exit(f"keep: could not read {man} ({e}). It may hold the asset's "
+                 "provenance, so it is not overwritten. Fix or move it, then keep "
+                 "again. Nothing was copied.")
+    rows = prior.get("provenance", []) if isinstance(prior, dict) else None
+    if not isinstance(rows, list) or not all(isinstance(r, dict) for r in rows):
+        sys.exit(f"keep: {man} is not an object with a list of provenance rows, so it "
+                 "is not overwritten. Fix or move it, then keep again. Nothing was "
+                 "copied.")
+    return prior
+
+
 def cmd_keep(args) -> int:
+    # Both checks come before anything is copied, so a refused keep leaves the
+    # asset untouched.
+    new_rows = provenance_rows(args)
     dest = ASSETS / args.name
+    man = dest / "sources.json"
+    prior = read_prior(man)
+
     tex = dest / "textures"
     dest.mkdir(parents=True, exist_ok=True)
 
@@ -165,7 +299,7 @@ def cmd_keep(args) -> int:
 
     # Sidecar maps: an .obj's .mtl and *_albedo/_metallic/_roughness images, and
     # anything TexGen left beside the model.  A .glb embeds its textures, so this
-    # is usually empty for one — which is not an error.
+    # is usually empty for one, which is not an error.
     if args.model:
         model = Path(args.model)
         for extra in sorted(model.parent.glob(model.stem + "*")):
@@ -175,16 +309,22 @@ def cmd_keep(args) -> int:
     for t in args.textures or []:
         take(Path(t), tex)
 
-    man = dest / "sources.json"
-    prior = []
-    if man.exists():
-        try:
-            prior = json.loads(man.read_text()).get("sources", [])
-        except ValueError:
-            pass
-    man.write_text(json.dumps({"name": args.name,
-                               "sources": sorted(set(prior) | set(sources))}, indent=2) + "\n")
-    print(f"  wrote {man.relative_to(ROOT)}  ({len(set(prior) | set(sources))} source paths)")
+    merged = sorted(set(_as_list(prior.get("sources"))) | set(sources))
+    record: dict = {"name": args.name, "sources": merged}
+    # Provenance merges like `sources`: the rows an earlier keep recorded stay,
+    # and this keep's rows are appended unless the identical row is already
+    # there. With no rows at all the key is left out, never written as "unknown".
+    rows, added = merge_rows(prior.get("provenance", []), new_rows)
+    if rows:
+        record["provenance"] = rows
+    # Anything else someone added to the file by hand is kept as it was.
+    for key, value in prior.items():
+        if key not in ("name", "sources", "provenance"):
+            record[key] = value
+    man.write_text(json.dumps(record, indent=2) + "\n")
+    print(f"  wrote {man.relative_to(ROOT)}  ({len(merged)} source paths"
+          + (f"; {len(rows)} provenance row{'' if len(rows) == 1 else 's'}, "
+             f"{added} new)" if rows else ")"))
 
     print(f"\n{args.name} curated in {dest.relative_to(ROOT)}")
     print("Now: scripts/cleanup.py sweep            (dry run)")
@@ -195,17 +335,33 @@ def cmd_keep(args) -> int:
 # -------------------------------------------------------------------- sweep
 
 def cmd_sweep(args) -> int:
+    include_protected = getattr(args, "include_protected", False)
+
     scratch = find_scratch()
     total = sum(size_of(p) for p, _ in scratch)
-    print(f"SCRATCH — always safe, regenerated by re-running the step ({human(total)})")
+    print(f"SCRATCH: always safe, regenerated by re-running the step ({human(total)})")
     if not scratch:
         print("  (none)")
     for p, why in scratch:
         print(f"  {human(size_of(p)):>8}  {p.relative_to(ROOT)}\n            {why}")
 
-    unclaimed = find_unclaimed()
+    protected = find_protected()
+    pfiles = sum(n for _, _, n, _ in protected)
+    pbytes = sum(b for _, _, _, b in protected)
+    print(f"\nPROTECTED: finished work `keep` cannot claim ({human(pbytes)}, {pfiles} files)")
+    if include_protected:
+        print("  --include-protected was given, so these are IN the unclaimed list below.")
+    else:
+        print("  Never swept. Copy out what you want, then add --include-protected to sweep them.")
+    if not protected:
+        print("  (none)")
+    for d, why, n, b in protected:
+        print(f"  {human(b):>8}  {d.relative_to(ROOT)}  ({n} file{'' if n == 1 else 's'})\n"
+              f"            {why}")
+
+    unclaimed = find_unclaimed(include_protected=include_protected)
     utotal = sum(size_of(p) for p in unclaimed)
-    print(f"\nUNCLAIMED — generated, but not curated into output/assets/ ({human(utotal)}, "
+    print(f"\nUNCLAIMED: generated, but not curated into output/assets/ ({human(utotal)}, "
           f"{len(unclaimed)} files)")
     if not curated_files():
         print("  Nothing has been curated yet, so EVERYTHING is unclaimed.")
@@ -221,7 +377,7 @@ def cmd_sweep(args) -> int:
 
     if not args.delete:
         print(f"\nDry run. {human(sum(size_of(p) for p in targets))} would be removed.")
-        print("Add --delete to act" + (", and --unclaimed to include the second list."
+        print("Add --delete to act" + (", and --unclaimed to include the UNCLAIMED list."
                                        if not args.unclaimed else "."))
         return 0
 
@@ -258,17 +414,34 @@ def main() -> int:
     k.add_argument("--rig", help="the rigged .fbx, if there is one")
     k.add_argument("--sheets", nargs="*", help="pose sheets to keep")
     k.add_argument("--textures", nargs="*", help="extra texture maps not beside the model")
+    prov = k.add_argument_group(
+        "provenance",
+        "Recorded as rows in sources.json. Each flag is repeatable, and the Nth use "
+        "of each makes row N, so give every flag you use the same number of times.")
+    prov.add_argument("--generator", action="append", metavar="NAME",
+                      help="the workflow or script that made it, e.g. txt2img_qwen")
+    prov.add_argument("--source", action="append", metavar="MODEL",
+                      help="the upstream model or asset base, e.g. Qwen/Qwen-Image")
+    prov.add_argument("--licence", action="append", metavar="LICENCE",
+                      help="the licence of that row's source, e.g. Apache-2.0")
+    prov.add_argument("--licence-url", dest="licence_url", action="append", metavar="URL",
+                      help="where that row's licence text is")
     k.set_defaults(func=cmd_keep)
 
     s = sub.add_parser("sweep", help="report, then optionally remove")
     s.add_argument("--delete", action="store_true", help="actually remove (default: dry run)")
     s.add_argument("--unclaimed", action="store_true",
-                   help="also remove generated files not curated into output/assets/")
+                   help="also remove generated files not curated into output/assets/, "
+                        "outside the protected folders")
+    s.add_argument("--include-protected", action="store_true",
+                   help="count the protected folders (music, icons, scenery, ground, "
+                        "materials) as unclaimed too, so --unclaimed deletes them")
     s.set_defaults(func=cmd_sweep)
 
     args = ap.parse_args()
     if not args.cmd:
-        return cmd_sweep(argparse.Namespace(delete=False, unclaimed=False))
+        return cmd_sweep(argparse.Namespace(delete=False, unclaimed=False,
+                                            include_protected=False))
     return args.func(args)
 
 

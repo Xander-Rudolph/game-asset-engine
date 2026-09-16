@@ -1,9 +1,33 @@
 {
  "id": "img2mesh_trellis",
  "revision": 0,
- "last_node_id": 5,
+ "last_node_id": 6,
  "last_link_id": 4,
  "nodes": [
+  {
+   "id": 6,
+   "type": "Note",
+   "pos": [
+    -20,
+    60
+   ],
+   "size": [
+    400,
+    600
+   ],
+   "flags": {},
+   "order": -1,
+   "mode": 0,
+   "title": "Read me",
+   "properties": {
+    "text": ""
+   },
+   "widgets_values": [
+    "CONCEPT -> MESH: TRELLIS, StableGen branch (29s measured)\n\nShape only.  The one for an asset that ships worldwide: TRELLIS is MIT\nwith no territory clause, unlike Hunyuan3D.\n\nNo cut-out needed.  It runs rembg with u2net itself, so a plain grey\nbackground concept goes straight into LoadImage.  Measured: a 1104x1472\ncharacter concept on grey came out as a clean 48,000-face mesh in 29\nseconds.\n\nThat 48,000 is Decimate Mesh's target, not TRELLIS's choice.\nmesh_simplify is a KEEP ratio: 0.95 keeps 95% of the faces.\n\nPlain TRELLIS can colour a mesh, but its texture bake runs through two\nlibraries licensed for research and evaluation only.  A reading of\nthis graph's code path found no call into either; that was not a\nruntime check.\n\nSame seed, same input, different bytes on each fresh run: GPU\nnondeterminism.  Compare renders, not hashes.\n\nNeeds the trellis weight group:\n  scripts/fetch_models.py --download --group trellis\nMeasured figures and the licence text: docs/guide/trellis.md\n\n---\n\nTRELLIS image-to-mesh, the Stable3DGen branch. USE THIS WHEN THE\nASSET SHIPS INTO THE EU, UK OR SOUTH KOREA: TRELLIS is MIT with\nno territory clause, unlike Hunyuan3D, and unlike the TripoSG\ncopy vendored in this pack, whose licence file carries the same\nexclusion (see docs/guide/licensing). It needs NO cut-out: the\npipeline runs rembg/u2net itself, so a plain grey-background\nconcept render works. Two things worth knowing before you change\nnumbers. mesh_simplify is a KEEP ratio, not a removal ratio --\n0.95 keeps 95% of the faces, so it barely simplifies and the\nDecimate node below is what actually meets a budget. And this\nbranch applies an axis transform that the plain TRELLIS nodes do\nnot. Measured against img2mesh_hunyuan3d21.json it lands in the\nsame orientation, so the transform brings it into line rather\nthan out of it (see docs/guide/trellis). Needs the 'trellis'\nweight group: scripts/fetch_models.py --download --group\ntrellis. Note the pipeline type is the generic DIFFUSERS_PIPE,\nshared with 14 other loaders, so ComfyUI will happily let you\nwire a TripoSG or Hunyuan loader in here and fail at run time\nrather than at validation -- keep node 2 as it is."
+   ],
+   "color": "#432",
+   "bgcolor": "#653"
+  },
   {
    "id": 1,
    "type": "LoadImage",

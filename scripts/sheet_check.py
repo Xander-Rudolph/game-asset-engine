@@ -29,7 +29,9 @@ try:
     import numpy as np
     from PIL import Image
 except ImportError:
-    sys.exit("needs numpy and Pillow: pip install --user numpy Pillow")
+    sys.exit("needs numpy and Pillow. On Debian or Ubuntu: sudo apt install python3-numpy python3-pil. "
+             "Or in a venv: python3 -m venv ~/.venvs/asset && ~/.venvs/asset/bin/pip install numpy Pillow, "
+             "then run this script with ~/.venvs/asset/bin/python")
 
 ROOT = Path(__file__).resolve().parent.parent
 

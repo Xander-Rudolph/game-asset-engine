@@ -29,7 +29,8 @@ def object_info() -> dict:
             return json.load(r)
     except Exception as e:
         sys.exit(f"Cannot reach ComfyUI at {SERVER}: {e}\n"
-                 "  docker compose --profile comfy up -d")
+                 "  docker compose --profile packaged up -d  (published image)\n"
+                 "  docker compose --profile comfy up -d     (source build)")
 
 
 def check(path: Path, info: dict) -> list[str]:
@@ -43,7 +44,7 @@ def check(path: Path, info: dict) -> list[str]:
         if spec is None:
             near = [n for n in info if ct.split()[-1].lower() in n.lower()][:3]
             problems.append(f"  [{nid}] unknown node {ct!r}"
-                            + (f" — did you mean {near}?" if near else ""))
+                            + (f" (did you mean {near}?)" if near else ""))
             continue
         req = spec["input"].get("required", {})
         opt = spec["input"].get("optional", {})
