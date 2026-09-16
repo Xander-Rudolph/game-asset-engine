@@ -1,0 +1,39 @@
+{
+  "_comment": [
+    "External command-line tool manifest for scripts/fetch_tools.py.",
+    "",
+    "Each entry is one release archive, pinned by URL, byte size and sha256. The",
+    "archive is downloaded to a .part file, checked against both, and only then",
+    "unpacked. 'strip' is the archive's top-level folder, removed from every",
+    "member path. 'keep' lists what is unpacked, as a file name or a folder",
+    "ending in '/'; every other member stays inside the archive and never",
+    "touches the disk. 'dest' is relative to the repository root and must be its",
+    "own folder inside tools/, which is gitignored, outside tools/_downloads:",
+    "installing replaces it whole, so fetch_tools.py refuses any other dest.",
+    "'binary' is the executable inside 'dest' that --path prints.",
+    "",
+    "Every entry carries 'license', 'license_url' and 'commercial'.",
+    "`fetch_tools.py --licenses` prints them. These tools run on the host from",
+    "tools/, so nothing here is copied into the published image."
+  ],
+  "tools": [
+    {
+      "name": "rhubarb",
+      "title": "Rhubarb Lip Sync",
+      "version": "1.14.0",
+      "platform": "linux-x86_64",
+      "url": "https://github.com/DanielSWolf/rhubarb-lip-sync/releases/download/v1.14.0/Rhubarb-Lip-Sync-1.14.0-Linux.zip",
+      "archive": "zip",
+      "size": 87225003,
+      "sha256": "a9a9074862cff47b2d59b8bf399a678a3b0b74f9452ad6ad94cb292913dd8667",
+      "strip": "Rhubarb-Lip-Sync-1.14.0-Linux/",
+      "keep": ["rhubarb", "res/", "LICENSE.md"],
+      "dest": "tools/rhubarb/1.14.0",
+      "binary": "rhubarb",
+      "license": "MIT (code); bundled components under the notices in LICENSE.md",
+      "license_url": "https://github.com/DanielSWolf/rhubarb-lip-sync/blob/v1.14.0/LICENSE.md",
+      "commercial": "yes",
+      "note": "Only rhubarb, res/ and LICENSE.md are unpacked. The zip's extras/EsotericSoftwareSpine/rhubarb-for-spine-1.14.0.jar bundles OpenJFX (GPL-2.0 with Classpath Exception) and javax.json (CDDL-1.1 or GPL-2.0), and LICENSE.md does not list it, so it is never extracted. The binary needs GLIBC_2.29 and GLIBCXX_3.4.26 or newer and must sit next to res/."
+    }
+  ]
+}

@@ -19,6 +19,8 @@ A register is `claims/<note>.json`, with the same base name as `docs/reference/<
 
 A claim id cited in a note, such as `LIP-001`, names the register by its prefix and the claim by its `id` field. Ids are unique within a register. `conflicts_found` and `conflicts_with` refer to claims by the same ids.
 
+What a register does not hold: numbers measured on this machine by the repo's own scripts. A note states those with their date and the command that produced them, with no claim id, the way the guides do.
+
 ## What a register holds
 
 Six top-level keys:

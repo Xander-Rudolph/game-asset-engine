@@ -130,6 +130,7 @@ picked from its description:
 | "render walk and attack sheets for the golem" | `pose-sheet`, sprite sheets and facings |
 | "I need a tileable swamp ground texture" | `ground-texture`, generation plus seam fixing |
 | "I need a looping battle theme for the boss fight" | `game-music`, licence-clear music looped without a seam |
+| "make this portrait talk" / "lip sync this line" | `lip-sync`, a talking portrait: mouth shapes timed to a voice line |
 | "how many faces should this be" / "rig this 600k mesh" | `mesh-budget`, measured budgets and heavy-mesh rigging |
 | "tidy up, I'm done with this asset" | `asset-cleanup`, curate the keepers and sweep the rest |
 
@@ -186,6 +187,7 @@ export MESHY_API_KEY=...
 | `pose-sheet` | Sprite sheets, facing sheets, bone poses |
 | `ground-texture` | Tileable terrain, and fixing seams |
 | `game-music` | Licence-clear instrumental music, looped without a seam |
+| `lip-sync` | Talking portraits: mouth shapes timed to voice lines |
 | `mesh-budget` | Face counts, decimation, rigging heavy meshes |
 | `asset-cleanup` | Curate the keepers, sweep the rest |
 
@@ -210,6 +212,7 @@ It deploys to GitHub Pages on every push to `main`.
 | [Rigging](https://xander-rudolph.github.io/game-asset-engine/guide/rigging) | Including heavy and scanned meshes |
 | [Ground and terrain](https://xander-rudolph.github.io/game-asset-engine/guide/terrain) | Tileable textures, and four ways to get seams wrong |
 | [Music](https://xander-rudolph.github.io/game-asset-engine/guide/music) | Licence-clear music that loops without a seam |
+| [Talking portraits](https://xander-rudolph.github.io/game-asset-engine/guide/talking-portraits) | Mouth shapes for a dialogue portrait, timed to a voice line |
 | [Licensing](https://xander-rudolph.github.io/game-asset-engine/guide/licensing) | Read before shipping anything |
 
 ## Licensing, briefly

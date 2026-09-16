@@ -49,6 +49,16 @@ ALLOW = [
     (".claude/skills/research-note/SKILL.md", "Daz",
      "names docs/reference/daz-genesis.md as a note to copy the shape from, and DAZ claim "
      "ids as an example of how a page cites its register"),
+    ("scripts/lipsync_cues.py", "Valve",
+     "credits the 0.08 s window of Valve's phoneme filter as the source of the share "
+     "frame rule, a number read in docs/reference/source-filmmaker.md, not SDK code"),
+    ("scripts/daz_inventory.py", "Daz",
+     "reads a user's own Daz content library from outside the repo and refuses a path "
+     "inside it, so it names the maker, its folders and its spec; its test library is "
+     "invented"),
+    ("scripts/daz_inventory.py", "Genesis",
+     "names Genesis 9 Starter Essentials and its data/ folders as the library a user "
+     "unpacks and points it at; no Genesis data is in the file"),
 ]
 
 # Separator between the words of a multi-word marker: whitespace, or a comment

@@ -21,6 +21,7 @@ A guide or reference page keeps only the sections that apply, but still says wha
 ## 2. Claim register
 
 - A research note has a register at `research/claims/<note>.json`, with the same base name. `research/README.md` gives the fields, the claim ids (one prefix per note, such as `LIP-001`) and the five statuses.
+- A register holds what was read from a source outside this repo: a licence, a model card, a spec, a forum post. A number measured on this machine by a script in this repo needs no claim id. Date it, and name the script and command that produced it, as every guide does. Say it was measured, not read.
 - Update the register first and the page second. A page never states a claim more strongly than the register does: a `corrected` claim only in its `claim` wording, never `as_first_reported`, and an `unsettled` one only as unsettled, with both readings.
 - Cite the ids behind each sentence, or table cell, as an HTML comment at its end, such as `<!-- LIP-001 -->` or `<!-- DAZ-001, DAZ-018 -->`. Change the comment whenever the sentence changes.
 - Revising a page: read the ids behind each sentence you change, and re-check before you strengthen one.

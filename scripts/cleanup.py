@@ -35,9 +35,9 @@ they are copied into `output/assets/<name>/`, and only then is anything swept.
     scripts/cleanup.py sweep --delete --unclaimed   # also anything not curated,
                                                     # outside the protected folders
 
-The protected folders (music, icons, scenery, ground, materials) hold finished
-work that `keep` has no way to claim, so --unclaimed leaves them alone unless
-you also pass --include-protected.
+The protected folders under output/ (music, icons, scenery, ground, materials,
+lipsync and mpfb) hold finished work that `keep` has no way to claim, so
+--unclaimed leaves them alone unless you also pass --include-protected.
 
 --generator, --source, --licence and --licence-url record where an asset came
 from, as rows in the "provenance" list of its sources.json. Each row has a
@@ -78,15 +78,22 @@ SCRATCH_GLOBS = [
 
 # Finished work that `keep` cannot claim: it curates a concept, a model, a rig,
 # sheets and textures, and has no slot for a music take, an icon, a prop, a
-# ground tile or a material. Without this list every file in them reads as
-# unclaimed, and `sweep --delete --unclaimed` would delete them. They are
-# skipped unless the sweep is given --include-protected.
+# ground tile, a material, a mouth set or a MakeHuman body. Without this list
+# every file in them reads as unclaimed, and `sweep --delete --unclaimed` would
+# delete them. They are skipped unless the sweep is given --include-protected.
+# The module docstring names these folders too; --include-protected's help is
+# built from this list.
 PROTECTED_DIRS = [
     ("music", "music takes and loops from generate_music.py"),
     ("icons", "icon concepts and the icons cut from them"),
     ("scenery", "scenery prop concepts"),
     ("ground", "ground texture takes, the input to make_seamless.py"),
     ("materials", "seamless materials written by make_seamless.py"),
+    ("lipsync", "mouth sets, timelines and MP4 previews from make_mouths.py, "
+                "compose_mouths.py, lipsync_cues.py and preview_lipsync.py; a set's "
+                "manifest.json only works beside its own overlays"),
+    ("mpfb", "MakeHuman bodies with viseme shape keys, and their sheets, from "
+             "mpfb_probe.py; keep needs a concept image, which a built body lacks"),
 ]
 
 # Provenance flags on `keep`, as (row key in sources.json, argparse dest).
@@ -434,8 +441,9 @@ def main() -> int:
                    help="also remove generated files not curated into output/assets/, "
                         "outside the protected folders")
     s.add_argument("--include-protected", action="store_true",
-                   help="count the protected folders (music, icons, scenery, ground, "
-                        "materials) as unclaimed too, so --unclaimed deletes them")
+                   help="count the protected folders under output/ ("
+                        + ", ".join(name for name, _ in PROTECTED_DIRS)
+                        + ") as unclaimed too, so --unclaimed deletes them")
     s.set_defaults(func=cmd_sweep)
 
     args = ap.parse_args()

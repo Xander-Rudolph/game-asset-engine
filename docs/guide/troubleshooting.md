@@ -186,8 +186,18 @@ Look for this line in the output:
 ```
 
 The bone names in your pose file are not in this rig. Bone names differ per
-model. Dump the map and re author. See
-[rigging](/guide/rigging#bone-names-are-not-human-readable).
+model, so a transforms file written for one rig, such as `poses/walk.json`,
+does not fit another. Compile a role pose for this rig and render that:
+
+```sh
+scripts/bone_roles.py compile poses/roles/walk.json output/rigged/golem.fbx
+scripts/render_sheet.py output/rigged/golem.fbx \
+    --poses transforms:output/poses/golem_walk.json --angles 4 --size 220 --check
+```
+
+See [animation](/guide/animation#deriving-cycles-automatically). For a bone no
+role covers, or a rig `bone_roles.py map` cannot read, dump the map and pose by
+bone name ([rigging](/guide/rigging#bone-names-are-not-human-readable)).
 
 A pose can also do nothing when every bone name is right, for example when a
 rotation cancels out or goes to an axis with no effect. Then no line is printed.

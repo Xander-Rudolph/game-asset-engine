@@ -13,6 +13,7 @@ So: ask Docker which one is up.
 from __future__ import annotations
 
 import json
+import math
 import os
 import subprocess
 import sys
@@ -43,6 +44,15 @@ def container() -> str:
     return CANDIDATES[0]
 
 
+# How much longer the host waits than the alarm inside the container, so the
+# process ends itself first and the caller can say which of the two ended it.
+ALARM_GRACE = 30
+
+# docker exec's exit code when the process inside was ended by SIGALRM: 128 plus
+# signal 14. Measured: 142, for a snippet sleeping past a 3 s alarm.
+SIGALRM_EXIT = (128 + 14,)
+
+
 def exec_python(script: str, payload: str, timeout: int = 3600):
     """Run a Python snippet inside the container with one JSON argument.
 
@@ -52,11 +62,20 @@ def exec_python(script: str, payload: str, timeout: int = 3600):
 
     The timeout is the point of routing everything through here. A Blender call
     that hangs hangs forever otherwise, and a tool that loops inherits one
-    chance to hang per iteration.
+    chance to hang per iteration. A timeout on the docker exec client alone
+    stops only the client: the process in the container carries on, holding
+    memory and showing in `docker top` as a Blender job. So the snippet runs
+    behind signal.alarm(timeout) with SIGALRM at its default action, which ends
+    the process inside the container, mid-render or not, and the host waits
+    ALARM_GRACE seconds longer before it gives up on the client. A snippet that
+    sets its own alarm replaces this one.
     """
+    seconds = max(1, math.ceil(timeout))
+    preamble = ("import signal as _alarm; _alarm.signal(_alarm.SIGALRM, _alarm.SIG_DFL); "
+                f"_alarm.alarm({seconds}); del _alarm\n")
     return subprocess.run(
-        ["docker", "exec", "-i", container(), "python3", "-c", script, payload],
-        capture_output=True, text=True, timeout=timeout)
+        ["docker", "exec", "-i", container(), "python3", "-c", preamble + script, payload],
+        capture_output=True, text=True, timeout=seconds + ALARM_GRACE)
 
 
 def exec_json(script: str, cfg: dict, sentinel: str, timeout: int = 3600):
@@ -73,12 +92,21 @@ def exec_json(script: str, cfg: dict, sentinel: str, timeout: int = 3600):
     try:
         r = exec_python(script, json.dumps(cfg), timeout=timeout)
     except subprocess.TimeoutExpired:
+        name = container()
         sys.stderr.write(
-            f"  timed out after {timeout}s inside {container()}\n"
-            "  Blender was still running. Nothing was written.\n")
+            f"  Blender was still running in {name} {ALARM_GRACE}s after its "
+            f"{timeout}s alarm, so the host stopped waiting.\n"
+            f"  Find it with `docker top {name} -o pid,etimes,args`.\n")
         return None
     line = next((l for l in r.stdout.splitlines() if l.startswith(sentinel)), None)
     if line is None:
+        if r.returncode in SIGALRM_EXIT:
+            tail = "\n".join(t for t in (r.stdout[-1500:].strip(), r.stderr[-1500:].strip()) if t)
+            sys.stderr.write((tail + "\n" if tail else "")
+                             + f"  Blender ran past the {timeout}s timeout, and its alarm "
+                             f"ended it inside {container()}. Raise --timeout if the job "
+                             "needs longer.\n")
+            return None
         sys.stderr.write(r.stdout[-3000:] + "\n" + r.stderr[-4000:] + "\n")
         return None
     return json.loads(line[len(sentinel):])

@@ -1,6 +1,6 @@
 # Installing it for Claude
 
-This repo is a Claude Code plugin. It ships seven skills that drive the pipeline
+This repo is a Claude Code plugin. It ships eight skills that drive the pipeline
 and the MCP server definitions that go with them.
 
 ## Install
@@ -51,11 +51,11 @@ The second prints the component inventory and what each skill costs in tokens:
 
 ```
 Component inventory
-  Skills (7)  asset-cleanup, asset-pipeline, concept-edit, game-music, ground-texture, mesh-budget, pose-sheet
+  Skills (8)  asset-cleanup, asset-pipeline, concept-edit, game-music, ground-texture, lip-sync, mesh-budget, pose-sheet
   MCP servers (1)  meshy
 
 Projected token cost
-  Always-on:   ~845 tok   added to every session
+  Always-on:   ~993 tok   added to every session
 ```
 
 Skills are discovered from `skills/<name>/SKILL.md`. You do not list them in
@@ -77,6 +77,12 @@ claude plugin validate .
 claude plugin validate .claude-plugin/marketplace.json
 ```
 
+Pointed at `.claude-plugin/plugin.json` instead, the check also passes, with
+one warning: `CLAUDE.md at the plugin root is not loaded as project context`
+(run on 2026-09-16). That is intended in this repo. `CLAUDE.md` holds the rules
+for editing the repo and is read only by Claude working in the repo root, so
+installers should not get it.
+
 ## You do not invoke skills by name
 
 Skills are selected from their `description` frontmatter, so you describe what
@@ -89,6 +95,7 @@ you want in ordinary language and the right one is chosen.
 | "render walk and attack sheets for the golem" | `pose-sheet` |
 | "I need a tileable swamp ground texture" | `ground-texture` |
 | "I need a looping battle theme for the boss fight" | `game-music` |
+| "make this portrait talk", "lip sync this line" | `lip-sync` |
 | "how many faces should this be", "rig this 600k mesh" | `mesh-budget` |
 | "tidy up, I'm done with this asset" | `asset-cleanup` |
 
@@ -187,6 +194,7 @@ and the 0.5.1 package:
 | `pose-sheet` | Sprite sheets, facing sheets, and authoring bone poses |
 | `ground-texture` | Tileable terrain, and fixing seams |
 | `game-music` | Licence-clear instrumental music, looped without a seam |
+| `lip-sync` | Talking portraits: mouth shapes timed to voice lines, with a preview |
 | `mesh-budget` | Face counts, decimation, rigging heavy meshes |
 | `asset-cleanup` | Curate the keepers, sweep the rest |
 

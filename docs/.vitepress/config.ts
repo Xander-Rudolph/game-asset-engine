@@ -85,6 +85,7 @@ export default defineConfig({
             { text: 'Rigging', link: '/guide/rigging' },
             { text: 'Animation cycles', link: '/guide/animation' },
             { text: 'Facings and camera angles', link: '/guide/facings' },
+            { text: 'Talking portraits', link: '/guide/talking-portraits' },
           ],
         },
         {

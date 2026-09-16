@@ -82,9 +82,11 @@ scripts/cleanup.py sweep --delete --unclaimed # also uncurated files
   diagnostic renders permanently. Show the user the list and get an explicit yes
   before using it. It refuses outright if nothing has been curated.
 - **Name the folders `keep` cannot claim before asking.** `keep` has no slot
-  for music, icons, scenery props, ground takes or materials, so `cleanup.py`
-  protects `output/music/`, `output/icons/`, `output/scenery/`,
-  `output/ground/` and `output/materials/`: `--unclaimed` leaves them alone.
+  for music, icons, scenery props, ground takes, materials, talking-portrait
+  mouth sets or MakeHuman viseme bodies, so `cleanup.py` protects
+  `output/music/`, `output/icons/`, `output/scenery/`, `output/ground/`,
+  `output/materials/`, `output/lipsync/` and `output/mpfb/`: `--unclaimed`
+  leaves them alone.
   Tell the user that. Only `--include-protected` sweeps them, and only after
   they have copied out what they want and said yes to that too.
 

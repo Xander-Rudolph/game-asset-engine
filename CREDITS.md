@@ -57,6 +57,21 @@ which all of the above extends.
 - **[Blender](https://www.blender.org)** and its `bpy` module. Every sprite
   sheet, pose, decimation measurement and weight transfer here runs through it.
 - **[VitePress](https://vitepress.dev)** for the documentation site.
+- **[Rhubarb Lip Sync](https://github.com/DanielSWolf/rhubarb-lip-sync)** by
+  Daniel Wolf, version 1.14.0. MIT for its own code, with the components it
+  bundles under the notices in its
+  [LICENSE.md](https://github.com/DanielSWolf/rhubarb-lip-sync/blob/v1.14.0/LICENSE.md).
+  It times the mouth shapes of a talking portrait. `scripts/fetch_tools.py`
+  downloads it into the gitignored `tools/`, so neither this repository nor the
+  image redistributes it; [the licensing guide](https://xander-rudolph.github.io/game-asset-engine/guide/licensing#lip-sync) has the details.
+- **[MPFB 2](https://github.com/makehumancommunity/mpfb2)**, the MakeHuman
+  add-on for Blender, and the MakeHuman community's viseme and face unit packs.
+  GPL-3.0-or-later for its code and CC0 1.0 for its bundled assets, per its
+  [LICENSE.md](https://github.com/makehumancommunity/mpfb2/blob/master/LICENSE.md)
+  as read on 2026-09-15 at v2.0.17; the packs are CC0, as MakeHuman's asset
+  index lists them. `scripts/mpfb_probe.py` downloads version 2.0.17 and the
+  packs into the gitignored `input/_devtools/mpfb2/` for a probe; nothing of it
+  is committed or in the image.
 - **Pillow**, **NumPy**, **trimesh**.
 
 ## Licences

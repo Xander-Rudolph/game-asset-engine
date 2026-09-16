@@ -56,15 +56,16 @@ you.
 a bind mount. The numbers exist; the pixels they describe cannot be looked at by
 anyone.
 
-**The gap is handed to a human by policy.** `skills/pose-sheet/SKILL.md` has a
+**The gap is handed to a human by policy.** `skills/pose-sheet/SKILL.md` had a
 step titled "Look at it, then say what you see", and the rule "do not hand over a
-sheet you have not looked at".
+sheet you have not looked at". The step has since been renamed "Check what is
+arithmetic, then look at what is not"; the rule is still there.
 
-That rule is right for taste, but it is also being used for checks whose answer
-is a number. The sharpest example: the skill asks the agent to find, by eye,
+That rule is right for taste, but it was also being used for checks whose answer
+is a number. The sharpest example: the skill asked the agent to find, by eye,
 which cell shows the figure facing down and to the right. `render_sheet.py`
-computes the azimuth list and prints it. **The script already knows the answer
-and asks the picture instead.**
+computes the azimuth list and prints it. **The script already knew the answer
+and asked the picture instead.**
 
 ## The principle
 

@@ -273,10 +273,18 @@ carries the skeleton and OBJ cannot carry one at all.
 
 ```sh
 scripts/list_animations.py                    # what is actually installed
+scripts/bone_roles.py map output/rigged/<name>.fbx
+scripts/bone_roles.py compile poses/roles/walk.json output/rigged/<name>.roles.json
 scripts/render_sheet.py output/rigged/<name>.fbx \
-    --poses transforms:poses/walk.json --angles 4 --size 220 \
+    --poses transforms:output/poses/<name>_walk.json --angles 4 --size 220 \
     --out output/sheets/<name>_walk.png --check
 ```
+
+`map` works out which bone is which on this rig and `compile` writes
+`output/poses/<name>_walk.json` for it. Never render `poses/walk.json` on a new
+rig: it was written for one 28 bone rig, and on its passing frame it bends that
+rig's knee the wrong way. Five rigs from this pipeline came out with 24, 28, 30,
+30 and 47 bones.
 
 **Ask which camera the game uses before rendering.** The default is isometric,
 elevation 30 with facings starting at 45 degrees. A top down game needs
@@ -290,9 +298,10 @@ if every bone name was right. It also names the cell that faces down and to the
 right, which is where the game's facing mapping starts.
 
 Then read the sheet. A mis signed rotation produces a confident, well rendered,
-wrong cycle, and neither the check nor a log line will tell you. A pose file
-fits only the rig it was written for; on a new rig, the `pose-sheet` skill reads
-the bone names and probes the axes first.
+wrong cycle, and neither the check nor a log line will tell you. A transforms
+file fits only the rig it was written for, which is why the role poses in
+`poses/roles/` are compiled per rig. If `map` stops, or a bone has no role, the
+`pose-sheet` skill covers posing by bone name.
 
 **For a set, one scale.** Each model is framed to its own bounding box. Size
 unrigged meshes with `scripts/normalise_mesh.py <meshes> --height <units>`

@@ -10,10 +10,14 @@ game reaches for when a unit walks north.
 ## Render a sheet
 
 ```sh
+scripts/bone_roles.py compile poses/roles/walk.json output/rigged/golem.fbx
 scripts/render_sheet.py output/rigged/golem.fbx \
-    --poses transforms:poses/walk.json --angles 4 --size 220 \
+    --poses transforms:output/poses/golem_walk.json --angles 4 --size 220 \
     --out output/sheets/golem_walk.png
 ```
+
+The first line compiles the role walk for this rig, because bone numbers differ
+from rig to rig ([animation](/guide/animation#deriving-cycles-automatically)).
 
 Angles run across the sheet. Animation frames run down. That is the order most
 engines expect when slicing a sheet into a flipbook.

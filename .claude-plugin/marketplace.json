@@ -12,11 +12,11 @@
     {
       "name": "game-asset-engine",
       "source": "./",
-      "description": "Skills for driving a local ComfyUI install through the whole asset pipeline: concept art, 3D mesh, textures, rigging, sprite sheets, tileable ground and looping music.",
+      "description": "Skills for driving a local ComfyUI install through the whole asset pipeline: concept art, 3D mesh, textures, rigging, sprite sheets, tileable ground, looping music and lip-synced talking portraits.",
       "version": "0.1.0",
       "author": { "name": "Xanderu" },
       "homepage": "https://xander-rudolph.github.io/game-asset-engine/",
-      "keywords": ["comfyui", "3d", "game-assets", "rigging", "sprites", "textures", "music"]
+      "keywords": ["comfyui", "3d", "game-assets", "rigging", "sprites", "textures", "music", "lip-sync"]
     }
   ]
 }

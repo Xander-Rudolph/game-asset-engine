@@ -1,0 +1,73 @@
+# Edit instructions for scripts/make_mouths.py, one per mouth shape.
+#
+# The letters are Rhubarb Lip Sync's: X is rest, A to F are the six basic
+# shapes, G and H are the optional two. A shape starts with its letter and a
+# colon; indented lines continue it. Lines starting with # are ignored.
+#
+# Each instruction names the one change, gives a spoken sound to anchor it,
+# and ends with what must stay the same, because the edit graph re-diffuses
+# the whole picture and only the mouth box of each result is kept.
+
+X: Change only the mouth. Close the lips softly so they rest together without
+   any pressure, with the corners level, as on a face that is silent and at
+   ease. Keep the eyes, eyebrows, nose, cheeks, jaw line, hair, skin tone,
+   lighting, clothing, framing and background exactly the same, and do not
+   move, turn or resize the head.
+
+A: Change only the mouth. Press the lips together firmly into a flat line, as
+   just before saying the B in "bob": the lips look thinner than at rest
+   because they are pressed against each other, the skin just above and below
+   them is slightly tensed, and no teeth show. Keep the eyes, eyebrows, nose,
+   cheeks, jaw line, hair, skin tone, lighting, clothing, framing and
+   background exactly the same, and do not move, turn or resize the head.
+
+B: Change only the mouth. Part the lips a little while the upper and lower
+   teeth stay closed together, so a narrow row of clenched teeth shows between
+   the lips, as when saying the S in "yes" or the EE in "see". Keep the eyes,
+   eyebrows, nose, cheeks, jaw line, hair, skin tone, lighting, clothing,
+   framing and background exactly the same, and do not move, turn or resize
+   the head.
+
+C: Change only the mouth. Part the lips slightly, as when saying the short
+   vowel in "bed": the jaw lowers just a little, the lips stay relaxed and keep
+   their width, the edges of the upper front teeth show, and below them there
+   is a narrow dark gap about as tall as those teeth. Keep the eyes, eyebrows,
+   nose, cheeks, hair, skin tone, lighting, clothing, framing and background
+   exactly the same, and do not move, turn or resize the head.
+
+D: Change only the mouth. Open the mouth wide, as when saying "ah" in "father":
+   the lips part into a tall opening that shows the upper teeth and the tongue
+   lying low in the mouth, but not as wide as a shout or a yawn. Keep the chin
+   and jaw line where they are as far as the open mouth allows. Keep the eyes,
+   eyebrows, nose, cheeks, hair, skin tone, lighting, clothing, framing and
+   background exactly the same, and do not move, turn or resize the head.
+
+E: Change only the mouth. Shape the lips into a slightly rounded opening, as
+   when saying the vowel in "law" or "her": the mouth is open less than for
+   "ah", the corners draw in so the opening looks rounder, and only a little
+   of the teeth shows. Keep the eyes, eyebrows, nose, cheeks, jaw line, hair,
+   skin tone, lighting, clothing, framing and background exactly the same, and
+   do not move, turn or resize the head.
+
+F: Change only the mouth. Push the lips forward into a small, tight pucker, as
+   when saying the "oo" in "moon" or the W in "we": the corners pull in towards
+   the centre and the lips leave only a small round opening with no teeth
+   showing. Keep the eyes, eyebrows, nose, cheeks, jaw line, hair, skin tone,
+   lighting, clothing, framing and background exactly the same, and do not
+   move, turn or resize the head.
+
+G: Change only the mouth. Tuck the lower lip up and slightly inwards so the
+   upper front teeth rest on it, as when starting to say the F in "fish": the
+   upper teeth show, the lower lip sits just under their edges and hides the
+   lower teeth, and the jaw is almost closed. Keep the eyes, eyebrows, nose,
+   cheeks, jaw line, hair, skin tone, lighting, clothing, framing and
+   background exactly the same, and do not move, turn or resize the head.
+
+H: Change only the mouth. Part the lips and teeth a little and curl the tip
+   of the tongue up inside the mouth so it presses against the ridge behind
+   the upper front teeth, as when holding the L in "hello": the upper teeth
+   show, the pink underside of the raised tongue is seen through the gap
+   below them, and the tongue stays inside the mouth behind the teeth. Keep
+   the eyes, eyebrows, nose, cheeks, hair, skin tone, lighting, clothing,
+   framing and background exactly the same, and do not move, turn or resize
+   the head.

@@ -24,6 +24,7 @@ Full detail, including the second manifest that GitHub installation needs, is in
 | `mesh-budget` | Choosing face counts, decimating, rigging heavy meshes |
 | `asset-cleanup` | Curating the keepers and sweeping the rest |
 | `game-music` | Licence-clear instrumental music, looped seamlessly at a set loudness |
+| `lip-sync` | Talking portraits: a portrait, its mouth shapes, and cues timed to voice lines |
 
 Each one starts by running `scripts/doctor.py`, so a session never begins by
 guessing whether ComfyUI is up. If it is not, the skill walks the user through
@@ -34,26 +35,33 @@ getting it running rather than failing later in a confusing way.
 Each of these was learned by getting it wrong. Not every skill needs every rule,
 so this says which skills carry which.
 
-**Check the engine first.** All seven start with `scripts/doctor.py`.
+**Check the engine first.** All eight start with `scripts/doctor.py`.
 
 **Check, do not assume.** Each skill carries the commands for its own checks, so
 nothing describes what a file probably contains. `asset-pipeline` reads a mesh's
 real face and body counts and prints a rig's bone count. `pose-sheet` dumps the
 rig's real bone names. `concept-edit` asks the running server which node types it
 loaded. `mesh-budget` measures a face budget rather than guessing one.
+`lip-sync` dry-runs a mouth box against the edit graph's size list, read from
+the running container, and checks that no pixel outside the box changed.
 
 **Show, do not report.** The skills that make images, `asset-pipeline`,
-`concept-edit`, `pose-sheet` and `ground-texture`, read each one back into the
-conversation, because printing a path is not showing a picture. `game-music`
-makes audio, which the conversation cannot show, so it puts every take in front
-of the person to listen to.
+`concept-edit`, `pose-sheet`, `ground-texture` and `lip-sync`, read each one
+back into the conversation, because printing a path is not showing a picture.
+`game-music` makes audio, which the conversation cannot show, so it puts every
+take in front of the person to listen to. `lip-sync` reads back its portrait,
+mouth box and contact sheet of mouths, then hands over the preview video for
+the person to watch with sound.
 
-**One stage per turn.** Only `asset-pipeline` has stages, and it gates each one,
-because a rejected mesh three stages later costs far more than a rerolled
-concept image.
+**One stage per turn.** `asset-pipeline` and `lip-sync` have stages, and gate
+each one. A rejected mesh three stages later costs far more than a rerolled
+concept image, and nine mouth edits cost about 23 minutes of GPU, so the
+portrait and the mouth box are approved before any mouth is made.
 
 **Say what was chosen and why.** `asset-pipeline` names the generator, the camera
-angle and what it added to the prompt.
+angle and what it added to the prompt. `lip-sync` asks where the voice lines come
+from and whether that voice may ship before it makes anything, and names the
+mouth shapes that came out weak.
 
 ## MCP servers
 

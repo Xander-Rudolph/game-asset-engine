@@ -139,10 +139,20 @@ precision is `fp16` rather than `auto`. [Rigging](/guide/rigging) explains why.
 ## 6. Render the animation frames
 
 ```sh
+scripts/bone_roles.py map output/rigged/golem.fbx
+scripts/bone_roles.py compile poses/roles/walk.json output/rigged/golem.roles.json
 scripts/render_sheet.py output/rigged/golem.fbx \
-    --poses transforms:poses/walk.json --angles 4 --size 220 \
+    --poses transforms:output/poses/golem_walk.json --angles 4 --size 220 \
     --out output/sheets/golem_walk.png --check
 ```
+
+The rigger numbers bones `bone_0` upwards, and the count and order change from
+figure to figure: five figures from this pipeline came out with 24, 28, 30, 30
+and 47 bones. So a pose file names roles, such as `left_thigh`, and is compiled
+for each rig. `map` works out which bone plays which role and `compile` writes
+`output/poses/golem_walk.json`. The walk file in `poses/` itself was written for
+one 28 bone rig and bends a knee the wrong way even there
+([animation](/guide/animation#deriving-cycles-automatically)).
 
 Angles run across, animation frames run down. That is the order most engines
 expect when slicing a sheet.

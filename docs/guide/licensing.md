@@ -2,7 +2,8 @@
 
 If you are making a game to sell, this is the page that matters. Three separate
 questions: the animations you apply, the models that generate the mesh, and the
-software those models run through. Music has [its own section](#music-and-sound).
+software those models run through. Music has [its own section](#music-and-sound),
+and so does [lip sync](#lip-sync).
 
 None of this is legal advice. The linked licences are the authority.
 
@@ -133,15 +134,66 @@ Whichever you choose, write down where each track came from and under what
 licence, next to the file. This section exists because a soundtrack made with
 MusicGen was credited as licence-free.
 
+## Lip sync
+
+[Talking portraits](/guide/talking-portraits) involve three things with
+licences: Rhubarb Lip Sync, which times the mouths, the image edit model, which
+draws them, and the voice, which this repository does not make.
+
+### Rhubarb Lip Sync is fetched, not redistributed
+
+`scripts/fetch_tools.py --download rhubarb` downloads the official Rhubarb Lip
+Sync 1.14.0 Linux release from its author's GitHub releases, pinned in
+`tools.json` by size and sha256, and unpacks only `rhubarb`, `res/` and
+`LICENSE.md` into `tools/`, which is gitignored. It runs there, on the host.
+Nothing of Rhubarb is committed to this repository, and the Dockerfile copies
+no `tools/` folder into the image, so neither the repository nor a published
+image redistributes it. You fetch it from its author, under its own licence.
+
+Read on 2026-09-16 in the release's own
+[LICENSE.md](https://github.com/DanielSWolf/rhubarb-lip-sync/blob/v1.14.0/LICENSE.md),
+as `fetch_tools.py` unpacked it:
+
+| Layer | Licence | What you owe |
+|---|---|---|
+| Rhubarb's own code | MIT, "Copyright (c) 2015-2016 Daniel Wolf" | The notice, in "all copies or substantial portions of the Software" |
+| The parts compiled into `rhubarb` or shipped in `res/` | The notices LICENSE.md lists: PocketSphinx, sphinxbase and the CMU Sphinx US English acoustic model under variations of the 2-clause BSD licence; Boost and UTF8-CPP under the Boost Software License; C++ Format under 2-clause BSD; Flite under a BSD-like licence; GSL, TCLAP, the Sound Change Applier and utf8proc under MIT, with some of utf8proc's data under the Unicode licence; libogg, libvorbis and WebRTC under 3-clause BSD; Where Am I? under the WTFPL | Every one of those notices, conditions and disclaimers, but only if you ship the binary or `res/`, for example to lip-sync at run time. Flite's licence also requires that "Any modifications must be clearly marked as such", that "Original authors' names are not deleted", and that their names are not used "to endorse or promote products derived from this software without specific prior written permission" |
+| The cue data it makes | The summary at the top of LICENSE.md, which says it "is not legally binding", says "the resulting lip sync data belongs to you alone" | Nothing, for a game that ships only the cues, or frames made from them |
+
+The release zip also holds a Spine integration,
+`extras/EsotericSoftwareSpine/rhubarb-for-spine-1.14.0.jar`, which bundles
+OpenJFX (GPL-2.0 with Classpath Exception) and javax.json (CDDL-1.1 or
+GPL-2.0), and LICENSE.md does not list it. `fetch_tools.py` never unpacks it.
+Whether the archive as a whole can be called permissive is unsettled
+([lip sync](/reference/lip-sync#licences)).
+
+`scripts/fetch_tools.py --licenses` prints the licence recorded for each tool.
+
+### The mouths and the voice
+
+The mouth overlays are edits made with Qwen-Image-Edit 2509, whose weights are
+Apache-2.0 (`scripts/fetch_models.py --licenses`), a licence that says nothing
+about generated images
+([lip sync](/reference/lip-sync#licences)).
+
+The voice lines are yours to source, and they carry the licence of whatever
+made them. Several open text-to-speech models pair permissive code with
+weights or training data that bar commercial use, XTTS-v2 and Piper's lessac
+voice among them.
+[Lip sync](/reference/lip-sync#text-to-speech-whose-lines-may-ship) sorts them
+into allowed, allowed with conditions, not allowed and unsettled, checked on
+2026-09-15. None of them is fetched or run here. Write down where each line
+came from, next to the file, as for music.
+
 ## Researched, not shipped
 
-Three research notes check licences for things this pipeline does not do yet.
+Research notes also check licences for things this pipeline does not do yet.
 Each is dated and links the text it read.
 
-- **Voice lines.** Several open text-to-speech models pair permissive code with
-  weights or training data that bar commercial use, XTTS-v2 and Piper's lessac
-  voice among them. [Lip sync](/reference/lip-sync#text-to-speech-whose-lines-may-ship)
-  sorts them into allowed, allowed with conditions, not allowed and unsettled.
+- **Voice lines.** This repository times mouths to a voice line but makes no
+  speech. [Lip sync](/reference/lip-sync#text-to-speech-whose-lines-may-ship)
+  checks the text-to-speech models and voices a game might use instead of a
+  recording, as [above](#the-mouths-and-the-voice).
 - **DAZ Genesis figures.** Sprites and portraits rendered from them may ship
   under the standard Daz EULA. The mesh, rig or morphs inside a build need an
   Interactive License for each product, and the EULA's AI clause puts feeding
