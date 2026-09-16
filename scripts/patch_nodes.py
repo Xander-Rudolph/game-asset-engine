@@ -4,7 +4,7 @@
 These have to live here rather than in the Dockerfile: `custom_nodes/` is a bind
 mount, so the host copy is the one ComfyUI actually imports and anything the
 image did to its own copy is hidden. `setup.sh` runs this after every clone or
-pull, and it is idempotent — re-running is a no-op.
+pull, and it is idempotent: re-running is a no-op.
 
 Each entry says what upstream breakage it works around, so they can be dropped
 when the node pack catches up.
@@ -34,7 +34,7 @@ PATCHES: list[tuple[str, str, str, str]] = [
         "CLIPImageProcessor",
         "transformers 5.x removed the deprecated CLIPFeatureExtractor alias for "
         "CLIPImageProcessor. Era3D still imports the old name, and that single "
-        "ImportError fails the import of the ENTIRE 3D-Pack — every algorithm in "
+        "ImportError fails the import of the ENTIRE 3D-Pack, every algorithm in "
         "it, not just Era3D. The two classes are the same thing.",
     ),
     (
@@ -42,7 +42,7 @@ PATCHES: list[tuple[str, str, str, str]] = [
         "from diffusers.models.controlnet import ControlNetOutput",
         "from diffusers.models.controlnets.controlnet import ControlNetOutput",
         "diffusers moved ControlNetOutput to diffusers.models.controlnets.controlnet "
-        "and dropped the old path. Same class, new home — and again one bad import "
+        "and dropped the old path. Same class, new home, and again one bad import "
         "here takes the whole node pack down.",
     ),
     (
@@ -51,7 +51,7 @@ PATCHES: list[tuple[str, str, str, str]] = [
         "decimate_mesh(mesh.v.detach().cpu().numpy(), mesh.f.detach().cpu().numpy(), "
         "target=target, remesh=remesh, optimalplacement=optimalplacement)",
         "Decimate Mesh passes its widgets POSITIONALLY into "
-        "decimate_mesh(verts, faces, target, backend, remesh, optimalplacement) — so "
+        "decimate_mesh(verts, faces, target, backend, remesh, optimalplacement), so "
         "the node's `remesh` lands in `backend` and its `optimalplacement` lands in "
         "`remesh`. The visible symptom is that the face target is silently ignored: "
         "quadric decimation hits the target, then the mis-bound `remesh` triggers "
