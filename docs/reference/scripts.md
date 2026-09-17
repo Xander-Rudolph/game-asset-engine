@@ -43,7 +43,7 @@ Everything in `scripts/`. Each takes `--help`.
 | `make_seamless.py` | Make a texture tile, and say whether it worked. |
 | `cut_icon.py` | Cut an icon out of its background and size it for a UI. |
 | `make_loop.py` | Make a music track loop without a seam at a set loudness: it chooses where in the take the loop starts and ends, keeps any silence in the take out of the loop, and reports what you would hear where it comes round. |
-| `cleanup.py` | Curate the keepers, then sweep the rest. Folders `keep` cannot claim, such as music takes, icons and mouth sets, are protected from the sweep. `keep --generator --source --licence --licence-url` records provenance rows in `sources.json`. |
+| `cleanup.py` | Curate the keepers, then sweep the rest. Folders `keep` cannot claim, such as music takes, icons and mouth sets, are protected from the sweep. `keep --generator --source --licence --licence-url` records provenance rows in `sources.json`. `keep` refuses Daz 3D data, and keeps only renders from `output/daz/` ([below](#cleanup-py)). |
 
 ## Faces and lip sync
 
@@ -57,7 +57,20 @@ What these are for, and what was measured, is in [lip sync and talking portraits
 | `preview_lipsync.py` | Play a mouth set against a timeline as an MP4, with the line's audio when there is some, and lay the mouths out on a labelled contact sheet. A shape the set lacks plays Rhubarb's fallback. Needs ffmpeg and ffprobe. |
 | `face_rig.py` | Give a rig a face in Blender. `add-jaw` adds a jaw bone under the head, weighted by rule, turns it 20 degrees as a check, and writes nothing when that barely moves the mesh. `transfer-shapes` copies a template head's shape keys onto a model with Surface Deform, and `spheres` writes the test files the method was proved on. A generated mesh has no parted lips, so the jaw stretches the lower face rather than opening a mouth. |
 | `mpfb_probe.py` | Probe MPFB 2, MakeHuman's Blender add-on, in the container's Blender. `fetch` downloads the add-on and three face packs, pinned by size and sha256, into the gitignored `input/_devtools/mpfb2/`. `build` makes a body with the 15 Meta/Oculus-style visemes as shape keys, as a `.blend` and a `.glb` in `output/mpfb/`, and `render` draws one viseme per row. `--help` records the licences as read and what was measured. |
-| `daz_inventory.py` | List the figures, bones, morphs and HD morphs in a Daz content library installed outside this repo, reading every `.dsf` with the standard library. It refuses a path in or above the repo. Not yet run on a real library, because none is installed here: `--selftest` and `--sample DIR` use an invented one. Why it exists is in [DAZ Genesis](/reference/daz-genesis). |
+
+## Daz figures
+
+What these are for, and what was measured, is in the [Daz figures](/guide/daz-figures)
+guide, and the licence that limits what may ship is in
+[DAZ Genesis](/reference/daz-genesis#licences). `daz_library.py` writes the
+library outside the repo, and `daz_import_probe.py` writes everything it makes
+from Daz content to the gitignored `output/daz/`. None of it may be committed.
+
+| Script | Does |
+|---|---|
+| `daz_library.py` | Install Daz Install Manager zips downloaded by hand into a content library outside the repo, `MODELS_DIR/daz_library` by default, and record every file with its CRC-32, and the licence held with the date you read the EULA. Every path is checked before anything is written. `list`, `licence`, `verify`, `uninstall`, `case-check` and a `selftest` with invented packages. Standard library only, on the host. See [below](#daz-library-py). |
+| `daz_import_probe.py` | Import a Genesis figure into the container's Blender with the Diffeomorphic DAZ Importer, which `fetch` pins by size and sha256 into the gitignored `input/_devtools/import_daz/`. `build` saves a `.blend` whose 17 viseme controllers come from FACS, and `render` draws a row per viseme with `render_sheet.py` and in three framings of its own, or measures what each moves with `--motion-only`. See [below](#daz-import-probe-py). |
+| `daz_inventory.py` | List the figures, bones, morphs, aliases and HD morphs in a Daz content library outside this repo, reading every `.dsf` with the standard library. Figures are grouped by the content type their author set, aliases and other modifiers are counted apart from morphs, and a valid JSON file that is not DSON is skipped, not an error. It refuses a path in or above the repo. See [below](#daz-inventory-py). |
 
 ## Keeping the repo honest
 
@@ -287,7 +300,34 @@ scripts/cleanup.py sweep --delete --unclaimed         # permanent
 `--delete` alone is safe. `--unclaimed` is not, and refuses to run when nothing
 has been curated. It leaves alone the folders `keep` has no slot for
 (`output/music/`, `icons/`, `scenery/`, `ground/`, `materials/`, `lipsync/` and
-`mpfb/`) unless `--include-protected` is given too.
+`mpfb/`) unless `--include-protected` is given too. `output/daz/` is not one of
+them: `sweep` lists its files as unclaimed, and `--unclaimed` deletes them.
+
+**Daz content.** `keep` refuses Daz 3D data before anything happens: no
+provenance is read, no asset folder is made and nothing is copied. It exits 1
+and lists every refused path on stderr, under `keep: refused. Daz 3D data may
+not be curated into a shippable asset folder under the standard Daz EULA:`. It
+refuses:
+
+- `--model`, `--rig` or `--textures` under `output/daz/`, whatever the file type;
+- `--concept` or `--sheets` under `output/daz/` unless it is an image or a video
+  (`.png`, `.jpg`, `.jpeg`, `.webp`, `.gif`, `.bmp`, `.tga`, `.tif`, `.tiff`,
+  `.exr`, `.mp4` or `.webm`);
+- a file given to any flag from a Daz content library: `MODELS_DIR/daz_library`,
+  or any folder holding the `.daz_library` records `daz_library.py` writes;
+- a native Daz file from anywhere: `.duf`, `.dsf`, `.dhdm`, `.dbz`, `.dsa`,
+  `.dse` or `.dsx`, in any case;
+- when `--model` itself passes, the files `keep` would copy from beside it, by
+  the same rules.
+
+Paths are compared with symlinks followed, by device and inode. A render kept
+from `output/daz/` prints `note: renders from output/daz/ may ship, but keep
+them out of the AI stages and any training until Daz answers in writing: see
+"The AI clauses" in docs/reference/daz-genesis.md.` The
+guard goes by path and suffix only: a mesh copied out of `output/daz/` under
+another name is not recognised. For 11 commands with no Daz content, the script
+before and after the guard gave identical output, exit codes and files
+(2026-09-16, in scratch copies of `output/`).
 
 ### `lipsync_cues.py`
 
@@ -351,6 +391,230 @@ overlaps, and `share`, adapted from the 0.08 s window of
 None has been judged on a portrait. `--text-only` writes a placeholder flap to `output/lipsync/text-only/`
 and never overwrites a timeline made from audio.
 
+### `daz_library.py`
+
+```sh
+scripts/daz_library.py install ZIP... [--dry-run] [--overwrite] [--eula-read YYYY-MM-DD]
+                       [--interactive-license]
+scripts/daz_library.py list
+scripts/daz_library.py licence SKU [--eula-read YYYY-MM-DD]
+                       [--interactive-license | --standard-license]
+scripts/daz_library.py verify [SKU] [--crc]
+scripts/daz_library.py uninstall SKU [--part NN] [--dry-run] [--force]
+scripts/daz_library.py case-check
+scripts/daz_library.py selftest [--dir DIR]
+```
+
+Every command but `selftest` takes `--library DIR`, `--json` and `--examples N`.
+`selftest --json` fails with `daz_library.py: error: unrecognized arguments:
+--json`.
+
+**Where.** The library is `MODELS_DIR/daz_library`, with `MODELS_DIR` read from
+the environment, else from `.env`, and a relative value resolved against the
+repo root as compose does. The container sees it as `/app/models/daz_library`.
+A library inside the repo, or one containing it, is refused.
+
+**What it installs.** A package is a Daz Install Manager zip whose name matches
+Daz's pattern, such as `IM00086958-01_Genesis9StarterEssentials1Of3.zip`,
+matched in full and in ASCII only. Only the File elements of its
+`Manifest.dsx` with `TARGET="Content"` and `ACTION="Install"` are extracted,
+with `Content/` removed, so the parts of a product merge into one folder. A
+part number that disagrees with `Supplement.dsx`, a GlobalID that differs from
+the one recorded for the SKU, and two zips for one part are refused as signs of
+a renamed zip. Do not script the Daz website: download by hand.
+
+**Checks first, then the lock.** An install opens and checks the zips, takes
+the library's lock (`<library>/.daz_library/.lock`), reads the records and runs
+every path check inside it. When there is no lock file yet, the checks also run
+once before, so a refused run creates nothing, not even the library folder.
+`--dry-run` takes no lock and writes nothing. A refused path stops the whole run
+with `nothing was installed`. Among the refusals:
+
+- `a symlink is at its temporary name <tmp>`, and `something other than a
+  regular file is at its temporary name <tmp>`;
+- `a symlink already exists at this path`, even one pointing inside the library;
+- `a name ending in .daz_library-part, which this script uses for temporary
+  files`;
+- `it needs <prefix> as a folder, but <zip> lists that path as a file`, within
+  one zip or across the zips of a run;
+- and a second install while one holds the lock, `another daz_library.py is
+  changing <library>; wait for it to finish`.
+
+Each file is written to `.<name>.daz_library-part` beside it, created with
+`O_EXCL` and `O_NOFOLLOW`, and renamed into place after the zip's CRC-32 check
+passes. A regular file left there by an interrupted run is replaced. A file
+already present with other bytes is a conflict unless `--overwrite` is given.
+The checks see the library as it is when they run: another program changing it
+during an install, without the lock, is not guarded against beyond the
+temporary name.
+
+**Stopping.** Any error while writing a package, a corrupt, encrypted or
+unsupported entry included, removes the temporary file and stops that package
+as `partial`, with the files already placed recorded as `"complete": false`.
+Later packages still run, and the exit status is 1. `list` shows the part under
+`incomplete_parts`, `verify` exits 1, and `uninstall SKU` removes what was
+placed. The first SIGINT, SIGTERM or SIGHUP prints `<SIG> received: stopping at
+the current file and recording what is placed; send it again to stop at once`,
+stops after the current 1 MiB chunk and records the part as `interrupted`, and
+packages not yet started as `not_started`. The report ends `stopped by <SIG>:
+install again to finish`. A second signal stops at once and still records the
+files placed.
+
+**The record and the licence.** `<library>/.daz_library/<SKU>.json` holds the
+product, each part's zip name, sha256, size and times, and every file with its
+size, CRC-32 and the parts that list it. Its licence block has two inputs: the
+licence held, the Daz Standard License unless `--interactive-license` records a
+bought Interactive License, which the script cannot check, and `eula_read`, the
+date given with `--eula-read`, else null. The rest of the block
+(`renders_and_sprites`, `mesh_rig_morphs_textures`, its conditions, `ai_stages`
+and the URLs) is wording rebuilt whenever the record is saved, and `licence SKU`
+prints it. Records saved by the first version keep the older fields
+(`mesh_rig_morphs_textures_may_ship` and the like) until their next save.
+
+**`verify`** uses `lstat`, so a symlink at a recorded path is `not_a_file` even
+when it points at identical bytes. **`case-check`** lists names in one folder
+that differ only in case, and references inside the library's `.dsf` and `.duf`
+files that find their file only when case is ignored.
+
+| Exit | Means |
+|---|---|
+| 0 | done |
+| 1 | a conflict, a skipped or partial package, a `verify` or `case-check` finding, or a failed self-test check |
+| 2 | a refused path, name, package, library or argument, or the lock held by another run |
+| 128 plus the signal | an install stopped by a signal: 130 SIGINT, 143 SIGTERM, 129 SIGHUP |
+
+Measured on 2026-09-16 with Genesis 9 Starter Essentials (SKU 86958), host
+`python3` 3.13, after the review fixes: `selftest` passed 67 checks in 4.70 and
+4.80 s wall, `verify 86958 --crc` passed 6499 of 6499 in 0.51 to 0.93 s, and a
+dry run of all three parts against the installed library exited 0 in 6.84 s
+wall with every file identical. Installing all three into an empty library took
+7.59 and 6.90 s wall before the fixes. The [guide](/guide/daz-figures#a-library-outside-the-repo)
+has the rest.
+
+### `daz_import_probe.py`
+
+```sh
+scripts/daz_import_probe.py fetch
+scripts/daz_import_probe.py build --out output/daz/NAME.blend [--facs] [--visemes]
+                            [--subdivision {keep,off}] [--figure DUF]
+                            [--anatomy auto|none|DUF,...] [--library DIR]
+                            [--no-textures] [--material-method M] [--fit F]
+                            [--content-dir DIR] [--no-dir-check] [--verbosity N]
+                            [--timeout SECONDS] [--no-wait]
+scripts/daz_import_probe.py render --blend output/daz/NAME.blend [--only AA,OW]
+                            [--sizes 128,220,340] [--columns body,face,face34]
+                            [--samples N] [--subdivision {off,as-saved}]
+                            [--materials] [--sheet-size PX] [--no-sheet]
+                            [--motion-only] [--label TEXT] [--threshold N]
+                            [--keep-frames] [--timeout SECONDS] [--no-wait]
+```
+
+**`fetch`** downloads GitHub's archive of import_daz's `version_5_2_0` tag,
+pinned at 1,697,629 bytes and sha256
+`b6921c46e9a876fe88ab0ef75f47c8eac67cf4c4314059871d2a78bdcfccf9d2`, checks the
+commit its zip comment names, and unpacks 296 files into
+`input/_devtools/import_daz/ext/import_daz`. Any download error deletes the
+`.part` file and tries the next URL. It unpacks again when a file is missing or
+has another size, but does not compare contents. The importer is
+GPL-2.0-or-later, and is run, never copied into the repo.
+
+**`build`** registers the importer as a local extension, points its content
+directory at the library and checks that the importer resolves the figure,
+because a wrong path raises nothing. `--library` is the host path, by default
+`/models/daz_library`, not read from `MODELS_DIR`, and the container must mount
+it. `--figure` and `--anatomy` entries are relative to the library with no `..`
+part, or the run exits 2 with `expected a path relative to the library with no
+.. part, got ...`. With `--anatomy auto` it reads the post-load figure list
+from the figure's `.duf`, gzip-compressed or plain. Use `--facs`: on Genesis 9
+`--visemes` loads nothing, so a build with it exits 1 by design. Use
+`--subdivision off`: the default `keep` saves the importer's Subsurf levels, up
+to 3 for render. It writes `NAME.blend`, `NAME_build.json`, which records the
+command line and every step, `NAME_blender.log` and `NAME_poses.json`.
+
+**`render`** reads `NAME_build.json` for the viseme properties and runs two
+stages, each a neutral row and then a row per viseme, all 17 or those `--only`
+names: `render_sheet.py` on the whole figure at `--sheet-size`, then the probe's
+`body`, `face` and `face34` framings at `--sizes`. With `--subdivision off`, the
+default, a `.blend` with any Subsurf modifier on is copied to
+`output/daz/_NAME_sheet_<pid>.blend` with them off for `render_sheet.py`, and
+the copy is deleted afterwards. `--only` given an empty list exits 2 with `name
+at least one viseme, such as AA, from AA, EE, ...`.
+
+Its files are `NAME_<label>_...`. The label is `--label`, or by default the
+options that differ from their defaults, in this order: the `--only` visemes,
+the `--sizes`, the `--columns`, `s<samples>`, `materials`, `as-saved`,
+`no-sheet` or `sheet<size>`, and `t<threshold>`, so a short run never
+overwrites a full one. A default run and `--motion-only` have no label, and
+`--label ""` forces none. A label must match `[A-Za-z0-9][A-Za-z0-9_-]{0,63}`,
+or the run exits 2. `NAME[_label]_render.json` records the command line, every
+option, `render_sheet.py`'s command and exit, and the pixels each viseme changes
+against the neutral row. It and `NAME_motion.json` record what each viseme
+moves: vertices, shape keys and pose bones.
+
+**Waiting and stopping.** Before each Blender job it polls every 30 s until
+ComfyUI's queue is empty and no other `python3 -c` job runs in the container,
+unless `--no-wait`. On Ctrl-C or SIGTERM, and whenever `render_sheet.py` exits
+non-zero or runs past the host's timeout, it ends the Blender job it started,
+found by a path unique to that job, with SIGTERM and then SIGKILL after 10 s,
+and prints `stopped   Blender job(s) [<container pids>] in <container>`. It
+deletes that job's frames, the temporary copy and the rows file. A stop writes
+no report and prints `! stopped by Ctrl-C` or `! stopped by SIGTERM`.
+`--keep-frames` keeps only the probe's own cells, under `output/daz/_frames/`.
+
+| Exit | Means |
+|---|---|
+| 0 | done |
+| 1 | a download, checksum, Blender step or check failed; `render_sheet.py` exited non-zero, as its `--check` does when a row repeats the rest pose; or Blender ran past `--timeout` |
+| 2 | bad arguments |
+| 130 | stopped by Ctrl-C |
+| 143 | stopped by SIGTERM |
+
+Measured on 2026-09-16 in `comfyui-packaged`, EEVEE on llvmpipe:
+`build --facs --subdivision off` took 5.7 s wall at a peak of 711 MiB;
+`render --motion-only` 0.6 s in Blender; `render --only AA --sizes 128 --columns
+face --samples 16` on that build, 28.9 s for `render_sheet.py`'s 2 rows and
+17.7 s for the probe's 2 cells; and with `--subdivision as-saved` on a build
+that kept its levels, 88.7 s for 2 face cells. The full default render on the
+cage, with the version before the Subsurf copy, took 184.3 s and then 1287.6 s,
+about 25 minutes. Every figure, and what failed on the way, is in the
+[guide](/guide/daz-figures#importing-without-a-ui).
+
+### `daz_inventory.py`
+
+```sh
+scripts/daz_inventory.py DIRECTORY [--brief | --json]
+scripts/daz_inventory.py --selftest
+scripts/daz_inventory.py --sample DIR
+```
+
+DIRECTORY is a content library, such as `MODELS_DIR/daz_library`, or any folder
+inside one, outside the repo.
+
+- **Morphs, aliases and other modifiers.** A modifier whose channel type is
+  `alias` is an alias, a second name for another modifier's channel, and is
+  counted and grouped apart. A morph has a morph block, or a float or int
+  channel, so controllers such as the visemes count. Anything else is an other
+  modifier. Only morphs count toward the morph groups, and only morphs can be
+  HD morphs.
+- **Content types.** A figure file is still any `.dsf` with geometry. Its role
+  comes from the `presentation.type` its author set: `Actor` is a body,
+  `Follower/Attachment` an attachment, and `Follower/Wardrobe`,
+  `Follower/Hair` and `Prop` wardrobe, hair and prop. Nothing in DSON tells an
+  optional eyebrow style from face anatomy, or a projection template from real
+  clothing.
+- **Not DSON.** A `.dsf` that is valid JSON but not an object with a
+  `file_version`, `asset_info`, `scene` or `*_library` key is skipped, listed
+  under `NOT DSON, SKIPPED` and in `--json`'s `not_dson`, and does not change
+  the exit status. Unreadable files still get a `skipped <file>: <reason>`
+  line on stderr and exit 1.
+
+Exit 0 when every `.dsf` was read or skipped as not DSON; 1 when a `.dsf` was
+unreadable, a folder could not be listed, a link into the repo was skipped, or
+a self-test check failed; 2 for a refused or missing path. On Genesis 9 Starter
+Essentials at `/models/daz_library` on 2026-09-16 it exited 0 with nothing on
+stderr in 2.79 to 2.84 s wall: 3210 `.dsf`, 1 of them not DSON, and 51 figure
+files. `--selftest` passed 67 checks in 0.45 to 0.48 s wall.
+
 ## Where scripts run
 
 Most call into the container. Two conventions matter:
@@ -361,15 +625,15 @@ and `input/` at `/app/input`. The scripts translate host paths automatically;
 graphs do not.
 
 **Blender lives in the container.** Sheet rendering, posing, decimation measuring,
-weight transfer, `face_rig.py`, `bone_roles.py` and `mpfb_probe.py` all run
-`python3` inside it. That is the only place in this stack with a glTF importer, an
+weight transfer, `face_rig.py`, `bone_roles.py`, `mpfb_probe.py` and
+`daz_import_probe.py` all run `python3` inside it. That is the only place in this stack with a glTF importer, an
 FBX importer and a renderer together. The renderer is not the graphics card:
 measured in `comfyui-packaged` on 2026-09-16, EEVEE there draws through
 llvmpipe, Mesa's software OpenGL, on the CPU
 ([DAZ Genesis, rendering](/reference/daz-genesis#rendering)).
 
-**Some run only on the host.** `fetch_tools.py` and `daz_inventory.py` use only
-the standard library. `lipsync_cues.py` runs Rhubarb from `tools/`, so the
+**Some run only on the host.** `fetch_tools.py`, `daz_library.py` and
+`daz_inventory.py` use only the standard library. `lipsync_cues.py` runs Rhubarb from `tools/`, so the
 published image does not carry it, and needs ffmpeg. `compose_mouths.py` and
 `preview_lipsync.py` need numpy and Pillow in the system `python3`, and the
 preview needs ffmpeg and ffprobe.

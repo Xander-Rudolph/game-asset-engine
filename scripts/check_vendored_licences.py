@@ -49,6 +49,25 @@ ALLOW = [
     (".claude/skills/research-note/SKILL.md", "Daz",
      "names docs/reference/daz-genesis.md as a note to copy the shape from, and DAZ claim "
      "ids as an example of how a page cites its register"),
+    ("README.md", "Daz",
+     "lists the daz-figure skill and the Daz figures guide, which route to the licence in "
+     "docs/reference/daz-genesis.md before anything is installed; it names the maker and "
+     "its figures, and no Daz content is in the file"),
+    (".claude-plugin/plugin.json", "Daz",
+     "the plugin description and keywords name Daz Genesis figures as the subject of the "
+     "daz-figure skill, which routes to the licence first; no Daz content is in the file"),
+    (".claude-plugin/marketplace.json", "Daz",
+     "the marketplace description and keywords name Daz Genesis figures as the subject of "
+     "the daz-figure skill, which routes to the licence first; no Daz content is in the file"),
+    ("skills/daz-figure/SKILL.md", "Daz",
+     "the end-user skill for a Daz product the user downloaded by hand: it states the "
+     "licence from docs/reference/daz-genesis.md before each stage, installs into a library "
+     "outside the repo and renders into gitignored output/daz/, so it names the maker, its "
+     "EULA, package, folder and file names; no Daz content is in the file"),
+    ("skills/daz-figure/SKILL.md", "Genesis",
+     "names Genesis 9 Starter Essentials (SKU 86958) as the one product its steps were "
+     "measured on, the Genesis figure .duf paths it imports and the counts it measured; no "
+     "Genesis data is in the file"),
     ("scripts/lipsync_cues.py", "Valve",
      "credits the 0.08 s window of Valve's phoneme filter as the source of the share "
      "frame rule, a number read in docs/reference/source-filmmaker.md, not SDK code"),
@@ -59,6 +78,25 @@ ALLOW = [
     ("scripts/daz_inventory.py", "Genesis",
      "names Genesis 9 Starter Essentials and its data/ folders as the library a user "
      "unpacks and points it at; no Genesis data is in the file"),
+    ("scripts/daz_library.py", "Daz",
+     "installs Daz Install Manager zips a user downloaded by hand into a library outside "
+     "the repo and refuses a library inside it, so it names the maker, its package, "
+     "manifest and folder names, its EULA URLs and the licence it records; its self-test "
+     "packages are invented and no Daz content is in the file"),
+    ("scripts/daz_library.py", "Genesis",
+     "names Genesis 9 Starter Essentials (SKU 86958) as the packages its naming rules and "
+     "measured counts were read from; no Genesis data is in the file"),
+    ("scripts/daz_import_probe.py", "Daz",
+     "runs the Diffeomorphic DAZ Importer, fetched into gitignored input/_devtools, on a "
+     "Daz library outside the repo, so it names the importer's daz module and operators, "
+     "Daz folders and output/daz/; neither the importer's GPL code nor Daz content is in "
+     "the file"),
+    ("scripts/daz_import_probe.py", "Genesis",
+     "names the Genesis 9 figure and preset .duf paths it imports from that library and "
+     "the counts it measured; no Genesis data is in the file"),
+    ("scripts/cleanup.py", "Daz",
+     "keep refuses Daz 3D data from output/daz/, a Daz content library or a native Daz "
+     "file and cites docs/reference/daz-genesis.md; it reads no Daz file"),
 ]
 
 # Separator between the words of a multi-word marker: whitespace, or a comment

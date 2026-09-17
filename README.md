@@ -131,6 +131,7 @@ picked from its description:
 | "I need a tileable swamp ground texture" | `ground-texture`, generation plus seam fixing |
 | "I need a looping battle theme for the boss fight" | `game-music`, licence-clear music looped without a seam |
 | "make this portrait talk" / "lip sync this line" | `lip-sync`, a talking portrait: mouth shapes timed to a voice line |
+| "import a Daz figure into Blender" / "render a Genesis character's visemes" | `daz-figure`, a Genesis figure you downloaded, imported and its visemes rendered, licence first |
 | "how many faces should this be" / "rig this 600k mesh" | `mesh-budget`, measured budgets and heavy-mesh rigging |
 | "tidy up, I'm done with this asset" | `asset-cleanup`, curate the keepers and sweep the rest |
 
@@ -152,7 +153,8 @@ Worth knowing so you can tell when something is off:
   image, so the gates are deliberate. If Claude runs two stages without asking,
   that is a bug.
 - **It shows you the picture.** Every generated image is read back into the
-  conversation. A printed file path is not a result.
+  conversation. A printed file path is not a result. Renders of Daz content are
+  the exception: you open those yourself, and Claude gives their pixel counts.
 - **It checks rather than assumes.** Face counts, bone names, body counts and
   node availability are read off the running server and the real files, never
   described from memory.
@@ -188,6 +190,7 @@ export MESHY_API_KEY=...
 | `ground-texture` | Tileable terrain, and fixing seams |
 | `game-music` | Licence-clear instrumental music, looped without a seam |
 | `lip-sync` | Talking portraits: mouth shapes timed to voice lines |
+| `daz-figure` | Genesis figures from Daz: install, import into Blender, render the visemes; only renders may ship |
 | `mesh-budget` | Face counts, decimation, rigging heavy meshes |
 | `asset-cleanup` | Curate the keepers, sweep the rest |
 
@@ -213,6 +216,7 @@ It deploys to GitHub Pages on every push to `main`.
 | [Ground and terrain](https://xander-rudolph.github.io/game-asset-engine/guide/terrain) | Tileable textures, and four ways to get seams wrong |
 | [Music](https://xander-rudolph.github.io/game-asset-engine/guide/music) | Licence-clear music that loops without a seam |
 | [Talking portraits](https://xander-rudolph.github.io/game-asset-engine/guide/talking-portraits) | Mouth shapes for a dialogue portrait, timed to a voice line |
+| [Daz figures](https://xander-rudolph.github.io/game-asset-engine/guide/daz-figures) | A Genesis figure in Blender, its visemes rendered, and what its licence lets ship |
 | [Licensing](https://xander-rudolph.github.io/game-asset-engine/guide/licensing) | Read before shipping anything |
 
 ## Licensing, briefly

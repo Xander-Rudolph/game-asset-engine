@@ -1,6 +1,6 @@
 # Installing it for Claude
 
-This repo is a Claude Code plugin. It ships eight skills that drive the pipeline
+This repo is a Claude Code plugin. It ships nine skills that drive the pipeline
 and the MCP server definitions that go with them.
 
 ## Install
@@ -51,11 +51,11 @@ The second prints the component inventory and what each skill costs in tokens:
 
 ```
 Component inventory
-  Skills (8)  asset-cleanup, asset-pipeline, concept-edit, game-music, ground-texture, lip-sync, mesh-budget, pose-sheet
+  Skills (9)  asset-cleanup, asset-pipeline, concept-edit, daz-figure, game-music, ground-texture, lip-sync, mesh-budget, pose-sheet
   MCP servers (1)  meshy
 
 Projected token cost
-  Always-on:   ~993 tok   added to every session
+  Always-on:   ~1,136 tok   added to every session
 ```
 
 Skills are discovered from `skills/<name>/SKILL.md`. You do not list them in
@@ -96,6 +96,7 @@ you want in ordinary language and the right one is chosen.
 | "I need a tileable swamp ground texture" | `ground-texture` |
 | "I need a looping battle theme for the boss fight" | `game-music` |
 | "make this portrait talk", "lip sync this line" | `lip-sync` |
+| "I downloaded Genesis 9 from Daz", "render a Genesis character's visemes" | `daz-figure` |
 | "how many faces should this be", "rig this 600k mesh" | `mesh-budget` |
 | "tidy up, I'm done with this asset" | `asset-cleanup` |
 
@@ -123,7 +124,10 @@ runs two stages without asking, that is a bug, not efficiency.
 
 **It shows you the picture.** Every generated image is read back into the
 conversation. A printed file path is not a result, and a skill that reports one
-has skipped the only check that matters.
+has skipped the only check that matters. The one exception is `daz-figure`:
+whether a Daz render may go into a chat model is open under Daz's AI clause, so
+you open its sheets yourself and Claude gives their pixel counts
+([Daz figures](/guide/daz-figures#what-was-not-tested)).
 
 **It checks instead of assuming.** Face counts, body counts, bone names and node
 availability are read off the running server and the real files. Nothing is
@@ -195,6 +199,7 @@ and the 0.5.1 package:
 | `ground-texture` | Tileable terrain, and fixing seams |
 | `game-music` | Licence-clear instrumental music, looped without a seam |
 | `lip-sync` | Talking portraits: mouth shapes timed to voice lines, with a preview |
+| `daz-figure` | Daz Genesis figures: installed outside the repo, imported into Blender and their visemes rendered; only the renders may ship |
 | `mesh-budget` | Face counts, decimation, rigging heavy meshes |
 | `asset-cleanup` | Curate the keepers, sweep the rest |
 

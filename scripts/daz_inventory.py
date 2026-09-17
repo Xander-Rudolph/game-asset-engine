@@ -35,6 +35,17 @@ DAZ-070); such a file is reported as unreadable.
   prints every geometry's vertex and polygon counts (polygons split into quads
   and triangles), and the bones: node_library entries of type "bone", by their
   name (the id when a name is missing; --json gives both).
+- Figure files are grouped by the content type their author set: the
+  presentation type of the first "figure" node that has one, or else of the
+  first node of any type that has one. "Actor" or "Actor/..." is a body;
+  "Follower/Attachment..." is an attachment (fitted eyes, mouth, lashes and
+  tear, but eyebrows too, which carry the same type); "Follower/Wardrobe...",
+  "Follower/Hair..." and "Prop..." are wardrobe, hair and prop; any other type
+  is "other", and a file with none is "none". The report lists body and
+  attachment figures first, then the other geometry, and tallies every
+  content type. Nothing in DSON marks a projection template or an optional
+  eyebrow style as such, so a template counts as the wardrobe or hair its type
+  says, and an eyebrow style as an attachment.
 - Its morphs are the modifiers in the .dsf files under the Morphs folder beside
   the figure file (data/Daz 3D/Genesis 9/Base/Genesis9.dsf owns
   data/Daz 3D/Genesis 9/Base/Morphs/**). Folder names are matched without
@@ -48,38 +59,61 @@ DAZ-070); such a file is reported as unreadable.
   "attached by parent URI". Names are grouped by prefix: eCTRLv, facs_ctrl_v,
   facs_bs_, facs_cbs_, facs_jnt_, pJCM, body_cbs_ and other. Controllers with
   no deltas count as morphs, because the visemes are controllers; each group
-  says how many hold vertex deltas.
+  says how many hold vertex deltas. A morph is a modifier with a morph block,
+  or with no morph block and a channel of type float or int.
+- An alias is a modifier whose channel type is "alias": a second name that
+  points at another modifier's channel through target_channel. In Genesis 9
+  Starter Essentials every alias file is named alias_... and each alias
+  carries the name of the modifier it points at, so counting aliases as
+  morphs counts those names twice. Aliases are counted and listed apart
+  (text: by id; --json: name, id and target_channel), grouped by the name
+  they carry, and never counted as morphs.
+- Any other modifier (no morph block, and no channel or a channel of another
+  type, such as "file") is listed apart as an other modifier, never as a
+  morph.
 - HD morphs are those with "_div2" in the name or file name, or with an
-  hd_url. For each it says whether the .dsf holds base-resolution deltas and an
-  hd_url, only an hd_url, only deltas, or neither, and whether the .dhdm the
-  hd_url names is on disk (matched without regard to case, because Daz's own
-  URIs mix "DAZ 3D" and "Daz 3D").
+  hd_url; an alias is never one. For each it says whether the .dsf holds
+  base-resolution deltas and an hd_url, only an hd_url, only deltas, or
+  neither, and whether the .dhdm the hd_url names is on disk (matched without
+  regard to case, because Daz's own URIs mix "DAZ 3D" and "Daz 3D").
 - Morph files that reach no figure in the walk are listed at the end, grouped
   by the figure their parent URI names (without regard to case).
 
+A .dsf that decodes to valid JSON but is not DSON (the top level is not an
+object, or is an object with no file_version, asset_info, scene or *_library
+key) is skipped and counted as "not DSON". It is listed in the report's NOT
+DSON section and in --json's "not_dson", with its top-level keys, and is not
+an error: the exit status stays 0. Genesis 9 Starter Essentials ships one, a
+face group file under Base/Tools/Geometry/Face Groups.
+
 A file that will not decode (bad gzip, truncated gzip, not UTF-8, bad JSON,
-not a DSON object, a geometry without a counted vertex array, a morph whose
-deltas are not a counted array) is counted as unreadable and gets one
-"skipped <file>: <reason>" line on stderr, after the report, and an entry of
-kind "file" in --json's "errors". A folder that cannot be listed (kind
-"folder") and a link into or above the repo (kind "link") get the same line,
-are counted apart from the .dsf files, and the walk carries on. File and
-folder names that are not valid UTF-8 are printed with \\xNN escapes.
+a geometry without a counted vertex array, a morph whose deltas are not a
+counted array) is counted as unreadable and gets one "skipped <file>:
+<reason>" line on stderr, after the report, and an entry of kind "file" in
+--json's "errors". A folder that cannot be listed (kind "folder") and a link
+into or above the repo (kind "link") get the same line, are counted apart
+from the .dsf files, and the walk carries on. File and folder names that are
+not valid UTF-8 are printed with \\xNN escapes.
 
 --brief drops the name lists from the text report. --json prints one JSON
-object on stdout instead: root, file counts, walk skips, figures (geometries,
-bones with id, label and parent, morphs with delta counts, hd_url and how each
-was attached, morph_groups, hd_morphs), unattached morphs and errors.
+object on stdout instead: root, file counts (read: gzip, text, not_dson and
+unreadable, which add up to dsf_files), walk skips, geometry_roles and
+content_types tallies, figures (content_type and role, geometries, bones with
+id, label and parent, morphs with delta counts, hd_url and how each was
+attached, morph_groups, hd_morphs, aliases with alias_groups, and
+other_modifiers), unattached morphs, aliases and other modifiers, not_dson
+and errors.
 --selftest writes a small synthetic DSON tree (invented names, gzip and plain)
 to a temporary directory, runs the inventory and the command line over it and
 checks every count. --sample DIR writes that same tree to DIR, to try the
 report without any Daz content. It contains deliberately broken files, so give
 it a folder of its own, never the real library's.
 
-Exit status: 0 when every .dsf read and every folder was walked; 1 when some
-.dsf were unreadable, a folder could not be listed or a link into the repo was
-skipped (the report is still printed), or a self-test check failed; 2 for a
-refused or missing path, or a sample that could not be written.
+Exit status: 0 when every .dsf was read or skipped as not DSON and every
+folder was walked; 1 when some .dsf were unreadable, a folder could not be
+listed or a link into the repo was skipped (the report is still printed), or
+a self-test check failed; 2 for a refused or missing path, or a sample that
+could not be written.
 """
 from __future__ import annotations
 
@@ -109,9 +143,26 @@ HD_STATES = {
 HD_BRIEF = {"deltas_and_hd_url": "base deltas and an hd_url", "hd_url_only": "only an hd_url",
             "deltas_only": "base deltas, no hd_url", "neither": "neither"}
 
+# A figure file's role, from its content type (presentation type), in report order.
+# (role, content type prefix); a prefix matches the type itself or the type followed by "/".
+ROLE_PREFIXES = (("body", "Actor"), ("attachment", "Follower/Attachment"),
+                 ("wardrobe", "Follower/Wardrobe"), ("hair", "Follower/Hair"), ("prop", "Prop"))
+ROLES = ("body", "attachment", "wardrobe", "hair", "prop", "other", "none")
+FIGURE_ROLES = ("body", "attachment")
+DIAL_CHANNELS = ("float", "int")        # a modifier with no morph block and one of these is a morph
+DSON_KEYS = "file_version, asset_info, scene or *_library"
+
 
 class Unreadable(Exception):
-    """A .dsf that did not decode, or decoded into something that is not DSON."""
+    """A .dsf that did not decode, or DSON whose structure is broken."""
+
+
+class NotDson(Exception):
+    """A .dsf that decoded to valid JSON with none of DSON's top-level keys."""
+
+    def __init__(self, reason: str, form: str):
+        super().__init__(reason)
+        self.form = form
 
 
 # ---------------------------------------------------------------- guards
@@ -143,7 +194,9 @@ def plural(n: int, word: str, words: str | None = None) -> str:
 def read_dson(path: Path) -> tuple[dict, str]:
     """Decode one DSON file into (document, "gzip" or "text").
 
-    Raises Unreadable with a one-line reason, never anything else for bad data.
+    Raises NotDson for valid JSON that is not DSON, and Unreadable with a
+    one-line reason for anything that does not decode; never anything else
+    for bad data.
     """
     try:
         raw = path.read_bytes()
@@ -182,11 +235,17 @@ def read_dson(path: Path) -> tuple[dict, str]:
     except RecursionError:
         raise Unreadable(f"JSON error{where}: nested too deeply to parse") from None
     if not isinstance(doc, dict):
-        raise Unreadable(f"not DSON: the top level is a JSON {type(doc).__name__}, "
-                         "not an object")
+        kind = {list: "list", str: "string", bool: "boolean", type(None): "null"}.get(
+            type(doc), "number")
+        raise NotDson(f"not DSON: the top level is a JSON {kind}, not an object", form)
     if not any(k == "file_version" or k == "asset_info" or k == "scene"
                or k.endswith("_library") for k in doc):
-        raise Unreadable("not DSON: no file_version, asset_info, scene or *_library")
+        if not doc:
+            raise NotDson("not DSON: an empty JSON object", form)
+        keys = list(doc)
+        more = f" and {len(keys) - 5} more" if len(keys) > 5 else ""
+        raise NotDson(f"not DSON: no {DSON_KEYS} key; top-level keys "
+                      f"{', '.join(keys[:5])}{more}", form)
     return doc, form
 
 
@@ -252,6 +311,7 @@ def summarise_figure(doc: dict) -> dict:
                            "quads": sides[4], "triangles": sides[3],
                            "other_polygons": other})
     figure_nodes, bones = [], []
+    figure_type, node_type = None, None
     for n in as_list(doc, "node_library"):
         if not isinstance(n, dict):
             raise Unreadable("not DSON: node_library holds something other than objects")
@@ -259,6 +319,9 @@ def summarise_figure(doc: dict) -> dict:
         name = n.get("name") or n.get("id")
         entry = {"name": None if name is None else str(name), "id": n.get("id"),
                  "label": n.get("label")}
+        presentation = n.get("presentation")
+        ctype = presentation.get("type") if isinstance(presentation, dict) else None
+        ctype = ctype if isinstance(ctype, str) and ctype else None
         if kind == "bone":
             parent = n.get("parent")
             entry["parent"] = (unquote(parent.split("#")[-1])
@@ -266,8 +329,20 @@ def summarise_figure(doc: dict) -> dict:
             bones.append(entry)
         elif kind == "figure":
             figure_nodes.append(entry)
-    return {"geometries": geometries, "figure_nodes": figure_nodes, "bones": bones,
+            figure_type = figure_type or ctype
+        node_type = node_type or ctype
+    content_type = figure_type or node_type
+    return {"content_type": content_type, "role": role_of(content_type),
+            "geometries": geometries, "figure_nodes": figure_nodes, "bones": bones,
             "warnings": warnings}
+
+
+def role_of(content_type: str | None) -> str:
+    """body, attachment, wardrobe, hair, prop, other or none, from a content type."""
+    if content_type is None:
+        return "none"
+    return next((role for role, prefix in ROLE_PREFIXES
+                 if content_type == prefix or content_type.startswith(prefix + "/")), "other")
 
 
 def summarise_modifiers(doc: dict) -> list[dict]:
@@ -278,6 +353,8 @@ def summarise_modifiers(doc: dict) -> list[dict]:
         if "skin" in m:
             continue
         morph = m.get("morph")
+        channel = m.get("channel") if isinstance(m.get("channel"), dict) else {}
+        channel_type = channel.get("type") if isinstance(channel.get("type"), str) else None
         deltas, hd_url = None, None
         if isinstance(morph, dict):
             if morph.get("deltas") is None:
@@ -289,8 +366,21 @@ def summarise_modifiers(doc: dict) -> list[dict]:
         elif morph is not None:
             raise Unreadable(f"not DSON: modifier {m.get('id')!r} has a morph that is "
                              "not an object")
+        if channel_type == "alias":
+            kind = "alias"
+        elif morph is not None or channel_type in DIAL_CHANNELS:
+            kind = "morph"
+        else:
+            kind = "other"
         name = m.get("name") or m.get("id")
+        target = channel.get("target_channel")
+        extra = m.get("extra") if isinstance(m.get("extra"), list) else []
         out.append({"name": name if isinstance(name, str) else None,
+                    "id": m.get("id") if isinstance(m.get("id"), str) else None,
+                    "kind": kind, "channel_type": channel_type,
+                    "target_channel": target if isinstance(target, str) else None,
+                    "extra_types": [e["type"] for e in extra
+                                    if isinstance(e, dict) and isinstance(e.get("type"), str)],
                     "parent": m.get("parent"), "has_morph": morph is not None,
                     "deltas": deltas, "hd_url": hd_url})
     return out
@@ -403,7 +493,8 @@ def inventory(top: Path) -> dict:
                 continue
             paths.append(path)
 
-    forms = {"gzip": 0, "text": 0, "unreadable": 0}
+    forms = {"gzip": 0, "text": 0, "not_dson": 0, "unreadable": 0}
+    not_dson = []
     for path in paths:
         rel = shown(path.relative_to(top).as_posix())
         try:
@@ -419,11 +510,16 @@ def inventory(top: Path) -> dict:
                 if mods:
                     morph_files.append({"file": rel, "path": path, "asset_id": aid,
                                         "modifiers": mods})
+        except NotDson as e:
+            not_dson.append({"file": rel, "form": e.form, "reason": str(e)})
+            forms["not_dson"] += 1
+            continue
         except Unreadable as e:
             errors.append({"file": rel, "kind": "file", "error": str(e)})
             forms["unreadable"] += 1
             continue
         forms[form] += 1
+    figures.sort(key=lambda f: (ROLES.index(f["role"]), f["file"]))
 
     by_dir: dict[str, list[dict]] = {}
     by_id: dict[str, list[dict]] = {}
@@ -440,9 +536,13 @@ def inventory(top: Path) -> dict:
         stem = mf["path"].stem
         for mod in mf["modifiers"]:
             name = mod["name"] or stem
-            record = {"name": name, "file": mf["file"], "group": group_of(name),
-                      "deltas": mod["deltas"], "hd_url": mod["hd_url"]}
-            if "_div2" in name or "_div2" in stem or mod["hd_url"]:
+            record = {"name": name, "id": mod["id"], "kind": mod["kind"], "file": mf["file"],
+                      "group": group_of(name), "deltas": mod["deltas"],
+                      "hd_url": mod["hd_url"], "channel_type": mod["channel_type"],
+                      "target_channel": mod["target_channel"],
+                      "extra_types": mod["extra_types"]}
+            if mod["kind"] == "morph" and ("_div2" in name or "_div2" in stem
+                                           or mod["hd_url"]):
                 record["hd"] = hd_record(record, root, listings)
             target = uri_file(mod["parent"])
             owner, via = None, None
@@ -477,6 +577,11 @@ def inventory(top: Path) -> dict:
         spellings = sorted(slot["spellings"])
         unattached_blocks.append(dict(target=spellings[0], also_spelled=spellings[1:],
                                       **morph_block(slot["records"])))
+    roles = {r: sum(f["role"] == r for f in figures) for r in ROLES}
+    content_types: dict[str, int] = {}
+    for fig in figures:
+        if fig["content_type"] is not None:
+            content_types[fig["content_type"]] = content_types.get(fig["content_type"], 0) + 1
     return {
         "root": shown(top),
         "dsf_files": len(paths),
@@ -485,8 +590,12 @@ def inventory(top: Path) -> dict:
         "walk_skips": {"folders_not_listed": sum(e["kind"] == "folder" for e in errors),
                        "links_into_repo": sum(e["kind"] == "link" for e in errors)},
         "seconds": round(time.monotonic() - started, 3),
+        "geometry_roles": roles,
+        "content_types": dict(sorted(content_types.items(),
+                                     key=lambda kv: (ROLES.index(role_of(kv[0])), kv[0]))),
         "figures": [finish_figure(f) for f in figures],
         "unattached": unattached_blocks,
+        "not_dson": not_dson,
         "errors": errors,
     }
 
@@ -504,21 +613,37 @@ def hd_record(record: dict, root: Path | None, listings: dict) -> dict:
 
 def morph_block(records: list[dict]) -> dict:
     records = sorted(records, key=lambda r: (r["name"].casefold(), r["file"]))
+    morphs = [r for r in records if r["kind"] == "morph"]
+    aliases = [r for r in records if r["kind"] == "alias"]
+    others = [r for r in records if r["kind"] == "other"]
     groups = {g: [] for g in (*GROUPS, OTHER)}
-    for r in records:
+    for r in morphs:
         groups[r["group"]].append(r["name"])
+    alias_groups = {g: [] for g in (*GROUPS, OTHER)}
+    for r in aliases:
+        alias_groups[r["group"]].append(r["id"] or r["name"])
     hd = [{"name": r["name"], "file": r["file"], "deltas": r["deltas"],
-           "hd_url": r["hd_url"], **r["hd"]} for r in records if "hd" in r]
-    keys = ("name", "file", "group", "deltas", "hd_url", "via", "morphs_folder_of")
-    return {"morph_count": len(records),
-            "morph_files": len({r["file"] for r in records}),
+           "hd_url": r["hd_url"], **r["hd"]} for r in morphs if "hd" in r]
+
+    def pick(rs, *keys):
+        return [{k: r[k] for k in (*keys, "via", "morphs_folder_of")} for r in rs]
+
+    return {"morph_count": len(morphs),
+            "morph_files": len({r["file"] for r in morphs}),
             "morph_groups": groups,
-            "morphs": [{k: r[k] for k in keys} for r in records],
-            "hd_morphs": hd}
+            "morphs": pick(morphs, "name", "file", "group", "deltas", "hd_url"),
+            "hd_morphs": hd,
+            "alias_count": len(aliases),
+            "alias_groups": alias_groups,
+            "aliases": pick(aliases, "name", "id", "file", "group", "target_channel"),
+            "other_modifier_count": len(others),
+            "other_modifiers": pick(others, "name", "id", "file", "channel_type",
+                                    "extra_types")}
 
 
 def finish_figure(fig: dict) -> dict:
-    out = {k: fig[k] for k in ("file", "form", "asset_id", "figure_nodes", "geometries")}
+    out = {k: fig[k] for k in ("file", "form", "asset_id", "content_type", "role",
+                               "figure_nodes", "geometries")}
     out["bone_count"] = len(fig["bones"])
     out["bones"] = fig["bones"]
     out.update(morph_block(fig["_morphs"]))
@@ -538,7 +663,34 @@ def columns(names: list[str], indent: int, width: int = 100) -> list[str]:
 
 
 def morph_lines(block: dict, brief: bool) -> list[str]:
-    lines = [f"  morphs: {block['morph_count']} in {block['morph_files']} files"]
+    if not block["morph_count"]:
+        lines = ["  morphs: none"]
+    else:
+        lines = [f"  morphs: {block['morph_count']} in {block['morph_files']} files"]
+        lines += morph_detail(block, brief)
+    if block["alias_count"]:
+        lines.append(f"  aliases, not counted as morphs: {block['alias_count']} "
+                     "(channel type alias, a second name for another modifier's channel)")
+        tally = [f"{g} {len(ids)}" for g, ids in block["alias_groups"].items() if ids]
+        lines.append(f"    by the name they carry: {', '.join(tally)}")
+        if not brief:
+            lines += columns([i for ids in block["alias_groups"].values() for i in ids], 6)
+    if block["other_modifier_count"]:
+        kinds: dict[str, int] = {}
+        for m in block["other_modifiers"]:
+            what = (f"channel type {m['channel_type']}" if m["channel_type"]
+                    else "no channel")
+            kinds[what] = kinds.get(what, 0) + 1
+        lines.append(f"  other modifiers, not counted as morphs: {block['other_modifier_count']} "
+                     f"(no morph block and no float or int channel: "
+                     f"{', '.join(f'{c} {w}' for w, c in sorted(kinds.items()))})")
+        if not brief:
+            lines += columns([m["name"] for m in block["other_modifiers"]], 6)
+    return lines
+
+
+def morph_detail(block: dict, brief: bool) -> list[str]:
+    lines = []
     by_uri = sum(1 for m in block["morphs"] if m["via"] == "parent_uri")
     if by_uri:
         lines.append("    attached by parent URI, from outside this figure's Morphs folder: "
@@ -575,10 +727,10 @@ def morph_lines(block: dict, brief: bool) -> list[str]:
 
 
 def report(inv: dict, brief: bool) -> str:
-    read, skips = inv["read"], inv["walk_skips"]
+    read, skips, roles = inv["read"], inv["walk_skips"], inv["geometry_roles"]
     out = [f"Daz inventory of {inv['root']}",
            f"{inv['dsf_files']} .dsf files: {read['gzip']} gzip, {read['text']} plain, "
-           f"{read['unreadable']} unreadable; {len(inv['figures'])} figure files; "
+           f"{read['not_dson']} not DSON (skipped), {read['unreadable']} unreadable; "
            f"{inv['seconds']:.2f} s"]
     if inv["folders_reached_twice"]:
         out[-1] += (f"; {plural(inv['folders_reached_twice'], 'folder')} reached again "
@@ -587,10 +739,31 @@ def report(inv: dict, brief: bool) -> str:
         out[-1] += f"; {plural(skips['folders_not_listed'], 'folder')} could not be listed"
     if skips["links_into_repo"]:
         out[-1] += f"; {plural(skips['links_into_repo'], 'link')} into the repo skipped"
+    main = sum(roles[r] for r in FIGURE_ROLES)
+    rest = [f"{roles[r]} {'with no content type' if r == 'none' else r}"
+            for r in ROLES if r not in FIGURE_ROLES and roles[r]]
+    out.append(f"{plural(len(inv['figures']), 'figure file')}, by content type: "
+               f"{main} body or attachment ({roles['body']} body, "
+               f"{roles['attachment']} attachment); "
+               f"{len(inv['figures']) - main} other geometry"
+               + (f" ({', '.join(rest)})" if rest else ""))
+    if inv["content_types"]:
+        w = max(len(t) for t in inv["content_types"]) + 2
+        out.append("content types:")
+        out += [f"  {t:<{w}}{n:>5}  {role_of(t)}" for t, n in inv["content_types"].items()]
+    section = None
     for fig in inv["figures"]:
+        now = "main" if fig["role"] in FIGURE_ROLES else "rest"
+        if now != section:
+            section = now
+            out += ["", "BODY AND ATTACHMENT FIGURES (content type Actor or Follower/Attachment)"
+                    if now == "main" else
+                    "OTHER GEOMETRY (wardrobe, hair, prop, any other content type or none)"]
         nodes = ", ".join(n["name"] or "?" for n in fig["figure_nodes"]) or "none"
         out += ["", f"FIGURE {fig['file']}  ({fig['form']})",
-                f"  asset id {fig['asset_id']}", f"  figure node {nodes}"]
+                f"  asset id {fig['asset_id']}",
+                f"  content type {fig['content_type'] or 'none'} ({fig['role']})",
+                f"  figure node {nodes}"]
         for g in fig["geometries"]:
             split = f"{g['quads']} quads, {g['triangles']} triangles"
             if g["other_polygons"]:
@@ -600,7 +773,7 @@ def report(inv: dict, brief: bool) -> str:
         out.append(f"  bones: {fig['bone_count']}")
         if not brief:
             out += columns([b["name"] or "?" for b in fig["bones"]], 4)
-        if fig["morph_count"]:
+        if fig["morph_count"] or fig["alias_count"] or fig["other_modifier_count"]:
             out += morph_lines(fig, brief)
         else:
             out.append("  morphs: none (no readable morph beside the figure file names it, "
@@ -614,6 +787,10 @@ def report(inv: dict, brief: bool) -> str:
             if block["also_spelled"]:
                 out.append(f"  also spelled {', '.join(block['also_spelled'])}")
             out += morph_lines(block, brief)
+    if inv["not_dson"]:
+        out += ["", "NOT DSON, SKIPPED: valid JSON, but not an object with a "
+                f"{DSON_KEYS} key; not an error"]
+        out += [f"  {n['file']}  ({n['form']}): {n['reason']}" for n in inv["not_dson"]]
     return "\n".join(out)
 
 
@@ -626,7 +803,9 @@ def _asset(rel: str, kind: str) -> dict:
                            "revision": "1.0"}}
 
 
-def _figure(rel, geom, fig, vertices, polygons, bones):
+def _figure(rel, geom, fig, vertices, polygons, bones, content_type=None, decoy=None):
+    """A figure file. `content_type` goes on the figure node; `decoy`, on a plain node
+    listed before it, which must not win."""
     doc = _asset(rel, "figure")
     doc["geometry_library"] = [{
         "id": geom, "name": geom, "type": "polygon_mesh",
@@ -635,12 +814,19 @@ def _figure(rel, geom, fig, vertices, polygons, bones):
         "polygon_material_groups": {"count": 1, "values": ["Skin"]},
         "polylist": {"count": len(polygons), "values": [[0, 0, *p] for p in polygons]}}]
     nodes = [{"id": fig, "name": fig, "type": "figure", "label": fig}]
+    if content_type:
+        nodes[0]["presentation"] = {"type": content_type, "label": fig}
     parent = fig
     for bone_id, bone_name in bones:
         nodes.append({"id": bone_id, "name": bone_name, "type": "bone",
                       "label": bone_name.title(), "parent": "#" + parent})
         parent = bone_id
-    nodes.append({"id": "prop_node", "name": "prop_node", "type": "node", "label": "Prop"})
+    prop = {"id": "prop_node", "name": "prop_node", "type": "node", "label": "Prop"}
+    if decoy:
+        prop["presentation"] = {"type": decoy}
+        nodes.insert(0, prop)
+    else:
+        nodes.append(prop)
     doc["node_library"] = nodes
     doc["modifier_library"] = [{"id": "SkinBinding", "name": "SkinBinding",
                                 "parent": "#" + geom,
@@ -649,11 +835,15 @@ def _figure(rel, geom, fig, vertices, polygons, bones):
     return doc
 
 
-def _modifier(rel, name, parent, deltas=None, hd_url=None, deltas_key=True):
+def _modifier(rel, name, parent, deltas=None, hd_url=None, deltas_key=True,
+              channel_type="float", extra_type=None):
     doc = _asset(rel, "modifier")
-    mod = {"id": name, "name": name, "parent": parent, "group": "/Selftest",
-           "channel": {"id": "value", "type": "float", "name": "Value",
-                       "value": 0.0, "min": 0.0, "max": 1.0}}
+    mod = {"id": name, "name": name, "parent": parent, "group": "/Selftest"}
+    if channel_type:
+        mod["channel"] = {"id": "value", "type": channel_type, "name": "Value",
+                          "value": 0.0, "min": 0.0, "max": 1.0}
+    if extra_type:
+        mod["extra"] = [{"type": extra_type}]
     if deltas is not None or hd_url:
         morph = {"vertex_count": 8}
         if deltas_key:
@@ -663,6 +853,17 @@ def _modifier(rel, name, parent, deltas=None, hd_url=None, deltas_key=True):
         mod["morph"] = morph
     doc["modifier_library"] = [mod]
     doc["scene"] = {"modifiers": [{"id": name + "-1", "url": "#" + name}]}
+    return doc
+
+
+def _alias(rel, alias_id, name, parent, target):
+    """An alias modifier: its own id, the name of the modifier it points at, no morph."""
+    doc = _asset(rel, "modifier")
+    doc["modifier_library"] = [{
+        "id": alias_id, "name": name, "parent": parent, "group": "/Selftest",
+        "channel": {"id": alias_id, "type": "alias", "name": name, "label": name,
+                    "target_channel": target}}]
+    doc["scene"] = {"modifiers": [{"id": alias_id + "-1", "url": "#" + alias_id}]}
     return doc
 
 
@@ -681,7 +882,8 @@ def build_sample(root: Path) -> None:
         f"{one}/FigureOne.dsf", "FigureOneGeom", "FigureOne", cube,
         [[0, 1, 3, 2], [4, 5, 7, 6], [0, 1, 5, 4], [2, 3, 7, 6], [0, 2, 6, 4],
          [1, 3, 7], [1, 7, 5]],
-        [("hip_t", "hip_t"), ("spine_id", "spine_t"), ("head_t", "head_t")]), gz=True)
+        [("hip_t", "hip_t"), ("spine_id", "spine_t"), ("head_t", "head_t")],
+        content_type="Actor"), gz=True)
     parent_one = "/" + quote(f"{one}/FigureOne.dsf") + "#FigureOneGeom"
     a, b = f"{one}/Morphs/Selftest Vendor/Set A", f"{one}/Morphs/Selftest Vendor/Set B"
     d = [[0, 0.1, 0.0, 0.0], [3, 0.0, 0.2, 0.0], [5, 0.0, 0.0, 0.3], [7, 0.1, 0.1, 0.1]]
@@ -700,6 +902,27 @@ def build_sample(root: Path) -> None:
             (b, "TestOther", {"deltas": []}, False)):
         put(f"{rel}/{name}.dsf", _modifier(f"{rel}/{name}.dsf", name, parent_one, **kw), gz)
     put(f"{a}/facs_bs_TestWide_div2.dhdm", b"invented bytes, not a real dhdm")
+    # Aliases carry the name of the modifier they point at, so they must not be counted
+    # as morphs (the visemes would count twice), and an alias to a _div2 is no HD morph.
+    c = f"{one}/Morphs/Selftest Vendor/Set C"
+    put(f"{c}/facs_ctrl_vTestB.dsf", _modifier(f"{c}/facs_ctrl_vTestB.dsf", "facs_ctrl_vTestB",
+                                               parent_one))
+    for alias_id, name, gz in (("alias_selftest_facs_ctrl_vTest", "facs_ctrl_vTest", False),
+                               ("alias_selftest_facs_ctrl_vTestB", "facs_ctrl_vTestB", True),
+                               ("alias_selftest_facs_bs_TestWide_div2", "facs_bs_TestWide_div2",
+                                False)):
+        put(f"{c}/{alias_id}.dsf", _alias(f"{c}/{alias_id}.dsf", alias_id, name, parent_one,
+                                          parent_one.split("#")[0] + f"#{name}?value"), gz)
+    # Neither morphs nor aliases: a channel of type file, and a modifier held only in extra.
+    put(f"{c}/SelftestLauncher.dsf", _modifier(f"{c}/SelftestLauncher.dsf", "SelftestLauncher",
+                                               parent_one, channel_type="file"))
+    put(f"{c}/SelftestPush.dsf", _modifier(f"{c}/SelftestPush.dsf", "SelftestPush", parent_one,
+                                           channel_type=None,
+                                           extra_type="selftest/modifier/push"))
+    # Valid JSON that is not DSON: skipped and listed, never an error.
+    groups = f"{v}/Tools/Face Groups"
+    put(f"{groups}/Selftest Groups.dsf", {"selftest_group_list": [{"id": "g1", "faces": [0]}]})
+    put(f"{groups}/Selftest Many Keys.dsf", {f"key{i}": i for i in range(1, 8)}, gz=True)
     put(f"{one}/UV Sets/Selftest/Base.dsf",
         dict(_asset(f"{one}/UV Sets/Selftest/Base.dsf", "uv_set"),
              uv_set_library=[{"id": "Base", "vertex_count": 8,
@@ -713,7 +936,8 @@ def build_sample(root: Path) -> None:
     put(f"{broken}/bad_json.dsf", b'{"file_version": "0.6.0.0", ')
     put(f"{broken}/gzip_bad_json.dsf", b'{"asset_info": ]', gz=True)
     put(f"{broken}/empty.dsf", b"")
-    put(f"{broken}/top_list.dsf", b"[]")
+    put(f"{broken}/top_list.dsf", b"[]")                # valid JSON, not DSON: not an error
+    put(f"{broken}/empty_object.dsf", b"{}")            # the same
     put(f"{broken}/zlib_stream.dsf", b"\x78\x9c\x03\x00\x00\x00\x00\x01")
     put(f"{broken}/not_utf8.dsf", b'{"file_version": "\xff"}')
     rel = f"{broken}/deltas_not_counted.dsf"
@@ -726,7 +950,8 @@ def build_sample(root: Path) -> None:
 
     put(f"{two}/FigureTwo.dsf", _figure(
         f"{two}/FigureTwo.dsf", "FigureTwoGeom", "FigureTwo", cube[:4], [[0, 1, 3, 2]],
-        [("root_t", "root_t"), ("tail_t", "tail_t")]))
+        [("root_t", "root_t"), ("tail_t", "tail_t")],
+        content_type="Follower/Attachment/Head/Face/Selftest", decoy="Prop/Selftest Decoy"))
     parent_two = "/" + quote(f"{two}/FigureTwo.dsf") + "#FigureTwoGeom"
     missing = "/" + quote(f"{v}/Missing/Missing.dsf") + "#MissingGeom"
     for rel, name, parent, gz in (
@@ -744,10 +969,20 @@ def build_sample(root: Path) -> None:
         put(f"{rel}/{name}.dsf", _modifier(f"{rel}/{name}.dsf", name, parent, deltas=d[:2]),
             gz)
 
-    for letter, gz in (("A", False), ("B", True)):
+    for letter, gz, ctype in (("A", False, "Follower/Wardrobe/Selftest"), ("B", True, None)):
         put(f"{pair}/Pair{letter}.dsf", _figure(
             f"{pair}/Pair{letter}.dsf", f"Pair{letter}Geom", f"Pair{letter}", cube[:3],
-            [[0, 1, 2]], [(f"pair_{letter.lower()}_root", f"pair_{letter.lower()}_root")]), gz)
+            [[0, 1, 2]], [(f"pair_{letter.lower()}_root", f"pair_{letter.lower()}_root")],
+            content_type=ctype), gz)
+    # One geometry file per remaining role: hair, prop (a plain node, no figure node), other.
+    for folder, ctype in (("Hair", "Follower/Hair"), ("Prop", None), ("Graft", "Follower")):
+        rel = f"{v}/{folder}/Selftest{folder}.dsf"
+        doc = _figure(rel, f"{folder}Geom", f"Selftest{folder}", cube[:3], [[0, 1, 2]],
+                      [(f"{folder.lower()}_root", f"{folder.lower()}_root")], content_type=ctype)
+        if folder == "Prop":
+            doc["node_library"] = [{"id": "SelftestProp", "name": "SelftestProp", "type": "node",
+                                    "presentation": {"type": "Prop/Selftest"}}]
+        put(rel, doc)
     for name, target, fragment in (("facs_bs_PairA", "PairA.dsf", "PairAGeom"),
                                    ("eCTRLvPairB", "PairB.dsf", "PairB"),
                                    ("TestNobody", "Nobody.dsf", "NobodyGeom")):
@@ -757,6 +992,9 @@ def build_sample(root: Path) -> None:
     rel = f"{v}/Loose/Morphs/facs_bs_Loose_div2.dsf"
     put(rel, _modifier(rel, "facs_bs_Loose_div2", missing,
                        deltas=[], hd_url="/" + quote(f"{v}/Loose/Morphs/gone.dhdm")))
+    rel = f"{v}/Loose/Morphs/alias_selftest_facs_bs_Loose_div2.dsf"
+    put(rel, _alias(rel, "alias_selftest_facs_bs_Loose_div2", "facs_bs_Loose_div2", missing,
+                    missing.split("#")[0] + "#facs_bs_Loose_div2?value"))
 
 
 def selftest() -> int:
@@ -782,12 +1020,12 @@ def selftest() -> int:
         v = "data/Selftest Vendor"
         figs = {f["file"]: f for f in inv["figures"]}
 
-        check(".dsf files walked", inv["dsf_files"], 33)
-        check("read as gzip / plain / unreadable", inv["read"],
-              {"gzip": 7, "text": 16, "unreadable": 10})
+        check(".dsf files walked", inv["dsf_files"], 46)
+        check("read as gzip / plain / not DSON / unreadable", inv["read"],
+              {"gzip": 8, "text": 25, "not_dson": 4, "unreadable": 9})
         check("unreadable files", sorted(e["file"].rsplit("/", 1)[-1] for e in inv["errors"]),
               sorted(["bad_gzip.dsf", "truncated_gzip.dsf", "bad_json.dsf",
-                      "gzip_bad_json.dsf", "empty.dsf", "top_list.dsf",
+                      "gzip_bad_json.dsf", "empty.dsf",
                       "zlib_stream.dsf", "not_utf8.dsf", "deltas_not_counted.dsf",
                       "BadFigure.dsf"]))
         messages = {e["file"].rsplit("/", 1)[-1]: e["error"] for e in inv["errors"]}
@@ -796,7 +1034,6 @@ def selftest() -> int:
                              ("bad_json.dsf", "JSON error: "),
                              ("gzip_bad_json.dsf", "JSON error inside the gzip: "),
                              ("empty.dsf", "empty file"),
-                             ("top_list.dsf", "not DSON: the top level is a JSON list"),
                              ("zlib_stream.dsf", "starts like a raw zlib stream"),
                              ("not_utf8.dsf", "not utf-8 text"),
                              ("deltas_not_counted.dsf", "not DSON: modifier "
@@ -804,9 +1041,37 @@ def selftest() -> int:
                              ("BadFigure.dsf", "not DSON: geometry NoVertices vertices")):
             check(f"message for {fname} starts {start!r}",
                   messages.get(fname, "").startswith(start), True)
-        check("figure files", sorted(figs), sorted([
+        check("valid JSON that is not DSON: skipped with its form and reason, not an error",
+              [(n["file"].rsplit("/", 1)[-1], n["form"], n["reason"]) for n in inv["not_dson"]],
+              [("empty_object.dsf", "text", "not DSON: an empty JSON object"),
+               ("top_list.dsf", "text", "not DSON: the top level is a JSON list, not an object"),
+               ("Selftest Groups.dsf", "text", "not DSON: no file_version, asset_info, scene "
+                "or *_library key; top-level keys selftest_group_list"),
+               ("Selftest Many Keys.dsf", "gzip", "not DSON: no file_version, asset_info, "
+                "scene or *_library key; top-level keys key1, key2, key3, key4, key5 "
+                "and 2 more")])
+        check("figure files, body and attachment first, then by file", list(figs), [
             f"{v}/Figure One/FigureOne.dsf", f"{v}/Figure Two/FigureTwo.dsf",
-            f"{v}/Pair/PairA.dsf", f"{v}/Pair/PairB.dsf"]))
+            f"{v}/Pair/PairA.dsf", f"{v}/Hair/SelftestHair.dsf", f"{v}/Prop/SelftestProp.dsf",
+            f"{v}/Graft/SelftestGraft.dsf", f"{v}/Pair/PairB.dsf"])
+        check("figure roles, from the figure node's content type before any other node's",
+              [(f["role"], f["content_type"]) for f in inv["figures"]],
+              [("body", "Actor"), ("attachment", "Follower/Attachment/Head/Face/Selftest"),
+               ("wardrobe", "Follower/Wardrobe/Selftest"), ("hair", "Follower/Hair"),
+               ("prop", "Prop/Selftest"), ("other", "Follower"), ("none", None)])
+        check("geometry roles and content types tallied", (inv["geometry_roles"],
+                                                           list(inv["content_types"].items())),
+              ({"body": 1, "attachment": 1, "wardrobe": 1, "hair": 1, "prop": 1, "other": 1,
+                "none": 1},
+               [("Actor", 1), ("Follower/Attachment/Head/Face/Selftest", 1),
+                ("Follower/Wardrobe/Selftest", 1), ("Follower/Hair", 1), ("Prop/Selftest", 1),
+                ("Follower", 1)]))
+        check("a content type matches a role only whole or before a slash",
+              [role_of(t) for t in ("Actor/Character", "Actors", "Follower/AttachmentX",
+                                    "Follower/Attachment/Lower-Body", "Follower/Hair",
+                                    "Props/Selftest", "Prop", "Set", None)],
+              ["body", "other", "other", "attachment", "hair", "other", "prop", "other",
+               "none"])
 
         one = figs.get(f"{v}/Figure One/FigureOne.dsf", {})
         g = (one.get("geometries") or [{}])[0]
@@ -818,10 +1083,31 @@ def selftest() -> int:
               [b["name"] for b in one.get("bones", [])], ["hip_t", "spine_t", "head_t"])
         check("figure one bone parents",
               [b["parent"] for b in one.get("bones", [])], ["FigureOne", "hip_t", "spine_id"])
-        check("figure one morph count", one.get("morph_count"), 10)
-        check("figure one groups", {k: len(n) for k, n in one.get("morph_groups", {}).items()},
-              {"eCTRLv": 1, "facs_ctrl_v": 1, "facs_bs_": 2, "facs_cbs_": 1,
+        check("figure one morph count, without aliases or other modifiers",
+              one.get("morph_count"), 11)
+        check("figure one groups: 2 visemes, not 4 with their aliases",
+              {k: len(n) for k, n in one.get("morph_groups", {}).items()},
+              {"eCTRLv": 1, "facs_ctrl_v": 2, "facs_bs_": 2, "facs_cbs_": 1,
                "facs_jnt_": 1, "pJCM": 1, "body_cbs_": 1, "other": 2})
+        check("figure one aliases, grouped by the name they carry",
+              (one.get("alias_count"),
+               {k: ids for k, ids in one.get("alias_groups", {}).items() if ids}),
+              (3, {"facs_ctrl_v": ["alias_selftest_facs_ctrl_vTest",
+                                   "alias_selftest_facs_ctrl_vTestB"],
+                   "facs_bs_": ["alias_selftest_facs_bs_TestWide_div2"]}))
+        check("figure one alias names, targets and files",
+              [(a["name"], a["target_channel"].rsplit("#", 1)[-1], a["file"].rsplit("/", 1)[-1])
+               for a in one.get("aliases", [])],
+              [("facs_bs_TestWide_div2", "facs_bs_TestWide_div2?value",
+                "alias_selftest_facs_bs_TestWide_div2.dsf"),
+               ("facs_ctrl_vTest", "facs_ctrl_vTest?value", "alias_selftest_facs_ctrl_vTest.dsf"),
+               ("facs_ctrl_vTestB", "facs_ctrl_vTestB?value",
+                "alias_selftest_facs_ctrl_vTestB.dsf")])
+        check("figure one other modifiers: a file channel and an extra-only modifier",
+              [(m["name"], m["channel_type"], m["extra_types"])
+               for m in one.get("other_modifiers", [])],
+              [("SelftestLauncher", "file", []),
+               ("SelftestPush", None, ["selftest/modifier/push"])])
         check("figure one morphs with deltas",
               sorted(m["name"] for m in one.get("morphs", []) if m["deltas"]),
               ["TestMisplaced", "body_cbs_TestBulge", "facs_bs_TestOpen",
@@ -832,7 +1118,7 @@ def selftest() -> int:
               [("TestMisplaced", "parent_uri", [f"{v}/Figure Two/FigureTwo.dsf"])])
         hd = {h["name"]: (h["state"], h["deltas"], h["dhdm_found"])
               for h in one.get("hd_morphs", [])}
-        check("figure one HD morphs", hd, {
+        check("figure one HD morphs, and no alias among them", hd, {
             "facs_bs_TestWide_div2": ("deltas_and_hd_url", 2, True),
             "facs_cbs_TestFix_div2": ("hd_url_only", 0, False)})
         check("figure one: no count warnings", one.get("warnings"), [])
@@ -858,26 +1144,46 @@ def selftest() -> int:
               [u["also_spelled"] for u in inv["unattached"]],
               [[f"/{v}/Missing/Missing.dsf"], []])
         loose = [h for u in inv["unattached"] for h in u["hd_morphs"]]
-        check("unattached _div2 with an empty delta array",
+        check("unattached _div2 with an empty delta array, and not its alias",
               [(h["state"], h["deltas"], h["dhdm_found"]) for h in loose],
               [("hd_url_only", 0, False)])
+        check("unattached aliases are listed apart from the morphs",
+              [(u["morph_count"], [a["id"] for a in u["aliases"]]) for u in inv["unattached"]],
+              [(2, ["alias_selftest_facs_bs_Loose_div2"]), (1, [])])
 
         r = run(root)
         check("command line: exit 1 when files are unreadable", r.returncode, 1)
-        check("command line: one stderr line per unreadable file",
-              sum(1 for line in r.stderr.splitlines() if line.startswith("skipped ")), 10)
+        check("command line: one stderr line per unreadable file, none for not DSON",
+              sorted(line.split(":")[0].rsplit("/", 1)[-1] for line in r.stderr.splitlines()
+                     if line.startswith("skipped ")),
+              sorted(e["file"].rsplit("/", 1)[-1] for e in inv["errors"]))
         check("command line: no traceback", "Traceback" in r.stdout + r.stderr, False)
         check("command line: report names the HD state",
               "holds 2 base deltas and an hd_url; .dhdm on disk" in r.stdout, True)
-        check("command line: summary line",
-              "33 .dsf files: 7 gzip, 16 plain, 10 unreadable; 4 figure files" in r.stdout, True)
+        check("command line: summary lines", (
+            "\n46 .dsf files: 8 gzip, 25 plain, 4 not DSON (skipped), 9 unreadable; "
+            in r.stdout,
+            "\n7 figure files, by content type: 2 body or attachment (1 body, 1 attachment); "
+            "5 other geometry (1 wardrobe, 1 hair, 1 prop, 1 other, 1 with no content type)\n"
+            in r.stdout), (True, True))
+        at = [r.stdout.find(s) for s in (
+            "\nBODY AND ATTACHMENT FIGURES", f"\nFIGURE {v}/Figure Two/FigureTwo.dsf",
+            "\nOTHER GEOMETRY", f"\nFIGURE {v}/Pair/PairA.dsf", "\nNOT DSON, SKIPPED")]
+        check("command line: body and attachment section, then other geometry, then not DSON",
+              (-1 not in at, at == sorted(at)), (True, True))
+        check("command line: aliases and other modifiers have their own lines", (
+            "    facs_ctrl_v      2  (0 with deltas)" in r.stdout,
+            "  aliases, not counted as morphs: 3 " in r.stdout,
+            "    by the name they carry: facs_ctrl_v 2, facs_bs_ 1\n" in r.stdout,
+            "  other modifiers, not counted as morphs: 2 (no morph block and no float or int "
+            "channel: 1 channel type file, 1 no channel)" in r.stdout), (True, True, True, True))
         r = run(root, "--json")
         try:
             parsed = json.loads(r.stdout)
         except ValueError:
             parsed = {}
-        check("command line: --json is one JSON object with 4 figures",
-              len(parsed.get("figures", [])), 4)
+        check("command line: --json is one JSON object with 7 figures and 4 not DSON",
+              (len(parsed.get("figures", [])), len(parsed.get("not_dson", []))), (7, 4))
         check("command line: --brief omits bone names",
               "spine_t" in run(root, "--brief").stdout, False)
         for label, target in (("the repo itself", ROOT), ("a folder inside the repo",
@@ -911,7 +1217,7 @@ def selftest() -> int:
             locked.chmod(0o755)
         tail = "; 1 folder could not be listed" if can_lock else ""
         check("command line: the summary counts links and folders apart from the .dsf files",
-              "33 .dsf files: 7 gzip, 16 plain, 10 unreadable; 4 figure files" in r.stdout
+              "46 .dsf files: 8 gzip, 25 plain, 4 not DSON (skipped), 9 unreadable; " in r.stdout
               and f"through links walked once{tail}; 2 links into the repo skipped" in r.stdout,
               True)
         kinds = {e["file"]: (e["kind"], e["error"].split(":")[0]) for e in inv["errors"]
@@ -924,11 +1230,48 @@ def selftest() -> int:
             print("  skip the unlistable folder: running as root, which can list it anyway")
         check("links into the repo and an unlistable folder are reported by kind", kinds, want)
         check("a link loop is walked once and adds no files",
-              (inv["dsf_files"], inv["folders_reached_twice"]), (33, 1))
-        check("gzip + plain + unreadable adds up to the .dsf files",
+              (inv["dsf_files"], inv["folders_reached_twice"]), (46, 1))
+        check("gzip + plain + not DSON + unreadable adds up to the .dsf files",
               sum(inv["read"].values()), inv["dsf_files"])
         check("walk skips are counted apart", inv["walk_skips"],
               {"folders_not_listed": 1 if can_lock else 0, "links_into_repo": 2})
+
+        # A clean library holding a file that is valid JSON but not DSON exits 0.
+        clean = Path(tmp, "clean")
+        build = f"{v}/Clean"
+        cube = [[0, 0, 0], [1, 0, 0], [0, 1, 0]]
+        for rel, doc in (
+                (f"{build}/CleanFigure.dsf", _figure(
+                    f"{build}/CleanFigure.dsf", "CleanGeom", "CleanFigure", cube, [[0, 1, 2]],
+                    [("clean_root", "clean_root")], content_type="Actor")),
+                (f"{build}/Morphs/facs_ctrl_vClean.dsf", _modifier(
+                    f"{build}/Morphs/facs_ctrl_vClean.dsf", "facs_ctrl_vClean",
+                    "#CleanGeom")),
+                (f"{build}/Morphs/alias_selftest_facs_ctrl_vClean.dsf", _alias(
+                    f"{build}/Morphs/alias_selftest_facs_ctrl_vClean.dsf",
+                    "alias_selftest_facs_ctrl_vClean", "facs_ctrl_vClean", "#CleanGeom",
+                    "#facs_ctrl_vClean?value")),
+                (f"{build}/Tools/Face Groups/Clean Groups.dsf",
+                 {"selftest_group_list": []})):
+            (clean / rel).parent.mkdir(parents=True, exist_ok=True)
+            (clean / rel).write_text(json.dumps(doc))
+        r = run(clean, "--brief")
+        check("clean library with a not-DSON file: exit 0, nothing on stderr",
+              (r.returncode, r.stderr), (0, ""))
+        check("clean library: the summary and the NOT DSON section name it", (
+            "\n4 .dsf files: 0 gzip, 3 plain, 1 not DSON (skipped), 0 unreadable; " in r.stdout,
+            f"\n  {build}/Tools/Face Groups/Clean Groups.dsf  (text): not DSON: " in r.stdout,
+            "    facs_ctrl_v      1  (0 with deltas)" in r.stdout,
+            "  aliases, not counted as morphs: 1 " in r.stdout), (True, True, True, True))
+        r = run(clean, "--json")
+        try:
+            parsed = json.loads(r.stdout)
+        except ValueError:
+            parsed = {}
+        check("clean library --json: exit 0, no errors, one not_dson, one morph and one alias",
+              (r.returncode, parsed.get("errors"), len(parsed.get("not_dson", [])),
+               [(f["morph_count"], f["alias_count"]) for f in parsed.get("figures", [])]),
+              (0, [], 1, [(1, 1)]))
 
         # A folder name that is not UTF-8, as a Windows zip unpacked on Linux can leave.
         odd = os.fsdecode(b"Caf\xe9")

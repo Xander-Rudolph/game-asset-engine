@@ -9,6 +9,7 @@ Driving the pipeline? The skills carry it, and every one starts with `scripts/do
 - MCP: do not add a server that repeats `run_workflow.py`, `validate_workflows.py`, `doctor.py`, `fetch_models.py` or `gh`. Personal servers stay at user scope with `${VAR}` keys.
 - `research/claims/` holds the claim registers behind the research notes in `docs/reference/`; `research/README.md` explains them.
 - `tools/` is the gitignored cache of command-line tools that `scripts/fetch_tools.py` fetches from `tools.json`.
+- The Daz content library lives at `MODELS_DIR/daz_library`, outside the repo, installed by `scripts/daz_library.py`. `output/daz/` holds Daz content: its 3D data is never curated (`cleanup.py keep` refuses it), and nothing in it is ever committed.
 - `docs/` is the VitePress site. `CREDITS.md` mirrors `docs/credits.md`, with absolute links.
 
 ## The container
@@ -46,7 +47,7 @@ A backlog, not a guide. List it with `grep '^### ' AUDIT.md` and read only the f
 
 ## Owner decisions
 
-Open, and not to be settled in passing (ask in one line, or open an issue): the face budget (18,000 in the docs, 48,000 in the graphs, per AUDIT.md "Read this one first"), the Meshy MCP server at the plugin root, the address compose publishes port 8188 on, the AGPL question for a hosted image, and whether the TripoSG and TripoSR graphs stay.
+Open, and not to be settled in passing (ask in one line, or open an issue): the face budget (18,000 in the docs, 48,000 in the graphs, per AUDIT.md "Read this one first"), the Meshy MCP server at the plugin root, the address compose publishes port 8188 on, the AGPL question for a hosted image, whether Claude may read a Daz render from `output/daz/` into a conversation (none is read until then), and whether the TripoSG and TripoSR graphs stay.
 
 ## Before a commit
 

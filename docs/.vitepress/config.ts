@@ -86,6 +86,7 @@ export default defineConfig({
             { text: 'Animation cycles', link: '/guide/animation' },
             { text: 'Facings and camera angles', link: '/guide/facings' },
             { text: 'Talking portraits', link: '/guide/talking-portraits' },
+            { text: 'Daz figures', link: '/guide/daz-figures' },
           ],
         },
         {

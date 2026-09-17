@@ -25,6 +25,7 @@ Full detail, including the second manifest that GitHub installation needs, is in
 | `asset-cleanup` | Curating the keepers and sweeping the rest |
 | `game-music` | Licence-clear instrumental music, looped seamlessly at a set loudness |
 | `lip-sync` | Talking portraits: a portrait, its mouth shapes, and cues timed to voice lines |
+| `daz-figure` | A Daz Genesis figure you downloaded: installed outside the repo, imported into Blender, and its visemes rendered, with the licence stated first |
 
 Each one starts by running `scripts/doctor.py`, so a session never begins by
 guessing whether ComfyUI is up. If it is not, the skill walks the user through
@@ -35,7 +36,7 @@ getting it running rather than failing later in a confusing way.
 Each of these was learned by getting it wrong. Not every skill needs every rule,
 so this says which skills carry which.
 
-**Check the engine first.** All eight start with `scripts/doctor.py`.
+**Check the engine first.** All nine start with `scripts/doctor.py`.
 
 **Check, do not assume.** Each skill carries the commands for its own checks, so
 nothing describes what a file probably contains. `asset-pipeline` reads a mesh's
@@ -44,24 +45,34 @@ rig's real bone names. `concept-edit` asks the running server which node types i
 loaded. `mesh-budget` measures a face budget rather than guessing one.
 `lip-sync` dry-runs a mouth box against the edit graph's size list, read from
 the running container, and checks that no pixel outside the box changed.
+`daz-figure` checks every installed file against its CRC-32, and reads the build
+report and what each viseme moves before it renders anything.
 
 **Show, do not report.** The skills that make images, `asset-pipeline`,
 `concept-edit`, `pose-sheet`, `ground-texture` and `lip-sync`, read each one
 back into the conversation, because printing a path is not showing a picture.
+`daz-figure` is the exception. Whether a Daz render may go into a chat model
+under Daz's AI clause is open, so it reads none back: the person opens each
+labelled sheet and says what they see, and the skill gives the pixels each
+viseme changed, from the render report.
 `game-music` makes audio, which the conversation cannot show, so it puts every
 take in front of the person to listen to. `lip-sync` reads back its portrait,
 mouth box and contact sheet of mouths, then hands over the preview video for
 the person to watch with sound.
 
-**One stage per turn.** `asset-pipeline` and `lip-sync` have stages, and gate
-each one. A rejected mesh three stages later costs far more than a rerolled
-concept image, and nine mouth edits cost about 23 minutes of GPU, so the
-portrait and the mouth box are approved before any mouth is made.
+**One stage per turn.** `asset-pipeline`, `lip-sync` and `daz-figure` have
+stages, and gate each one. A rejected mesh three stages later costs far more
+than a rerolled concept image, and nine mouth edits cost about 23 minutes of
+GPU, so the portrait and the mouth box are approved before any mouth is made.
+A full viseme render of a Genesis figure took about 25 minutes of CPU, so
+`daz-figure` renders one viseme first.
 
 **Say what was chosen and why.** `asset-pipeline` names the generator, the camera
 angle and what it added to the prompt. `lip-sync` asks where the voice lines come
 from and whether that voice may ship before it makes anything, and names the
-mouth shapes that came out weak.
+mouth shapes that came out weak. `daz-figure` states the Daz licence before it
+installs anything: renders may ship, the 3D data needs an Interactive License,
+and Daz content stays out of every AI stage.
 
 ## MCP servers
 
