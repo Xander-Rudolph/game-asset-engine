@@ -8,6 +8,7 @@ Driving the pipeline? The skills carry it, and every one starts with `scripts/do
 - Maintainer skills go in `.claude/skills/`, which installers never load. Anything at the plugin root, `.mcp.json` included, starts for every installer.
 - MCP: do not add a server that repeats `run_workflow.py`, `validate_workflows.py`, `doctor.py`, `fetch_models.py` or `gh`. Personal servers stay at user scope with `${VAR}` keys.
 - `research/claims/` holds the claim registers behind the research notes in `docs/reference/`; `research/README.md` explains them.
+- `research/untested.md` lists what was built but not tested for real, and the owner decisions still open. Remove an item once it is settled.
 - `tools/` is the gitignored cache of command-line tools that `scripts/fetch_tools.py` fetches from `tools.json`.
 - The Daz content library lives at `MODELS_DIR/daz_library`, outside the repo, installed by `scripts/daz_library.py`. `output/daz/` holds Daz content: its 3D data is never curated (`cleanup.py keep` refuses it), and nothing in it is ever committed.
 - `docs/` is the VitePress site. `CREDITS.md` mirrors `docs/credits.md`, with absolute links.

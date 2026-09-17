@@ -7,6 +7,8 @@ Research notes live on the docs site, in `docs/reference/`. What each statement 
 | `claims/` | One claim register per research note, as JSON |
 | `experiments/` | Run artefacts, owned by whoever runs them. Do not edit or tidy someone else's |
 
+`untested.md` lists what was built but not tested for real, and the owner decisions still open.
+
 ## One register per note
 
 A register is `claims/<note>.json`, with the same base name as `docs/reference/<note>.md`, and its `note` key holds that path.
