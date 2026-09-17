@@ -1,6 +1,6 @@
 ---
 name: asset-pipeline
-description: Generate a game asset from a text prompt through a local ComfyUI, stopping for approval at each stage (concept image, then 3D mesh, then rigging, then sprite frames). Use when the user wants to make a 3D game asset, character, creature or prop from a description, or asks to run the asset pipeline. Also use when they want to redo one stage of an asset they already made.
+description: Generate a game asset from a text prompt through a local ComfyUI, stopping for approval at each stage (concept image, 3D mesh, texture, rigging, sprite frames). Use when the user wants to make a 3D game asset, character, creature or 3D prop from a description (a flat billboard prop needs only the concept image and a cut-out), or asks to run the asset pipeline. Also use when they want to redo one stage of an asset they already made.
 ---
 
 # Asset pipeline: prompt to rigged model, with a gate at every stage
@@ -38,6 +38,17 @@ and then walk the remaining steps with them one at a time.
 
 If the user gave no subject, ask what they want to make before generating.
 
+**Redoing one stage?** Go straight to that stage below, or hand off to the skill
+that owns it: `concept-edit` to change one detail of an approved concept,
+`mesh-budget` for a face budget, decimation or rigging a heavy mesh, `pose-sheet`
+for poses, cycles and facings on a rigged model.
+
+**A flat prop?** One that never shows its other side (a tree, a rock on a map)
+stops after stage 1, generated with `preset_concept_prop.json`, and is cut out,
+not meshed. Start from `scripts/cut_icon.py <src> <dst>`, then add what the
+Cutting section of docs/guide/props.md adds and the script does not do: clear
+enclosed pockets, bleed the rim colour, stand every prop on one baseline.
+
 ---
 
 ## Stage 1: concept image
@@ -64,10 +75,20 @@ Or use a preset, which already carries the house style and its matching negative
 
 ```sh
 scripts/run_workflow.py workflows/api/preset_concept_character.json \
-    --prompt '<subject>'
+    --subject '<subject>'
 ```
 
-Three things that are load bearing:
+`--subject` fills the preset's subject slot; `--prompt` would replace the whole
+text, house style and all. The character, creature, building and prop presets
+also carry an `<<< ART DIRECTION: ... >>>` slot that `--subject` leaves alone.
+**Never queue past `still has an unfilled slot (<<< ART DIRECTION >>>)`:** the
+script warns and queues anyway, and the placeholder reaches the model as
+literal text. Add `--dry-run` first. If it warns, ask the user for their look,
+put it in that slot in `prompts/<folder>/_style.txt` (`scenery` for the prop
+preset; it reaches every asset from that folder), run
+`scripts/build_presets.py`, and dry-run again until the warning is gone.
+
+Four things that are load bearing:
 
 - **Write full sentences, not comma separated tags.** Qwen is a text model. Tag
   soup wastes its strength, and SDXL habits produce worse results here.
@@ -77,6 +98,14 @@ Three things that are load bearing:
 - **Both default to 1104x1472.** Do not switch to square for a standing figure.
   It crops at mid thigh, and a cropped concept makes a cropped mesh. Square is
   fine for a prop.
+- **Naming a thing in the positive summons it, even to forbid it.** "No ragged
+  tatters, no tears, no frayed edges" in the positive made a more tattered coat
+  every time. When something keeps appearing, say what it should be in the
+  positive ("a smooth even curved hem") and put what it must not be in the
+  negative, which only the 20-step workflow and the presets use. The "no cast
+  shadow" above breaks this rule. docs/guide/props.md records the same kind of
+  short "no ..." list working across a whole batch; if a shadow creeps back,
+  delete those words from the positive first and let the negative carry them.
 
 Use `--prompt` and `--negative`, never `--set text=...`. The `text` input exists
 on both the positive and negative nodes, and a bare `--set` is refused for
@@ -98,13 +127,22 @@ Then ask with AskUserQuestion: **Approve**, **Reroll** (`--set seed=<new>`),
 
 ## Stage 2: 3D mesh
 
+Free the concept models first. The Qwen models stay loaded after stage 1, and
+the shape run that follows can run out of memory:
+
+```sh
+scripts/run_workflow.py --free
+```
+
+It unloads the models ComfyUI manages. It does not release 3D-Pack's Hunyuan
+pipelines, which the pack caches itself; only a container restart does.
+
 Pick the generator and **say which one you picked and why**:
 
 | Use | When |
 |---|---|
 | `img2mesh_trellis.json` | **The choice with no territory clause** (MIT), for anything shipping into the EU, UK or South Korea. Removes the background itself, so a plain-background concept works as is. Needs the `trellis` weight group: `scripts/fetch_models.py --download --group trellis`. |
 | `img2mesh_hunyuan3d21.json` | Best geometry, removes the background itself. **Licence excludes the EU, UK and South Korea.** Say so before using it for anything that ships. |
-| `mesh_texture_hunyuan3d21.json` | Paints an existing shape. Run after a shape graph. It runs Hunyuan3D 2.1, so **the licence excludes the EU, UK and South Korea** for the textured model and every sprite rendered from it, even when TRELLIS made the shape. Say so before texturing anything that ships. |
 | `img2mesh_triposr.json` | **Does not work as wired.** Read from the source, not run: the graph feeds `LoadImage`'s mask straight into `reference_mask`, and that mask is 1 minus alpha. A transparent cut-out comes out with the subject greyed and the background kept, and an image with no transparency fails on a mask size mismatch. It would need an `InvertMask` before `reference_mask`, plus a cut-out. |
 | `img2mesh_triposg.json` | **Do not use for now.** In this install it returns a cage of fragments instead of the subject, whatever the input: plain grey background, white background, a transparent cut-out, square framing and the non-flash decoder all failed the same way. Its licence status inside this pack is also unresolved. |
 
@@ -154,12 +192,53 @@ or **Stop**.
 
 ---
 
-## Stage 3: rigging
+## Stage 3: texture
+
+Optional. **Say the licence first:** this runs Hunyuan3D 2.1, whose licence
+excludes the EU, UK and South Korea for the textured model and every sprite
+rendered from it, even when TRELLIS made the shape. For an asset that ships
+there, skip to stage 4.
+
+```sh
+scripts/run_workflow.py workflows/api/mesh_texture_hunyuan3d21.json \
+    --image output/concept/<concept>.png \
+    --set "mesh_path=/app/output/mesh/<name>.glb" \
+    --set "TexGen Pipeline.max_num_view=6" \
+    --set "TexGen Pipeline.resolution=512" \
+    --set "save_path=mesh/<name>_textured.glb"
+```
+
+Pass the approved concept image again: it is what gets painted.
+
+- **Copy the maps out before the next asset.** They go to the same fixed paths
+  every run (`output/Hun2-1/hunyuan_output*.jpg`), and the next asset
+  overwrites them without a warning.
+- **Texturing rebuilds the mesh**, typically to about 40,000 faces
+  (docs/guide/meshes.md). Decimate after texturing, not before, and rig the
+  textured mesh.
+- **The texture model stays in GPU memory** and `--free` cannot release it, so
+  the next shape run fails with `torch.OutOfMemoryError: Allocation on device`.
+  **Before the next asset's shape stage, the container needs a restart**
+  (`docker restart "$(python3 scripts/_engine.py)"`). A restart ends every job
+  on the shared server, not only yours, so run
+  `curl -s http://127.0.0.1:8188/queue` first and ask the user.
+- **For several assets, restart, run all shapes, restart again, run all
+  textures.** Offer `scripts/asset_to_mesh.sh <concept.png> <name> ...`, which
+  checks the queue before each of those restarts and copies the maps out. **It
+  uses Hunyuan3D for the shape as well as the texture**, so all its output
+  carries the territory clause.
+
+Render and read `output/mesh/<name>_textured.glb` as in stage 2, then ask:
+**Approve**, **Reroll**, **Skip texturing**, or **Stop**.
+
+---
+
+## Stage 4: rigging
 
 Only after the mesh is approved.
 
 ```sh
-cp output/mesh/<name>.glb input/3d/<name>.glb
+cp output/mesh/<name>_textured.glb input/3d/<name>.glb   # <name>.glb if untextured
 scripts/rig_units.sh <name>
 ```
 
@@ -190,14 +269,22 @@ carries the skeleton and OBJ cannot carry one at all.
 
 ---
 
-## Stage 4: animation frames
+## Stage 5: animation frames
 
 ```sh
 scripts/list_animations.py                    # what is actually installed
+scripts/bone_roles.py map output/rigged/<name>.fbx
+scripts/bone_roles.py compile poses/roles/walk.json output/rigged/<name>.roles.json
 scripts/render_sheet.py output/rigged/<name>.fbx \
-    --poses transforms:poses/walk.json --angles 4 --size 220 \
+    --poses transforms:output/poses/<name>_walk.json --angles 4 --size 220 \
     --out output/sheets/<name>_walk.png --check
 ```
+
+`map` works out which bone is which on this rig and `compile` writes
+`output/poses/<name>_walk.json` for it. Never render `poses/walk.json` on a new
+rig: it was written for one 28 bone rig, and on its passing frame it bends that
+rig's knee the wrong way. Five rigs from this pipeline came out with 24, 28, 30,
+30 and 47 bones.
 
 **Ask which camera the game uses before rendering.** The default is isometric,
 elevation 30 with facings starting at 45 degrees. A top down game needs
@@ -211,7 +298,20 @@ if every bone name was right. It also names the cell that faces down and to the
 right, which is where the game's facing mapping starts.
 
 Then read the sheet. A mis signed rotation produces a confident, well rendered,
-wrong cycle, and neither the check nor a log line will tell you.
+wrong cycle, and neither the check nor a log line will tell you. A transforms
+file fits only the rig it was written for, which is why the role poses in
+`poses/roles/` are compiled per rig. If `map` stops, or a bone has no role, the
+`pose-sheet` skill covers posing by bone name.
+
+**For a set, one scale.** Each model is framed to its own bounding box. Size
+unrigged meshes with `scripts/normalise_mesh.py <meshes> --height <units>`
+(`--footprint <units>` if tile bound), confirm with the same command plus
+`--check`, and render all of them with one `--span <units>`. Never normalise a
+rigged FBX, which loses its skeleton. Normalising before rigging is undone: the
+rigger rescales each model so its largest dimension is 2.0 units (four upright
+figures rigged here measured 2.000 tall), so upright figures under one `--span`
+render the same height and a model longer than it is tall comes back shorter.
+Say so.
 
 ---
 

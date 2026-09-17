@@ -191,8 +191,8 @@ and what each step measured:
   comes round, on either passage sitting under the take's typical level, on
   how well the rhythm of the two crossfaded passages matches, and lightly on
   length. On the same 14 takes every restart came in within 0.4 dB, and the
-  rhythm match rose from 0.23–0.70 to 0.36–0.92. The start it chose was 2 to
-  58 seconds in.
+  rhythm match, which had ranged from 0.23 to 0.70, ranged from 0.36 to 0.92.
+  The start it chose was 2 to 58 seconds in.
 - **It keeps silence out of the loop.** A take that stops dead part way, as
   planner takes often do, is searched a stretch at a time between its
   silences. A battle take with a 2.5-second stop gave a 76-second loop from

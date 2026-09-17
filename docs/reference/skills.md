@@ -24,6 +24,8 @@ Full detail, including the second manifest that GitHub installation needs, is in
 | `mesh-budget` | Choosing face counts, decimating, rigging heavy meshes |
 | `asset-cleanup` | Curating the keepers and sweeping the rest |
 | `game-music` | Licence-clear instrumental music, looped seamlessly at a set loudness |
+| `lip-sync` | Talking portraits: a portrait, its mouth shapes, and cues timed to voice lines |
+| `daz-figure` | A Daz Genesis figure you downloaded: installed outside the repo, imported into Blender, and its visemes rendered, with the licence stated first |
 
 Each one starts by running `scripts/doctor.py`, so a session never begins by
 guessing whether ComfyUI is up. If it is not, the skill walks the user through
@@ -31,21 +33,46 @@ getting it running rather than failing later in a confusing way.
 
 ## The rules they share
 
-These are written into every skill because each one was learned by getting it
-wrong.
+Each of these was learned by getting it wrong. Not every skill needs every rule,
+so this says which skills carry which.
 
-**Check, do not assume.** Every skill has commands for asking the running server
-what it actually loaded, reading a mesh's real face and body counts, and dumping
-a rig's real bone names. Nothing describes what a file probably contains.
+**Check the engine first.** All nine start with `scripts/doctor.py`.
 
-**Show, do not report.** An image that was generated gets read back into the
-conversation so the person can see it. Printing a path is not showing a picture.
+**Check, do not assume.** Each skill carries the commands for its own checks, so
+nothing describes what a file probably contains. `asset-pipeline` reads a mesh's
+real face and body counts and prints a rig's bone count. `pose-sheet` dumps the
+rig's real bone names. `concept-edit` asks the running server which node types it
+loaded. `mesh-budget` measures a face budget rather than guessing one.
+`lip-sync` dry-runs a mouth box against the edit graph's size list, read from
+the running container, and checks that no pixel outside the box changed.
+`daz-figure` checks every installed file against its CRC-32, and reads the build
+report and what each viseme moves before it renders anything.
 
-**One stage per turn.** The pipeline gates at each stage because a rejected mesh
-three stages later costs far more than a rerolled concept image.
+**Show, do not report.** The skills that make images, `asset-pipeline`,
+`concept-edit`, `pose-sheet`, `ground-texture` and `lip-sync`, read each one
+back into the conversation, because printing a path is not showing a picture.
+`daz-figure` is the exception. Whether a Daz render may go into a chat model
+under Daz's AI clause is open, so it reads none back: the person opens each
+labelled sheet and says what they see, and the skill gives the pixels each
+viseme changed, from the render report.
+`game-music` makes audio, which the conversation cannot show, so it puts every
+take in front of the person to listen to. `lip-sync` reads back its portrait,
+mouth box and contact sheet of mouths, then hands over the preview video for
+the person to watch with sound.
 
-**Say what was chosen and why.** Which generator, which camera angle, what was
-added to the prompt.
+**One stage per turn.** `asset-pipeline`, `lip-sync` and `daz-figure` have
+stages, and gate each one. A rejected mesh three stages later costs far more
+than a rerolled concept image, and nine mouth edits cost about 23 minutes of
+GPU, so the portrait and the mouth box are approved before any mouth is made.
+A full viseme render of a Genesis figure took about 25 minutes of CPU, so
+`daz-figure` renders one viseme first.
+
+**Say what was chosen and why.** `asset-pipeline` names the generator, the camera
+angle and what it added to the prompt. `lip-sync` asks where the voice lines come
+from and whether that voice may ship before it makes anything, and names the
+mouth shapes that came out weak. `daz-figure` states the Daz licence before it
+installs anything: renders may ship, the 3D data needs an Interactive License,
+and Daz content stays out of every AI stage.
 
 ## MCP servers
 
@@ -77,9 +104,25 @@ export MESHY_API_KEY=...        # in your shell profile, not in the repo
 ```
 :::
 
-Meshy costs credits per call. If you use it, note that its exports are
-photogrammetry scale, often around two million triangles, which is far more than
-this pipeline's assets. See [decimation](/guide/decimation) before importing one.
+Four things to know before using it, checked on 2026-09-16 against the
+[Meshy MCP server README](https://github.com/meshy-dev/meshy-mcp-server#readme)
+and the 0.5.1 package:
+
+- **The API key needs a Pro plan or above**, and most tools cost credits. The
+  README lists the price of each.
+- **Downloads land in `meshy_output/`** under the directory the server runs in.
+  Claude Code starts it in the project you opened, so for someone who installed
+  the plugin that is their own game repo. Add `meshy_output/` to that repo's
+  ignore file.
+- **Polycount is a setting, not a given.** An export can be photogrammetry
+  scale, often around two million triangles, which is far more than this
+  pipeline's assets. Smart topology takes a configurable polycount, and the
+  remesh tool takes a `target_polycount` from 100 to 300,000. Either way, see
+  [decimation](/guide/decimation) before importing one.
+- **The version is not pinned.** `.mcp.json` runs
+  `npx -y @meshy-ai/meshy-mcp-server` with no version, so a new release can be
+  picked up the next time the server starts. 0.5.1 was the current release on
+  2026-09-16.
 
 ## Writing your own skill
 

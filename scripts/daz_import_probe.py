@@ -1,0 +1,2040 @@
+#!/usr/bin/env python3
+r"""Probe the Diffeomorphic DAZ Importer (import_daz 5.2.0) in the container's headless bpy.
+
+Imports a Genesis 9 figure from a Daz content library installed outside the
+repo, loads its viseme and FACS controllers, saves a .blend under output/daz/
+and renders one viseme per row, so you can see whether the importer runs with
+no UI and whether the Genesis face reads at sprite sizes.
+
+    scripts/daz_import_probe.py fetch
+        # import_daz at the version_5_2_0 tag, pinned, into input/_devtools/import_daz
+
+    scripts/daz_import_probe.py build --facs --subdivision off --out output/daz/g9_cage.blend
+        # output/daz/g9_cage.blend, _build.json, _blender.log, _poses.json
+
+    scripts/daz_import_probe.py render --blend output/daz/g9_cage.blend
+        # render_sheet.py's whole-figure rows at 128 px, then the probe's three
+        # framings at 128, 220 and 340 px: g9_cage_render_sheet_128.png,
+        # g9_cage_sheet_<size>.png and _labelled.png, g9_cage_render.json;
+        # about 25 min on llvmpipe (see MEASURED)
+
+    # a short run: the neutral row and AA in both stages, one framing, one
+    # size, 16 samples, into files named g9_cage_AA_128_face_s16_...
+    scripts/daz_import_probe.py render --blend output/daz/g9_cage.blend --only AA \
+        --sizes 128 --columns face --samples 16
+
+    # what each viseme moves, with no rendering: g9_cage_motion.json
+    scripts/daz_import_probe.py render --blend output/daz/g9_cage.blend --motion-only
+
+    # also call import_visemes, which adds nothing on Genesis 9 and so makes the
+    # build exit 1, and save the importer's Subsurf levels
+    scripts/daz_import_probe.py build --visemes --facs --out output/daz/g9_visemes.blend
+
+    # render at the Subsurf levels saved in the file, which has to be asked for
+    scripts/daz_import_probe.py render --blend output/daz/g9_visemes.blend --no-sheet \
+        --subdivision as-saved --only AA --sizes 128 --columns face --samples 16
+
+    # a character preset with 26 texture references, saved with its images and without
+    scripts/daz_import_probe.py build --figure "People/Genesis 9/Characters/Kat for Genesis 9.duf" \
+        --facs --out output/daz/g9_kat.blend
+    scripts/daz_import_probe.py build --figure "People/Genesis 9/Characters/Kat for Genesis 9.duf" \
+        --facs --no-textures --out output/daz/g9_kat_notex.blend
+    scripts/daz_import_probe.py render --blend output/daz/g9_kat.blend --no-sheet --materials \
+        --sizes 340 --columns face --only AA --samples 16
+
+    # the developer load, no Eyes, Mouth, Eyelashes or Tear figures
+    scripts/daz_import_probe.py build --figure "People/Genesis 9/Developer Kit/Genesis 9 Dev Load.duf" \
+        --anatomy none --out output/daz/g9_devload.blend
+
+    # what a wrong content path does: the checks are recorded, not obeyed
+    scripts/daz_import_probe.py build --content-dir /app/models/daz_library_missing --no-dir-check \
+        --anatomy none --out output/daz/g9_wrongdir.blend
+
+WHAT IS DOWNLOADED. `fetch` pins GitHub's archive of the version_5_2_0 tag by
+byte size and sha256, writes it to input/_devtools/import_daz/downloads/ as a
+.part file, and renames it into place only when both match; on a mismatch or
+a broken download it deletes the .part file and exits 1. GitHub publishes no
+checksum for tag archives, so the pins are the bytes downloaded on 2026-09-16,
+the same from github.com and from codeload.github.com. The zip's comment
+names the tagged commit, and `fetch` checks that too. The add-on is unpacked,
+without its top folder, into input/_devtools/import_daz/ext/import_daz, and
+unpacked again when a file the archive holds is missing there or has another
+size.
+
+LICENCE. The code is GPL-2.0-or-later (blender_manifest.toml in the archive),
+copyright 2016-2026 Thomas Larsson (its __init__.py), both read 2026-09-16. It
+is run, never copied into the repo: input/ is gitignored. Daz content keeps
+the Daz EULA after import, so what this script writes from it (the .blend
+files, logs, reports and renders) goes to the gitignored output/daz/, and none
+of it may be committed. The one exception is render_sheet.py, which writes its
+cells to output/_sheet_frames/<its pid>_<unix time>/ while it runs and deletes
+them when it finishes; if it exits non-zero, runs past its time or is stopped,
+this script ends its Blender job and deletes that folder. Keep all of it out
+of the AI stages, as docs/reference/daz-genesis.md warns: never load the
+Genesis mesh, its textures or its UV maps into Hunyuan3D 2.1, UniRig or any
+other model, and do not feed a render from output/daz/ to Qwen-Image,
+ControlNet, TRELLIS, Hunyuan3D or any training without a written answer from
+Daz.
+
+HOW IT RUNS WITHOUT A UI, the method scripts/mpfb_probe.py found for MPFB:
+  1. BLENDER_USER_RESOURCES and HOME are set before `import bpy`, pointing
+     under input/_devtools/import_daz/. Blender's user config and the
+     importer's "~/DAZ Importer" settings and error file land there, not in
+     the image or /app/.home.
+  2. input/_devtools/import_daz/ext is added as a local extension repository
+     with preferences.extensions.repos.new(module="import_daz_probe", ...),
+     and the add-on is enabled as bl_ext.import_daz_probe.import_daz.
+  3. contentDirs is set to the library as the container sees it, and mdlDirs
+     and cloudDirs are emptied, through import_daz.set_global_setting. The
+     build first checks that the directory and the figure exist, then that
+     get_root_paths() returns exactly that directory and that
+     get_absolute_paths() resolves the figure, because a wrong content path
+     raises nothing. --figure and --anatomy take paths inside the library.
+  4. set_silent_mode(True) before every operator, because easy_import_daz
+     sets it back to False when it returns.
+  5. bpy.ops.daz.easy_import_daz(directory=..., files=[{"name": ...}],
+     materialMethod=..., fitMeshes=...) imports the figure. With no .dbz file
+     from Daz Studio, fitMeshes must not be its default DBZFILE; the default
+     here is MORPHED.
+  6. Genesis 9.duf loads the Eyes, Mouth, Eyelashes, Tear and eyebrow figures
+     through a Daz Studio post-load script, which the importer does not run.
+     With --anatomy auto (the default) the build reads that script's
+     AssetFile list from the .duf, plain or gzip-compressed as the importer
+     reads it, imports each file the same way, parents each new rig to the
+     body rig and merges them with bpy.ops.daz.merge_rigs.
+  7. With the body rig active, bpy.ops.daz.import_visemes() and
+     bpy.ops.daz.import_facs() load the controllers as rig properties whose
+     drivers move shape keys and bones.
+Every operator returns FINISHED even when it failed, so each step also
+records import_daz.get_error_message(), and a step that made nothing it
+should have made is marked failed. The importer's own terminal output goes to
+<name>_blender.log. The build carries on past a failed morph step and saves
+what it has.
+
+`render --blend` reads <name>_build.json for the viseme properties and runs
+two stages, each with a neutral row (every viseme property 0) and then a row
+per viseme, all 17 or those --only names:
+  1. scripts/render_sheet.py: the whole figure, one angle, at --sheet-size,
+     each row setting its viseme property to 1 through "@props".
+     render_sheet.py opens a .blend as saved, so with --subdivision off (the
+     default) this first opens the file and, if any Subsurf modifier is on,
+     saves a copy beside it with every one off, _<name>_sheet_<pid>.blend,
+     for render_sheet.py to open. The copy and the rows file are deleted
+     afterwards. --subdivision as-saved hands render_sheet.py the file itself.
+  2. The probe's own renderer, with render_sheet.py's default clay, sun and
+     world light, as scripts/mpfb_probe.py does, in these framings:
+       body     the whole figure, orthographic, azimuth 45, elevation 30
+       face     front on; the band from the crown down to the lowest vertex
+                AA moves (or, if AA moves none, the viseme that moves the
+                most body vertices) fills three quarters of the cell height,
+                whatever --only says
+       face34   the same framing, 35 degrees round towards the key light and
+                10 degrees up
+Files are named <name>_<label>_<file>. The label is --label, or by default the
+options that differ from their defaults, joined with _ in this order: the
+--only visemes joined with -, the --sizes, the --columns, s<samples>,
+materials, as-saved, no-sheet or sheet<size>, t<threshold>. A default run and
+--motion-only have no label, so a short run does not overwrite a full one.
+<name>[_<label>]_render.json records the command line, every option, the
+render_sheet.py command, the file it opened and its exit, and, per size and
+framing, the pixels each viseme changes against the neutral row, with the
+threshold mpfb_probe.py uses. It and _motion.json hold, for all 17 visemes,
+how far the drivers moved the evaluated body and Mouth meshes and which pose
+bones moved in armature space, sorted into the importer's "(drv)" helper
+bones (and which of those the drivers posed), Daz bones whose own channels
+changed, Daz bones following a helper through a constraint, and Daz bones
+carried by a moving parent.
+
+MEASURED on 2026-09-16 in comfyui-packaged (bpy 4.5.9 LTS, EEVEE drawing
+through llvmpipe) against Genesis 9 Starter Essentials (SKU 86958) installed
+at /models/daz_library. Each item names the command that produced it; unless
+it says otherwise that is an example above, run with this version of the
+script. Peak memory is the Blender process's peak RSS; docker stats took 1 to
+4 samples of a build, too few to follow it.
+  source    Read, not run: in input/_devtools/import_daz/ext/import_daz no
+            line references bpy.app.background, and the 9 lines that call
+            invoke_props_dialog sit on invoke() paths, which an operator
+            called from Python does not take (grep and the enclosing
+            functions).
+  build     `build --visemes --facs --out output/daz/g9_visemes.blend`, exit
+            1 because import_visemes added nothing: 5.7 s wall, 5.48 s in
+            Blender, peak 653 MiB, import_facs 4.19 s. The add-on registered
+            as an extension and every operator ran from Python in background
+            mode with no dialog waiting. Blender drops bl_info from a module
+            it enables as an extension, so the build reads
+            blender_manifest.toml: version 5.2.0, BUILD 3018.
+            `build --facs --subdivision off --out output/daz/g9_cage.blend`:
+            5.7 s wall, 5.51 s in Blender, peak 711 MiB.
+  figure    Genesis 9.duf, because it is the load Daz Studio offers. Against
+            the Dev Load it also names body_bs_Navel_HD3,
+            head_bs_MouthRealism_HD3 and facs_ctrl_EyeRestingFocalPoint (read
+            from both files), and the anatomy figures in its post-load script. The g9_visemes
+            build log prints "Missing geonode" for the two HD3 morphs. That
+            build's body mesh has 25182 vertices and 25156 faces; Mouth 5079
+            and 5000, Eyes 2120 and 2112, Eyelashes 2028 and 858, Tear 280
+            and 220. The Dev Load example: 150 bones, 0.9 s wall.
+  rig       g9_visemes build: 152 bones after the figure (138 Daz bones and
+            14 "(drv)" helpers), 157 after merge_rigs, and 177 after
+            import_facs: 143 Daz bones (138 and tongue01 to tongue05 from the
+            Mouth), as the research note says, and 34 "(drv)" helpers.
+  visemes   g9_visemes build: bpy.ops.daz.import_visemes() returns FINISHED,
+            logs "Load Visemes to Genesis 9 Mesh (0 morphs)" and the same for
+            the other 4 meshes, and leaves get_error_message() empty:
+            data/paths/genesis9.json has no viseme table (read).
+            bpy.ops.daz.import_facs() logs 285 morphs for the body, 21 for
+            the Mouth, including 10 viseme controllers (vER, vIH, vIY, vL,
+            vOW, vS, vSH, vT, vTH, vUW), 18 for the Tear, 2 for the Eyelashes
+            and 1 for the Eyes. It adds 284 object and 338 data properties,
+            among them facs_ctrl_vAA to facs_ctrl_vW, 17 on the rig object
+            with 17 "(fin)" twins on its data. No shape key carries a viseme
+            name: the body gets 178 FACS shape keys and the Mouth 6 tongue
+            keys. The Mouth's controllers share the body's property names,
+            so one property drives both.
+  drivers   g9_visemes build: 409 drivers on the rig and 325 on shape keys,
+            none of them anything but a simple expression, and nothing added
+            to bpy.app.driver_namespace.
+  motion    `render --blend output/daz/g9_cage.blend --motion-only`, 0.6 s
+            wall: the .blend opened with no DAZ add-on and auto-run scripts
+            off. facs_ctrl_vAA at 1 moves 2880 body cage vertices, up to 7.8
+            mm, and 12 body shape keys. Over the 17 visemes the body moves
+            1419 (T) to 3494 (EE) vertices, up to 2.8 (T) to 11.8 (W) mm, and
+            3 (L) to 41 (OW) shape keys. M moves 24 shape keys and no bone.
+            Every other viseme changes the same 33 pose bones in armature
+            space: 15 are the importer's "(drv)" helpers, 9 to 14 of which
+            the drivers pose while the rest move with their parent; 15 are
+            Daz bones following their helper through a Copy Transforms
+            constraint, lowerjaw and tongue01 to tongue05 among them; and 3,
+            lowerteeth, lowerfacerig and chin, are carried by a moving
+            parent. No Daz bone's own channels change.
+  paths     The wrong content path example, exit 1: set_global_setting raised
+            nothing, get_root_paths() and get_absolute_paths() returned [],
+            easy_import_daz returned FINISHED with no object, and
+            get_error_message() said "Some assets were not found. Check that
+            all DAZ root paths have been set up correctly." and listed five
+            .dsf files. In the g9_visemes build the library's "Daz 3D" folder
+            resolved against the importer's "DAZ 3D" tables, because it
+            matches names without regard to case on Linux.
+  render    Diffeomorphic saves 5 Subsurf modifiers at level 1 in the
+            viewport and up to 3 for render. The as-saved example above, on
+            g9_visemes.blend: 2 face cells of 128 px at 16 samples in 88.7 s,
+            peak 4593 MiB, container 4.54 to 8.83 GiB.
+            `render --blend output/daz/g9_visemes.blend --only AA --sizes 128
+            --columns face --samples 16`: the copy with Subsurf off took 0.5 s
+            wall, render_sheet.py drew its 2 rows in 28.8 s wall, and the
+            probe's 2 cells took 17.9 s, peak 2655 MiB.
+            `render --blend output/daz/g9_visemes.blend`, run with the
+            earlier version of this script that handed render_sheet.py the
+            file as saved: its whole-figure cells at 64 samples came about
+            238 s apart, so 18 rows would pass the 3600 s timeout, and the
+            run was stopped after 3.
+            The Kat example above: 2 cells in 81.9 s, peak 6312 MiB, container
+            4.54 to 10.63 GiB; the same command on g9_kat_notex.blend, 27.7 s
+            and 2836 MiB. The Kat builds: 8.7 s wall each; the figure import
+            alone reached 1444 MiB in 3.02 s, because the importer reads the
+            images as it imports, so --no-textures, which clears them
+            afterwards, does not lower that peak (1456 MiB).
+  full run  `render --blend output/daz/g9_cage.blend`, run once, with the
+            version of this script before it made the Subsurf copy or wrote
+            its options, which for this file rendered the same rows (not
+            re-run): render_sheet.py's 18 rows in 184.3 s wall; the probe's
+            162 cells (3 framings, 3 sizes, 64 samples) in 1287.6 s wall,
+            390.1 s at 128 px, 422.9 s at 220 px and 473.5 s at 340 px, peak
+            3401 MiB, container 4.54 to 7.67 GiB.
+  visible   From that full run: render_sheet.py, whole figure at 128 px,
+            changed 0 to 4 pixels per viseme, and its --check called 7 rows
+            (IH, K, L, S, T, TH, W) the rest pose repeated, so it exited 1.
+            The probe's framings, pixels changed against the neutral row
+            (threshold 8), fewest to most over the 17 visemes:
+                    128 px      220 px      340 px
+           body     0 to 4      2 to 12     9 to 27
+           face     67 to 258   213 to 791  533 to 1873
+           face34   87 to 253   238 to 704  537 to 1559
+            Read by Claude on 2026-09-16 from a crop of the 340 px face
+            column, clay: OW and UW read as rounded mouths, EH and ER as open
+            with teeth, EE and IY as teeth behind parted lips, M as pressed
+            lips; F, K, L, S, T, TH, IH and W look like one slightly parted
+            mouth, and AA opens less than OW. Whether a Daz render may be shown
+            to an AI model at all is unsettled (docs/reference/daz-genesis.md,
+            "The AI clauses"), so the daz-figure skill has a person judge them.
+
+Before each Blender job this waits, polling every 30 s, until ComfyUI's queue
+is empty and `docker top` shows no other `python3 -c` job in the container.
+--no-wait skips that. Peak memory is sampled from `docker stats` on the host
+while the job runs, and the Blender process reports its own peak RSS. Every
+Blender job ends itself inside the container after --timeout. On Ctrl-C or
+SIGTERM, and whenever render_sheet.py exits non-zero, this ends the Blender
+job it started in the container, found by a path unique to that job in its
+arguments (SIGTERM, then SIGKILL after 10 s), deletes the frames and
+temporary files that job was writing, and on a stop writes no report.
+
+Exit codes: 0 done; 1 a download, checksum, Blender step or check failed,
+render_sheet.py exited non-zero (as its --check does when a row repeats the
+rest pose), or Blender ran past --timeout; 2 bad arguments; 130 stopped by
+Ctrl-C; 143 stopped by SIGTERM.
+"""
+from __future__ import annotations
+
+import argparse
+import contextlib
+import functools
+import gzip
+import hashlib
+import http.client
+import json
+import os
+import re
+import shutil
+import signal
+import subprocess
+import sys
+import threading
+import time
+import urllib.error
+import urllib.request
+import zipfile
+from pathlib import Path, PurePosixPath
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _engine import ALARM_GRACE, container, exec_json, exec_python  # noqa: E402
+
+ROOT = Path(__file__).resolve().parent.parent
+DEV = ROOT / "input" / "_devtools" / "import_daz"
+DOWNLOADS = DEV / "downloads"
+EXT = DEV / "ext"
+OUT = ROOT / "output" / "daz"
+REPO_MODULE = "import_daz_probe"
+COMFY = os.environ.get("COMFY_URL", "http://127.0.0.1:8188")
+DEFAULT_LIBRARY = Path("/models/daz_library")
+DEFAULT_FIGURE = "People/Genesis 9/Genesis 9.duf"
+
+PIN = {
+    "name": "import_daz",
+    "version": "5.2.0",
+    "tag": "version_5_2_0",
+    "commit": "1abc6815bdc5c305d8128f5714b73622af6838ce",
+    "file": "import_daz-version_5_2_0.zip",
+    "top": "import_daz-version_5_2_0/",
+    "urls": ["https://github.com/Diffeomorphic/import_daz/archive/refs/tags/version_5_2_0.zip",
+             "https://codeload.github.com/Diffeomorphic/import_daz/zip/refs/tags/version_5_2_0"],
+    "size": 1697629,
+    "sha256": "b6921c46e9a876fe88ab0ef75f47c8eac67cf4c4314059871d2a78bdcfccf9d2",
+    "licence": "code GPL-2.0-or-later",
+    "licence_source": "blender_manifest.toml in the archive (license = SPDX:GPL-2.0-or-later)",
+}
+
+# The 17 Genesis viseme names, in the order the research note gives them.
+VISEMES = ["AA", "EE", "EH", "ER", "F", "IH", "IY", "K", "L", "M",
+           "OW", "S", "SH", "T", "TH", "UW", "W"]
+PROP_PATTERN = r"facs_ctrl_v|ectrlv|viseme"
+MATERIAL_METHODS = ("EXTENDED_PRINCIPLED", "BSDF", "FBX_COMPATIBLE")
+FIT_METHODS = ("MORPHED", "UNIQUE", "SHARED", "DBZFILE")
+COLUMNS = ("body", "face", "face34")
+SIZES = [128, 220, 340]
+TIMEOUT_GRACE = ALARM_GRACE
+# render_sheet.py hardcodes where its Blender job writes cells: this folder,
+# then "<its pid>_<unix time>".
+SHEET_FRAMES = ROOT / "output" / "_sheet_frames"
+SHEET_FRAMES_C = "/app/output/_sheet_frames"
+
+
+# ------------------------------------------------------------------ fetch
+
+def sha256_of(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def download(pin: dict) -> bool:
+    dest = DOWNLOADS / pin["file"]
+    if dest.exists() and dest.stat().st_size == pin["size"] and sha256_of(dest) == pin["sha256"]:
+        print(f"  have     {dest.relative_to(ROOT)}")
+        return True
+    DOWNLOADS.mkdir(parents=True, exist_ok=True)
+    part = dest.with_name(dest.name + ".part")
+    for url in pin["urls"]:
+        print(f"  get      {url}")
+        h = hashlib.sha256()
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "asset-engine daz_import_probe"})
+            with urllib.request.urlopen(req, timeout=120) as r, part.open("wb") as f:
+                for chunk in iter(lambda: r.read(1 << 20), b""):
+                    f.write(chunk)
+                    h.update(chunk)
+        except (urllib.error.URLError, http.client.HTTPException, OSError) as exc:
+            print(f"  ! {url}: {type(exc).__name__}: {exc}")
+            part.unlink(missing_ok=True)
+            continue
+        size = part.stat().st_size
+        if size != pin["size"] or h.hexdigest() != pin["sha256"]:
+            print(f"  ! {pin['file']}: got {size} bytes, sha256 {h.hexdigest()}; "
+                  f"pinned {pin['size']} bytes, sha256 {pin['sha256']}. Deleted.")
+            part.unlink(missing_ok=True)
+            continue
+        part.replace(dest)
+        print(f"  ok       {dest.relative_to(ROOT)}  {size} bytes  sha256 {pin['sha256']}")
+        return True
+    return False
+
+
+def unpacked_intact(pin: dict, target: Path) -> str | None:
+    """None when every file member of the checked archive is on disk at its size, else why not."""
+    try:
+        if json.loads((target / ".fetched.json").read_text())["sha256"] != pin["sha256"]:
+            return "its .fetched.json names another archive"
+    except (OSError, ValueError, KeyError, TypeError):
+        return "its .fetched.json cannot be read"
+    with zipfile.ZipFile(DOWNLOADS / pin["file"]) as zf:
+        for info in zf.infolist():
+            rel = info.filename[len(pin["top"]):]
+            if not rel or info.is_dir():
+                continue
+            p = target / rel
+            if not p.is_file():
+                return f"{rel} is missing"
+            if p.stat().st_size != info.file_size:
+                return f"{rel} is {p.stat().st_size} bytes, the archive holds {info.file_size}"
+    return None
+
+
+def unpack_addon(pin: dict) -> bool:
+    target = EXT / "import_daz"
+    if (target / ".fetched.json").is_file():
+        why = unpacked_intact(pin, target)
+        if why is None:
+            print(f"  have     {target.relative_to(ROOT)}")
+            return True
+        print(f"  ! {target.relative_to(ROOT)} does not match the archive: {why}; unpacking again")
+    archive = DOWNLOADS / pin["file"]
+    staging = EXT / ".import_daz.staging"
+    shutil.rmtree(staging, ignore_errors=True)
+    with zipfile.ZipFile(archive) as zf:
+        comment = zf.comment.decode("ascii", "replace")
+        if comment != pin["commit"]:
+            print(f"  ! {pin['file']}: zip comment names commit {comment!r}, pinned {pin['commit']}")
+            return False
+        infos = zf.infolist()
+        for info in infos:
+            p = PurePosixPath(info.filename)
+            if p.is_absolute() or ".." in p.parts or not info.filename.startswith(pin["top"]):
+                print(f"  ! refusing {pin['file']}: member {info.filename!r} is outside {pin['top']}")
+                return False
+        manifest = zf.read(pin["top"] + "blender_manifest.toml").decode("utf-8")
+        if not re.search(r'^id = "import_daz"$', manifest, re.M) or \
+                not re.search(rf'^version = "{re.escape(pin["version"])}"$', manifest, re.M):
+            print(f"  ! {pin['file']}: blender_manifest.toml is not import_daz {pin['version']}")
+            return False
+        staging.mkdir(parents=True)
+        files = 0
+        for info in infos:
+            rel = info.filename[len(pin["top"]):]
+            if not rel:
+                continue
+            dest = staging / rel
+            if info.is_dir():
+                dest.mkdir(parents=True, exist_ok=True)
+                continue
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            with zf.open(info) as src, dest.open("wb") as out:
+                shutil.copyfileobj(src, out)
+            files += 1
+    (staging / ".fetched.json").write_text(json.dumps(
+        {"file": pin["file"], "sha256": pin["sha256"], "commit": pin["commit"],
+         "tag": pin["tag"], "files": files, "licence": pin["licence"]}, indent=2) + "\n")
+    shutil.rmtree(target, ignore_errors=True)
+    staging.replace(target)
+    print(f"  unpacked {target.relative_to(ROOT)}  ({files} files, commit {pin['commit'][:7]})")
+    return True
+
+
+def cmd_fetch(args) -> int:
+    if not download(PIN):
+        return 1
+    return 0 if unpack_addon(PIN) else 1
+
+
+# ------------------------------------------------------------------ Blender side
+
+BUILD_SCRIPT = r'''
+import json, os, re, resource, signal, sys, time, traceback
+cfg = json.loads(sys.argv[-1])
+# The host's timeout only stops docker exec; SIGALRM's default action ends
+# this process even inside C code or a hang at exit.
+signal.signal(signal.SIGALRM, signal.SIG_DFL)
+signal.alarm(cfg["timeout"])
+for d in (cfg["user_resources"], os.path.join(cfg["home"], "DAZ Importer"), os.path.dirname(cfg["blend"])):
+    os.makedirs(d, exist_ok=True)
+# Before bpy loads: Blender's user folders and the importer's ~/DAZ Importer
+# settings and error file go under the dev folder.
+os.environ["BLENDER_USER_RESOURCES"] = cfg["user_resources"]
+os.environ["HOME"] = cfg["home"]
+# The importer prints a great deal; send this process's stdout to the log and
+# restore it only for the result line.
+sys.stdout.flush()
+_saved_stdout = os.dup(1)
+_log = os.open(cfg["log"], os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o644)
+os.dup2(_log, 1)
+T0 = time.time()
+import bpy, addon_utils
+
+result = {"steps": [], "stopped_at": None, "failures": []}
+daz = None
+
+
+class Stop(Exception):
+    pass
+
+
+def peak_rss_mb():
+    return round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0, 1)
+
+
+def checkpoint():
+    with open(cfg["partial"], "w") as f:
+        json.dump(result, f, indent=1)
+
+
+def step(name, fn, fatal=True):
+    print("\n=== PROBE STEP " + name, flush=True)
+    t = time.time()
+    entry = {"step": name}
+    value = None
+    try:
+        value = fn()
+        entry["ok"] = True
+    except Exception as exc:
+        entry["ok"] = False
+        entry["error"] = f"{type(exc).__name__}: {exc}"
+        entry["traceback"] = traceback.format_exc()[-3000:]
+    entry["seconds"] = round(time.time() - t, 2)
+    entry["peak_rss_mb"] = peak_rss_mb()
+    if daz is not None:
+        entry["get_error_message"] = daz.get_error_message()
+    result["steps"].append(entry)
+    sys.stdout.flush()
+    checkpoint()
+    if not entry["ok"]:
+        result["failures"].append({"step": name, "error": entry["error"],
+                                   "get_error_message": entry.get("get_error_message", "")})
+        if fatal:
+            result["stopped_at"] = name
+            raise Stop(name)
+    return value
+
+
+def reraise(exc):
+    raise exc
+
+
+def deselect_all():
+    for ob in bpy.context.view_layer.objects:
+        ob.select_set(False)
+
+
+def activate(ob):
+    deselect_all()
+    ob.hide_set(False)
+    ob.select_set(True)
+    bpy.context.view_layer.objects.active = ob
+
+
+def import_duf(abspath):
+    """easy_import_daz on one file; returns the new objects or raises."""
+    before = set(bpy.data.objects)
+    daz.set_silent_mode(True)
+    ret = bpy.ops.daz.easy_import_daz(
+        directory=os.path.dirname(abspath),
+        files=[{"name": os.path.basename(abspath)}],
+        materialMethod=cfg["material_method"],
+        fitMeshes=cfg["fit"])
+    # easy_import_daz leaves silent mode off when it returns.
+    daz.set_silent_mode(True)
+    new = [ob for ob in bpy.data.objects if ob not in before]
+    if not new:
+        raise RuntimeError(f"easy_import_daz returned {sorted(ret)} and made no object; "
+                           f"get_error_message(): {daz.get_error_message()!r}")
+    return new
+
+
+def armature_props(rig):
+    out = {}
+    for owner, label in ((rig, "object"), (rig.data, "data")):
+        for k in owner.keys():
+            out.setdefault(label, []).append(k)
+    return out
+
+
+def matching(names):
+    return sorted(n for n in names if re.search(cfg["prop_pattern"], n, re.I))
+
+
+def driver_stats(idblock):
+    ad = getattr(idblock, "animation_data", None)
+    if not ad:
+        return 0, 0
+    total = complex_ = 0
+    for fc in ad.drivers:
+        total += 1
+        if fc.driver.type == "SCRIPTED" and not fc.driver.is_simple_expression:
+            complex_ += 1
+    return total, complex_
+
+
+def survey():
+    s = {"objects": [], "meshes": {}, "armatures": {}}
+    for ob in bpy.data.objects:
+        s["objects"].append({"name": ob.name, "type": ob.type,
+                             "parent": ob.parent.name if ob.parent else None,
+                             "parent_type": ob.parent_type if ob.parent else None})
+        if ob.type == "MESH":
+            me = ob.data
+            keys = me.shape_keys.key_blocks if me.shape_keys else []
+            dk = driver_stats(me.shape_keys) if me.shape_keys else (0, 0)
+            mats = []
+            for slot in ob.material_slots:
+                m = slot.material
+                if not m:
+                    continue
+                types = sorted({n.type for n in m.node_tree.nodes}) if m.node_tree else []
+                groups = sorted({n.node_tree.name for n in m.node_tree.nodes
+                                 if n.type == "GROUP" and n.node_tree}) if m.node_tree else []
+                mats.append({"name": m.name, "node_types": types, "groups": groups})
+            s["meshes"][ob.name] = {
+                "vertices": len(me.vertices), "faces": len(me.polygons),
+                "shape_keys": len(keys),
+                "shape_key_names": [k.name for k in keys],
+                "shape_key_drivers": dk[0], "shape_key_python_drivers": dk[1],
+                "modifiers": [[m.name, m.type] for m in ob.modifiers],
+                "materials": mats,
+            }
+        elif ob.type == "ARMATURE":
+            props = armature_props(ob)
+            names = props.get("object", []) + props.get("data", [])
+            do = driver_stats(ob)
+            dd = driver_stats(ob.data)
+            s["armatures"][ob.name] = {
+                "bones": len(ob.data.bones),
+                "bone_names": [b.name for b in ob.data.bones],
+                "deform_bones": sum(1 for b in ob.data.bones if b.use_deform),
+                "custom_properties": {k: len(v) for k, v in props.items()},
+                "matching_properties": {k: matching(v) for k, v in props.items()},
+                "drivers": do[0] + dd[0], "python_drivers": do[1] + dd[1],
+            }
+    s["images"] = len(bpy.data.images)
+    s["materials"] = len(bpy.data.materials)
+    s["node_groups"] = len(bpy.data.node_groups)
+    return s
+
+
+def main_rig(objs):
+    rigs = [o for o in objs if o.type == "ARMATURE" and o.parent is None]
+    if not rigs:
+        raise RuntimeError("the import made no top-level armature")
+    return max(rigs, key=lambda o: len(o.data.bones))
+
+
+try:
+    step("read_factory_settings(use_empty=True)",
+         lambda: bpy.ops.wm.read_factory_settings(use_empty=True))
+    ns_before = set(bpy.app.driver_namespace.keys())
+    pkg = "bl_ext." + cfg["repo_module"] + ".import_daz"
+
+    def add_repo():
+        bpy.context.preferences.extensions.repos.new(
+            name=cfg["repo_module"], module=cfg["repo_module"],
+            custom_directory=cfg["repo_dir"], source="USER")
+        addon_utils.extensions_refresh(ensure_wheels=False)
+
+    step("add local extension repository", add_repo)
+
+    def enable():
+        mod = addon_utils.enable(pkg, default_set=True, handle_error=reraise)
+        if mod is None:
+            raise RuntimeError(f"addon_utils.enable({pkg!r}) returned None")
+        return mod
+
+    step(f"enable {pkg}", enable)
+    daz = sys.modules[pkg]
+    # Blender drops bl_info from a module it enables as an extension.
+    result["bl_info_on_module"] = hasattr(daz, "bl_info")
+    result["manifest_version"] = re.search(
+        r'^version = "([^"]+)"', open(os.path.join(cfg["repo_dir"], "import_daz", "blender_manifest.toml")).read(),
+        re.M).group(1)
+    result["build"] = sys.modules[pkg + ".buildnumber"].BUILD
+    result["driver_namespace_added"] = sorted(set(bpy.app.driver_namespace.keys()) - ns_before)
+    result["operators"] = {op: hasattr(bpy.ops.daz, op) for op in
+                           ("easy_import_daz", "import_visemes", "import_facs", "merge_rigs")}
+    GS = sys.modules[pkg + ".settings"].GS
+    result["settings_dir"] = GS.settingsDir
+
+    lib = cfg["library"]
+
+    dirs = cfg["content_dirs"]
+    figure_path = os.path.join(lib, cfg["figure"])
+
+    def check_library():
+        missing = [p for d in dirs for p in [d] + [os.path.join(d, s) for s in ("data", "People", "Runtime")]
+                   if not os.path.isdir(p)]
+        if missing:
+            raise FileNotFoundError(f"content directory missing in the container: {missing}")
+        if not os.path.isfile(figure_path):
+            raise FileNotFoundError(f"figure not found: {figure_path}")
+
+    # With --no-dir-check these two steps are recorded but do not stop the
+    # build, to show what the importer does with a wrong content path.
+    step("content directory and figure exist", check_library, fatal=cfg["dir_check"])
+
+    def set_dirs():
+        daz.set_global_setting("contentDirs", dirs)
+        daz.set_global_setting("mdlDirs", [])
+        daz.set_global_setting("cloudDirs", [])
+        daz.set_global_setting("verbosity", cfg["verbosity"])
+        roots = daz.get_root_paths()
+        result["get_root_paths"] = roots
+        found = daz.get_absolute_paths(["/" + cfg["figure"]])
+        result["get_absolute_paths_figure"] = found
+        if roots != dirs:
+            raise RuntimeError(f"get_root_paths() returned {roots}, expected {dirs}")
+        if not found:
+            raise RuntimeError(f"get_absolute_paths() did not resolve /{cfg['figure']}")
+
+    step("set_global_setting('contentDirs') and resolve the figure", set_dirs, fatal=cfg["dir_check"])
+    figure_abs = figure_path
+    daz.set_silent_mode(True)
+    result["silent_mode_after_set"] = daz.get_silent_mode()
+
+    new = step(f"easy_import_daz {os.path.basename(figure_abs)}", lambda: import_duf(figure_abs))
+    result["figure_objects"] = [[o.name, o.type] for o in new]
+    rig = step("find the body rig", lambda: main_rig(new))
+    result["body_rig"] = rig.name
+    result["silent_mode_after_easy_import"] = "reset to True by the probe"
+    result["survey_after_figure"] = survey()
+
+    # The anatomy figures a Daz Studio post-load script would add.
+    anatomy = []
+    for rel in cfg["anatomy"]:
+        absp = os.path.join(lib, rel)
+        name = os.path.splitext(os.path.basename(rel))[0]
+
+        def one(absp=absp):
+            if not os.path.isfile(absp):
+                raise FileNotFoundError(f"not in the library: {absp}")
+            return import_duf(absp)
+
+        objs = step(f"easy_import_daz anatomy {name}", one, fatal=False)
+        if objs:
+            anatomy.append((name, objs))
+    result["anatomy_objects"] = {n: [[o.name, o.type] for o in objs] for n, objs in anatomy}
+
+    subrigs = [o for _, objs in anatomy for o in objs if o.type == "ARMATURE" and o.parent is None]
+    if subrigs:
+        def merge():
+            for sub in subrigs:
+                wm = sub.matrix_world.copy()
+                sub.parent = rig
+                sub.matrix_world = wm
+            activate(rig)
+            for sub in subrigs:
+                sub.select_set(True)
+            daz.set_silent_mode(True)
+            before = len(rig.data.bones)
+            ret = bpy.ops.daz.merge_rigs(useOnlySelected=True)
+            daz.set_silent_mode(True)
+            left = [o.name for o in bpy.data.objects if o.type == "ARMATURE" and o != rig]
+            if left:
+                raise RuntimeError(f"merge_rigs returned {sorted(ret)} and left armatures {left}; "
+                                   f"get_error_message(): {daz.get_error_message()!r}")
+            return {"bones_before": before, "bones_after": len(rig.data.bones)}
+
+        result["merge_rigs"] = step(f"parent {len(subrigs)} anatomy rigs and merge_rigs", merge, fatal=False)
+
+    def import_morphs(op_name):
+        def run():
+            activate(rig)
+            daz.set_silent_mode(True)
+            before = armature_props(rig)
+            meshes_before = {o.name: len(o.data.shape_keys.key_blocks) if o.data.shape_keys else 0
+                             for o in bpy.data.objects if o.type == "MESH"}
+            ret = getattr(bpy.ops.daz, op_name)()
+            daz.set_silent_mode(True)
+            after = armature_props(rig)
+            added = {k: len(set(after.get(k, [])) - set(before.get(k, []))) for k in ("object", "data")}
+            keys_added = {o.name: (len(o.data.shape_keys.key_blocks) if o.data.shape_keys else 0)
+                          - meshes_before.get(o.name, 0)
+                          for o in bpy.data.objects if o.type == "MESH"}
+            out = {"returned": sorted(ret), "properties_added": added,
+                   "shape_keys_added": keys_added,
+                   "get_error_message": daz.get_error_message()}
+            if not any(added.values()) and not any(keys_added.values()):
+                raise RuntimeError(f"bpy.ops.daz.{op_name}() returned {sorted(ret)} and added no "
+                                   f"property or shape key; get_error_message(): "
+                                   f"{daz.get_error_message()!r}")
+            return out
+        return run
+
+    if cfg["visemes"]:
+        result["import_visemes"] = step("bpy.ops.daz.import_visemes()", import_morphs("import_visemes"), fatal=False)
+    if cfg["facs"]:
+        result["import_facs"] = step("bpy.ops.daz.import_facs()", import_morphs("import_facs"), fatal=False)
+
+    final = survey()
+    result["survey"] = final
+    arm = final["armatures"].get(rig.name, {})
+    names = set()
+    for v in arm.get("matching_properties", {}).values():
+        names.update(v)
+    result["viseme_props"] = {}
+    for v in cfg["visemes_list"]:
+        hits = sorted(n for n in names if re.fullmatch(rf"(facs_ctrl_v|ectrlv|ctrl_v|v){v}", n, re.I))
+        if hits:
+            result["viseme_props"][v] = hits[0]
+    result["viseme_props_owner"] = {
+        n: ("object" if n in rig.keys() else "data" if n in rig.data.keys() else None)
+        for n in result["viseme_props"].values()}
+
+    def strip_textures():
+        cleared = 0
+        trees = [m.node_tree for m in bpy.data.materials if m.node_tree] + list(bpy.data.node_groups)
+        for tree in trees:
+            for node in tree.nodes:
+                if node.type == "TEX_IMAGE" and node.image is not None:
+                    node.image = None
+                    cleared += 1
+        images = len(bpy.data.images)
+        for img in list(bpy.data.images):
+            if img.users == 0:
+                bpy.data.images.remove(img)
+        return {"image_nodes_cleared": cleared, "images_before": images, "images_after": len(bpy.data.images)}
+
+    if cfg["no_textures"]:
+        result["no_textures"] = step("clear image textures", strip_textures, fatal=False)
+
+    def subdivision_off():
+        mods = [m for o in bpy.data.objects if o.type == "MESH" for m in o.modifiers if m.type == "SUBSURF"]
+        levels = sorted({(m.levels, m.render_levels) for m in mods})
+        for m in mods:
+            m.show_viewport = False
+            m.show_render = False
+        return {"subsurf_modifiers": len(mods), "levels_viewport_render": levels}
+
+    if cfg["subdivision"] == "off":
+        result["subdivision_off"] = step("switch off Subsurf modifiers", subdivision_off, fatal=False)
+
+    def save():
+        bpy.context.preferences.filepaths.save_version = 0
+        ret = bpy.ops.wm.save_as_mainfile(filepath=cfg["blend"], check_existing=False)
+        if "FINISHED" not in ret:
+            raise RuntimeError(f"save_as_mainfile returned {sorted(ret)}")
+
+    step("save .blend", save)
+except Stop:
+    pass
+except Exception:
+    result["stopped_at"] = result["stopped_at"] or "outside a step"
+    result["fatal"] = traceback.format_exc()[-3000:]
+
+result["blender_seconds"] = round(time.time() - T0, 2)
+result["peak_rss_mb"] = peak_rss_mb()
+checkpoint()
+sys.stdout.flush()
+os.dup2(_saved_stdout, 1)
+print("DAZ_BUILD " + json.dumps(result), flush=True)
+sys.stderr.flush()
+# Leave directly: an add-on or a Python-expression driver can leave the bpy
+# module hanging at interpreter exit (seen with MPFB and render_sheet.py).
+os._exit(0)
+'''
+
+RENDER_SCRIPT = r'''
+import json, os, resource, signal, sys, time
+cfg = json.loads(sys.argv[-1])
+signal.signal(signal.SIGALRM, signal.SIG_DFL)
+signal.alarm(cfg["timeout"])
+os.makedirs(cfg["user_resources"], exist_ok=True)
+os.environ["BLENDER_USER_RESOURCES"] = cfg["user_resources"]
+import bpy, math
+import numpy as np
+from mathutils import Vector, Euler
+
+t0 = time.time()
+os.makedirs(cfg["frames_dir"], exist_ok=True)
+bpy.ops.wm.open_mainfile(filepath=cfg["blend"], load_ui=False)
+enabled = [a.module for a in bpy.context.preferences.addons if "daz" in a.module]
+auto_exec = bpy.context.preferences.filepaths.use_scripts_auto_execute
+
+rig = bpy.data.objects.get(cfg["rig"])
+if rig is None or rig.type != "ARMATURE":
+    raise SystemExit(f"no armature named {cfg['rig']!r} in {cfg['blend']}")
+props = cfg["props"]           # viseme -> property name
+
+
+def owner_of(name):
+    for owner in (rig, rig.data):
+        if name in owner.keys():
+            return owner
+    return None
+
+
+owners = {v: owner_of(p) for v, p in props.items()}
+missing = sorted(v for v, o in owners.items() if o is None)
+# Motion and framing are measured over every viseme the rig has; --only
+# narrows what is rendered, not what the framing is taken from.
+avail = [v for v in cfg["visemes"] if owners.get(v) is not None]
+order = [None] + [v for v in avail if not cfg["only"] or v in cfg["only"]]
+meshes = [o for o in bpy.data.objects if o.type == "MESH" and not o.hide_render]
+body = max((o for o in meshes if o.parent == rig), key=lambda o: len(o.data.vertices), default=None)
+if body is None:
+    raise SystemExit("no mesh parented to " + rig.name)
+mouth = next((o for o in meshes if "mouth" in o.name.lower()), None)
+
+# Diffeomorphic gives each figure mesh a Subsurf modifier. Motion and framing
+# are measured on the cage, with every Subsurf switched off; --subdivision
+# decides whether renders use the file's own levels.
+subsurfs = [(m, m.show_viewport, m.show_render) for o in meshes for m in o.modifiers if m.type == "SUBSURF"]
+subsurf_levels = sorted({(m.levels, m.render_levels) for m, _, _ in subsurfs})
+for m, _, _ in subsurfs:
+    m.show_viewport = False
+
+if cfg["clay"]:
+    clay = bpy.data.materials.new("probe_clay")
+    clay.use_nodes = True
+    bsdf = clay.node_tree.nodes["Principled BSDF"]
+    bsdf.inputs["Base Color"].default_value = tuple(cfg["clay_color"]) + (1.0,)
+    bsdf.inputs["Roughness"].default_value = 0.65
+    if "Specular IOR Level" in bsdf.inputs:
+        bsdf.inputs["Specular IOR Level"].default_value = 0.3
+    for o in meshes:
+        o.data.materials.clear()
+        o.data.materials.append(clay)
+
+scene = bpy.context.scene
+for o in scene.objects:
+    if o.type in ("LIGHT", "CAMERA", "LIGHT_PROBE"):
+        o.hide_render = True
+scene.render.use_compositing = False
+scene.render.use_sequencer = False
+
+
+def set_pose(v):
+    for vv, owner in owners.items():
+        if owner is not None:
+            owner[props[vv]] = 0.0
+            owner.update_tag()
+    if v is not None:
+        owners[v][props[v]] = 1.0
+        owners[v].update_tag()
+    bpy.context.view_layer.update()
+
+
+def positions(ob):
+    dg = bpy.context.evaluated_depsgraph_get()
+    ev = ob.evaluated_get(dg)
+    me = ev.to_mesh()
+    co = np.empty(len(me.vertices) * 3, dtype=np.float64)
+    me.vertices.foreach_get("co", co)
+    ev.to_mesh_clear()
+    co = co.reshape(-1, 3)
+    m = np.array(ev.matrix_world)
+    return co @ m[:3, :3].T + m[:3, 3]
+
+
+pose_bones = list(rig.pose.bones)
+
+
+def bone_matrices():
+    """Armature-space matrices, and the bones' own pose channels (matrix_basis)."""
+    return (np.array([np.array(pb.matrix) for pb in pose_bones]),
+            np.array([np.array(pb.matrix_basis) for pb in pose_bones]))
+
+
+def classify_bones(now, before):
+    """Which bones moved in armature space, and why: the importer's (drv)
+    helpers (with those whose own channels changed), Daz bones whose own
+    channels changed, Daz bones with a constraint aimed at a moving (drv)
+    helper, and Daz bones only carried along by a moving parent."""
+    moved = np.abs(now[0] - before[0]).max(axis=(1, 2)) > 1e-6
+    posed = np.abs(now[1] - before[1]).max(axis=(1, 2)) > 1e-6
+    helpers = {pb.name for pb, m in zip(pose_bones, moved) if m and "(drv)" in pb.name}
+    out = {"helpers": [], "helpers_posed": [], "posed": [], "follow_helper": [], "carried": [],
+           "constraints": {}}
+    for pb, m, p in zip(pose_bones, moved, posed):
+        if not m:
+            continue
+        if "(drv)" in pb.name:
+            out["helpers"].append(pb.name)
+            if p:
+                out["helpers_posed"].append(pb.name)
+            continue
+        live = [c for c in pb.constraints if not c.mute and c.influence > 0]
+        if live:
+            out["constraints"][pb.name] = [[c.type, getattr(c, "subtarget", "")] for c in live]
+        if p:
+            out["posed"].append(pb.name)
+        elif any(getattr(c, "subtarget", "") in helpers for c in live):
+            out["follow_helper"].append(pb.name)
+        else:
+            out["carried"].append(pb.name)
+    return int(moved.sum()), out
+
+
+def key_values(ob):
+    if ob is None or not ob.data.shape_keys:
+        return None
+    return np.array([k.value for k in ob.data.shape_keys.key_blocks])
+
+
+set_pose(None)
+neutral = {"body": positions(body), "mouth": positions(mouth) if mouth else None,
+           "bones": bone_matrices(), "keys_body": key_values(body), "keys_mouth": key_values(mouth)}
+motion = {}
+widest = None
+for v in avail:
+    set_pose(v)
+    d = np.linalg.norm(positions(body) - neutral["body"], axis=1)
+    rec = {"body_max_shift_m": round(float(d.max()), 5), "body_vertices_moved": int((d > 1e-4).sum())}
+    if mouth:
+        dm = np.linalg.norm(positions(mouth) - neutral["mouth"], axis=1)
+        rec["mouth_max_shift_m"] = round(float(dm.max()), 5)
+        rec["mouth_vertices_moved"] = int((dm > 1e-4).sum())
+    n, kinds = classify_bones(bone_matrices(), neutral["bones"])
+    # pose_bones_moved counts armature-space change, so it includes the (drv)
+    # helpers and bones carried along by a moving parent.
+    rec["pose_bones_moved"] = n
+    rec["pose_bones_moved_helpers"] = len(kinds["helpers"])
+    rec["pose_bones_moved_daz"] = n - len(kinds["helpers"])
+    rec["pose_bones"] = kinds
+    kb = key_values(body)
+    if kb is not None:
+        rec["body_shape_keys_nonzero"] = int((np.abs(kb - neutral["keys_body"]) > 1e-6).sum())
+    km = key_values(mouth)
+    if km is not None:
+        rec["mouth_shape_keys_nonzero"] = int((np.abs(km - neutral["keys_mouth"]) > 1e-6).sum())
+    motion[v] = rec
+    if widest is None or rec["body_vertices_moved"] > motion[widest]["body_vertices_moved"]:
+        widest = v
+set_pose(None)
+
+pts = neutral["body"]
+lo, hi = pts.min(axis=0), pts.max(axis=0)
+# The face band runs down to the lowest vertex frame_key (AA) moves, or, if
+# it moves none, the viseme that moves the most body vertices.
+key = cfg["frame_key"] if cfg["frame_key"] in motion and motion[cfg["frame_key"]]["body_vertices_moved"] else widest
+if key and motion[key]["body_vertices_moved"]:
+    set_pose(key)
+    moved = np.linalg.norm(positions(body) - neutral["body"], axis=1) > 1e-4
+    set_pose(None)
+    chin = float(pts[moved][:, 2].min())
+    chin_from = "lowest vertex moved by " + key
+else:
+    hb = rig.data.bones.get("head")
+    chin = float((rig.matrix_world @ hb.head_local).z) if hb else float(hi[2] - 0.25)
+    chin_from = "head bone (no viseme moved the body)"
+band = pts[pts[:, 2] >= chin]
+head_h = float(hi[2] - chin)
+head_centre = Vector(((band[:, 0].min() + band[:, 0].max()) / 2.0,
+                      (band[:, 1].min() + band[:, 1].max()) / 2.0,
+                      (hi[2] + chin) / 2.0))
+extent = float((hi - lo).max())
+centre = Vector(((lo + hi) / 2.0).tolist())
+
+cam_data = bpy.data.cameras.new("probe_cam")
+cam_data.type = "ORTHO"
+cam_data.clip_start = 0.01
+cam_data.clip_end = 100.0
+cam = bpy.data.objects.new("probe_cam", cam_data)
+scene.collection.objects.link(cam)
+scene.camera = cam
+world = bpy.data.worlds.new("probe_world")
+world.use_nodes = True
+world.node_tree.nodes["Background"].inputs[0].default_value = (1, 1, 1, 1)
+world.node_tree.nodes["Background"].inputs[1].default_value = cfg["ambient"]
+scene.world = world
+sun = bpy.data.lights.new("probe_key", "SUN")
+sun.energy = cfg["key"]
+sun_ob = bpy.data.objects.new("probe_key", sun)
+scene.collection.objects.link(sun_ob)
+sun_ob.rotation_euler = Euler((math.radians(55), 0, math.radians(30)), "XYZ")
+sun_ob.parent = cam
+
+scene.render.engine = "BLENDER_EEVEE_NEXT"
+if cfg["samples"]:
+    scene.eevee.taa_render_samples = cfg["samples"]
+scene.render.film_transparent = True
+scene.render.image_settings.file_format = "PNG"
+scene.render.image_settings.color_mode = "RGBA"
+scene.view_settings.view_transform = "Standard"
+columns = {
+    "body": {"target": centre, "scale": extent * 1.15, "az": -45.0, "el": 30.0, "dist": extent * 3.0},
+    "face": {"target": head_centre, "scale": head_h / 0.75, "az": 0.0, "el": 0.0, "dist": 2.0},
+    "face34": {"target": head_centre, "scale": head_h / 0.75, "az": -35.0, "el": 10.0, "dist": 2.0},
+}
+for m, viewport, render in subsurfs:
+    m.show_viewport = viewport if cfg["subdivision"] == "as-saved" else False
+    m.show_render = render if cfg["subdivision"] == "as-saved" else False
+
+
+def place(col):
+    c = columns[col]
+    az, el = math.radians(c["az"]), math.radians(c["el"])
+    offset = Vector((math.sin(az) * math.cos(el), -math.cos(az) * math.cos(el), math.sin(el))) * c["dist"]
+    cam.location = c["target"] + offset
+    cam.rotation_euler = Euler((math.radians(90.0) - el, 0.0, az), "XYZ")
+    cam_data.ortho_scale = c["scale"]
+
+
+frames = []
+timing = {}
+for size in cfg["sizes"]:
+    scene.render.resolution_x = scene.render.resolution_y = size
+    ts = time.time()
+    for ri, v in enumerate(order):
+        set_pose(v)
+        for ci, col in enumerate(cfg["columns"]):
+            place(col)
+            f = os.path.join(cfg["frames_dir"], f"s{size}_r{ri:02d}_c{ci}.png")
+            scene.render.filepath = f
+            bpy.ops.render.render(write_still=True)
+            frames.append(f)
+    timing[str(size)] = round(time.time() - ts, 1)
+
+import gpu
+try:
+    renderer = gpu.platform.renderer_get()
+except Exception as exc:
+    renderer = f"unavailable: {exc}"
+print("DAZ_RENDER " + json.dumps({
+    "frames": frames, "order": ["neutral"] + order[1:], "missing": missing,
+    "columns": cfg["columns"], "daz_addons_enabled": enabled,
+    "use_scripts_auto_execute": auto_exec, "body": body.name,
+    "mouth": mouth.name if mouth else None, "motion": motion, "widest": widest,
+    "vertices": {"body": len(body.data.vertices), "mouth": len(mouth.data.vertices) if mouth else None},
+    "subsurf_modifiers": len(subsurfs), "subsurf_levels_viewport_render": subsurf_levels,
+    "subdivision": cfg["subdivision"],
+    "frame_key_used": key, "chin_from": chin_from,
+    "head_height_m": round(head_h, 4), "figure_height_m": round(float(hi[2] - lo[2]), 4),
+    "eevee_samples": scene.eevee.taa_render_samples, "gpu_renderer": renderer,
+    "seconds_per_size": timing, "peak_rss_mb": round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0, 1),
+    "seconds": round(time.time() - t0, 1)}), flush=True)
+sys.stderr.flush()
+os._exit(0)
+'''
+
+# render_sheet.py opens a .blend as saved, Subsurf modifiers and all. So that
+# its rows get the subdivision --subdivision asks for, this opens the file,
+# switches every Subsurf modifier off and saves a copy beside it for
+# render_sheet.py to open, and saves nothing when none is switched on.
+PREP_SCRIPT = r'''
+import json, os, resource, sys, time
+cfg = json.loads(sys.argv[-1])
+os.makedirs(cfg["user_resources"], exist_ok=True)
+os.environ["BLENDER_USER_RESOURCES"] = cfg["user_resources"]
+import bpy
+t0 = time.time()
+bpy.ops.wm.open_mainfile(filepath=cfg["blend"], load_ui=False)
+mods = [m for o in bpy.data.objects if o.type == "MESH" for m in o.modifiers if m.type == "SUBSURF"]
+on = [m for m in mods if m.show_viewport or m.show_render]
+out = {"subsurf_modifiers": len(mods), "subsurf_switched_on": len(on),
+       "levels_viewport_render": sorted({(m.levels, m.render_levels) for m in on}), "copy": None}
+if on:
+    for m in on:
+        m.show_viewport = False
+        m.show_render = False
+    bpy.context.preferences.filepaths.save_version = 0
+    ret = bpy.ops.wm.save_as_mainfile(filepath=cfg["copy"], check_existing=False, copy=True)
+    if "FINISHED" not in ret:
+        raise SystemExit(f"save_as_mainfile returned {sorted(ret)}")
+    out["copy"] = cfg["copy"]
+out["seconds"] = round(time.time() - t0, 1)
+out["peak_rss_mb"] = round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0, 1)
+print("DAZ_PREP " + json.dumps(out), flush=True)
+sys.stderr.flush()
+os._exit(0)
+'''
+
+# Stopping the docker exec client leaves its process running in the container,
+# still writing frames. This ends the `python3 -c` jobs whose arguments hold
+# the marker: SIGTERM, then SIGKILL for any still there after 10 s.
+STOP_SCRIPT = r'''
+import json, os, signal, sys, time
+marker = sys.argv[-1].encode()
+me = os.getpid()
+
+
+def jobs():
+    found = []
+    for d in os.listdir("/proc"):
+        if not d.isdigit() or int(d) == me:
+            continue
+        try:
+            with open(f"/proc/{d}/cmdline", "rb") as f:
+                argv = f.read().split(b"\0")
+        except OSError:
+            continue
+        if len(argv) > 2 and argv[1] == b"-c" and any(marker in a for a in argv[2:]):
+            found.append(int(d))
+    return found
+
+
+ended = jobs()
+for pid in ended:
+    try:
+        os.kill(pid, signal.SIGTERM)
+    except OSError:
+        pass
+deadline = time.time() + 10
+while ended and time.time() < deadline and jobs():
+    time.sleep(0.5)
+killed = jobs()
+for pid in killed:
+    try:
+        os.kill(pid, signal.SIGKILL)
+    except OSError:
+        pass
+print("DAZ_STOP " + json.dumps({"ended": ended, "killed": killed}), flush=True)
+'''
+
+
+# ------------------------------------------------------------------ host side
+
+class Stopped(Exception):
+    """SIGTERM, raised so the same clean-up runs as for Ctrl-C."""
+
+
+@contextlib.contextmanager
+def signals_held():
+    """Ignore Ctrl-C and SIGTERM while a stop is being cleaned up."""
+    old = {s: signal.signal(s, signal.SIG_IGN) for s in (signal.SIGINT, signal.SIGTERM)}
+    try:
+        yield
+    finally:
+        for s, h in old.items():
+            signal.signal(s, h)
+
+
+def end_container_job(marker: str) -> None:
+    """End the Blender job in the container whose arguments hold `marker`."""
+    try:
+        r = exec_python(STOP_SCRIPT, marker, timeout=40)
+        line = next((l for l in r.stdout.splitlines() if l.startswith("DAZ_STOP ")), None)
+        res = json.loads(line[len("DAZ_STOP "):]) if line else None
+        why = f"exit {r.returncode}: {r.stderr.strip()[-300:]}"
+    except (OSError, subprocess.TimeoutExpired, ValueError) as exc:
+        res, why = None, f"{type(exc).__name__}: {exc}"
+    if res is None:
+        print(f"  ! could not check {container()} for the job writing {marker} ({why}); "
+              f"look for it with `docker top {container()} -o pid,etimes,args`")
+    elif res["ended"]:
+        print(f"  stopped   Blender job(s) {res['ended']} in {container()}"
+              + (f", {res['killed']} with SIGKILL" if res["killed"] else ""))
+
+def other_blender_jobs() -> list[str]:
+    """`python3 -c` processes in the container other than this probe's own."""
+    try:
+        out = subprocess.run(["docker", "top", container(), "-o", "pid,etimes,args"],
+                             capture_output=True, text=True, timeout=30).stdout
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return [f"(docker top failed: {exc})"]
+    return [line.strip() for line in out.splitlines()[1:] if "python3 -c" in line]
+
+
+def wait_for_idle(skip: bool) -> None:
+    """Wait while ComfyUI runs or queues a job, or another Blender job runs in the container."""
+    if skip:
+        return
+    while True:
+        busy = []
+        try:
+            with urllib.request.urlopen(COMFY + "/queue", timeout=10) as r:
+                q = json.load(r)
+            n = len(q.get("queue_running", [])) + len(q.get("queue_pending", []))
+            if n:
+                busy.append(f"ComfyUI queue holds {n} job(s)")
+        except (urllib.error.URLError, OSError, ValueError) as exc:
+            busy.append(f"could not read {COMFY}/queue: {exc}")
+        jobs = other_blender_jobs()
+        if jobs:
+            busy.append(f"{len(jobs)} other python3 -c job(s) in {container()}")
+        if not busy:
+            return
+        print(f"  waiting: {'; '.join(busy)}; checking again in 30 s ({time.strftime('%H:%M:%S')})",
+              flush=True)
+        time.sleep(30)
+
+
+UNITS = {"B": 1, "KiB": 1 << 10, "MiB": 1 << 20, "GiB": 1 << 30, "TiB": 1 << 40,
+         "kB": 1000, "MB": 1000 ** 2, "GB": 1000 ** 3}
+
+
+def parse_mem(text: str) -> int | None:
+    m = re.match(r"\s*([\d.]+)\s*([A-Za-z]+)", text)
+    if not m or m.group(2) not in UNITS:
+        return None
+    return int(float(m.group(1)) * UNITS[m.group(2)])
+
+
+class MemSampler(threading.Thread):
+    """Container memory from `docker stats --no-stream`, sampled until stopped."""
+
+    def __init__(self):
+        super().__init__(daemon=True)
+        self.samples: list[int] = []
+        self.halt = threading.Event()
+
+    def sample(self) -> int | None:
+        try:
+            out = subprocess.run(["docker", "stats", "--no-stream", "--format", "{{.MemUsage}}",
+                                  container()], capture_output=True, text=True, timeout=30).stdout
+        except (OSError, subprocess.TimeoutExpired):
+            return None
+        return parse_mem(out.split("/")[0]) if out else None
+
+    def run(self):
+        while not self.halt.is_set():
+            v = self.sample()
+            if v is not None:
+                self.samples.append(v)
+            self.halt.wait(1.0)
+
+    def summary(self, baseline: int | None) -> dict:
+        gib = 1 << 30
+        peak = max(self.samples) if self.samples else None
+        return {"samples": len(self.samples),
+                "baseline_gib": round(baseline / gib, 2) if baseline else None,
+                "peak_gib": round(peak / gib, 2) if peak else None,
+                "peak_above_baseline_gib": round((peak - baseline) / gib, 2) if peak and baseline else None}
+
+
+@functools.lru_cache(maxsize=None)
+def container_mounts() -> tuple:
+    try:
+        out = subprocess.run(["docker", "inspect", "-f", "{{json .Mounts}}", container()],
+                             capture_output=True, text=True, timeout=30).stdout
+        return tuple(json.loads(out) or ())
+    except (OSError, subprocess.TimeoutExpired, ValueError):
+        return ()
+
+
+def container_path(host: Path) -> str | None:
+    """Where the container sees a host path, from its bind mounts."""
+    best = None
+    for m in container_mounts():
+        src = Path(m.get("Source", ""))
+        try:
+            rel = host.resolve().relative_to(src)
+        except ValueError:
+            continue
+        if best is None or len(str(src)) > len(str(best[0])):
+            best = (src, str(PurePosixPath(m["Destination"]) / rel.as_posix()))
+    return best[1] if best else None
+
+
+def run_blender(script: str, cfg: dict, sentinel: str, timeout: int,
+                marker: str) -> tuple[dict | None, float, dict]:
+    """Run a Blender job; on Ctrl-C or SIGTERM end its process in the container
+    too, found by `marker`, a path unique to this job in its arguments."""
+    sampler = MemSampler()
+    baseline = sampler.sample()
+    sampler.start()
+    t = time.time()
+    try:
+        res = exec_json(script, cfg, sentinel, timeout=timeout)
+        wall = round(time.time() - t, 1)
+    except (KeyboardInterrupt, Stopped):
+        with signals_held():
+            end_container_job(marker)
+        raise
+    finally:
+        sampler.halt.set()
+        sampler.join(timeout=35)
+    return res, wall, sampler.summary(baseline)
+
+
+def no_result(wall: float, timeout: int) -> None:
+    if wall >= timeout + TIMEOUT_GRACE:
+        print(f"  ! Blender was still running {TIMEOUT_GRACE} s after its --timeout {timeout} s "
+              f"alarm; look for it with `docker top {container()}`")
+    elif wall >= timeout:
+        print(f"  ! Blender ran past --timeout {timeout} s and its SIGALRM ended it ({wall} s wall)")
+    else:
+        print("  ! Blender printed no result (traceback above)")
+
+
+def read_duf(path: Path) -> dict:
+    """A .duf or .dsf as JSON, gzip-compressed or plain, as the importer's
+    load_json.loadJson reads it: gzip first, plain text when that fails."""
+    try:
+        with gzip.open(path, "rt", encoding="utf-8-sig") as f:
+            return json.load(f)
+    except gzip.BadGzipFile:
+        pass
+    return json.loads(path.read_text(encoding="utf-8-sig"))
+
+
+def anatomy_from_figure(figure: Path) -> list[str]:
+    """The AssetFile entries of a .duf's post-load add-on script, if it has one."""
+    try:
+        doc = read_duf(figure)
+    except (OSError, ValueError, EOFError) as exc:
+        raise SystemExit(f"could not read {figure}: {exc}")
+    files = []
+    for extra in doc.get("scene", {}).get("extra", []):
+        if extra.get("type") != "scene_post_load_script":
+            continue
+        addons = extra.get("settings", {}).get("PostLoadAddons", {}).get("value", {})
+        for entry in addons.values():
+            asset = (entry.get("value") or {}).get("AssetFile")
+            if asset:
+                # Daz writes these both with and without a leading slash.
+                files.append(asset.lstrip("/"))
+    return files
+
+
+def out_path(text: str) -> Path:
+    p = Path(text)
+    p = (ROOT / p) if not p.is_absolute() else p
+    p = p.resolve()
+    try:
+        p.relative_to(OUT.resolve())
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"--out must be under {OUT.relative_to(ROOT)}/, got {text!r}")
+    if p.suffix != ".blend":
+        raise argparse.ArgumentTypeError(f"--out must end in .blend, got {text!r}")
+    return p
+
+
+def c_path(host: Path) -> str:
+    """A host path under output/ or input/ as the container mounts it."""
+    p = container_path(host)
+    if p is None:
+        raise SystemExit(f"  ! {container()} mounts no folder holding {host}")
+    return p
+
+
+def library_relative(text: str) -> str:
+    """A path inside the content library: relative, with no .. part."""
+    p = PurePosixPath(text.strip())
+    if not text.strip() or p.is_absolute() or ".." in p.parts:
+        raise argparse.ArgumentTypeError(
+            f"expected a path relative to the library with no .. part, got {text!r}")
+    return p.as_posix()
+
+
+def anatomy_arg(text: str) -> str | list[str]:
+    if text in ("auto", "none"):
+        return text
+    items = [library_relative(a) for a in text.split(",") if a.strip()]
+    if not items:
+        raise argparse.ArgumentTypeError("expected auto, none or library-relative .duf paths")
+    return items
+
+
+def cmd_build(args) -> int:
+    if not (EXT / "import_daz" / "blender_manifest.toml").exists():
+        print("  ! run `scripts/daz_import_probe.py fetch` first")
+        return 1
+    lib = args.library.resolve()
+    try:
+        lib.relative_to(ROOT)
+        print(f"  ! the library must be outside the repo, got {lib}")
+        return 2
+    except ValueError:
+        pass
+    figure = lib / args.figure
+    if not figure.is_file():
+        print(f"  ! figure not found on the host: {figure}")
+        return 1
+    lib_c = container_path(lib)
+    if lib_c is None:
+        print(f"  ! {container()} mounts no folder holding {lib}")
+        return 1
+    if args.anatomy == "auto":
+        anatomy = anatomy_from_figure(figure)
+        for a in anatomy:
+            try:
+                library_relative(a)
+            except argparse.ArgumentTypeError:
+                print(f"  ! {args.figure} names post-load file {a!r}, which is outside the library")
+                return 1
+    elif args.anatomy == "none":
+        anatomy = []
+    else:
+        anatomy = args.anatomy
+    name = args.out.stem
+    OUT.mkdir(parents=True, exist_ok=True)
+    DEV.mkdir(parents=True, exist_ok=True)
+    dev_c = c_path(DEV)
+    cfg = {
+        "user_resources": f"{dev_c}/blender_user",
+        "home": f"{dev_c}/home",
+        "repo_module": REPO_MODULE,
+        "repo_dir": f"{dev_c}/ext",
+        "library": lib_c,
+        "content_dirs": [args.content_dir or lib_c],
+        "dir_check": not args.no_dir_check,
+        "figure": args.figure,
+        "anatomy": anatomy,
+        "material_method": args.material_method,
+        "fit": args.fit,
+        "verbosity": args.verbosity,
+        "visemes": args.visemes,
+        "facs": args.facs,
+        "no_textures": args.no_textures,
+        "subdivision": args.subdivision,
+        "prop_pattern": PROP_PATTERN,
+        "visemes_list": VISEMES,
+        "blend": c_path(args.out),
+        "log": c_path(OUT / f"{name}_blender.log"),
+        "partial": c_path(OUT / f"{name}_build.partial.json"),
+        "timeout": args.timeout,
+    }
+    print(f"  container {container()}")
+    print(f"  add-on    {cfg['repo_dir']}/import_daz as bl_ext.{REPO_MODULE}.import_daz")
+    print(f"  library   {lib} (container {lib_c})")
+    print(f"  figure    {args.figure}")
+    print(f"  anatomy   {len(anatomy)} post-load figure file(s)" if anatomy else "  anatomy   none")
+    print(f"  morphs    visemes {'yes' if args.visemes else 'no'}, FACS {'yes' if args.facs else 'no'}; "
+          f"materials {args.material_method}; fit {args.fit}"
+          + ("; textures cleared before saving" if args.no_textures else ""))
+    wait_for_idle(args.no_wait)
+    partial = OUT / f"{name}_build.partial.json"
+    try:
+        res, wall, mem = run_blender(BUILD_SCRIPT, cfg, "DAZ_BUILD ", args.timeout, cfg["partial"])
+    except (KeyboardInterrupt, Stopped):
+        partial.unlink(missing_ok=True)
+        raise
+    report = {"date": time.strftime("%Y-%m-%d"), "container": container(),
+              "argv": ["scripts/daz_import_probe.py"] + sys.argv[1:], "wall_seconds": wall,
+              "docker_stats_memory": mem, "download": {k: v for k, v in PIN.items() if k != "urls"}
+              | {"url": PIN["urls"][0]}, "config": cfg}
+    if res is None:
+        no_result(wall, args.timeout)
+        if partial.exists():
+            report["blender_partial"] = json.loads(partial.read_text())
+            done = report["blender_partial"]["steps"]
+            print(f"  last step that finished: {done[-1]['step'] if done else 'none'}")
+        rc = 1
+    else:
+        report["blender"] = res
+        rc = summarise_build(res, args, name)
+    partial.unlink(missing_ok=True)
+    report_path = OUT / f"{name}_build.json"
+    report_path.write_text(json.dumps(report, indent=2) + "\n")
+    print(f"  memory    container {mem['baseline_gib']} GiB before, peak {mem['peak_gib']} GiB "
+          f"({mem['samples']} docker stats samples)")
+    in_blender = f", {res['blender_seconds']} s in Blender" if res else ""
+    print(f"  report    {report_path.relative_to(ROOT)}  ({wall} s wall{in_blender})")
+    print(f"  log       {(OUT / (name + '_blender.log')).relative_to(ROOT)}")
+    return rc
+
+
+def summarise_build(res: dict, args, name: str) -> int:
+    for s in res["steps"]:
+        mark = "ok" if s["ok"] else "FAILED"
+        print(f"  {mark:6s} {s['seconds']:7.2f} s  {s['peak_rss_mb']:8.1f} MB peak  {s['step']}")
+        if not s["ok"]:
+            print(f"         {s['error']}")
+        msg = (s.get("get_error_message") or "").strip()
+        if msg:
+            print("         get_error_message(): " + msg.replace("\n", " | ")[:400])
+    rc = 0
+    if res.get("stopped_at") or res.get("fatal"):
+        print(f"  ! stopped at: {res.get('stopped_at')}")
+        if res.get("fatal"):
+            print(res["fatal"])
+        return 1
+    if res["failures"]:
+        rc = 1
+    survey = res.get("survey", {})
+    for rig, a in survey.get("armatures", {}).items():
+        props = a["custom_properties"]
+        print(f"  rig       {rig}: {a['bones']} bones ({a['deform_bones']} deform), "
+              f"{props.get('object', 0)} object and {props.get('data', 0)} data properties, "
+              f"{a['drivers']} drivers ({a['python_drivers']} not simple expressions)")
+        for owner, names in a["matching_properties"].items():
+            if names:
+                print(f"            {len(names)} {owner} properties match {PROP_PATTERN}")
+    for mesh, m in survey.get("meshes", {}).items():
+        print(f"  mesh      {mesh}: {m['vertices']} vertices, {m['faces']} faces, "
+              f"{m['shape_keys']} shape keys ({m['shape_key_drivers']} driven)")
+    print(f"  images    {survey.get('images')}; materials {survey.get('materials')}")
+    if res.get("no_textures"):
+        t = res["no_textures"]
+        print(f"  textures  {t['image_nodes_cleared']} image nodes cleared; images {t['images_before']} "
+              f"before, {t['images_after']} saved")
+    props = res.get("viseme_props", {})
+    print(f"  visemes   {len(props)} of {len(VISEMES)} found as rig properties")
+    if props:
+        poses = OUT / f"{name}_poses.json"
+        rows = [{"@props": {p: 0.0 for p in props.values()}}]
+        rows += [{"@props": {p: (1.0 if p == props[v] else 0.0) for p in props.values()}}
+                 for v in VISEMES if v in props]
+        poses.write_text(json.dumps(rows, indent=1) + "\n")
+        print(f"  poses     {poses.relative_to(ROOT)}  (render_sheet.py --poses transforms:, "
+              "row 0 neutral)")
+    print(f"  wrote     {args.out.relative_to(ROOT)}"
+          if args.out.exists() else f"  ! {args.out.relative_to(ROOT)} was not written")
+    return rc if args.out.exists() else 1
+
+
+# ------------------------------------------------------------------ render
+
+def auto_label(args) -> str:
+    """The render options that differ from the defaults, joined, so that a
+    narrower or different run does not overwrite the files of a full one."""
+    if args.motion_only:
+        return ""
+    parts = []
+    if args.only:
+        parts.append("-".join(args.only))
+    if args.sizes != SIZES:
+        parts.append("-".join(str(s) for s in args.sizes))
+    if args.columns != list(COLUMNS):
+        parts.append("-".join(args.columns))
+    if args.samples:
+        parts.append(f"s{args.samples}")
+    if args.materials:
+        parts.append("materials")
+    if args.subdivision != "off":
+        parts.append(args.subdivision)
+    if args.no_sheet:
+        parts.append("no-sheet")
+    elif args.sheet_size != 128:
+        parts.append(f"sheet{args.sheet_size}")
+    if args.threshold != 8:
+        parts.append(f"t{args.threshold}")
+    return "_".join(parts)
+
+
+def cmd_render(args) -> int:
+    blend = args.blend
+    name = blend.stem
+    build = OUT / f"{name}_build.json"
+    if not blend.exists() or not build.exists():
+        print(f"  ! need {blend.relative_to(ROOT)} and {build.relative_to(ROOT)}; run `build` first")
+        return 1
+    b = json.loads(build.read_text()).get("blender") or {}
+    props = b.get("viseme_props") or {}
+    if not props:
+        print(f"  ! {build.relative_to(ROOT)} lists no viseme properties; nothing to render")
+        return 1
+    label = auto_label(args) if args.label is None else args.label
+    prefix = f"{name}_{label}" if label else name
+    kind = "motion" if args.motion_only else "render"
+    report = {
+        "date": time.strftime("%Y-%m-%d"), "container": container(), "blend": str(blend.relative_to(ROOT)),
+        "argv": ["scripts/daz_import_probe.py"] + sys.argv[1:],
+        "options": {
+            "motion_only": args.motion_only,
+            "only": args.only or "all",
+            "sizes": [] if args.motion_only else args.sizes,
+            "columns": args.columns,
+            "samples_requested": args.samples or "Blender default",
+            "materials": "imported" if args.materials else "clay",
+            "subdivision": args.subdivision,
+            "render_sheet": not (args.motion_only or args.no_sheet),
+            "sheet_size": args.sheet_size,
+            "threshold": args.threshold,
+            "label": label,
+            "timeout": args.timeout,
+        },
+    }
+    print(f"  files     {(OUT / prefix).relative_to(ROOT)}_{kind}.json"
+          + ("" if args.motion_only else " and its sheets"))
+    rc = 0
+    if args.motion_only:
+        args.sizes = []
+    elif not args.no_sheet:
+        rc |= run_render_sheet(args, name, prefix, props, report)
+    run_id = f"{os.getpid()}_{int(time.time())}"
+    frames = OUT / "_frames" / run_id
+    dev_c = c_path(DEV)
+    cfg = {
+        "user_resources": f"{dev_c}/blender_user",
+        "blend": c_path(blend),
+        "rig": b["body_rig"],
+        "props": props,
+        "visemes": VISEMES,
+        "frame_key": "AA",
+        "frames_dir": c_path(frames),
+        "sizes": args.sizes,
+        "columns": args.columns,
+        "clay": not args.materials,
+        "subdivision": args.subdivision,
+        "only": args.only,
+        "clay_color": [0.55, 0.54, 0.52],
+        "key": 1.6,
+        "ambient": 0.22,
+        "samples": args.samples,
+        "timeout": args.timeout,
+    }
+    report["probe_config"] = cfg
+    wait_for_idle(args.no_wait)
+    try:
+        rc |= compose_render(args, cfg, frames, prefix, report)
+    finally:
+        if not args.keep_frames:
+            shutil.rmtree(frames, ignore_errors=True)
+            try:
+                frames.parent.rmdir()
+            except OSError:
+                pass
+    report_path = OUT / f"{prefix}_{kind}.json"
+    report_path.write_text(json.dumps(report, indent=2) + "\n")
+    print(f"  report    {report_path.relative_to(ROOT)}")
+    return rc
+
+
+def remove_sheet_frames(pid: int, since: float) -> None:
+    """Delete render_sheet.py's frame folders from the process `pid` started at `since`."""
+    for d in sorted(SHEET_FRAMES.glob(f"{pid}_*")):
+        try:
+            started = int(d.name.split("_", 1)[1])
+        except ValueError:
+            continue
+        if d.is_dir() and started >= int(since) - 1:
+            n = sum(1 for _ in d.iterdir())
+            shutil.rmtree(d, ignore_errors=True)
+            print(f"  removed   {d.relative_to(ROOT)} ({n} file(s) render_sheet.py left)")
+
+
+def run_render_sheet(args, name: str, prefix: str, props: dict, report: dict) -> int:
+    rows_v = [v for v in VISEMES if v in props and (not args.only or v in args.only)]
+    rows = [{"@props": {p: 0.0 for p in props.values()}}]
+    rows += [{"@props": {p: (1.0 if p == props[v] else 0.0) for p in props.values()}} for v in rows_v]
+    tag = os.getpid()
+    poses = OUT / f"_{name}_sheet_{tag}_poses.json"
+    copy = OUT / f"_{name}_sheet_{tag}.blend"
+    sheet = OUT / f"{prefix}_render_sheet_{args.sheet_size}.png"
+    entry = {"rows": ["neutral"] + rows_v, "subdivision": args.subdivision}
+    report["render_sheet"] = entry
+    try:
+        poses.write_text(json.dumps(rows, indent=1) + "\n")
+        opened = args.blend
+        if args.subdivision == "off":
+            dev_c = c_path(DEV)
+            pcfg = {"user_resources": f"{dev_c}/blender_user", "blend": c_path(args.blend),
+                    "copy": c_path(copy)}
+            wait_for_idle(args.no_wait)
+            info, wall, mem = run_blender(PREP_SCRIPT, pcfg, "DAZ_PREP ", min(args.timeout, 900),
+                                          pcfg["copy"])
+            if info is None:
+                no_result(wall, min(args.timeout, 900))
+                entry["prep"] = {"failed": True, "wall_seconds": wall}
+                print("  ! could not switch Subsurf off in a copy, so render_sheet.py did not run")
+                return 1
+            entry["prep"] = info | {"wall_seconds": wall, "docker_stats_memory": mem}
+            if info["copy"]:
+                opened = copy
+                print(f"  subsurf   {info['subsurf_switched_on']} of {info['subsurf_modifiers']} Subsurf "
+                      f"modifiers on, levels (viewport, render) {info['levels_viewport_render']}; "
+                      f"render_sheet.py opens a copy with them off ({wall} s)")
+            else:
+                print(f"  subsurf   none of {info['subsurf_modifiers']} Subsurf modifiers on; "
+                      f"render_sheet.py opens the file as saved ({wall} s)")
+        entry["opened"] = str(opened.relative_to(ROOT))
+        cmd = [sys.executable, str(ROOT / "scripts" / "render_sheet.py"), str(opened),
+               "--poses", f"transforms:{poses}", "--angles", "1", "--size", str(args.sheet_size),
+               "--out", str(sheet), "--check", "--timeout", str(args.timeout)]
+        wait_for_idle(args.no_wait)
+        print("  render_sheet.py " + " ".join(cmd[2:]), flush=True)
+        sampler = MemSampler()
+        baseline = sampler.sample()
+        sampler.start()
+        t = time.time()
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        marker = f"{SHEET_FRAMES_C}/{proc.pid}_"
+        try:
+            out = proc.communicate(timeout=args.timeout + 2 * TIMEOUT_GRACE)[0]
+            code = proc.returncode
+        except subprocess.TimeoutExpired as exc:
+            proc.kill()
+            out = (proc.communicate()[0] or "") + f"\nrender_sheet.py still running after {exc.timeout} s; ended"
+            code = None
+        except (KeyboardInterrupt, Stopped):
+            with signals_held():
+                if proc.poll() is None:
+                    proc.terminate()
+                    try:
+                        proc.wait(timeout=10)
+                    except subprocess.TimeoutExpired:
+                        proc.kill()
+                        proc.wait()
+                end_container_job(marker)
+                remove_sheet_frames(proc.pid, t)
+            raise
+        finally:
+            wall = round(time.time() - t, 1)
+            sampler.halt.set()
+            sampler.join(timeout=35)
+        if code != 0:
+            # render_sheet.py deletes its frames only when it finishes or its
+            # Blender job returns no result; a crash, or this script ending it
+            # after the host timeout, leaves them and can leave the job running.
+            with signals_held():
+                end_container_job(marker)
+                remove_sheet_frames(proc.pid, t)
+    finally:
+        poses.unlink(missing_ok=True)
+        copy.unlink(missing_ok=True)
+    print("\n".join("    | " + line for line in out.strip().splitlines()[-40:]))
+    entry.update({"command": ["scripts/render_sheet.py"] + cmd[2:], "exit": code, "wall_seconds": wall,
+                  "sheet": str(sheet.relative_to(ROOT)) if sheet.exists() else None,
+                  "docker_stats_memory": sampler.summary(baseline),
+                  "output_tail": out.strip().splitlines()[-60:]})
+    if code != 0 or not sheet.exists():
+        print(f"  ! render_sheet.py exited {code}")
+        return 1
+    return 0
+
+
+def compose_render(args, cfg: dict, frames: Path, prefix: str, report: dict) -> int:
+    from PIL import Image, ImageChops, ImageDraw
+
+    info, wall, mem = run_blender(RENDER_SCRIPT, cfg, "DAZ_RENDER ", args.timeout, cfg["frames_dir"])
+    if info is None:
+        no_result(wall, args.timeout)
+        report["probe_render"] = {"failed": True, "wall_seconds": wall}
+        return 1
+    if info["missing"]:
+        print(f"  ! viseme properties not on the rig: {', '.join(info['missing'])}")
+    print(f"  opened    {args.blend.relative_to(ROOT)}; DAZ add-ons enabled: "
+          f"{info['daz_addons_enabled'] or 'none'}; auto-run scripts {info['use_scripts_auto_execute']}")
+    print(f"  subsurf   {info['subsurf_modifiers']} modifiers, levels (viewport, render) "
+          f"{info['subsurf_levels_viewport_render']}; renders use {info['subdivision']}")
+    print(f"  framing   head band {info['head_height_m']} m of {info['figure_height_m']} m "
+          f"({info['chin_from']}); EEVEE {info['eevee_samples']} samples on {info['gpu_renderer']}")
+    for v, m in info["motion"].items():
+        if not args.motion_only and v not in info["order"]:
+            continue
+        k = m["pose_bones"]
+        print(f"  motion    {v:3s} body {m['body_vertices_moved']:5d} vertices, max "
+              f"{m['body_max_shift_m']:.4f} m; mouth {m.get('mouth_vertices_moved', '-')}; shape keys changed "
+              f"body {m.get('body_shape_keys_nonzero', '-')}, mouth {m.get('mouth_shape_keys_nonzero', '-')}; "
+              f"{m['pose_bones_moved']} pose bones in armature space: {len(k['helpers'])} (drv) helpers "
+              f"({len(k['helpers_posed'])} posed by drivers), {len(k['posed'])} Daz bones posed, "
+              f"{len(k['follow_helper'])} following a helper, {len(k['carried'])} carried")
+    order, cols = info["order"], info["columns"]
+    rep = {"wall_seconds": wall, "docker_stats_memory": mem, "renders": len(info["frames"]),
+           "threshold": args.threshold, "sizes": {}}
+    rep.update({k: info[k] for k in ("eevee_samples", "gpu_renderer", "head_height_m", "figure_height_m",
+                                     "chin_from", "motion", "use_scripts_auto_execute",
+                                     "daz_addons_enabled", "seconds_per_size", "peak_rss_mb", "seconds",
+                                     "vertices", "subsurf_modifiers", "subsurf_levels_viewport_render",
+                                     "subdivision", "order", "frame_key_used", "widest", "body", "mouth",
+                                     "missing")})
+    for size in cfg["sizes"]:
+        sheet = Image.new("RGBA", (len(cols) * size, len(order) * size), (0, 0, 0, 0))
+        cells = {}
+        for ri in range(len(order)):
+            for ci in range(len(cols)):
+                im = Image.open(frames / f"s{size}_r{ri:02d}_c{ci}.png").convert("RGBA")
+                cells[(ri, ci)] = im
+                sheet.paste(im, (ci * size, ri * size))
+        out = OUT / f"{prefix}_sheet_{size}.png"
+        sheet.save(out)
+        per = {}
+        for ci, col in enumerate(cols):
+            base = cells[(0, ci)]
+            figure = sum(base.getchannel("A").histogram()[1:])
+            rows = {}
+            for ri, v in enumerate(order[1:], start=1):
+                diff = ImageChops.difference(cells[(ri, ci)], base)
+                bands = [bd.point(lambda x: 255 if x > args.threshold else 0) for bd in diff.split()]
+                mask = bands[0]
+                for bd in bands[1:]:
+                    mask = ImageChops.lighter(mask, bd)
+                box = mask.getbbox()
+                rows[v] = {"changed_px": mask.histogram()[255],
+                           "box": [box[2] - box[0], box[3] - box[1]] if box else [0, 0]}
+            per[col] = {"figure_px": figure, "visemes": rows}
+        rep["sizes"][str(size)] = per
+        gutter = 70
+        lab = Image.new("RGBA", (gutter + sheet.width, 16 + sheet.height), (255, 255, 255, 255))
+        lab.alpha_composite(sheet, (gutter, 16))
+        d = ImageDraw.Draw(lab)
+        for ci, col in enumerate(cols):
+            d.text((gutter + ci * size + 4, 2), col, fill=(0, 0, 0, 255))
+        for ri, v in enumerate(order):
+            d.text((4, 16 + ri * size + size // 2 - 5), v, fill=(0, 0, 0, 255))
+        lab.save(OUT / f"{prefix}_sheet_{size}_labelled.png")
+        print(f"  sheet     {out.relative_to(ROOT)}  ({len(cols)}x{len(order)} cells of {size} px, "
+              f"{info['seconds_per_size'][str(size)]} s)")
+        for col in cols:
+            counts = [per[col]["visemes"][v]["changed_px"] for v in order[1:]]
+            if counts:
+                print(f"            {col:7s} changed px vs neutral: min {min(counts)}, max {max(counts)}, "
+                      f"figure {per[col]['figure_px']} px")
+    report["probe_render"] = rep
+    print(f"  renders   {len(info['frames'])} in {wall} s wall; container peak {mem['peak_gib']} GiB "
+          f"(before {mem['baseline_gib']} GiB)")
+    return 1 if info["missing"] else 0
+
+
+# ------------------------------------------------------------------ arguments
+
+def csv_sizes(text: str) -> list[int]:
+    try:
+        sizes = [int(s) for s in text.split(",") if s.strip()]
+    except ValueError:
+        raise argparse.ArgumentTypeError(
+            f"expected whole numbers separated by commas, such as 128,220, got {text!r}") from None
+    if not sizes:
+        raise argparse.ArgumentTypeError("name at least one cell size, such as 128")
+    if any(not 16 <= s <= 2048 for s in sizes):
+        raise argparse.ArgumentTypeError(f"cell sizes must be 16 to 2048 px, got {text!r}")
+    return list(dict.fromkeys(sizes))
+
+
+def csv_columns(text: str) -> list[str]:
+    cols = [c.strip() for c in text.split(",") if c.strip()]
+    bad = [c for c in cols if c not in COLUMNS]
+    if bad:
+        raise argparse.ArgumentTypeError(
+            f"unknown framing {', '.join(repr(c) for c in bad)}; choose from {', '.join(COLUMNS)}")
+    if not cols:
+        raise argparse.ArgumentTypeError(f"name at least one of {', '.join(COLUMNS)}")
+    return list(dict.fromkeys(cols))
+
+
+def csv_visemes(text: str) -> list[str]:
+    names = [v.strip().upper() for v in text.split(",") if v.strip()]
+    bad = [v for v in names if v not in VISEMES]
+    if bad:
+        raise argparse.ArgumentTypeError(f"unknown viseme {', '.join(bad)}; choose from {', '.join(VISEMES)}")
+    if not names:
+        raise argparse.ArgumentTypeError(f"name at least one viseme, such as AA, from {', '.join(VISEMES)}")
+    # In the research note's order, whatever order they were given in.
+    return [v for v in VISEMES if v in names]
+
+
+def label_arg(text: str) -> str:
+    if text and not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,63}", text):
+        raise argparse.ArgumentTypeError(
+            f"expected letters, digits, _ and -, starting with a letter or digit, got {text!r}")
+    return text
+
+
+def bounded(lo: int, hi: int | None):
+    def parse(text: str) -> int:
+        try:
+            v = int(text)
+        except ValueError:
+            raise argparse.ArgumentTypeError(f"expected a whole number, got {text!r}") from None
+        if v < lo or (hi is not None and v > hi):
+            span = f"{lo} to {hi}" if hi is not None else f"{lo} or more"
+            raise argparse.ArgumentTypeError(f"expected {span}, got {v}")
+        return v
+    return parse
+
+
+def blend_path(text: str) -> Path:
+    p = Path(text)
+    p = (ROOT / p) if not p.is_absolute() else p
+    p = p.resolve()
+    try:
+        p.relative_to(OUT.resolve())
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"--blend must be under {OUT.relative_to(ROOT)}/, got {text!r}")
+    return p
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    sub.add_parser("fetch", help="download, check and unpack import_daz 5.2.0")
+
+    def common(p, timeout):
+        p.add_argument("--timeout", type=bounded(1, None), default=timeout,
+                       help=f"seconds before Blender ends itself inside the container "
+                            f"(default {timeout}); the host waits {TIMEOUT_GRACE} s more")
+        p.add_argument("--no-wait", action="store_true",
+                       help="do not wait for ComfyUI's queue or other python3 -c jobs first")
+
+    b = sub.add_parser("build", help="import a figure with visemes and FACS: .blend, _build.json")
+    common(b, 1800)
+    b.add_argument("--out", type=out_path, required=True, help="output/daz/NAME.blend")
+    b.add_argument("--library", type=Path, default=DEFAULT_LIBRARY,
+                   help=f"host path of the Daz content library (default {DEFAULT_LIBRARY})")
+    b.add_argument("--figure", type=library_relative, default=DEFAULT_FIGURE,
+                   help=f".duf relative to the library, with no .. part (default {DEFAULT_FIGURE!r})")
+    b.add_argument("--anatomy", type=anatomy_arg, default="auto",
+                   help="auto: the files the figure .duf's post-load add-on script names, read "
+                        "from a plain or gzip-compressed .duf; none; or library-relative .duf "
+                        "paths, comma separated")
+    b.add_argument("--content-dir", default="",
+                   help="container path to give the importer as contentDirs instead of the library, "
+                        "to test a wrong path; the figure still loads from --library")
+    b.add_argument("--no-dir-check", action="store_true",
+                   help="record the content directory checks but carry on when they fail")
+    b.add_argument("--visemes", action="store_true", help="run bpy.ops.daz.import_visemes()")
+    b.add_argument("--facs", action="store_true", help="run bpy.ops.daz.import_facs()")
+    b.add_argument("--no-textures", action="store_true",
+                   help="clear every image texture node and remove the images before saving")
+    b.add_argument("--subdivision", choices=("keep", "off"), default="keep",
+                   help="off saves every Subsurf modifier switched off for viewport and render; "
+                        "keep saves the importer's levels, 1 in the viewport and up to 3 for render "
+                        "(default keep)")
+    b.add_argument("--material-method", choices=MATERIAL_METHODS, default="EXTENDED_PRINCIPLED",
+                   help="the importer's material method (default EXTENDED_PRINCIPLED)")
+    b.add_argument("--fit", choices=FIT_METHODS, default="MORPHED",
+                   help="the importer's fitMeshes; DBZFILE needs a .dbz from Daz Studio (default MORPHED)")
+    b.add_argument("--verbosity", type=bounded(0, 4), default=3,
+                   help="the importer's verbosity; 3 prints each path it cannot find (default 3)")
+
+    r = sub.add_parser("render", help="viseme rows: render_sheet.py sheet, face sheets, _render.json")
+    common(r, 3600)
+    r.add_argument("--blend", type=blend_path, required=True, help="a .blend that `build` wrote")
+    r.add_argument("--sizes", type=csv_sizes, default=list(SIZES),
+                   help="cell sizes for the probe's framings (default 128,220,340)")
+    r.add_argument("--columns", type=csv_columns, default=list(COLUMNS),
+                   help=f"framings, comma separated, from {', '.join(COLUMNS)} (default all three)")
+    r.add_argument("--sheet-size", type=bounded(16, 2048), default=128,
+                   help="cell size for the render_sheet.py whole-figure sheet (default 128)")
+    r.add_argument("--no-sheet", action="store_true", help="skip render_sheet.py")
+    r.add_argument("--label", type=label_arg, default=None,
+                   help="added to the names of the render's files as NAME_LABEL_...; by default the "
+                        "options that differ from the defaults, such as AA_128_face_s16, and none "
+                        "for a default run or --motion-only; \"\" for none")
+    r.add_argument("--motion-only", action="store_true",
+                   help="measure what each viseme moves and render nothing")
+    r.add_argument("--threshold", type=bounded(0, 254), default=8,
+                   help="0 to 254 channel difference that counts as a changed pixel (default 8)")
+    r.add_argument("--samples", type=bounded(0, None), default=0,
+                   help="EEVEE render samples; 0 keeps Blender's default")
+    r.add_argument("--subdivision", choices=("off", "as-saved"), default="off",
+                   help="off renders the cage in both stages, handing render_sheet.py a copy of the "
+                        ".blend with its Subsurf modifiers switched off when any is on; as-saved "
+                        "renders the Subsurf levels saved in the file, up to 3 from the importer, "
+                        "and is slow on llvmpipe (default off)")
+    r.add_argument("--only", type=csv_visemes, default=[],
+                   help="render only these visemes after the neutral row, in both stages, comma "
+                        "separated, such as AA,OW (default all 17); motion and framing still cover all")
+    r.add_argument("--materials", action="store_true",
+                   help="render the imported materials instead of clay")
+    r.add_argument("--keep-frames", action="store_true",
+                   help="keep the probe's own cell PNGs under output/daz/_frames/ (render_sheet.py's "
+                        "are always deleted)")
+    args = ap.parse_args()
+
+    def on_sigterm(signum, frame):
+        raise Stopped("SIGTERM")
+
+    signal.signal(signal.SIGTERM, on_sigterm)
+    try:
+        if args.cmd == "fetch":
+            return cmd_fetch(args)
+        if args.cmd == "build":
+            return cmd_build(args)
+        return cmd_render(args)
+    except KeyboardInterrupt:
+        print("\n  ! stopped by Ctrl-C")
+        return 130
+    except Stopped:
+        print("\n  ! stopped by SIGTERM")
+        return 143
+
+
+if __name__ == "__main__":
+    sys.exit(main())

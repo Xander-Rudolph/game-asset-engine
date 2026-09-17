@@ -83,6 +83,12 @@ The fix is the order you run things in, not a setting: restart the container,
 run all shapes, restart again, run all textures. `asset_to_mesh.sh` does this
 automatically. Don't mix the stages in your own scripts.
 
+**On a shared server, run `curl -s http://127.0.0.1:8188/queue` before any
+restart.** A restart ends every running and queued job on the server, not only
+yours. `asset_to_mesh.sh` checks that queue before each of its restarts and
+stops if anything is running or pending, unless `ASSET_ENGINE_FORCE_RESTART=1`
+is set.
+
 ## Grey means untextured, not broken
 
 The render tools give an untextured mesh a mid-grey clay material. Blender's

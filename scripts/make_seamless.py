@@ -4,8 +4,8 @@
     scripts/make_seamless.py in.png --out output/materials/plains.jpg
     scripts/make_seamless.py in.png --out out.jpg --size 1024 --check
 
-No node in this ComfyUI install generates tiling textures — there is no
-circular-padding VAE decode and no tiled sampler — so the seam has to be
+No node in this ComfyUI install generates tiling textures (there is no
+circular-padding VAE decode and no tiled sampler), so the seam has to be
 dealt with afterwards.
 
 **Rolling the image by half does nothing.** That is the trick everyone
@@ -31,12 +31,13 @@ import argparse
 import pathlib
 import sys
 
-import numpy as np
-
 try:
+    import numpy as np
     from PIL import Image
 except ImportError:
-    sys.exit("needs Pillow: pip install --user Pillow")
+    sys.exit("needs numpy and Pillow. On Debian or Ubuntu: sudo apt install python3-numpy python3-pil. "
+             "Or in a venv: python3 -m venv ~/.venvs/asset && ~/.venvs/asset/bin/pip install numpy Pillow, "
+             "then run this script with ~/.venvs/asset/bin/python")
 
 
 def seam_score(a):
@@ -48,8 +49,8 @@ def seam_score(a):
     its standard deviation. With nothing to compare against, good and
     bad both looked bad.
 
-    A tiling texture's first and last columns are NEIGHBOURS — they sit
-    side by side when the tile repeats — so the honest question is
+    A tiling texture's first and last columns are NEIGHBOURS (they sit
+    side by side when the tile repeats), so the honest question is
     whether they differ by about as much as any other adjacent pair.
     1.0 is seamless. A freshly generated texture scores several times
     that.
@@ -82,8 +83,8 @@ def _mend(a, axis, band):
 
     What this does instead: near the seam, take the pixels from half a
     tile across. They are unrelated content but the same texture, and
-    crucially they are CONTINUOUS with each other — a[x + w/2] and
-    a[x+1 + w/2] are neighbours — so the discontinuity is replaced by
+    crucially they are CONTINUOUS with each other (a[x + w/2] and
+    a[x+1 + w/2] are neighbours), so the discontinuity is replaced by
     ordinary ground. Weighted to 1 at the seam and 0 at the band's
     edges, the join to the surroundings is a fade between two pieces of
     the same texture, which reads as variation.
@@ -108,7 +109,7 @@ def trim_border(im, flat=3.0):
     Asked for a full-bleed surface, the model sometimes returns a
     *picture* of one: a smaller square inset on a white ground. Every
     edge is then the same flat colour, and tiling it lays a bright
-    lattice across the map — which looks like a seam bug and is not one.
+    lattice across the map, which looks like a seam bug and is not one.
     Told not to draw a border in the negative prompt, it drew one
     anyway, so the prompt is not where this gets fixed.
 
@@ -145,8 +146,8 @@ def make_seamless(im, blend=0.16):
     Rolling by half IS the right move, for a reason worth stating: the
     first and last rows of a rolled image were ADJACENT rows in the
     original, so the outer edges come out continuous by construction.
-    What the roll does is move the one real discontinuity — between the
-    original's last row and its first — into the middle of the tile,
+    What the roll does is move the one real discontinuity (between the
+    original's last row and its first) into the middle of the tile,
     where it can be mended without touching the edges that have to
     match.
 
@@ -203,7 +204,7 @@ def main():
     if after > 1.6 and abs_after > 4.0:
         print("  ! the seam still shows; raise --blend", file=sys.stderr)
     if g.std() < 8:
-        print("  ! very flat — a texture this even reads as a painted "
+        print("  ! very flat: a texture this even reads as a painted "
               "rectangle at map scale", file=sys.stderr)
 
 

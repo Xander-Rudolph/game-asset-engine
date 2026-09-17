@@ -1,6 +1,6 @@
 # Installing it for Claude
 
-This repo is a Claude Code plugin. It ships six skills that drive the pipeline
+This repo is a Claude Code plugin. It ships nine skills that drive the pipeline
 and the MCP server definitions that go with them.
 
 ## Install
@@ -51,11 +51,11 @@ The second prints the component inventory and what each skill costs in tokens:
 
 ```
 Component inventory
-  Skills (6)  asset-cleanup, asset-pipeline, concept-edit, ground-texture, mesh-budget, pose-sheet
+  Skills (9)  asset-cleanup, asset-pipeline, concept-edit, daz-figure, game-music, ground-texture, lip-sync, mesh-budget, pose-sheet
   MCP servers (1)  meshy
 
 Projected token cost
-  Always-on:   ~714 tok   added to every session
+  Always-on:   ~1,136 tok   added to every session
 ```
 
 Skills are discovered from `skills/<name>/SKILL.md`. You do not list them in
@@ -77,6 +77,12 @@ claude plugin validate .
 claude plugin validate .claude-plugin/marketplace.json
 ```
 
+Pointed at `.claude-plugin/plugin.json` instead, the check also passes, with
+one warning: `CLAUDE.md at the plugin root is not loaded as project context`
+(run on 2026-09-16). That is intended in this repo. `CLAUDE.md` holds the rules
+for editing the repo and is read only by Claude working in the repo root, so
+installers should not get it.
+
 ## You do not invoke skills by name
 
 Skills are selected from their `description` frontmatter, so you describe what
@@ -88,6 +94,9 @@ you want in ordinary language and the right one is chosen.
 | "use that one but swap the shoulder pauldron" | `concept-edit` |
 | "render walk and attack sheets for the golem" | `pose-sheet` |
 | "I need a tileable swamp ground texture" | `ground-texture` |
+| "I need a looping battle theme for the boss fight" | `game-music` |
+| "make this portrait talk", "lip sync this line" | `lip-sync` |
+| "I downloaded Genesis 9 from Daz", "render a Genesis character's visemes" | `daz-figure` |
 | "how many faces should this be", "rig this 600k mesh" | `mesh-budget` |
 | "tidy up, I'm done with this asset" | `asset-cleanup` |
 
@@ -115,7 +124,10 @@ runs two stages without asking, that is a bug, not efficiency.
 
 **It shows you the picture.** Every generated image is read back into the
 conversation. A printed file path is not a result, and a skill that reports one
-has skipped the only check that matters.
+has skipped the only check that matters. The one exception is `daz-figure`:
+whether a Daz render may go into a chat model is open under Daz's AI clause, so
+you open its sheets yourself and Claude gives their pixel counts
+([Daz figures](/guide/daz-figures#what-was-not-tested)).
 
 **It checks instead of assuming.** Face counts, body counts, bone names and node
 availability are read off the running server and the real files. Nothing is
@@ -159,10 +171,23 @@ export MESHY_API_KEY=...
 
 Meshy is a hosted service, so it complements this pipeline rather than being part
 of it. It is useful when you want a mesh without a local GPU, or to compare a
-hosted generator against the local one. It costs credits per call, and its
-exports are photogrammetry scale, often around two million triangles, which is
-far more than anything here produces. See
-[face counts and decimation](/guide/decimation) before importing one.
+hosted generator against the local one. Checked on 2026-09-16 against the
+[Meshy MCP server README](https://github.com/meshy-dev/meshy-mcp-server#readme)
+and the 0.5.1 package:
+
+- **The API key needs a Pro plan or above**, and most tools cost credits. The
+  README lists the price of each.
+- **Downloads are saved to `meshy_output/`** under the directory the server runs
+  in, which Claude Code sets to the project you opened. If you installed the
+  plugin, that is your own game repo, so add `meshy_output/` to its ignore file.
+- **The face count can be set.** An export can be photogrammetry scale, often
+  around two million triangles, far more than anything here produces. Smart
+  topology takes a configurable polycount, and remeshing takes a
+  `target_polycount` from 100 to 300,000. See
+  [face counts and decimation](/guide/decimation) before importing one.
+- **The version is not pinned.** `.mcp.json` runs
+  `npx -y @meshy-ai/meshy-mcp-server` with no version, so each start can pick
+  up a new release. 0.5.1 was current on 2026-09-16.
 
 ## The skills
 
@@ -172,6 +197,9 @@ far more than anything here produces. See
 | `concept-edit` | Change one element of an approved image without redrawing it |
 | `pose-sheet` | Sprite sheets, facing sheets, and authoring bone poses |
 | `ground-texture` | Tileable terrain, and fixing seams |
+| `game-music` | Licence-clear instrumental music, looped without a seam |
+| `lip-sync` | Talking portraits: mouth shapes timed to voice lines, with a preview |
+| `daz-figure` | Daz Genesis figures: installed outside the repo, imported into Blender and their visemes rendered; only the renders may ship |
 | `mesh-budget` | Face counts, decimation, rigging heavy meshes |
 | `asset-cleanup` | Curate the keepers, sweep the rest |
 

@@ -11,6 +11,7 @@ its mistakes. This is the cheapest stage to redo and the most expensive to skip.
 | `txt2img_qwen.json` | The real thing. Negative prompts work here. | ~130s |
 | `txt2img_sdxl.json` | Comparison only. Weaker at following prompts. | ~60s |
 | `img_edit_qwen.json` | Changing an image you already have | ~90s |
+| `img_refine_sdxl.json` | Re-rendering materials after a simplify, at low denoise | not recorded |
 
 ## The fast workflow ignores negative prompts
 
@@ -147,6 +148,56 @@ dense with chains and filigree, were barely touched at 0.85, right at 0.93, and
 already flat vector art at 0.97 with their small props gone.
 
 Test one image before running a batch.
+
+## A second pass for materials
+
+A simplify pass can flatten the rendering as it removes clutter. That is why
+both simplify prompts in `prompts/` end by forbidding a flat result: "NOT a
+clay render" in one, "untextured grey or brown plastic" in the other. When the
+result still comes back flatter than you want, fix it with a second pass,
+not a longer prompt.
+
+**Give each pass one job.** Asking Qwen-Image-Edit to simplify and re-render
+realistically in a single prompt did worse than two passes. Asking it for
+photorealism on its own gained only a little: the edit model's style is
+illustrative, and wording does not override it, the same way "NOT cartoon"
+fails at denoise 1.0 above. `prompts/realism_pass.txt` is written as an
+instruction for the edit model: keep the design, change only the rendering.
+Both findings come from the development sessions recorded in `AUDIT.md`;
+neither was re-run for this page.
+
+**The render pass uses a different model.** `img_refine_sdxl.json` runs SDXL
+base as an image-to-image pass over the simplified picture. Its own positive
+and negative prompts describe materials and lighting, not a design, so you
+change nothing but the source image and the output name:
+
+```sh
+scripts/run_workflow.py workflows/api/img_refine_sdxl.json \
+    --image output/simplified/ornate_knight.png \
+    --set 'Sampler.denoise=0.3' --set 'Save.filename_prefix=refined/ornate_knight'
+```
+
+Denoise is the whole control, as it is for the edit model, but in a much lower
+band:
+
+| Denoise | What you get |
+|---|---|
+| 0.25 to 0.35 | Adds material detail and keeps the design. The graph ships at 0.3. |
+| Above about 0.5 | SDXL starts reinventing shapes. |
+
+Those bands come from the graph's own `_comment` and the same session record in
+`AUDIT.md`. No image count or measurement is recorded with them, so treat them
+as a starting point and test one image first.
+
+::: warning Don't swap in a community realism checkpoint
+The graph loads `sd_xl_base_1.0.safetensors` on purpose. SDXL base is
+CreativeML OpenRAIL++-M, which `models.json` marks commercial
+([licensing](/guide/licensing#sdxl-and-sd1-5)). The realism checkpoints from
+CivitAI that were on the development machine are not used, and the graph's
+`_comment` says why: "their licensing is unclear and this pipeline ships game
+assets". A swap that looks like a free upgrade brings that licence question
+with it, and it needs an answer before you ship anything the checkpoint made.
+:::
 
 ## Naming outputs
 

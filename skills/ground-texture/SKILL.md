@@ -22,7 +22,7 @@ prints rather than working around it.
 
 ```sh
 scripts/run_workflow.py workflows/api/preset_ground_texture.json \
-    --prompt 'dense woodland floor of fallen leaves, moss, twigs and needles'
+    --subject 'dense woodland floor of fallen leaves, moss, twigs and needles'
 ```
 
 Or generate a whole set from the prompt library:
@@ -32,7 +32,8 @@ WIDTH=1024 HEIGHT=1024 scripts/generate_concepts.sh prompts/ground
 ```
 
 The preset carries a fixed sentence and **only the subject phrase should
-change**. Every other clause is preventing one specific failure:
+change**, which is what `--subject` does. `--prompt` would replace the whole
+sentence. Every other clause is preventing one specific failure:
 
 | Clause | Stops |
 |---|---|

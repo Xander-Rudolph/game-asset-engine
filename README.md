@@ -38,9 +38,18 @@ Qwen-Image, which is in the `qwen` group.
 Then <http://localhost:8188>, or make something from the terminal:
 
 ```sh
-scripts/run_workflow.py workflows/api/preset_concept_creature.json \
-    --prompt "a mossy stone golem, thick moss on the shoulders"
+scripts/run_workflow.py workflows/api/preset_ground_texture.json \
+    --subject "dense woodland floor of fallen leaves, moss, twigs and needles"
 ```
+
+`--subject` fills the preset's subject slot and keeps its technique text;
+`--prompt` would replace the whole text, technique and all. The character,
+creature, building and prop presets also carry an `<<< ART DIRECTION: ... >>>`
+slot that `--subject` leaves alone; `run_workflow.py` warns about it and
+queues anyway. Fill it first, as
+[Bring your own art direction](#bring-your-own-art-direction) describes, and run
+`scripts/build_presets.py`, or the placeholder reaches the model as literal
+text.
 
 There is a [click through notebook](notebooks/asset_pipeline.ipynb) that walks
 the whole pipeline one cell at a time.
@@ -120,6 +129,9 @@ picked from its description:
 | "use that one but swap the shoulder pauldron" | `concept-edit`, changes one element without redrawing |
 | "render walk and attack sheets for the golem" | `pose-sheet`, sprite sheets and facings |
 | "I need a tileable swamp ground texture" | `ground-texture`, generation plus seam fixing |
+| "I need a looping battle theme for the boss fight" | `game-music`, licence-clear music looped without a seam |
+| "make this portrait talk" / "lip sync this line" | `lip-sync`, a talking portrait: mouth shapes timed to a voice line |
+| "import a Daz figure into Blender" / "render a Genesis character's visemes" | `daz-figure`, a Genesis figure you downloaded, imported and its visemes rendered, licence first |
 | "how many faces should this be" / "rig this 600k mesh" | `mesh-budget`, measured budgets and heavy-mesh rigging |
 | "tidy up, I'm done with this asset" | `asset-cleanup`, curate the keepers and sweep the rest |
 
@@ -141,7 +153,8 @@ Worth knowing so you can tell when something is off:
   image, so the gates are deliberate. If Claude runs two stages without asking,
   that is a bug.
 - **It shows you the picture.** Every generated image is read back into the
-  conversation. A printed file path is not a result.
+  conversation. A printed file path is not a result. Renders of Daz content are
+  the exception: you open those yourself, and Claude gives their pixel counts.
 - **It checks rather than assumes.** Face counts, bone names, body counts and
   node availability are read off the running server and the real files, never
   described from memory.
@@ -175,6 +188,9 @@ export MESHY_API_KEY=...
 | `concept-edit` | Change one element of an approved image |
 | `pose-sheet` | Sprite sheets, facing sheets, bone poses |
 | `ground-texture` | Tileable terrain, and fixing seams |
+| `game-music` | Licence-clear instrumental music, looped without a seam |
+| `lip-sync` | Talking portraits: mouth shapes timed to voice lines |
+| `daz-figure` | Genesis figures from Daz: install, import into Blender, render the visemes; only renders may ship |
 | `mesh-budget` | Face counts, decimation, rigging heavy meshes |
 | `asset-cleanup` | Curate the keepers, sweep the rest |
 
@@ -199,6 +215,8 @@ It deploys to GitHub Pages on every push to `main`.
 | [Rigging](https://xander-rudolph.github.io/game-asset-engine/guide/rigging) | Including heavy and scanned meshes |
 | [Ground and terrain](https://xander-rudolph.github.io/game-asset-engine/guide/terrain) | Tileable textures, and four ways to get seams wrong |
 | [Music](https://xander-rudolph.github.io/game-asset-engine/guide/music) | Licence-clear music that loops without a seam |
+| [Talking portraits](https://xander-rudolph.github.io/game-asset-engine/guide/talking-portraits) | Mouth shapes for a dialogue portrait, timed to a voice line |
+| [Daz figures](https://xander-rudolph.github.io/game-asset-engine/guide/daz-figures) | A Genesis figure in Blender, its visemes rendered, and what its licence lets ship |
 | [Licensing](https://xander-rudolph.github.io/game-asset-engine/guide/licensing) | Read before shipping anything |
 
 ## Licensing, briefly
@@ -223,5 +241,6 @@ authors and the CC0 animation library. Full list in [CREDITS.md](CREDITS.md).
 
 ## Requirements
 
-A CUDA GPU with 12GB or more, about 200GB of disk for weights, about 28GB for the
-image, Docker with the NVIDIA container toolkit. Linux.
+A CUDA GPU. Tested on an RTX 4070 Ti SUPER (16GB) with 31GB of RAM; a 12GB card
+is untested. About 200GB of disk for weights, about 28GB for the image, Docker
+with the NVIDIA container toolkit. Linux.

@@ -1,0 +1,17 @@
+[
+ {"_note": "Role pose for scripts/bone_roles.py compile. rotate is degrees about the character's own axes: X to its right, Y forward, Z up; right-hand rule, X then Y then Z. +X swings a hanging limb forward and tips a rising part back. A blow from the front.",
+  "_frame": "rest, the moment before the blow lands"},
+ {"_frame": "recoil: torso and head thrown back, arms flung forward and out, one foot lifts",
+  "spine": {"rotate": [12, 0, 0]}, "chest": {"rotate": [10, 0, 0]},
+  "head": {"rotate": [18, 0, 0]},
+  "left_upper_arm": {"rotate": [24, 16, 0]}, "left_forearm": {"rotate": [20, 0, 0]},
+  "right_upper_arm": {"rotate": [24, -16, 0]}, "right_forearm": {"rotate": [20, 0, 0]},
+  "left_thigh": {"rotate": [14, 0, 0]}, "left_shin": {"rotate": [-12, 0, 0]},
+  "right_thigh": {"rotate": [-6, 0, 0]}},
+ {"_frame": "recovering: half way back",
+  "spine": {"rotate": [5, 0, 0]}, "chest": {"rotate": [5, 0, 0]},
+  "head": {"rotate": [8, 0, 0]},
+  "left_upper_arm": {"rotate": [10, 8, 0]}, "left_forearm": {"rotate": [10, 0, 0]},
+  "right_upper_arm": {"rotate": [10, -8, 0]}, "right_forearm": {"rotate": [10, 0, 0]},
+  "left_thigh": {"rotate": [6, 0, 0]}}
+]

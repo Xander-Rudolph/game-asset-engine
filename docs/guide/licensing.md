@@ -2,7 +2,8 @@
 
 If you are making a game to sell, this is the page that matters. Three separate
 questions: the animations you apply, the models that generate the mesh, and the
-software those models run through. Music has [its own section](#music-and-sound).
+software those models run through. Music has [its own section](#music-and-sound),
+and so does [lip sync](#lip-sync).
 
 None of this is legal advice. The linked licences are the authority.
 
@@ -72,9 +73,9 @@ restrictions travel with the model, not with a mesh you derive from a render.
 
 ## Music and sound
 
-Nothing in this repository makes audio yet. The question still comes up as soon
-as a project ships a soundtrack, and the best-known open model is the one to
-avoid.
+This repository makes music with ACE-Step 1.5, whose weights are MIT
+([Music](/guide/music)). The question still comes up whenever a soundtrack
+comes from anywhere else, and the best-known open model is the one to avoid.
 
 ### MusicGen: the weights are non-commercial
 
@@ -133,6 +134,76 @@ Whichever you choose, write down where each track came from and under what
 licence, next to the file. This section exists because a soundtrack made with
 MusicGen was credited as licence-free.
 
+## Lip sync
+
+[Talking portraits](/guide/talking-portraits) involve three things with
+licences: Rhubarb Lip Sync, which times the mouths, the image edit model, which
+draws them, and the voice, which this repository does not make.
+
+### Rhubarb Lip Sync is fetched, not redistributed
+
+`scripts/fetch_tools.py --download rhubarb` downloads the official Rhubarb Lip
+Sync 1.14.0 Linux release from its author's GitHub releases, pinned in
+`tools.json` by size and sha256, and unpacks only `rhubarb`, `res/` and
+`LICENSE.md` into `tools/`, which is gitignored. It runs there, on the host.
+Nothing of Rhubarb is committed to this repository, and the Dockerfile copies
+no `tools/` folder into the image, so neither the repository nor a published
+image redistributes it. You fetch it from its author, under its own licence.
+
+Read on 2026-09-16 in the release's own
+[LICENSE.md](https://github.com/DanielSWolf/rhubarb-lip-sync/blob/v1.14.0/LICENSE.md),
+as `fetch_tools.py` unpacked it:
+
+| Layer | Licence | What you owe |
+|---|---|---|
+| Rhubarb's own code | MIT, "Copyright (c) 2015-2016 Daniel Wolf" | The notice, in "all copies or substantial portions of the Software" |
+| The parts compiled into `rhubarb` or shipped in `res/` | The notices LICENSE.md lists: PocketSphinx, sphinxbase and the CMU Sphinx US English acoustic model under variations of the 2-clause BSD licence; Boost and UTF8-CPP under the Boost Software License; C++ Format under 2-clause BSD; Flite under a BSD-like licence; GSL, TCLAP, the Sound Change Applier and utf8proc under MIT, with some of utf8proc's data under the Unicode licence; libogg, libvorbis and WebRTC under 3-clause BSD; Where Am I? under the WTFPL | Every one of those notices, conditions and disclaimers, but only if you ship the binary or `res/`, for example to lip-sync at run time. Flite's licence also requires that "Any modifications must be clearly marked as such", that "Original authors' names are not deleted", and that their names are not used "to endorse or promote products derived from this software without specific prior written permission" |
+| The cue data it makes | The summary at the top of LICENSE.md, which says it "is not legally binding", says "the resulting lip sync data belongs to you alone" | Nothing, for a game that ships only the cues, or frames made from them |
+
+The release zip also holds a Spine integration,
+`extras/EsotericSoftwareSpine/rhubarb-for-spine-1.14.0.jar`, which bundles
+OpenJFX (GPL-2.0 with Classpath Exception) and javax.json (CDDL-1.1 or
+GPL-2.0), and LICENSE.md does not list it. `fetch_tools.py` never unpacks it.
+Whether the archive as a whole can be called permissive is unsettled
+([lip sync](/reference/lip-sync#licences)).
+
+`scripts/fetch_tools.py --licenses` prints the licence recorded for each tool.
+
+### The mouths and the voice
+
+The mouth overlays are edits made with Qwen-Image-Edit 2509, whose weights are
+Apache-2.0 (`scripts/fetch_models.py --licenses`), a licence that says nothing
+about generated images
+([lip sync](/reference/lip-sync#licences)).
+
+The voice lines are yours to source, and they carry the licence of whatever
+made them. Several open text-to-speech models pair permissive code with
+weights or training data that bar commercial use, XTTS-v2 and Piper's lessac
+voice among them.
+[Lip sync](/reference/lip-sync#text-to-speech-whose-lines-may-ship) sorts them
+into allowed, allowed with conditions, not allowed and unsettled, checked on
+2026-09-15. None of them is fetched or run here. Write down where each line
+came from, next to the file, as for music.
+
+## Researched, not shipped
+
+Research notes also check licences for things this pipeline does not do yet.
+Each is dated and links the text it read.
+
+- **Voice lines.** This repository times mouths to a voice line but makes no
+  speech. [Lip sync](/reference/lip-sync#text-to-speech-whose-lines-may-ship)
+  checks the text-to-speech models and voices a game might use instead of a
+  recording, as [above](#the-mouths-and-the-voice).
+- **DAZ Genesis figures.** Sprites and portraits rendered from them may ship
+  under the standard Daz EULA. The mesh, rig or morphs inside a build need an
+  Interactive License for each product, and the EULA's AI clause puts feeding
+  Daz content to this pipeline's models in doubt
+  ([DAZ Genesis](/reference/daz-genesis#licences)).
+- **Source engine tools.** None is in the image. The Source SDK code may be used
+  only to develop a Source 1 mod of a Valve game, and content made with Valve's
+  developer tools, such as studiomdl, is non-commercial by default
+  ([Source Filmmaker](/reference/source-filmmaker#licences-copy-learn-from-never-vendor)).
+
 ## Decide per asset, before it ships
 
 | The asset will | Generate it with |
@@ -177,6 +248,8 @@ Unlike the GPL rows above, these limit what you may *use* the software for, not
 what you may do with its code. Plain TRELLIS bakes its colour texture through
 both, which is why that texture is no clean replacement for Hunyuan3D's paint
 ([the run and the licence text](/guide/trellis#why-the-colour-is-research-only)).
+Its mesh decoder's vertex colours, baked in Blender instead, load neither
+([the vertex-colour route](/guide/trellis#the-vertex-colour-route-licence-clean-and-just-as-dark)).
 Before trusting any texturing route, read the licence file of every rasteriser
 it imports, not just the model card.
 :::
@@ -221,7 +294,13 @@ clause back. The plain TRELLIS branch does return a coloured mesh with no
 territory clause, but it bakes that colour through two research-only
 rasterisers, so it is no way round the clause for anything you sell
 ([TRELLIS](/guide/trellis#plain-trellis-was-run-the-colour-works-and-its-licence-does-not)).
-So far, no texturing route here is both proven and free of restrictions.
+
+The one texture route with no conditions is TRELLIS's own vertex colours,
+baked in Blender: a run with both research-only rasterisers blocked finished
+cleanly, and the FlexiCubes code it builds meshes with is Apache-2.0. It is a
+tested method, not a shipped graph yet, and its colour comes out dark enough
+to need matching to the concept afterwards
+([the numbers](/guide/trellis#the-vertex-colour-route-licence-clean-and-just-as-dark)).
 
 Note what this route deliberately avoids and why: Hunyuan3D texturing because of
 its territory clause, TripoSG because of the unresolved licence file above (it
@@ -264,6 +343,79 @@ separate GPL ffmpeg builds, and the whole Ubuntu base layer.
 **[The full inventory is on its own page](/guide/redistributing)**, including what
 already meets the source duty, what needs a source offer, the AGPL question that
 hosting raises, and what could not be determined.
+
+## Meshy, the hosted service the plugin wires in
+
+The plugin's `.mcp.json` configures Meshy's MCP server
+(`@meshy-ai/meshy-mcp-server`), which calls Meshy with your `MESHY_API_KEY`. A
+Meshy mesh comes under Meshy's service terms, not a model licence, and the
+terms depend on your plan and on what you do with the result.
+
+Read on 2026-09-16: Meshy's [Terms of Service](https://www.meshy.ai/terms-of-use)
+and the FAQ on its [pricing page](https://www.meshy.ai/pricing). The terms page
+was headed "Last Updated: September 19, 2026", three days after that read, and
+says changes "take effect on the date indicated as 'Last Updated'". Read both
+pages again before relying on this.
+
+| Case | What the page says |
+|---|---|
+| Free plan | Terms 3.2: Meshy "owns all right, title, and interest, including all intellectual property rights, in and to the AI Customer Output" and licenses it to you under CC BY 4.0, so you "can share and adapt the assets for any purpose, even commercially, as long as Free Customer provides appropriate credit to Provider" |
+| Paid plan | Pricing FAQ: "If you are on a premium plan, you own all assets you create with Meshy." Terms 3.2 gives paid plans "the option to keep their User Content private" and does not say who owns their output |
+| Released to the Meshy Community page | Terms 3.3: "such output is licensed under the Creative Commons Zero (CC0) 1.0 Universal Public Domain Dedication license" |
+| Reference images and other input | Terms 2.2: you warrant "that you have all rights, licenses, and permissions needed to input such Customer Input into the Service". Pricing FAQ: you own the assets "provided that you have used materials that do not violate the copyrights of others in the process of generating your model" |
+
+Four more lines in the terms bear on a game pipeline:
+
+- **AI markers.** Terms 2.4: the service "may include machine-readable metadata,
+  digital watermarks, or other identifiers in Customer Output", and "You agree
+  not to remove, alter, disable, or otherwise tamper with such identifiers".
+  Whether a Meshy export carries any, and whether this pipeline's decimate and
+  export steps keep them, was not checked.
+- **API output is deleted.** Terms 2.5: output "generated by Customers using the
+  APIs, other than Enterprise Customers, will be deleted three (3) days after it
+  is generated". The MCP server uses the API, so download what you keep.
+- **Training.** Terms 2.9: "Meshy may use Customer Inputs and Customer Outputs
+  from non Enterprise Customers" to "train, validate, test, or improve
+  Services". The pricing FAQ says the opposite: "We will NOT share your data or
+  use it for any training purpose without your consent." The terms say that
+  they, with any Order, DPA and the Privacy Policy, "form the entire agreement
+  between you and Meshy". The Privacy Policy was not read. Think about this
+  before sending unreleased concept art.
+- **Competing models.** Terms 2.6 bars using "generated digital assets to train,
+  develop, or improve AI models that are competitive with Meshy".
+
+So, per mesh: record the plan it was made on in `sources.json`. A free-plan
+mesh comes under CC BY 4.0 and needs a credit to Meshy, while the FAQ calls a
+paid-plan mesh "exclusively yours". Don't release a mesh to the Community page
+if you mean to keep it to yourself, because it goes out under CC0. Feed Meshy
+only images you have the rights to, such as concepts made in this pipeline
+under the licences above.
+
+## Kept out on purpose
+
+Image models that are easy to plug in here, and that this repository does not
+use. Checked on 2026-09-16.
+
+**FLUX.1 [dev] and FLUX.1 Krea [dev].** The
+[FLUX.1 [dev] Non-Commercial License v1.1.1](https://raw.githubusercontent.com/black-forest-labs/flux/main/model_licenses/LICENSE-FLUX1-dev)
+grants use of the model "solely for your Non-Commercial Purposes", and says
+that "use (a) for revenue-generating activity, (b) in direct interactions with
+or that has impact on end users ... is not a Non-Commercial Purpose". Section
+4(a) goes further: you will not use the model "(or any Derivative thereof, or
+any data produced by the FLUX.1 [dev] Model), in whole or in part, (i) for any
+commercial or production purposes". Its outputs clause says "You may use Output
+for any purpose (including for commercial purposes), except as expressly
+prohibited herein", and 4(a) names data produced by the model. The
+[Krea [dev] model card](https://huggingface.co/black-forest-labs/FLUX.1-Krea-dev)
+names the licence `flux-1-dev-non-commercial-license`, and its download gate
+asks you to agree to the "FluxDev Non-Commercial License Agreement". Neither
+belongs in a pipeline for a game you sell.
+
+**Community checkpoints from CivitAI.** There is no one licence to quote. The
+realism checkpoints that were on the development machine are not used, and
+`img_refine_sdxl.json` records why: "their licensing is unclear and this
+pipeline ships game assets". Their licence terms were not read. The refine pass
+uses SDXL base instead ([concept art](/guide/concept-art#a-second-pass-for-materials)).
 
 ## Hunyuan3D is kept here on purpose
 

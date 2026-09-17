@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """List the animation clips the installed node packs can apply to a mesh.
 
-Two separate libraries, on two separate skeletons — see the README:
+Two separate libraries, on two separate skeletons (see the README):
 
   mesh2motion  bundled .glb clip libraries, one per rig family, bound to
                mesh2motion's own rigs.  Read straight out of the glTF JSON
@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parent.parent
 M2M = ROOT / "custom_nodes/ComfyUI-mesh2motion/mesh2motion-ui/animations"
 UNIRIG = ROOT / "custom_nodes/ComfyUI-UniRig/assets/animation_templates"
 # prestartup_script.py copies the pack's templates here, and this is the folder
-# the UniRigApplyAnimation combo actually reads — drop Mixamo downloads in it.
+# the UniRigApplyAnimation combo actually reads: drop Mixamo downloads in it.
 LIVE = ROOT / "input/animation_templates"
 
 
@@ -48,7 +48,7 @@ def main() -> int:
 
     print(f"mesh2motion  ({M2M})")
     if not M2M.is_dir():
-        print("  not installed — scripts/setup.sh clones it")
+        print("  not installed: scripts/setup.sh clones it")
     for glb in sorted(M2M.glob("*.glb")):
         rig = glb.stem.replace("-animations", "")
         clips = [c for c in glb_animations(glb)
@@ -67,7 +67,7 @@ def main() -> int:
     for label, root in (("UniRig (pack)", UNIRIG), ("UniRig (live, editable)", LIVE)):
         print(f"\n{label}  ({root})")
         if not root.is_dir():
-            print("  not present yet — appears after the container's first start")
+            print("  not present yet: it appears after the container's first start")
             continue
         for sub in sorted(p for p in root.iterdir() if p.is_dir()):
             files = sorted(p.name for p in sub.iterdir() if p.is_file())

@@ -1,9 +1,33 @@
 {
  "id": "txt2music_acestep15",
  "revision": 0,
- "last_node_id": 10,
+ "last_node_id": 11,
  "last_link_id": 10,
  "nodes": [
+  {
+   "id": 11,
+   "type": "Note",
+   "pos": [
+    -20,
+    60
+   ],
+   "size": [
+    400,
+    600
+   ],
+   "flags": {},
+   "order": -1,
+   "mode": 0,
+   "title": "Read me",
+   "properties": {
+    "text": ""
+   },
+   "widgets_values": [
+    "MUSIC: caption in, instrumental FLAC out, ACE-Step 1.5 turbo\n\nMIT, and its model card allows commercial use of the music it makes.\n\nIn TextEncodeAceStepAudio1.5, 'tags' is the caption: a genre label,\nthen a sentence or two on mood, instruments and pace.  'lyrics' holds\n[Instrumental].  There is no negative prompt, so say only what the\ntrack should be.  Leave \"no vocals\" out of the caption: naming a thing\nsummons it.\n\n'duration' there and 'seconds' in EmptyAceStep1.5LatentAudio are\nseparate inputs that nothing ties together.  Set both to the same\nlength.\n\nTHE PLANNER IS OFF ('generate_audio_codes').  Off, ambient beds held\nup.  Turn it on for anything with a tune: a menu theme, a chamber\npiece and two battle tracks made without it were rejected by ear.  It\nruns on the CPU here, about 4.5 minutes for a 150-second take, and\nholds the queue the whole time.\n\nKEEP THE TEXT ENCODERS ON THE CPU (DualCLIPLoader, device cpu).  On\nthis image's PyTorch 2.6 the planner's sampling on the GPU gave NaN\nprobabilities, and the CUDA assert aborted the whole ComfyUI server,\ntaking every queued job with it (Comfy-Org/ComfyUI#12274).\n\nA folder of tracks, and seamless loops: scripts/generate_music.py.\nMeasured figures: docs/guide/music.md\n\n---\n\nText to music with ACE-Step 1.5 turbo: MIT, and its model card\nallows commercial use of what it makes. The sampler settings are\nthe official ComfyUI template's: 8 steps at cfg 1.0, euler with\nthe simple scheduler, AuraFlow sampling shift 3, and a zeroed\nnegative (the model takes no negative prompt). Put a caption in\nMusic.tags and [Instrumental] in Music.lyrics for a track with\nno singing. Music.duration and Length.seconds are separate\ninputs that nothing ties together: set both to the same length.\nTHE PLANNER IS OFF HERE (Music.generate_audio_codes false), and\nanything with a tune should turn it on: its 1.7B language model\nwrites codes that carry the melody and the orchestration, and a\nmenu theme, a chamber piece and two battle tracks made without\nit were rejected by ear, while ambient beds held up. With only\n[Instrumental] in Music.lyrics it lays the track out as a song,\nwith an intro, breaks and an ending; with a section script there\ninstead ([Main Theme - strings], [Variation - horns], no intro,\nbreakdown or outro) six battle takes of six held together. A\nslow theme still fell silent for half a minute; the same theme\nas a march over an ostinato did not. It is slow: about 4.5\nminutes on the CPU for 150 seconds of music. THE TEXT ENCODERS\nRUN ON THE CPU ON PURPOSE: on this image's PyTorch 2.6 the\nplanner's sampling on the GPU produces NaN probabilities, and\nthe CUDA assert aborts the whole ComfyUI server, taking every\nqueued job with it (Comfy-Org/ComfyUI#12274). On the CPU it\nworks, at about 2.3 s of planning per second of music. Saves\nFLAC, so the loop and encode step works from lossless audio.\nNeeds the 'music' weight group. scripts/generate_music.py drives\nthis from a prompt folder."
+   ],
+   "color": "#432",
+   "bgcolor": "#653"
+  },
   {
    "id": 1,
    "type": "UNETLoader",

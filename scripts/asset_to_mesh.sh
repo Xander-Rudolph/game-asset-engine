@@ -6,24 +6,73 @@
 # STAGED, NOT PER-ASSET, and that is the whole design. ComfyUI-3D-Pack holds its
 # Hunyuan pipelines in its own node cache, outside ComfyUI's model management, so
 # POST /free does not release them and ~5GB stays pinned. With auto_cleanup left
-# false (it has to be — see img2mesh_hunyuan3d21.json) a TexGen run leaves TexGen
+# false (it has to be, see img2mesh_hunyuan3d21.json) a TexGen run leaves TexGen
 # resident, and the next asset's ShapeGen then dies with
 # `torch.OutOfMemoryError: Allocation on device` in its loader.
 #
 # So: restart the container once, run EVERY shape (ShapeGen loads once and stays
 # hot), restart again, run EVERY texture. Two restarts for a whole batch instead
 # of one per asset, and each heavy model is loaded exactly once.
+#
+# The server is SHARED, and a restart kills whatever it is running or holding in
+# its queue. So each restart first reads GET /queue and refuses, naming the jobs,
+# when anything is there. Set ASSET_ENGINE_FORCE_RESTART=1 to restart anyway,
+# and only when those jobs are yours to lose.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 mkdir -p logs output/assets output/sheets
 LOG="logs/tomesh-$(date +%Y%m%d-%H%M%S).log"
 echo "log: $LOG"
 
+COMFY="${COMFY_URL:-http://127.0.0.1:8188}"
+
+# Exits the script when the server holds any job, running or pending, because a
+# restart would kill it. Prints nothing when the queue is empty.
+require_empty_queue() {
+    if [ "${ASSET_ENGINE_FORCE_RESTART:-0}" = "1" ]; then
+        echo "ASSET_ENGINE_FORCE_RESTART=1: restarting without checking $COMFY/queue" >&2
+        return 0
+    fi
+    local queue busy
+    if ! queue=$(curl -sf -m 30 "$COMFY/queue"); then
+        echo "asset_to_mesh.sh: could not read $COMFY/queue, so it cannot tell whether a" \
+             "restart would kill other jobs on the shared server. Not restarting." \
+             "Set ASSET_ENGINE_FORCE_RESTART=1 to restart anyway." >&2
+        exit 1
+    fi
+    if ! busy=$(printf '%s' "$queue" | python3 -c '
+import json, sys
+try:
+    q = json.load(sys.stdin)
+except ValueError:
+    sys.exit(1)          # the shell prints the one-line reason
+if not isinstance(q, dict) or not all(
+        isinstance(q.get(k) or [], list) for k in ("queue_running", "queue_pending")):
+    sys.exit(1)
+def ids(key):
+    return [str(i[1]) if isinstance(i, list) and len(i) > 1 else "?" for i in q.get(key) or []]
+run, pend = ids("queue_running"), ids("queue_pending")
+if run or pend:
+    print("%d running (%s), %d pending (%s)" % (
+        len(run), ", ".join(run) or "none", len(pend), ", ".join(pend) or "none"))
+'); then
+        echo "asset_to_mesh.sh: $COMFY/queue did not answer with a queue. Not restarting." >&2
+        exit 1
+    fi
+    if [ -n "$busy" ]; then
+        echo "asset_to_mesh.sh: not restarting. The ComfyUI server at $COMFY is shared and" \
+             "holds $busy. Restarting would kill other jobs on the shared server." \
+             "Wait for them to finish, or set ASSET_ENGINE_FORCE_RESTART=1 if they are yours to lose." >&2
+        exit 1
+    fi
+}
+
 restart() {
+    require_empty_queue
     # The container is comfyui-packaged for the published image and comfyui for a
     # source build, so ask the same resolver the other scripts use.
     docker restart "$(python3 scripts/_engine.py)" >/dev/null 2>&1
-    until curl -s -o /dev/null "${COMFY_URL:-http://127.0.0.1:8188}/object_info"; do sleep 4; done
+    until curl -s -o /dev/null "$COMFY/object_info"; do sleep 4; done
     sleep 2
 }
 

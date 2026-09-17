@@ -13,6 +13,12 @@ server, the node packs, Blender, sparse convolution, the weights, the output
 folders), and each of them shows up much later as something that looks like a
 broken workflow. Checking first takes a few seconds and removes the guessing.
 
+It also checks what runs on the host rather than in the container: ffmpeg and
+ffprobe on the PATH, and each command-line tool in tools.json unpacked under
+tools/ by scripts/fetch_tools.py. Only lip sync needs these today
+(lipsync_cues.py and preview_lipsync.py), so a gap there is a warning, not a
+failure.
+
 Exit codes: 0 everything ready, 1 something is missing, 2 could not check.
 """
 from __future__ import annotations
@@ -123,7 +129,8 @@ def check_gpu(rep: Report) -> None:
     else:
         rep.add(WARN, "gpu runtime", "no NVIDIA GPU found",
                 "The pipeline runs on CPU only in theory. In practice mesh "
-                "generation needs a CUDA GPU with 12GB or more.")
+                "generation needs a CUDA GPU. It was measured on an "
+                "RTX 4070 Ti SUPER with 16GB and 31GB of host RAM; 12GB is untested.")
 
 
 def check_env(rep: Report, fix: bool) -> None:
@@ -280,6 +287,36 @@ def check_models(rep: Report) -> None:
                 "concept presets also need --download --group qwen, about 48GB)")
 
 
+def check_host_tools(rep: Report) -> None:
+    """ffmpeg and ffprobe on the host, and the tools.json tools under tools/.
+
+    Warnings, not failures: only lip sync uses them, and every other skill
+    runs without them."""
+    missing = [t for t in ("ffmpeg", "ffprobe") if not shutil.which(t)]
+    if missing:
+        rep.add(WARN, "ffmpeg", f"not on the host's PATH: {', '.join(missing)}",
+                "Lip sync (lipsync_cues.py, preview_lipsync.py) needs ffmpeg and "
+                "ffprobe on the host. Install your system's ffmpeg package")
+    else:
+        rep.add(OK, "ffmpeg", "ffmpeg and ffprobe on the host")
+    try:
+        import fetch_tools
+        tools = fetch_tools.load_manifest()
+    except SystemExit as e:
+        rep.add(WARN, "tools.json", str(e)[:200], "Fix the entry in tools.json")
+        return
+    except (OSError, ValueError, KeyError) as e:
+        rep.add(WARN, "tools.json", f"could not read it: {e}", "")
+        return
+    for t in tools:
+        why = fetch_tools.problems(t)
+        if why:
+            rep.add(WARN, t["name"], f"{t['version']}: {why[0]}",
+                    f"scripts/fetch_tools.py --download {t['name']}")
+        else:
+            rep.add(OK, t["name"], f"{t['version']} in {t['dest']}")
+
+
 def check_writable(rep: Report) -> None:
     bad = []
     for d in ("output", "input", "logs"):
@@ -320,6 +357,7 @@ def main() -> int:
         if not args.skip_models:
             check_models(rep)
         check_writable(rep)
+    check_host_tools(rep)
 
     if args.json:
         print(json.dumps({"ready": not rep.failed, "checks": rep.rows}, indent=2))

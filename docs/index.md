@@ -63,8 +63,9 @@ angle your map uses.
 
 ## What it costs to run
 
-A CUDA GPU with 12GB or more, about 200GB of disk for the model weights, and
-about 28GB for the prebuilt image. There are no per-asset fees. A concept image
+A CUDA GPU (measured on an RTX 4070 Ti SUPER with 16GB and 31GB of RAM; a 12GB
+card has not been tested), about 200GB of disk for the model weights, and about
+28GB for the prebuilt image. There are no per-asset fees. A concept image
 takes 30 seconds to 2 minutes, a mesh about a minute, a rig a few minutes.
 
 ## Where to go next

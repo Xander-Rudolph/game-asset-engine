@@ -6,6 +6,9 @@
 # Weights, uploads, generated output: none of this belongs in git
 input/
 output/
+# Command-line tools fetched by scripts/fetch_tools.py (tools.json). Anchored, so a
+# folder called tools/ anywhere else in the repo is still tracked.
+/tools/
 logs/*
 !logs/.gitkeep
 *.log

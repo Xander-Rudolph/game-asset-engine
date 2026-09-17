@@ -27,7 +27,7 @@ from `prompts/music/`, and copy its `_style.txt` too.
 bpm: 96
 key: D minor
 time: 4
-seconds: 150
+seconds: 200
 seed: 1
 lufs: -16
 planner: yes
@@ -52,8 +52,9 @@ throughout, warm, lush, studio-polished cinematic mix.
   with the caption.
 - **Give a slow theme a pulse.** An ostinato or a steady drum under it is what
   kept a slow theme from falling silent.
-- Ask for 150 to 200 seconds. Use `lufs: -16` for ambience and menus and
-  `-14` for battles.
+- Ask for about 200 seconds. A loop comes out shorter than its take: 75 to
+  182 seconds from takes of 145 to 210. Use `lufs: -16` for ambience and
+  menus and `-14` for battles.
 
 ## 2. Generate several takes and keep the best loops
 
@@ -76,10 +77,15 @@ the next run finds those takes and records them instead of making them
 again. On a busy or low-memory box, queue a track's takes together with
 `--no-wait`, then run the same command without it to loop and record them.
 
-## 3. Hand the winners to the user to listen to
+## 3. Put every take in front of the listener, not just the winner
 
 The picker measures silence, level jumps and loudness. It cannot hear whether
-a track is any good or whether a voice crept in. Say that plainly.
+a track is any good or whether a voice crept in. Say that plainly, and hand
+over `out/music/takes/` as well as the kept loops. In the game's own listening
+pass, two of the four menu and battle takes kept by ear were the ones the
+measurements ranked first, and a battle prompt whose three takes measured among
+the cleanest was turned down (`docs/guide/music.md`, "Several takes, picked by
+measurement").
 
 ## Rules
 

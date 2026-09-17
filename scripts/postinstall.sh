@@ -20,7 +20,7 @@ echo "logging to $LOG"
 
 SVC="${SVC:-comfyui}"
 if ! docker compose --profile comfy ps --services --filter status=running | grep -qx "$SVC"; then
-    echo "$SVC is not running — start it with 'docker compose --profile comfy up -d' first." >&2
+    echo "$SVC is not running. Start it with 'docker compose --profile comfy up -d' first." >&2
     exit 1
 fi
 
@@ -36,7 +36,7 @@ else
 fi
 
 # comfy-env's pixi environment resolves comfy-kitchen to latest, which needs
-# torch >= 2.7 for its PEP 585 custom-op annotations — the same wall the main
+# torch >= 2.7 for its PEP 585 custom-op annotations, the same wall the main
 # environment hit.  The pixi env correctly inherits torch 2.6, so the two
 # disagree and UniRig registers ZERO nodes (silently: it logs the ValueError and
 # carries on).  0.2.26 is the last release that runs on torch 2.6.
@@ -49,7 +49,7 @@ fi
 
 # Hunyuan3D-2.1's TexGen needs a pybind11 extension that ships as SOURCE ONLY.
 # Without it MeshRender.py's bare `except` swallows the ImportError, prints a
-# warning, and leaves meshVerticeInpaint undefined — so texturing dies 40s in
+# warning, and leaves meshVerticeInpaint undefined, so texturing dies 40s in
 # with `NameError: name 'meshVerticeInpaint' is not defined`.  It has to be built
 # here rather than in the Dockerfile: it belongs inside the node tree, which the
 # ./custom_nodes bind mount replaces at runtime.

@@ -68,7 +68,9 @@ from pathlib import Path
 try:
     import numpy as np
 except ImportError:
-    sys.exit("needs numpy: pip install --user numpy")
+    sys.exit("needs numpy. On Debian or Ubuntu: sudo apt install python3-numpy. "
+             "Or in a venv: python3 -m venv ~/.venvs/asset && ~/.venvs/asset/bin/pip install numpy, "
+             "then run this script with ~/.venvs/asset/bin/python")
 
 SR = 44100
 HOP = 512

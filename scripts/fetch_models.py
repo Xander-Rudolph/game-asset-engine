@@ -50,7 +50,7 @@ SKELETON_DST = "3d_checkpoints"
 
 def models_dir() -> Path:
     """MODELS_DIR from the environment, else from .env, resolved like compose
-    does it — relative to the directory holding the compose file."""
+    does it: relative to the directory holding the compose file."""
     raw = os.environ.get("MODELS_DIR")
     if not raw:
         env = ROOT / ".env"
@@ -136,7 +136,7 @@ def download(url: str, dest: Path, expected: int | None) -> None:
         if e.code in (401, 403):
             raise SystemExit(
                 f"  {e.code} on {url}\n"
-                "  Gated or private repo — accept the licence on HF and export HF_TOKEN."
+                "  Gated or private repo: accept the licence on HF and export HF_TOKEN."
             )
         raise
 
@@ -161,7 +161,7 @@ def download(url: str, dest: Path, expected: int | None) -> None:
 # ---------------------------------------------------------------------- manifest
 
 def matches(path: str, patterns: list[str]) -> bool:
-    """Prefix or glob match — 'subdir/' catches a whole folder."""
+    """Prefix or glob match: 'subdir/' catches a whole folder."""
     from fnmatch import fnmatch
     return any(path.startswith(p) or fnmatch(path, p) for p in patterns)
 
@@ -228,10 +228,10 @@ def seed_skeleton(mdir: Path) -> None:
     'put the model here' markers) into MODELS_DIR/3d_checkpoints.
 
     The compose file mounts that folder over the pack's own, which would
-    otherwise hide the configs the loaders read — the pack downloads weights
+    otherwise hide the configs the loaders read. The pack downloads weights
     only and expects the json/yaml to already be on disk."""
     if not SKELETON_SRC.is_dir():
-        print(f"! {SKELETON_SRC} not found — run scripts/setup.sh first to clone "
+        print(f"! {SKELETON_SRC} not found. Run scripts/setup.sh first to clone "
               f"ComfyUI-3D-Pack, or the 3D checkpoint configs will be missing.")
         return
     dst = mdir / SKELETON_DST
@@ -285,7 +285,7 @@ def main() -> int:
         print("\n!! forbids commercial use   ! commercial use with conditions")
         print("These are the licences on the MODEL WEIGHTS.  What they say about the "
               "meshes and images you generate with them is a separate question the "
-              "licence text answers — read it before shipping an asset.")
+              "licence text answers. Read it before shipping an asset.")
         return 0
     if args.list_groups:
         for g, desc in man["groups"].items():
@@ -316,7 +316,7 @@ def main() -> int:
                if e["commercial"].startswith("NO") and not args.accept_noncommercial]
     if blocked:
         for e in blocked:
-            print(f"  SKIP {e['name']:<48} {e['license']} — {e['commercial']}")
+            print(f"  SKIP {e['name']:<48} {e['license']}: {e['commercial']}")
         print("       pass --accept-noncommercial to fetch these anyway\n")
         entries = [e for e in entries if e not in blocked]
     todo, ok, failed = [], 0, []

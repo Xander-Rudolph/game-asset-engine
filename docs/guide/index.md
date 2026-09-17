@@ -53,7 +53,11 @@ chosen. If you want to change a default, read that explanation first.
 
 ## Requirements
 
-- A CUDA GPU with 12GB or more of memory (less fails during mesh generation)
+- A CUDA GPU. The reference machine is an RTX 4070 Ti SUPER with 16GB
+  (16,376 MiB by `nvidia-smi`), an i7-14700K and 31GB of RAM (`free -g`), and
+  even on 16GB eight texture views at 768px ran out of memory
+  ([textures](/guide/textures#settings-that-matter)). A 12GB card has not been
+  tested.
 - About 200GB of disk for model weights, plus about 28GB for the prebuilt image
 - Docker with the NVIDIA container toolkit
 - Linux (only tested on Linux)

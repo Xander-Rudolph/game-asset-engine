@@ -22,8 +22,8 @@ because they do not arrive together:
             survive a collapse decimation, but the triangles under them do
             not, so a texture starts to swim long before the outline breaks.
 
-The camera is the isometric one (elevation 30, azimuth 45, orthographic) —
-see docs/guide/facings.md — so the silhouette figure is measured from the
+The camera is the isometric one (elevation 30, azimuth 45, orthographic;
+see docs/guide/facings.md), so the silhouette figure is measured from the
 angle the game will use rather than from a flattering three-quarter view.
 """
 from __future__ import annotations
@@ -99,7 +99,7 @@ def deviation(ref_bvh, v, t, height):
 
     Sampled at vertices AND face centroids: a collapse decimation moves
     vertices onto the old surface where it can, so vertices alone flatter
-    the result — the error lives in the middle of the new, larger faces.
+    the result: the error lives in the middle of the new, larger faces.
     """
     pts = np.vstack([v, v[t].mean(axis=1)])
     d = []

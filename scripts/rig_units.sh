@@ -4,7 +4,7 @@
 #   scripts/rig_units.sh golem knight
 #
 # UniRigLoadMesh offers a COMBO of files, and comfy-env's isolated worker
-# snapshots that list when the node is scanned — a mesh dropped into
+# snapshots that list when the node is scanned: a mesh dropped into
 # input/3d/ afterwards is rejected with "value_not_in_list", and a
 # container restart does not refresh it. So each figure is copied over a
 # slot that IS in the list and loaded through that; the node reads the
@@ -17,10 +17,10 @@
 # previous figure's rig.
 #
 # Two settings are load-bearing, both found by failing on a real asset:
-#   articulationxl, not mixamo — mixamo demands a fixed 52-bone humanoid
+#   articulationxl, not mixamo: mixamo demands a fixed 52-bone humanoid
 #     and aborts ("Expected 52 bones ... got 22") on any figure whose arms
 #     hang against its body, which is most generated figures.
-#   fp16, not auto — auto picks bf16 on Ampere/Ada and spconv 2.3.8 has no
+#   fp16, not auto: auto picks bf16 on Ampere/Ada and spconv 2.3.8 has no
 #     bfloat16 kernels, so skinning dies with a bare "WorkerError:
 #     torch.bfloat16".
 set -euo pipefail

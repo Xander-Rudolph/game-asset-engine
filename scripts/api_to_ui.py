@@ -20,16 +20,28 @@ reads it from there rather than guessing.  Two traps live in it:
   randomise dropdown.  Miss it and everything after the seed shifts by
   one.
 
-Written into `workflows/default/workflows/`, which is ComfyUI's own user
-workflow folder (the compose file mounts `workflows/` at `/app/user`), so
-they appear in the editor's sidebar with no import step.
+Written into `workflows/default/workflows/`.  A source-build service (the
+`comfy` and `comfy-local` profiles) mounts `workflows/` at `/app/user`, so
+there it is ComfyUI's own user workflow folder and the graphs appear in the
+editor's sidebar with no import step.  The `packaged` service mounts nothing
+there: its `/app/user` is the `comfy-user` volume, which the entrypoint seeds
+from the copy of the workflows baked into the image, and after that it only
+adds a graph whose file name the volume lacks.  A file regenerated here
+does not replace the one that editor already shows; open it there by hand.
 
     scripts/api_to_ui.py                 # convert them all
     scripts/api_to_ui.py txt2img_qwen    # or just one
+    scripts/api_to_ui.py --check         # convert, write, then verify
+    scripts/api_to_ui.py --dry-run       # verify in memory, write nothing
+
+Only a file whose content changed is rewritten, so a run that changes
+nothing leaves every file, and its mtime, as it was.  The server is
+$COMFY_URL, or http://127.0.0.1:8188 when that is unset.
 """
 
 import argparse
 import json
+import os
 import pathlib
 import sys
 import textwrap
@@ -39,7 +51,7 @@ import urllib.request
 HERE = pathlib.Path(__file__).resolve().parent.parent
 API_DIR = HERE / "workflows" / "api"
 UI_DIR = HERE / "workflows" / "default" / "workflows"
-SERVER = "http://127.0.0.1:8188"
+SERVER = os.environ.get("COMFY_URL", "http://127.0.0.1:8188").rstrip("/")
 
 # Laid out left to right in dependency order.  Generous, because the
 # Comfy3D nodes carry a dozen widgets and overlapping nodes are the
@@ -103,6 +115,30 @@ worldwide.  It removes the background itself too.
 
 Decimate Mesh's target is a CEILING, not a target: a simpler mesh
 stays simpler.""",
+    "img2mesh_trellis": """CONCEPT -> MESH: TRELLIS, StableGen branch (29s measured)
+
+Shape only.  The one for an asset that ships worldwide: TRELLIS is MIT
+with no territory clause, unlike Hunyuan3D.
+
+No cut-out needed.  It runs rembg with u2net itself, so a plain grey
+background concept goes straight into LoadImage.  Measured: a 1104x1472
+character concept on grey came out as a clean 48,000-face mesh in 29
+seconds.
+
+That 48,000 is Decimate Mesh's target, not TRELLIS's choice.
+mesh_simplify is a KEEP ratio: 0.95 keeps 95% of the faces.
+
+Plain TRELLIS can colour a mesh, but its texture bake runs through two
+libraries licensed for research and evaluation only.  A reading of
+this graph's code path found no call into either; that was not a
+runtime check.
+
+Same seed, same input, different bytes on each fresh run: GPU
+nondeterminism.  Compare renders, not hashes.
+
+Needs the trellis weight group:
+  scripts/fetch_models.py --download --group trellis
+Measured figures and the licence text: docs/guide/trellis.md""",
     "img2mesh_triposg": """CONCEPT -> MESH -- TripoSG.  DO NOT USE FOR NOW.
 
 In this install it returns a cage of fragments instead of the subject,
@@ -177,6 +213,33 @@ img_edit_qwen for anything instruction-shaped.""",
 Kept, not recommended.  It renders "a person wearing a costume,
 photographed in a studio" and drops most of a seven-clause brief.
 Use txt2img_qwen.""",
+    "txt2music_acestep15": """MUSIC: caption in, instrumental FLAC out, ACE-Step 1.5 turbo
+
+MIT, and its model card allows commercial use of the music it makes.
+
+In TextEncodeAceStepAudio1.5, 'tags' is the caption: a genre label,
+then a sentence or two on mood, instruments and pace.  'lyrics' holds
+[Instrumental].  There is no negative prompt, so say only what the
+track should be.  Leave "no vocals" out of the caption: naming a thing
+summons it.
+
+'duration' there and 'seconds' in EmptyAceStep1.5LatentAudio are
+separate inputs that nothing ties together.  Set both to the same
+length.
+
+THE PLANNER IS OFF ('generate_audio_codes').  Off, ambient beds held
+up.  Turn it on for anything with a tune: a menu theme, a chamber
+piece and two battle tracks made without it were rejected by ear.  It
+runs on the CPU here, about 4.5 minutes for a 150-second take, and
+holds the queue the whole time.
+
+KEEP THE TEXT ENCODERS ON THE CPU (DualCLIPLoader, device cpu).  On
+this image's PyTorch 2.6 the planner's sampling on the GPU gave NaN
+probabilities, and the CUDA assert aborted the whole ComfyUI server,
+taking every queued job with it (Comfy-Org/ComfyUI#12274).
+
+A folder of tracks, and seamless loops: scripts/generate_music.py.
+Measured figures: docs/guide/music.md""",
 }
 
 
@@ -187,9 +250,11 @@ def object_info():
     except (urllib.error.URLError, OSError) as e:
         sys.exit(
             f"cannot reach ComfyUI at {SERVER} ({e}).\n"
-            "The widget order can only be read from the running server -- "
-            "start it with `docker compose --profile comfy up -d` and wait "
-            "for /object_info to answer 200."
+            "The widget order can only be read from the running server. "
+            "Start it with `docker compose --profile packaged up -d` for the "
+            "published image, or `docker compose --profile comfy up -d` for a "
+            "source build, and wait for /object_info to answer 200.  Set "
+            "COMFY_URL if the server is somewhere else."
         )
 
 
@@ -396,10 +461,12 @@ def back_to_api(ui, info):
     return api
 
 
-def check(name, info, out):
+def check(name, info, text):
+    """Compare `text`, the converted graph exactly as it is (or would be)
+    written to disk, with the API original it came from."""
     src = json.loads((API_DIR / f"{name}.json").read_text())
     want = {k: v for k, v in src.items() if not k.startswith("_")}
-    got = back_to_api(json.loads((out / f"{name}.json").read_text()), info)
+    got = back_to_api(json.loads(text), info)
     bad = []
     for nid, node in want.items():
         mine = got.get(nid)
@@ -428,26 +495,44 @@ def main():
                     help="workflow names to convert (default: all)")
     ap.add_argument("--out", default=str(UI_DIR))
     ap.add_argument("--check", action="store_true",
-                    help="read the converted graphs back and compare them "
-                         "with the API originals, value by value")
+                    help="convert and WRITE each graph as a plain run does "
+                         "(a file whose content would not change is left "
+                         "alone), then compare it with the API original, "
+                         "value by value. A graph that fails is still "
+                         "written. Use --dry-run to verify without writing")
+    ap.add_argument("--dry-run", action="store_true",
+                    help="convert and compare in memory, exactly as --check "
+                         "does, and write nothing")
     args = ap.parse_args()
+    verify = args.check or args.dry_run
 
     info = object_info()
     out = pathlib.Path(args.out)
-    out.mkdir(parents=True, exist_ok=True)
+    if not args.dry_run:
+        out.mkdir(parents=True, exist_ok=True)
 
     wanted = args.names or sorted(p.stem for p in API_DIR.glob("*.json"))
     failed = 0
+    written = unchanged = 0
     for name in wanted:
         src = API_DIR / f"{name}.json"
         if not src.exists():
             sys.exit(f"no such workflow: {src}")
         ui = convert(json.loads(src.read_text()), info, name)
-        (out / f"{name}.json").write_text(json.dumps(ui, indent=1))
+        text = json.dumps(ui, indent=1)
+        if not args.dry_run:
+            # Rewrite only what changed, so a run that changes nothing
+            # leaves every mtime alone and a diff shows only real changes.
+            dest = out / f"{name}.json"
+            if dest.is_file() and dest.read_text() == text:
+                unchanged += 1
+            else:
+                dest.write_text(text)
+                written += 1
         widgets = sum(len(n.get("widgets_values", [])) for n in ui["nodes"])
         note = ""
-        if args.check:
-            bad = check(name, info, out)
+        if verify:
+            bad = check(name, info, text)
             failed += bool(bad)
             note = "  OK" if not bad else "  MISMATCH\n    " + \
                 "\n    ".join(bad)
@@ -456,9 +541,15 @@ def main():
     if failed:
         sys.exit(f"\n{failed} workflow(s) did not survive the round trip -- "
                  "do not open these, the widget order is wrong")
-    print(f"\nwritten to {out}")
-    print("Open ComfyUI at http://127.0.0.1:8188 -- they are in the "
-          "sidebar under Workflows.")
+    if args.dry_run:
+        print(f"\n--dry-run: nothing written to {out}")
+        return
+    print(f"\n{out}: {written} written, {unchanged} already up to date")
+    print(f"Open ComfyUI at {SERVER}. A source build (the comfy or "
+          "comfy-local profile) "
+          "lists them in the sidebar under Workflows. The packaged service "
+          "keeps its own copies in the comfy-user volume and does not "
+          "replace them, so open a changed graph there by hand.")
 
 
 if __name__ == "__main__":

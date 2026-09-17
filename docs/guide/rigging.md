@@ -146,12 +146,90 @@ faster, and at 128 pixels it is identical. See
 
 ## Bone names are not human readable
 
-`articulationxl` names every bone `bone_0` through `bone_N`, and the count
-differs per figure. Two characters from this same pipeline came out with 47
-bones and 28 bones.
+`articulationxl` names every bone `bone_0` through `bone_N`, and the count and
+order differ per figure. Five figures from this same pipeline came out with 24,
+28, 30, 30 and 47 bones.
 
 So a hand written pose file does not survive being pointed at a second model.
-Dump the map before authoring anything:
+Map the bones to roles before posing anything:
+
+```sh
+scripts/bone_roles.py map output/rigged/golem.fbx
+```
+
+On the 24 bone `output/rigged/unit_rogue.fbx` it printed, trimmed:
+
+```
+  up       +Z  (1.6 deg from the ankles to the top of the spine)
+  forward  -Y  (3.0 deg from the way the toes point)
+  right    -X  (the character's own right; its left is +X)
+  head_end bone_5 carries 0.009 of bone_4's skin weight (13.3 of 1470.7); under 0.25 makes it head_end: yes
+
+  role             bone      head                       skin weight  connected
+  pelvis           bone_0    (-0.020, -0.098, +0.051)       6598.7  no
+  spine            bone_1    (-0.020, -0.121, +0.215)        313.0  no
+  chest            bone_2    (-0.020, -0.105, +0.426)       3036.4  yes
+  neck             bone_3    (-0.027, -0.090, +0.684)        196.2  no
+  head             bone_4    (-0.027, -0.105, +0.746)       1470.7  yes
+  head_end         bone_5    (-0.027, -0.082, +0.863)         13.3  yes
+  right_thigh      bone_20   (-0.129, -0.098, +0.043)       2317.2  no
+  right_shin       bone_21   (-0.184, -0.066, -0.387)       2789.7  yes
+
+  no role  bone_10  (below left_hand)
+  no role  bone_15  (below right_hand)
+```
+
+It writes `output/rigged/unit_rogue.roles.json`, which `bone_roles.py compile`
+reads to turn one role pose file into a pose for this rig. That is covered in
+[deriving cycles automatically](/guide/animation#deriving-cycles-automatically).
+
+`map` reads the skeleton's geometry, and skin weights for the head, but never
+its names:
+
+- **Root and pelvis.** The root is the bone with no parent. The pelvis is the
+  root, or the first bone below it, with three or more children.
+- **Legs.** The two chains off the pelvis that reach furthest from it. On each,
+  the thigh and shin are the consecutive pair with the greatest combined length,
+  and the foot is the shin's child whose chain reaches furthest sideways from
+  the ankle.
+- **Spine.** The remaining pelvis chain pointing most nearly away from the legs,
+  followed at each bone through the child that continues most nearly straight.
+- **Chest and arms.** The chest is the first spine bone with chains leaving it
+  to both sides, and those chains are the arms. On each, the upper arm and
+  forearm are the longest consecutive pair.
+- **Facing.** Forward is the way the feet point, and right is forward crossed
+  with up. Every rig mapped here faces -Y, so the character's own left is +X.
+- **Head.** Skin weights settle this one call, because on some rigs the top bone
+  is an end marker the mesh hardly follows. See
+  [which bone is the head](/guide/animation#which-bone-is-the-head).
+
+`map` reads `.fbx` and `.glb`. On 2026-09-16 it ran on the five articulationxl
+figures, `input/3d/mixamo.fbx` and `output/mpfb/human_game_engine.glb`. No
+non-humanoid skeleton has been tried.
+
+For the 28 bone humanoid, `output/assets/alchemist_warrior/rig.fbx`, the map
+agrees bone for bone with the one worked out by hand in `poses/_bones.md`:
+
+| Bones | Part |
+|---|---|
+| `bone_0` | root and pelvis |
+| `bone_1` to `bone_3` | spine, spine_2 and chest |
+| `bone_4`, `bone_5` | neck, head |
+| `bone_6` to `bone_9` | left shoulder, upper arm, forearm, hand |
+| `bone_10` to `bone_12` | that hand's fingers |
+| `bone_13` to `bone_16` | right shoulder, upper arm, forearm, hand |
+| `bone_17` to `bone_19` | that hand's fingers |
+| `bone_20` to `bone_23` | left thigh, shin, foot, toe |
+| `bone_24` to `bone_27` | right thigh, shin, foot, toe |
+
+It disagrees with `poses/_bones.md` in one place. The table there for the
+`rig24_*.json` and `rig47_*.json` pose files puts `bone_2` in its spine column.
+`map` makes `bone_2` the chest on the 24, both 30 and the 47 bone rigs, because
+the arms leave it, and `bone_1` the one spine bone below it. The arm, thigh and
+shin bones in that table agree.
+
+For bones `map` gives no role, such as fingers, or a skeleton it cannot read,
+dump the raw hierarchy:
 
 ```sh
 docker exec "$(python3 scripts/_engine.py)" python3 -c "
@@ -165,26 +243,6 @@ for b in a.data.bones:
 Read the hierarchy from the head positions. The chain rising from the root is the
 spine and then the head. Chains branching at chest height going sideways are the
 arms. Chains going down from the root are the legs.
-
-For a 28 bone humanoid from this pipeline the map came out as:
-
-| Bones | Part |
-|---|---|
-| `bone_0` | root and pelvis |
-| `bone_1` to `bone_3` | spine, lower to chest |
-| `bone_4`, `bone_5` | neck, head |
-| `bone_6` to `bone_9` | one shoulder, upper arm, forearm, hand |
-| `bone_10` to `bone_12` | that hand's fingers |
-| `bone_13` to `bone_16` | the other shoulder, upper arm, forearm, hand |
-| `bone_17` to `bone_19` | that hand's fingers |
-| `bone_20` to `bone_23` | one thigh, shin, foot, toe |
-| `bone_24` to `bone_27` | the other thigh, shin, foot, toe |
-
-Or let a script work it out from the skeleton's own geometry. None ships here
-yet, but the rules are short: the root is the bone with no parent, the legs are
-the two chains descending furthest below it, the spine is the chain that rises,
-and the arms are the two chains branching off near the top. See
-[deriving cycles automatically](/guide/animation#deriving-cycles-automatically).
 
 ## Batch rigging quirks
 
@@ -211,18 +269,109 @@ neither a file count nor a name check can tell the new result from the old one.
 The script creates an empty timestamp file before each run, takes the `.fbx` in
 `output/` that is newer than it, and moves that to `output/rigged/`.
 
+## Faces
+
+Neither rigger makes a face. A UniRig figure measured for the lip sync research
+had no jaw, eye or mouth bones and no shape keys, and mesh2motion's human rig
+stops at the head ([lip sync](/reference/lip-sync#the-riggers-give-you-no-face)).
+How Valve built faces for the Source engine out of muscle shapes, and which of
+its ideas carry over, is in [Source Filmmaker](/reference/source-filmmaker#how-valve-s-facial-system-is-built).
+Human bases that do ship a face rig, and what their licences let a game do, are
+compared in [DAZ Genesis](/reference/daz-genesis#other-character-bases-compared).
+
+### A jaw by rule
+
+`scripts/face_rig.py add-jaw` adds a weighted `jaw` bone under the head of a
+rigged `.fbx`, `.glb` or `.blend`, and writes a `.blend` or an `.fbx`. Turn the
+jaw about its own X axis; a positive angle opens it.
+
+```sh
+scripts/face_rig.py add-jaw output/rigged/golem.fbx --out output/face_rig/golem_jaw.blend
+scripts/render_sheet.py output/face_rig/golem_jaw.blend \
+    --poses transforms:output/face_rig/jaw20.json --size 220 --flat \
+    --out output/sheets/golem_jaw.png
+```
+
+`output/face_rig/jaw20.json` is a file you write, holding
+`[{}, {"jaw": {"rotate": [20, 0, 0]}}]`: the rest pose, then the jaw open 20
+degrees. The jaw has no role, so it is posed by its bone name in a transforms
+file, not from `poses/roles/`.
+
+**Check the head it picked.** `add-jaw` prints the chain it climbed and the bone
+it took for the head. The top bone is not always the head: on three of the five
+articulationxl rigs tried, it is the heaviest weight on 5 vertices or fewer. So
+the head is the bone, from the top down, that is the heaviest weight on the most
+of the highest 2% of the vertices the chain moves. Pass `--head` when the pick
+is wrong. Run on 2026-09-16, it picked the same bone that `bone_roles.py map`
+calls the head on all five rigs:
+
+| Rig | Head | Vertices given jaw weight | Moved by a 20 degree turn |
+|---|---|---|---|
+| `unit_rogue`, 24 bones | `bone_4` | 297 | 264 |
+| `alchemist_warrior`, 28 bones | `bone_5` | 194 | 191 |
+| `unit_alchemist`, 30 bones | `bone_4` | 534 | 493 |
+| `unit_beastmaster`, 30 bones | `bone_4` | 336 | 323 |
+| `unit_warrior`, 47 bones | `bone_4` | 196 | 185 |
+
+Before writing, `add-jaw` turns the jaw 20 degrees. If no vertex moves more than
+0.5% of the head's height, or the ones that move rise on average, it prints the
+numbers, writes nothing and exits 1. Only the first case has been triggered, on
+a test head weighted 0.001, where it printed
+`! nothing moved when the jaw turned: the weights did not take`.
+
+**At sprite size the change is small.** On `unit_alchemist`, the jaw at 0 and
+at 20 degrees, counted per cell with a row diff on 2026-09-16. A second
+`add-jaw` and render the same day gave the same per-cell counts.
+
+| Render | Cells | Pixels changed per cell |
+|---|---|---|
+| 220 px, `--flat` | azimuths 0, 90, 180, 270 | 251, 145, 29, 172 |
+| 128 px, `--flat` | azimuths 0, 90, 180, 270 | 99, 65, 21, 65 |
+| 220 px, isometric | azimuths 45, 135, 225, 315 | 249, 54, 70, 241 |
+| 128 px, isometric | azimuths 45, 135, 225, 315 | 89, 25, 34, 91 |
+
+In the 220 px front cell the change fits a 28 by 17 px box, 34 of its pixels
+change by 16 levels or more, and no silhouette pixel changes. At 128 px it fits
+16 by 11 px, with 12 pixels changing by 16 levels or more.
+
+A generated mesh has no parted lips, so the jaw stretches the lower face down
+rather than opening a mouth. `--check` passes a jaw row but cannot judge it.
+A row that keeps row 0's silhouette is compared pixel by pixel, and on
+2026-09-16 `scripts/sheet_check.py` passed both the 220 px flat and the 128 px
+isometric jaw sheets with `pose row 1 keeps row 0's silhouette at every angle,
+but 63/64/11/74 px inside it changed by 8 levels or more` (25/9/10/29 px at
+128 px). Whether that change reads as a jaw is still for a face sheet to show.
+
+Not tried: `--front` other than `-y`, `--name`, and Mixamo, mesh2motion or
+Genesis rigs.
+
+### Shape keys
+
+`render_sheet.py` sets shape keys per row with `@shape_keys` in a transforms
+file, and rig properties with `@props`; `scripts/render_sheet.py --help` covers
+both. `scripts/face_rig.py transfer-shapes` copies shape keys from a template
+head onto a model with Blender's Surface Deform modifier, but nothing places the
+template: it must already sit on the model's surface. `scripts/face_rig.py
+spheres` writes test spheres to try it on, and a transfer onto them moved 261 of
+642 vertices, by 0.3044 units at most. `scripts/face_rig.py --help` has the
+details, and [lip sync](/reference/lip-sync#faces-on-generated-meshes) has the
+heads worth borrowing shapes from and their licences.
+
 ## Checking a rig
 
 Render it. A rig that solved badly is obvious in one sheet and invisible in a log:
 
 ```sh
-scripts/render_sheet.py output/rigged/golem.fbx --poses transforms:poses/walk.json \
+scripts/bone_roles.py compile poses/roles/walk.json output/rigged/golem.fbx \
+    --out output/poses/golem_walk.json
+scripts/render_sheet.py output/rigged/golem.fbx --poses transforms:output/poses/golem_walk.json \
     --angles 4 --size 220 --out output/sheets/golem_walk.png --check
 ```
 
-`--check` exits non-zero on a fault it can measure, such as an empty or clipped
-cell, or a pose row identical to the first row at every angle. It cannot tell a
-good walk from a bad one.
+`compile` maps the rig first when given the FBX itself. `--check` exits non-zero
+on a fault it can measure, such as an empty or clipped cell, or a pose row
+identical to the first row at every angle. It cannot tell a good walk from a bad
+one.
 
 Then open the image and look at it. A mis solved shoulder produces a confident,
 well rendered, wrong walk cycle.

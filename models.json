@@ -17,7 +17,7 @@
     "Every entry carries 'license', 'license_url' and 'commercial'. `fetch_models.py --licenses` prints them, and --download refuses a non-commercial model unless you pass --accept-noncommercial."
   ],
   "groups": {
-    "core": "SDXL image generation + TripoSR/TripoSG image-to-3D, ~20GB",
+    "core": "SDXL base and its fp16-fix VAE, plus the TripoSR and TripoSG weights, ~20GB. Their image-to-3D graphs do not work as wired yet: see the _comment in img2mesh_triposr.json and img2mesh_triposg.json",
     "hunyuan": "Hunyuan3D 2.1 shape and PBR texture generation, plus the 2.0 turbo shape model (best mesh quality, ~24GB)",
     "instantmesh": "Zero123++ multiview -> InstantMesh reconstruction, ~10GB",
     "trellis": "TRELLIS image-to-3D: both branches, ~9GB",
@@ -95,7 +95,7 @@
       ],
       "license": "BRIA RMBG-1.4",
       "license_url": "https://bria.ai/bria-huggingface-model-license-agreement/",
-      "commercial": "NO — non-commercial without a BRIA agreement",
+      "commercial": "NO (non-commercial without a BRIA agreement)",
       "note": "Not required. Hunyuan3D and TRELLIS remove backgrounds themselves with rembg (MIT) and its u2net model (Apache-2.0); TripoSG does not remove backgrounds.  Only fetch this if you have a BRIA commercial agreement, or the project is non-commercial."
     },
     {
@@ -107,7 +107,7 @@
       "dest": "3d_checkpoints/Diffusers/tencent/Hunyuan3D-2_1/hunyuan3d-dit-v2-1/model.fp16.ckpt",
       "license": "Tencent Hunyuan Community",
       "license_url": "https://huggingface.co/tencent/Hunyuan3D-2.1/blob/main/LICENSE",
-      "commercial": "conditional — excludes EU/UK/South Korea; >1M MAU needs Tencent's written licence"
+      "commercial": "conditional (excludes EU/UK/South Korea; >1M MAU needs Tencent's written licence)"
     },
     {
       "name": "Hunyuan3D-2.1 VAE (fp16)",
@@ -118,7 +118,7 @@
       "dest": "3d_checkpoints/Diffusers/tencent/Hunyuan3D-2_1/hunyuan3d-vae-v2-1/model.fp16.ckpt",
       "license": "Tencent Hunyuan Community",
       "license_url": "https://huggingface.co/tencent/Hunyuan3D-2.1/blob/main/LICENSE",
-      "commercial": "conditional — excludes EU/UK/South Korea; >1M MAU needs Tencent's written licence"
+      "commercial": "conditional (excludes EU/UK/South Korea; >1M MAU needs Tencent's written licence)"
     },
     {
       "name": "Hunyuan3D-2 DiT turbo (shape)",
@@ -132,7 +132,7 @@
       ],
       "license": "Tencent Hunyuan Community",
       "license_url": "https://huggingface.co/tencent/Hunyuan3D-2/blob/main/LICENSE",
-      "commercial": "conditional — excludes EU/UK/South Korea; >1M MAU needs Tencent's written licence"
+      "commercial": "conditional (excludes EU/UK/South Korea; >1M MAU needs Tencent's written licence)"
     },
     {
       "name": "Zero123++ v1.2",
@@ -256,7 +256,7 @@
         "vae_encoder/*",
         "*.bin"
       ],
-      "note": "fp16 variants only — the fp32/onnx/openvino copies in that repo are another 25GB of the same weights",
+      "note": "fp16 variants only; the fp32/onnx/openvino copies in that repo are another 25GB of the same weights",
       "license": "CreativeML OpenRAIL++-M",
       "license_url": "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/blob/main/LICENSE.md",
       "commercial": "yes"
@@ -343,9 +343,10 @@
       "kind": "snapshot",
       "repo": "ashawkey/imagedream-ipmv-diffusers",
       "dest": "3d_checkpoints/Diffusers/ashawkey/imagedream-ipmv-diffusers",
-      "license": "Apache-2.0",
+      "license": "OpenRAIL (per the Hub cards; no licence text found)",
       "license_url": "https://huggingface.co/ashawkey/imagedream-ipmv-diffusers",
-      "commercial": "yes"
+      "commercial": "yes",
+      "note": "Licence checked 2026-09-16 and corrected from Apache-2.0, which is a licence on code, not on these weights. WEIGHTS: the Hub card metadata says openrail on this repo, on Peng-Wang/ImageDream (the weights this repo's card says it ports into diffusers) and on MVDream/MVDream (the MVDream v2.1 weights the Peng-Wang/ImageDream card says they were fine-tuned from). None of those three repos has a licence file. https://github.com/bytedance/MVDream README.md line 26 says 'Our models are provided on the Huggingface Model Page with the OpenRAIL license.' The MVDream/MVDream card says its v2.1 model was fine-tuned from stabilityai/stable-diffusion-2-1-base, whose Hub page answered HTTP 401 on the check date. CODE: https://github.com/bytedance/ImageDream has three licence files, none about weights. LICENSE at the root is the Apache License 2.0, and README.md line 37 says the code is forked from threestudio, whose LICENSE is also the Apache License 2.0. extern/ImageDream/LICENSE-CODE, beside the diffusion model code, is the MIT License. load/lights/LICENSE.txt is CC0, for one HDR light probe. No OpenRAIL licence text was found in any of these repos, so which OpenRAIL licence applies, and whether it allows the commercial use recorded here, is unsettled."
     },
     {
       "name": "CRM",
@@ -369,9 +370,10 @@
       "repo": "VAST-AI/TriplaneGaussian",
       "file": "model_lvis_rel.ckpt",
       "dest": "3d_checkpoints/TriplaneGaussian/model_lvis_rel.ckpt",
-      "license": "MIT",
-      "license_url": "https://huggingface.co/VAST-AI/TriplaneGaussian",
-      "commercial": "yes"
+      "license": "Apache-2.0",
+      "license_url": "https://github.com/VAST-AI-Research/TriplaneGaussian/blob/main/LICENSE",
+      "commercial": "yes",
+      "note": "Licence checked 2026-09-16 and corrected from MIT. This Hugging Face repo has no licence file, and its Hub card metadata says apache-2.0. The TriplaneGaussian code repo has three licence files: LICENSE at the root (license_url) is the Apache License 2.0, and tgs/models/pointclouds/LICENSE_POINTNET and tgs/models/snowflake/LICENSE are MIT licences under other authors' copyright, on two code modules (its README.md credits SnowflakeNet for the point cloud upsampling module). None of the three mentions the weights."
     },
     {
       "name": "PartCrafter",
@@ -393,7 +395,7 @@
       "note": "Gated: accept the licence at https://huggingface.co/stabilityai/stable-fast-3d then export HF_TOKEN",
       "license": "Stability AI Community License",
       "license_url": "https://huggingface.co/stabilityai/stable-fast-3d/blob/main/LICENSE.md",
-      "commercial": "conditional — free under $1M annual revenue, then an Enterprise licence"
+      "commercial": "conditional (free under $1M annual revenue, then an Enterprise licence)"
     },
     {
       "name": "Qwen-Image diffusion (2512, fp8)",
@@ -459,7 +461,7 @@
       ],
       "license": "Tencent Hunyuan Community",
       "license_url": "https://huggingface.co/tencent/Hunyuan3D-2.1/blob/main/LICENSE",
-      "commercial": "conditional — excludes EU/UK/South Korea; >1M MAU needs Tencent's written licence",
+      "commercial": "conditional (excludes EU/UK/South Korea; >1M MAU needs Tencent's written licence)",
       "note": "Texture pass for the shape meshes. The node ignores json/yaml/py on download because the pack ships those configs."
     },
     {

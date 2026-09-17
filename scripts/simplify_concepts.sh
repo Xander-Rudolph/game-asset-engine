@@ -4,7 +4,7 @@
 #   scripts/simplify_concepts.sh output/concept/*.png
 #   DENOISE=0.93 scripts/simplify_concepts.sh output/concept/ornate_knight.png
 #
-# Outputs land in output/simplified/<source name>.png — named after the source,
+# Outputs land in output/simplified/<source name>.png, named after the source,
 # not the edit counter, because ComfyUI's SaveImage counter (edit_00001_,
 # edit_00002_ …) records nothing about which input or settings produced it and
 # becomes unreadable within a dozen runs.

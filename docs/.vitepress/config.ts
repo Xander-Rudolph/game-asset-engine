@@ -85,6 +85,8 @@ export default defineConfig({
             { text: 'Rigging', link: '/guide/rigging' },
             { text: 'Animation cycles', link: '/guide/animation' },
             { text: 'Facings and camera angles', link: '/guide/facings' },
+            { text: 'Talking portraits', link: '/guide/talking-portraits' },
+            { text: 'Daz figures', link: '/guide/daz-figures' },
           ],
         },
         {
@@ -108,6 +110,14 @@ export default defineConfig({
             { text: 'Models and weights', link: '/reference/models' },
             { text: 'Docker and versions', link: '/reference/docker' },
             { text: 'Closing the loop', link: '/reference/closing-the-loop' },
+          ],
+        },
+        {
+          text: 'Research',
+          items: [
+            { text: 'Source Filmmaker', link: '/reference/source-filmmaker' },
+            { text: 'Lip sync and talking portraits', link: '/reference/lip-sync' },
+            { text: 'DAZ Genesis', link: '/reference/daz-genesis' },
           ],
         },
       ],

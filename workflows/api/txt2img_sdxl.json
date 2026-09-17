@@ -1,4 +1,5 @@
 {
+  "_comment": "SDXL base 1.0 text-to-image, KEPT FOR COMPARISON, NOT THE DEFAULT. The Qwen graphs are the concept-art default: txt2img_qwen_fast.json to find a look, then txt2img_qwen.json for the image you build on, where the negative prompt works (docs/guide/concept-art). SDXL base is a photo model: it renders a person wearing a costume, photographed in a studio, and drops most of a long brief, where Qwen-Image holds a seven-clause description at once (skills/asset-pipeline/SKILL.md). docs/guide/concept-art lists this graph at about 60s. LICENCE: CreativeML OpenRAIL++-M (models.json), and commercial use of the images is permitted; the licence's use restrictions travel with the model (docs/guide/licensing). Its one weight, sd_xl_base_1.0.safetensors, is in the core group that a plain scripts/fetch_models.py --download fetches (models.json). The same checkpoint drives img_refine_sdxl.json, the low-denoise refine pass. Its one-queue sibling txt2mesh_sdxl_hunyuan3d21.json was measured to OOM a 16GB card (see that graph's _comment).",
   "1": {
     "class_type": "CheckpointLoaderSimple",
     "inputs": { "ckpt_name": "sd_xl_base_1.0.safetensors" },

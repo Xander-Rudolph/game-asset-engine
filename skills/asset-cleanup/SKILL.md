@@ -1,6 +1,6 @@
 ---
 name: asset-cleanup
-description: Keep only the finished parts of a generated asset - concept image, model, textures and pose sheets - and sweep the intermediates. Use when the user asks to clean up, tidy, prune or free space in the asset pipeline, or when a run has finished and the working files are no longer needed.
+description: Keep only the finished parts of a generated asset (concept image, model, textures and pose sheets) and sweep the intermediates. Use when the user asks to clean up, tidy or free the space taken by generated output, or when a run has finished and the working files are no longer needed.
 ---
 
 # Asset cleanup: curate, then sweep
@@ -11,7 +11,7 @@ A finished asset is four things: the **concept image**, the **model**, its
 **textures**, and its **pose sheets**. Everything else under `output/` is
 working material.
 
-**Nothing on disk records which concept produced which mesh** — filenames are
+**Nothing on disk records which concept produced which mesh.** Filenames are
 counters and timestamps (`qwen_00002_.png`, `Hunyuan21_2026-09-08-15-10-01.glb`).
 So the tool never infers. You name the keepers, they are **copied** into
 `output/assets/<name>/`, and only then is anything removed.
@@ -35,7 +35,7 @@ through. Fix `PUID` and `PGID` in `.env` first.
 scripts/cleanup.py
 ```
 
-Two lists. **SCRATCH** is by-products with no judgement attached — per-frame
+Two lists. **SCRATCH** is by-products with no judgement attached: per-frame
 renders that were composed into a sheet, unlit silhouette checks, TexGen's
 working directory, UV `.npz` files, run logs. **UNCLAIMED** is everything
 generated that has not been curated.
@@ -43,14 +43,14 @@ generated that has not been curated.
 ### 2. Curate
 
 Work out which files are the keepers before running this. If unsure which mesh
-or concept the user means, **ask** — a wrong answer here is what makes the sweep
+or concept the user means, **ask**. A wrong answer here is what makes the sweep
 destructive.
 
 ```sh
 scripts/cleanup.py keep <name> \
     --concept output/concept/qwen_00002_.png \
     --model   output/mesh/textured_2026-09-08-22-22-18.glb \
-    --rig     output/rigged_1788911741_articulationxl.fbx \
+    --rig     output/rigged/<name>.fbx \
     --sheets  output/sheets/<name>_walk.png output/sheets/<name>_attack.png
 ```
 
@@ -59,7 +59,10 @@ scripts/cleanup.py keep <name> \
   `.mtl` for an `.obj`) are picked up automatically, and `--textures` adds any
   that live elsewhere, such as Hunyuan TexGen's `output/Hun2-1/`.
 - `--rig` is optional; include it whenever a rigged FBX exists, since it is the
-  only thing that can be animated.
+  only thing that can be animated. `scripts/rig_units.sh` moves each rig to
+  `output/rigged/<name>.fbx`. A rig made by running
+  `workflows/api/mesh_rig_unirig.json` directly is not moved: it sits at the top
+  of `output/` under UniRig's own name, so pass that path.
 - This writes `sources.json` recording the original paths. That file is what
   makes step 3 safe: `keep` **renames** as it copies (`concept.png`,
   `model.glb`, `rig.fbx`), so without it the originals would not be recognised
@@ -78,6 +81,14 @@ scripts/cleanup.py sweep --delete --unclaimed # also uncurated files
 - **`--unclaimed` is not.** It deletes rejected concepts, superseded meshes and
   diagnostic renders permanently. Show the user the list and get an explicit yes
   before using it. It refuses outright if nothing has been curated.
+- **Name the folders `keep` cannot claim before asking.** `keep` has no slot
+  for music, icons, scenery props, ground takes, materials, talking-portrait
+  mouth sets or MakeHuman viseme bodies, so `cleanup.py` protects
+  `output/music/`, `output/icons/`, `output/scenery/`, `output/ground/`,
+  `output/materials/`, `output/lipsync/` and `output/mpfb/`: `--unclaimed`
+  leaves them alone.
+  Tell the user that. Only `--include-protected` sweeps them, and only after
+  they have copied out what they want and said yes to that too.
 
 ## Rules
 
@@ -86,11 +97,15 @@ scripts/cleanup.py sweep --delete --unclaimed # also uncurated files
 - **Report what was freed and what was kept**, not just that it ran.
 - `keep` copies rather than moves, on purpose: an interrupted or mistaken sweep
   cannot destroy a curated asset.
-- Curated assets live in `output/assets/<name>/` — `concept.png`, `model.glb`,
+- Curated assets live in `output/assets/<name>/`: `concept.png`, `model.glb`,
   `rig.fbx`, `textures/`, `sheets/`, `sources.json`. That folder is what gets
   moved into the game; everything else is disposable.
 - `output/` is gitignored in full, so curated assets are **not** in version
   control. Copy them into the project proper when they are final.
+- **Never run `docker image prune -a` to free space.** It removes the engine
+  image whenever its container is stopped, and getting it back is a 17GB
+  download that unpacks to 27.6GB (`docs/guide/running-the-image.md`). This
+  skill frees generated output, not Docker storage.
 - Run logs belong in `logs/`, not the project root. `setup.sh` and
   `postinstall.sh` tee there automatically; redirect other long runs there too.
   The sweep treats `logs/` as scratch.
