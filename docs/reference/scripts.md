@@ -53,7 +53,7 @@ What these are for, and what was measured, is in [lip sync and talking portraits
 |---|---|
 | `lipsync_cues.py` | Mouth cues for voice lines. Runs Rhubarb Lip Sync from `tools/` on the host, refuses a line that fails its speech gate, and writes a timeline JSON to `output/lipsync/`. `--fps N` adds one mouth shape per frame, and `--text-only` writes a placeholder flap for a line with no voice yet. Needs ffmpeg. See [below](#lipsync-cues-py). |
 | `make_mouths.py` | Make a talking portrait from a concept with `--portrait-from`, then, once it is approved and the mouth box chosen, one whole-image edit per mouth shape through `img_edit_qwen.json`, and compose them. Before every edit it waits until no Blender job is running and the ComfyUI queue is empty. The box is checked before any edit is queued, and a shape whose edit exists is skipped, so a stopped run resumes. |
-| `compose_mouths.py` | Cut the mouth box out of each edit into `mouth_<S>.png` overlays and a `manifest.json`, and measure drift in a ring round the box. `--check MANIFEST` fails unless no pixel outside the box changes, every size matches and A to F are present. Host, numpy and Pillow. |
+| `compose_mouths.py` | Cut the mouth box out of each edit into `mouth_<S>.png` overlays and a `manifest.json`, and measure drift in a ring round the box. `--check MANIFEST` fails unless no pixel outside the box changes, every size matches and A to F are present. `--selftest` rechecks the 33 measured sizes in the script's `PROBED` table and composes a set from made-up pixels, so it needs no pictures and no GPU. Host, numpy and Pillow. |
 | `preview_lipsync.py` | Play a mouth set against a timeline as an MP4, with the line's audio when there is some, and lay the mouths out on a labelled contact sheet. A shape the set lacks plays Rhubarb's fallback. Needs ffmpeg and ffprobe. |
 | `face_rig.py` | Give a rig a face in Blender. `add-jaw` adds a jaw bone under the head, weighted by rule, turns it 20 degrees as a check, and writes nothing when that barely moves the mesh. `transfer-shapes` copies a template head's shape keys onto a model with Surface Deform, and `spheres` writes the test files the method was proved on. A generated mesh has no parted lips, so the jaw stretches the lower face rather than opening a mouth. |
 | `mpfb_probe.py` | Probe MPFB 2, MakeHuman's Blender add-on, in the container's Blender. `fetch` downloads the add-on and three face packs, pinned by size and sha256, into the gitignored `input/_devtools/mpfb2/`. `build` makes a body with the 15 Meta/Oculus-style visemes as shape keys, as a `.blend` and a `.glb` in `output/mpfb/`, and `render` draws one viseme per row. `--help` records the licences as read and what was measured. |
@@ -69,7 +69,7 @@ from Daz content to the gitignored `output/daz/`. None of it may be committed.
 | Script | Does |
 |---|---|
 | `daz_library.py` | Install Daz Install Manager zips downloaded by hand into a content library outside the repo, `MODELS_DIR/daz_library` by default, and record every file with its CRC-32, and the licence held with the date you read the EULA. Every path is checked before anything is written. `list`, `licence`, `verify`, `uninstall`, `case-check` and a `selftest` with invented packages. Standard library only, on the host. See [below](#daz-library-py). |
-| `daz_import_probe.py` | Import a Genesis figure into the container's Blender with the Diffeomorphic DAZ Importer, which `fetch` pins by size and sha256 into the gitignored `input/_devtools/import_daz/`. `build` saves a `.blend` whose 17 viseme controllers come from FACS, and `render` draws a row per viseme with `render_sheet.py` and in three framings of its own, or measures what each moves with `--motion-only`. See [below](#daz-import-probe-py). |
+| `daz_import_probe.py` | Import a Genesis figure into the container's Blender with the Diffeomorphic DAZ Importer, which `fetch` pins by size and sha256 into the gitignored `input/_devtools/import_daz/`. `build` saves a `.blend` whose 17 viseme controllers come from FACS, `scene` adds morph sets, character shape dials, sliders, clothing and hair merged into the figure's rig and a pose preset, `verify` reopens a saved `.blend` with no add-on, and `render` draws a row per viseme with `render_sheet.py` and in three framings of its own, or measures what each moves with `--motion-only`. See [below](#daz-import-probe-py). |
 | `daz_inventory.py` | List the figures, bones, morphs, aliases and HD morphs in a Daz content library outside this repo, reading every `.dsf` with the standard library. Figures are grouped by the content type their author set, aliases and other modifiers are counted apart from morphs, and a valid JSON file that is not DSON is skipped, not an error. It refuses a path in or above the repo. See [below](#daz-inventory-py). |
 
 ## Keeping the repo honest
@@ -88,9 +88,11 @@ Run both before a commit, with `npm run docs:build`.
 ```sh
 scripts/render_sheet.py MODEL [--poses SPEC] [--angles N] [--azimuth-start DEG]
                         [--elevation DEG] [--size PX] [--zoom N] [--persp]
-                        [--span UNITS] [--key N] [--ambient N] [--clay]
-                        [--clay-color R,G,B] [--flat] [--out PATH] [--check]
-                        [--keep-frames] [--timeout SECONDS]
+                        [--span UNITS] [--key N] [--ambient N]
+                        [--engine {eevee,cycles}] [--samples N] [--denoise]
+                        [--clay] [--clay-color R,G,B] [--flat] [--out PATH]
+                        [--check] [--keep-frames] [--timeout SECONDS]
+                        [--max-wait SECONDS] [--no-wait]
 ```
 
 `--poses` takes `static`, `frames:1,7,13`, `even:N` or `transforms:FILE`.
@@ -109,6 +111,56 @@ sheet is put together. `--keep-frames` leaves them in `output/_sheet_frames/`.
 
 Defaults are the isometric camera: elevation 30, first facing at 45 degrees,
 orthographic. See [facings](/guide/facings).
+
+**`--engine`, `--samples` and `--denoise`.** `--engine` picks EEVEE, the
+default, or Cycles, and `--samples N` sets the samples a cell gets: 64 for
+EEVEE, which is Blender's own and is left untouched, and 128 for Cycles, where
+adaptive sampling makes it a ceiling. `N` is checked on the host, before the
+model loads, and refused unless it is a whole number from 1 to 16,777,216 for
+Cycles or 2,147,483,647 for EEVEE, which are the engines' own limits on the
+property in bpy 4.5.9:
+
+```text
+--samples is 0. Expected a whole number from 1 to 16777216, which is as far as Cycles counts samples in bpy 4.5.9. Leave --samples out for 128, this engine's default
+```
+
+`--denoise` is off by default and denoises a Cycles render with
+OpenImageDenoise, on the CPU, because OptiX denoising needs driver libraries
+this container has not. EEVEE has no denoiser, so under EEVEE the flag changes
+nothing and says so rather than being ignored: `! --denoise is a Cycles option
+and does nothing here: EEVEE has no denoiser, and this sheet renders exactly as
+it would without it. Add --engine cycles to denoise.`
+
+EEVEE rasterises on the CPU through llvmpipe in this container, because the
+NVIDIA runtime gives it no GL libraries, while Cycles path traces on the card.
+Measured on 2026-09-18 in `comfyui-packaged`, on the 16 cell sheet
+`scripts/render_sheet.py output/assets/alchemist_warrior/rig.fbx --poses
+transforms:output/poses/alchemist_warrior_walk.json --angles 4 --size 128`:
+EEVEE took 108.7 s wall and Cycles, with `--engine cycles`, 3.12 s wall. Cycles
+took 1,531 MiB of the RTX 4070 Ti SUPER's 16,376 MiB while it ran (nvidia-smi
+sampled every 0.1 s, 1,865 MiB in use on the card before it started). The look
+is not the same either, so read `--help` before mixing engines across one set.
+
+EEVEE at factory settings has no bounce lighting: `scene.eevee.use_raytracing`
+is `False` out of the box (read from bpy 4.5.9 after
+`wm.read_factory_settings`, 2026-09-18) and the script leaves it there, which is
+why a sheet comes out flat and even. Switching it on moves EEVEE towards Cycles
+without landing on it: on the clay basilisk at 4 cells, 2026-09-18, the lit
+surface went from 131.88 to 128.77 of 255, past Cycles' 129.92, for 40.10 s
+against 34.42 s, while the mean absolute difference from Cycles rose from 3.39
+to 4.03.
+
+**Waiting for the card.** A Cycles render waits first, polling every 30 s until
+ComfyUI's queue is empty and no other `python3 -c` job runs in the container,
+the same wait `scripts/make_mouths.py` does before an edit. Blender and ComfyUI
+share one card: an image edit through `make_mouths.py` peaked at 15,178 to
+15,344 MiB of the 16,376 MiB card on 2026-09-16 ([lip sync](/reference/lip-sync#tried-on-one-portrait)),
+and a second job beside it ends in a CUDA out-of-memory error rather than a
+fallback to the CPU. It prints each Blender job's pid and how long it has run
+while it waits, stops without rendering after `--max-wait` seconds (default
+7200), and stops at once when `docker top` or ComfyUI's queue cannot be read,
+because a machine that cannot be seen is not an idle one. `--no-wait` skips the
+wait. An EEVEE render never waits, because it never touches the card.
 
 **A `.blend` as MODEL.** It is opened as saved rather than imported, because an
 import keeps shape keys but not the drivers that connect rig properties to them.
@@ -501,6 +553,19 @@ scripts/daz_import_probe.py build --out output/daz/NAME.blend [--facs] [--viseme
                             [--no-textures] [--material-method M] [--fit F]
                             [--content-dir DIR] [--no-dir-check] [--verbosity N]
                             [--timeout SECONDS] [--no-wait]
+scripts/daz_import_probe.py scene --out output/daz/NAME.blend [--figure DUF]
+                            [--anatomy auto|none|DUF,...] [--library DIR]
+                            [--morphs SET,...] [--custom-morphs DIR]
+                            [--custom-files F,...] [--custom-category NAME]
+                            [--custom-bodypart {Face,Body,Custom}] [--facs]
+                            [--set NAME=VALUE] [--wear DUF] [--no-transfer]
+                            [--skip-transfer NAME,...] [--set-dressed NAME=VALUE]
+                            [--pose DUF] [--pose-affects-morphs] [--no-verify]
+                            [--subdivision {keep,off}] [--material-method M]
+                            [--fit F] [--verbosity N]
+                            [--timeout SECONDS] [--no-wait]
+scripts/daz_import_probe.py verify --blend output/daz/NAME.blend [--rig NAME]
+                            [--props NAME,...] [--timeout SECONDS] [--no-wait]
 scripts/daz_import_probe.py render --blend output/daz/NAME.blend [--only AA,OW]
                             [--sizes 128,220,340] [--columns body,face,face34]
                             [--samples N] [--subdivision {off,as-saved}]
@@ -530,6 +595,52 @@ from the figure's `.duf`, gzip-compressed or plain. Use `--facs`: on Genesis 9
 `--subdivision off`: the default `keep` saves the importer's Subsurf levels, up
 to 3 for render. It writes `NAME.blend`, `NAME_build.json`, which records the
 command line and every step, `NAME_blender.log` and `NAME_poses.json`.
+
+**`scene`** does everything `build` does and then drives the figure, in this
+order, each step recording its seconds, peak RSS and
+`import_daz.get_error_message()` and carrying on when it fails:
+
+- `--morphs` runs one standard morph operator per named set, from `anime`,
+  `body`, `expressions`, `facs`, `facsdetails`, `facsexpr`, `feminine`,
+  `flexions`, `head`, `jcms`, `masculine`, `powerpose`, `units` and `visemes`.
+  Called from Python the selector dialog never opens, so each one loads every
+  file the add-on's paths table lists for the figure. On Genesis 9, `units`,
+  `expressions`, `visemes`, `head` and `facsexpr` have no table and add
+  nothing.
+- `--custom-morphs` runs `bpy.ops.daz.import_custom_morphs()` with
+  `onDrivers='RIG'` on a folder inside the library, `--custom-files` naming the
+  `.dsf` files in it (the default is every one). That is the only way to load
+  the `Base Characters 9` shape dials, which no standard set lists.
+- `--facs`, as in `build`, so `render --blend` finds its viseme properties.
+- Every numeric property on the rig object and its data goes to
+  `NAME_morphs.json` with its value, hard and soft limits and default.
+- `--set NAME=VALUE`, repeatable, writes a property, tags the rig and its
+  objects so the drivers run, and measures how far each deformed mesh moves in
+  millimetres.
+- `--wear` imports a clothing or hair `.duf` onto the figure already in the
+  scene, repeatable and in the order given, parents its armature to the body
+  rig and calls `bpy.ops.daz.merge_rigs(useOnlySelected=True)`.
+- `bpy.ops.daz.transfer_shapekeys(transferMethod='NEAREST')` runs from the body
+  to those meshes unless `--no-transfer`; `--skip-transfer` leaves named
+  objects out of it, which a strand hair mesh needs.
+- `--set-dressed` is `--set` again, after the wearables are on.
+- `--pose` applies a pose preset with `bpy.ops.daz.import_pose()`, passing
+  `affectMorphs=False` as the operator's own `invoke()` does, because the
+  property default is `True` and with `useClearMorphs` also `True` a pose
+  preset zeroes every dial on the figure. `--pose-affects-morphs` leaves the
+  default alone.
+- After saving, `verify` runs on the file unless `--no-verify`.
+
+It writes `NAME.blend`, `NAME_scene.json`, `NAME_morphs.json`,
+`NAME_blender.log` and `NAME_poses.json`, and a `NAME_build.json` beside them
+so `render --blend` works on it. `--fit DBZFILE` exits 1 on this host: the
+route needs a `.dbz` exported from Daz Studio.
+
+**`verify`** reopens a `.blend` in a second Blender with no DAZ add-on enabled,
+no extension repository and auto-run scripts off, and reports the bones, posed
+bones, drivers, properties and meshes it finds, then clears the pose and zeroes
+the properties `--props` names to say how far each mesh moves. With no `--rig`
+or `--props` it reads them from the `_scene.json` beside the file.
 
 **`render`** reads `NAME_build.json` for the viseme properties and runs two
 stages, each a neutral row and then a row per viseme, all 17 or those `--only`
@@ -578,6 +689,18 @@ that kept its levels, 88.7 s for 2 face cells. The full default render on the
 cage, with the version before the Subsurf copy, took 184.3 s and then 1287.6 s,
 about 25 minutes. Every figure, and what failed on the way, is in the
 [guide](/guide/daz-figures#importing-without-a-ui).
+
+Measured on 2026-09-18 in the same container: `scene` with eleven morph sets,
+six character dials and two sliders set took 5.0 s wall, 4.86 s in Blender, at
+a peak of 642.0 MB, and left 1593 numeric properties on the rig; with three
+wearables instead, 5.2 s wall at a peak of 998.4 MB; and the whole dressed,
+posed build, a character preset with `body,jcms,flexions`, FACS, a shirt,
+shorts, hair and a pose, 17.5 s wall at a peak of 1643.7 MB for a 140,971,653
+byte `.blend` of 258 bones. `verify` on the outfit build took 0.8 s wall at a
+peak of 578.5 MB. `render --blend output/daz/g9_dressed.blend --only AA --sizes
+128 --columns face --samples 16 --no-sheet` drew 2 cells in 20.0 s. What each
+stage measured, and the two things that need Daz Studio, are in the
+[guide](/guide/daz-figures#a-dressed-posed-character-headless).
 
 ### `daz_inventory.py`
 

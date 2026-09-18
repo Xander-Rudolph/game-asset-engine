@@ -29,6 +29,10 @@ UniRigExportPosedFBX wants, so in-graph posing is unreachable headlessly.
     scripts/render_sheet.py output/face_rig/spheres/target_keys.blend \\
         --poses transforms:output/face_rig/sphere_keys.json --zoom 1.6
 
+    # the same sheet path traced on the GPU instead of rasterised on the CPU
+    scripts/render_sheet.py output/rigged/unit_rogue.fbx \\
+        --poses transforms:output/poses/unit_rogue_attack.json --engine cycles
+
 Sheet layout is poses down, angles across: the order most engines want when
 slicing a sheet into a flipbook.
 
@@ -80,6 +84,41 @@ for a single number; the pose then renders with the property as it was.
 Unknown shape keys and properties, and refused property values, are reported
 like unknown bones, on the terminal and in the result.
 
+TWO ENGINES. The default is EEVEE, which in this container has no GPU: the
+NVIDIA runtime gives it compute libraries only, so EGL falls back to Mesa
+llvmpipe and EEVEE rasterises on the CPU. `--engine cycles` path traces on the
+card instead, because Cycles needs no GL context, and it is the faster of the
+two here by a wide margin. Everything else is held the same: the transparent
+film, the clay material and its colour, the sun parented to the camera, the
+world ambient, the camera and its framing, the cell size and the poses.
+
+A Cycles render waits for the card first, polling every 30 s until ComfyUI's
+queue is empty and no other Blender job runs in the container, the same wait
+scripts/make_mouths.py does before an edit. The two share one card: an image
+edit through make_mouths.py peaked at 15,178 to 15,344 MiB of the 16,376 MiB
+card (2026-09-16, docs/reference/lip-sync.md), and a second job beside it is a
+CUDA out-of-memory error, not a fallback to the CPU. It stops without rendering
+after `--max-wait` seconds, and at once when `docker top` or the queue cannot be
+read, which is not the same as an idle machine. `--no-wait` skips the wait.
+EEVEE never waits, because it never touches the card.
+
+The look is not the same, and is not meant to be. A sun that rides the camera
+and a white world dome are rasterised by EEVEE with no bounce lighting at
+factory settings: `scene.eevee.use_raytracing` is False out of the box and this
+script leaves it there, so ambient light reaches everywhere equally and a sheet
+comes out flat and even. Switching it on moves EEVEE towards Cycles without
+landing on it: on the clay basilisk at 4 cells (2026-09-18) the lit surface went
+from 131.88 to 128.77 of 255, past Cycles' 129.92, for 40.10 s against 34.42 s,
+while the mean absolute difference from Cycles rose from 3.39 to 4.03. Cycles
+traces the same two lights, so the world dome is occluded where the mesh blocks
+it: armpits, the inside of a bent elbow, the ground between the feet and every
+crevice go darker, the lit faces stay about where EEVEE put them, and the sheet
+reads with more contrast and more form. The sun's shadows are sharper. Below
+the sample count that converges, the difference from EEVEE is noise rather than
+shading. Use one
+engine for a whole set: two sheets rendered by different engines will not sit
+beside each other on an atlas.
+
 A .blend is opened as saved instead of imported into an empty scene, because
 an import keeps shape keys but not the drivers that connect rig properties to
 them.  After loading, the parts of the file an import would not bring are set
@@ -104,6 +143,7 @@ import shutil
 import subprocess
 import time
 import sys
+import urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -116,6 +156,33 @@ SVC = _container()
 
 # Blender's hard limits on a shape key's slider range, and so on its value.
 SHAPE_KEY_LIMIT = 10.0
+
+# Samples per cell when --samples is not given. EEVEE's is left to Blender:
+# nothing sets taa_render_samples, so every sheet rendered before this option
+# existed still renders byte for byte the same. The number is recorded here only
+# so --help can state it (bpy 4.5.9 factory settings, read 2026-09-18).
+EEVEE_SAMPLES = 64
+# Cycles' default. Measured on this repo's alchemist_warrior walk, 4 poses by 4
+# angles, 2026-09-18: against a 2048 sample render of the same cells, the error
+# left on the silhouette edge falls 22.7, 9.9, 4.3, 3.1, 2.6 levels of 255 at
+# 16, 32, 64, 128 and 256 samples, while a 256 px cell costs 0.142, 0.149,
+# 0.151, 0.166 and 0.181 s on the 4070 Ti SUPER. Adaptive sampling flattens the
+# cost, so the knee is bought for almost nothing and 128 is where the edge stops
+# being the thing you notice.
+CYCLES_SAMPLES = 128
+# The widest each engine's own sample property will take. Read from
+# scene.cycles.bl_rna and bpy.types.SceneEEVEE.bl_rna in comfyui-packaged
+# (bpy 4.5.9 LTS, 2026-09-18). Past these Blender raises a bare
+# `ValueError: bpy_struct: item.attr = val: CyclesRenderSettings.samples value
+# not in 'int' range` after the model has loaded, and below 1 it silently clamps
+# to 1, so --samples is checked here instead.
+MAX_SAMPLES = {"cycles": 16777216, "eevee": 2147483647}
+
+# Waiting for the machine before a Cycles render, as scripts/make_mouths.py
+# waits before an edit: same 30 s poll, same MAX_WAIT guard against a stuck job.
+COMFY = os.environ.get("COMFY_URL", "http://127.0.0.1:8188")
+MAX_WAIT = 7200
+POLL = 30
 
 # The Blender half. Runs inside the container; all input arrives as one JSON blob
 # on argv so there is no quoting to get wrong.
@@ -144,8 +211,12 @@ if is_blend:
             v = getattr(struct, p.identifier)
             values[p.identifier] = v[:] if getattr(p, "is_array", False) else v
         return values
+    # "cycles" is in the list for the same reason "eevee" is: a file saved with
+    # its own sample count, light path limits or film settings must render as
+    # an import would, not as its author left it.
     factory = {k: plain_settings(getattr(bpy.context.scene, k))
-               for k in ("render", "eevee", "view_settings", "display_settings")}
+               for k in ("render", "eevee", "view_settings", "display_settings",
+                         "cycles") if hasattr(bpy.context.scene, k)}
     bpy.ops.wm.open_mainfile(filepath=path, load_ui=False)
     for k, values in factory.items():
         struct = getattr(bpy.context.scene, k)
@@ -312,7 +383,51 @@ coll.objects.link(key_ob)
 key_ob.rotation_euler = Euler((math.radians(55), 0, math.radians(30)), "XYZ")
 key_ob.parent = cam            # light rides the camera: every facing lit alike
 
-scene.render.engine = "BLENDER_EEVEE_NEXT"
+# --- engine -----------------------------------------------------------------
+# EEVEE is the default and is left exactly as it was: nothing here touches
+# taa_render_samples unless --samples asked for it, so a sheet rendered before
+# this option existed still comes out byte for byte the same.
+render_device = None
+device_names = []
+# Anything the operator has to know goes in here as well as on stdout: the host
+# keeps only the RENDERED line and drops the rest, so a warning printed and not
+# carried out never reaches the terminal.
+warnings = []
+if cfg.get("engine") == "cycles":
+    scene.render.engine = "CYCLES"
+    # The device comes from the add-on preferences, not the scene: setting
+    # scene.cycles.device = "GPU" on its own renders on the CPU, quietly, when
+    # no device is enabled in the preferences.
+    prefs = bpy.context.preferences.addons["cycles"].preferences
+    prefs.compute_device_type = "CUDA"   # OPTIX needs driver libraries this
+    prefs.get_devices()                  # container does not have
+    gpus = [d for d in prefs.devices if d.type == "CUDA"]
+    for d in prefs.devices:
+        d.use = d.type == "CUDA"
+    if gpus:
+        scene.cycles.device = "GPU"
+        render_device = "GPU"
+        device_names = [d.name for d in gpus]
+    else:
+        # Path tracing a sprite sheet on the CPU is slow enough to be worth
+        # saying out loud rather than discovering from the clock.
+        scene.cycles.device = "CPU"
+        render_device = "CPU"
+        device_names = [d.name for d in prefs.devices if d.type == "CPU"]
+        warnings.append("no CUDA device in the Cycles preferences, so this renders "
+                        "on the CPU, which path traces a sheet far slower than the "
+                        "card does. Check that the container was given a GPU.")
+        print("  ! " + warnings[-1])
+    scene.cycles.samples = cfg["samples"]
+    scene.cycles.use_denoising = cfg["denoise"]
+    if cfg["denoise"]:
+        # OptiX denoising needs the same driver libraries OPTIX rendering does.
+        scene.cycles.denoiser = "OPENIMAGEDENOISE"
+else:
+    scene.render.engine = "BLENDER_EEVEE_NEXT"
+    if cfg.get("samples"):
+        scene.eevee.taa_render_samples = cfg["samples"]
+
 scene.render.resolution_x = scene.render.resolution_y = cfg["size"]
 scene.render.film_transparent = True
 scene.render.image_settings.file_format = "PNG"
@@ -447,6 +562,14 @@ print("RENDERED " + json.dumps({
     "missing_props": sorted(missing_props),
     "refused_props": refused_props,
     "frame_range": [scene.frame_start, scene.frame_end],
+    "engine": scene.render.engine,
+    "device": render_device,
+    "devices": device_names,
+    "samples": (scene.cycles.samples if scene.render.engine == "CYCLES"
+                else scene.eevee.taa_render_samples),
+    "denoise": (bool(scene.cycles.use_denoising)
+                if scene.render.engine == "CYCLES" else False),
+    "warnings": warnings,
 }))
 # A Python-expression driver anywhere in the session leaves the bpy module
 # hanging at interpreter exit, after every frame is written. Leave directly.
@@ -497,6 +620,24 @@ def check_pose(path: Path, n: int, pose) -> None:
             raise SystemExit(f"{path}: pose {n}: property {name!r} is {v!r}. "
                              "Expected a number, true or false, a string or a "
                              "list of numbers")
+
+
+def check_samples(n: int | None, engine: str) -> None:
+    """Refuse a sample count here, rather than after the model has loaded.
+
+    Blender clamps a value under 1 to 1 without saying so, and raises a bare
+    ValueError above its own limit, minutes into a run.
+    """
+    if n is None:
+        return
+    limit = MAX_SAMPLES[engine]
+    if not 1 <= n <= limit:
+        default = CYCLES_SAMPLES if engine == "cycles" else EEVEE_SAMPLES
+        raise SystemExit(
+            f"--samples is {n}. Expected a whole number from 1 to {limit}, which "
+            f"is as far as {'Cycles' if engine == 'cycles' else 'EEVEE'} counts "
+            f"samples in bpy 4.5.9. Leave --samples out for {default}, this "
+            f"engine's default")
 
 
 def refuse_role_file(path: Path, model: Path, why: str) -> None:
@@ -560,6 +701,73 @@ def to_container(p: Path) -> str:
     return str(p)
 
 
+def blender_jobs() -> list[tuple[str, str]]:
+    """(pid, seconds running) of each `python3 -c` process in the container.
+
+    Stops the run when `docker top` fails, as scripts/make_mouths.py does: a
+    process list that cannot be read is not an idle machine, and treating it as
+    one starts a Cycles render beside whatever is already on the card.
+    """
+    name = _container()
+    cmd = ["docker", "top", name, "-o", "pid,etimes,args"]
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+    except OSError as e:
+        raise SystemExit(f"cannot run docker top ({e}), so whether a Blender job is "
+                         "running is unknown. Nothing was rendered")
+    except subprocess.TimeoutExpired:
+        return [("?", "docker top did not answer within 30 s")]
+    if r.returncode != 0:
+        raise SystemExit(f"`{' '.join(cmd)}` exited {r.returncode}: "
+                         f"{(r.stderr or r.stdout).strip()}\n"
+                         "Whether a Blender job is running is unknown, so nothing was "
+                         "rendered. Check the container name (ASSET_ENGINE_CONTAINER) "
+                         "and that you can run docker")
+    jobs = []
+    for line in r.stdout.splitlines()[1:]:
+        parts = line.split(None, 2)
+        if len(parts) == 3 and "python3 -c" in parts[2]:
+            jobs.append((parts[0], parts[1]))
+    return jobs
+
+
+def machine_busy(server: str) -> str:
+    """Why the card is busy, or '' when a Cycles render may start."""
+    jobs = blender_jobs()
+    if jobs:
+        ages = ", ".join(f"pid {pid} for {age} s" if age.isdigit() else age
+                         for pid, age in jobs)
+        return f"{len(jobs)} Blender job(s) running in {_container()} ({ages})"
+    try:
+        with urllib.request.urlopen(f"{server.rstrip('/')}/queue", timeout=30) as r:
+            q = json.load(r)
+    except OSError as e:
+        raise SystemExit(f"Cannot reach ComfyUI at {server}: {e}. Whether the card is "
+                         "busy is unknown, so nothing was rendered. Pass --no-wait to "
+                         "render anyway")
+    n = len(q.get("queue_running", [])) + len(q.get("queue_pending", []))
+    return f"{n} ComfyUI job(s) queued or running" if n else ""
+
+
+def wait_for_machine(server: str, max_wait: int) -> None:
+    """Poll until nothing else is on the card, as make_mouths.py does before an edit."""
+    started = time.time()
+    while True:
+        why = machine_busy(server)
+        if not why:
+            return
+        waited = time.time() - started
+        if waited >= max_wait:
+            raise SystemExit(
+                f"  still busy after {waited:.0f} s, the --max-wait of {max_wait} s: "
+                f"{why}. Nothing was rendered. A Blender job running far longer than "
+                "its tool's --timeout may be stuck: see "
+                f"`docker top {_container()} -o pid,etimes,args`")
+        pause = round(min(POLL, max(1.0, max_wait - waited)))
+        print(f"  waiting: {why}; checking again in {pause} s", flush=True)
+        time.sleep(pause)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -592,6 +800,29 @@ def main() -> int:
                          "a scale and a golem looms over a goblin")
     ap.add_argument("--key", type=float, default=1.6, help="sun strength")
     ap.add_argument("--ambient", type=float, default=0.22, help="world light strength")
+    ap.add_argument("--engine", choices=("eevee", "cycles"), default="eevee",
+                    help="eevee (default) rasterises, and in this container it "
+                         "does that on the CPU through llvmpipe because the "
+                         "NVIDIA runtime gives no GL libraries. cycles path "
+                         "traces on the card, needs no GL context, and is far "
+                         "faster here, but its look has real ambient occlusion "
+                         "and sharper shadows: see the description above")
+    ap.add_argument("--samples", type=int, default=None, metavar="N",
+                    help=f"samples per cell, from 1 to {MAX_SAMPLES['cycles']} for "
+                         f"cycles and {MAX_SAMPLES['eevee']} for eevee, which are "
+                         f"the engines' own limits. Default {EEVEE_SAMPLES} for "
+                         f"eevee, which is Blender's own and is left untouched, and "
+                         f"{CYCLES_SAMPLES} for cycles. Adaptive sampling stays "
+                         "on in cycles, so N is a ceiling rather than a count")
+    ap.add_argument("--denoise", action="store_true",
+                    help="cycles only, and warned about and ignored under eevee, "
+                         "which has no denoiser: denoise with OpenImageDenoise, which runs "
+                         "on the CPU here because OptiX denoising needs driver "
+                         f"libraries this container has not. Off by default: at "
+                         f"{CYCLES_SAMPLES} samples it costs about 60%% more per "
+                         "cell to move the lit surface by under a level in 255, "
+                         "and it does not touch the alpha edge, which is what a "
+                         "sprite shows. Worth turning on below 64 samples")
     ap.add_argument("--clay", action="store_true",
                     help="force the clay material even on a textured mesh")
     ap.add_argument("--clay-color", default="0.55,0.54,0.52",
@@ -609,7 +840,19 @@ def main() -> int:
     ap.add_argument("--timeout", type=int, default=1800,
                     help="seconds before Blender is stopped inside the container "
                          "(default 1800). A hung render otherwise hangs forever")
+    ap.add_argument("--max-wait", type=int, default=MAX_WAIT, metavar="SECONDS",
+                    help="longest wait for a free card before a cycles render, then "
+                         f"stop without rendering (default {MAX_WAIT})")
+    ap.add_argument("--no-wait", action="store_true",
+                    help="start a cycles render without waiting for ComfyUI's queue "
+                         "or for another Blender job. The card is shared, and a "
+                         "ComfyUI image edit peaks near 15 GB of its 16, so two jobs "
+                         "on it at once end in a CUDA out-of-memory error rather than "
+                         "a fallback")
     args = ap.parse_args()
+    if args.max_wait < 0:
+        ap.error("--max-wait cannot be negative")
+    check_samples(args.samples, args.engine)
 
     model = args.model if args.model.is_absolute() else ROOT / args.model
     if not model.exists():
@@ -645,11 +888,29 @@ def main() -> int:
         "frames_dir": frames_dir,
         "clay": args.clay,
         "clay_color": [float(x) for x in args.clay_color.split(",")],
+        "engine": args.engine,
+        # 0 means "whatever the engine already had", which for EEVEE is how a
+        # sheet rendered before this option existed stays byte for byte the same.
+        "samples": args.samples or (CYCLES_SAMPLES if args.engine == "cycles" else 0),
+        "denoise": args.denoise,
     }
 
     print(f"  model   {cfg['model']}")
     print(f"  poses   {args.poses}  ({len(poses)} row(s))")
     print(f"  angles  {', '.join(f'{a:g}' for a in azimuths)}")
+    if args.denoise and args.engine != "cycles":
+        print("  ! --denoise is a Cycles option and does nothing here: EEVEE has no "
+              "denoiser, and this sheet renders exactly as it would without it. Add "
+              "--engine cycles to denoise.")
+
+    if args.engine == "cycles" and not args.no_wait:
+        # Cycles renders on the card, and so does ComfyUI: an image edit peaked
+        # at 15,178 to 15,344 MiB of the 16,376 MiB card (make_mouths.py,
+        # 2026-09-16), and a second job beside it is a CUDA out-of-memory error
+        # rather than a fallback to the CPU. EEVEE rasterises through llvmpipe
+        # and never touches the card, so its path does not wait. Same poll and
+        # same guard as scripts/make_mouths.py.
+        wait_for_machine(COMFY, args.max_wait)
 
     script = (f"import os; os.makedirs({frames_dir!r}, exist_ok=True)\n"
               + BLENDER_SCRIPT)
@@ -660,6 +921,10 @@ def main() -> int:
             shutil.rmtree(ROOT / "output" / "_sheet_frames" / run_id, ignore_errors=True)
         return 1
     info["run_id"] = run_id
+    for warning in info.get("warnings", []):
+        # Printed inside the container too, where nothing on success reads it:
+        # exec_json keeps the RENDERED line and drops the rest of stdout.
+        print(f"  ! {warning}")
     if info["missing_bones"]:
         print(f"  ! bones not in the rig: {', '.join(info['missing_bones'])}")
     if info["missing_shape_keys"]:
@@ -681,6 +946,13 @@ def main() -> int:
         print("  rig     none (static mesh)")
     if info["shape_keys"]:
         print(f"  shapes  {info['shape_keys']} shape key name(s)")
+    if info.get("engine") == "CYCLES":
+        print(f"  engine  Cycles on the {info['device']} "
+              f"({', '.join(info['devices']) or 'no device named'}), "
+              f"{info['samples']} samples, "
+              f"{'denoised' if info['denoise'] else 'not denoised'}")
+    else:
+        print(f"  engine  EEVEE Next, {info.get('samples')} samples")
 
     out = args.out or model.with_suffix("").with_name(model.stem + "_sheet.png")
     if not out.is_absolute():
