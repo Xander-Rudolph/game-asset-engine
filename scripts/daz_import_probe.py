@@ -6,6 +6,13 @@ repo, loads its viseme and FACS controllers, saves a .blend under output/daz/
 and renders one viseme per row, so you can see whether the importer runs with
 no UI and whether the Genesis face reads at sprite sizes.
 
+`scene` goes further on the same headless Blender, with no Daz Studio on the
+host: it loads morph sets and character shape dials, lists every slider the
+rig gains with its range, sets named ones and measures how far the mesh
+moves, imports clothing and hair onto the figure already in the scene and
+merges their rigs into its own, applies a pose preset, and saves the lot.
+`verify` reopens what it saved in a Blender with no add-on at all.
+
     scripts/daz_import_probe.py fetch
         # import_daz at the version_5_2_0 tag, pinned, into input/_devtools/import_daz
 
@@ -49,6 +56,45 @@ no UI and whether the Genesis face reads at sprite sizes.
     # what a wrong content path does: the checks are recorded, not obeyed
     scripts/daz_import_probe.py build --content-dir /app/models/daz_library_missing --no-dir-check \
         --anatomy none --out output/daz/g9_wrongdir.blend
+
+    # every standard morph set the add-on knows, the six character dials the
+    # Starter Essentials ships, and two sliders set and measured
+    scripts/daz_import_probe.py scene --out output/daz/g9_morphs.blend --anatomy none \
+        --morphs units,expressions,visemes,head,body,jcms,flexions,masculine,feminine,powerpose,facsexpr \
+        --custom-morphs "data/Daz 3D/Genesis 9/Base/Morphs/Daz 3D/Base Characters 9" \
+        --custom-files Kat_figure_ctrl_Character.dsf,Amala_figure_ctrl_Character.dsf \
+        --custom-category Characters --custom-bodypart Body \
+        --set Kat_figure_ctrl_Character=1.0 --set body_bs_ProportionHeight=1.0 --subdivision off
+
+    # a shirt, shorts and hair onto the figure already in the scene, then a
+    # character dial and a pose, and the saved file reopened with no add-on
+    scripts/daz_import_probe.py scene --out output/daz/g9_outfit.blend --anatomy none \
+        --morphs body,jcms --custom-morphs "data/Daz 3D/Genesis 9/Base/Morphs/Daz 3D/Base Characters 9" \
+        --custom-files Kat_figure_ctrl_Character.dsf --custom-category Characters --custom-bodypart Body \
+        --wear "People/Genesis 9/Clothing/Daz Originals/Base Clothing/G9 Base Shirt.duf" \
+        --wear "People/Genesis 9/Clothing/Daz Originals/Base Clothing/G9 Base Shorts.duf" \
+        --wear "People/Genesis 9/Hair/Daz Originals/Base Hair/G9 Base dForce Pixie Hair.duf" \
+        --skip-transfer "dForce Pixie Cut Mesh,dForce Pixie Hair Cap Mesh" \
+        --set-dressed Kat_figure_ctrl_Character=1.0 \
+        --pose "People/Genesis 9/Poses/Daz Originals/Base Poses/Base/G9 Base Pose 13 Walking G9B.duf" \
+        --subdivision off
+
+    # the file the measure track renders: a character preset, its anatomy
+    # figures, body and corrective morphs, FACS, an outfit, hair and a pose
+    scripts/daz_import_probe.py scene --out output/daz/g9_dressed.blend \
+        --figure "People/Genesis 9/Characters/Kat for Genesis 9.duf" --morphs body,jcms,flexions --facs \
+        --wear "People/Genesis 9/Clothing/Daz Originals/Base Clothing/G9 Base Shirt.duf" \
+        --wear "People/Genesis 9/Clothing/Daz Originals/Base Clothing/G9 Base Shorts.duf" \
+        --wear "People/Genesis 9/Hair/Daz Originals/Base Hair/G9 Base dForce Pixie Hair.duf" \
+        --skip-transfer "dForce Pixie Cut Mesh,dForce Pixie Hair Cap Mesh" \
+        --pose "People/Genesis 9/Poses/Daz Originals/Base Poses/Base/G9 Base Pose 13 Walking G9B.duf"
+
+    # what the DBZFILE fitting route asks for, which only Daz Studio can write
+    scripts/daz_import_probe.py scene --out output/daz/g9_dbz.blend --anatomy none --fit DBZFILE \
+        --wear "People/Genesis 9/Clothing/Daz Originals/Base Clothing/G9 Base Shirt.duf"
+
+    # reopen any .blend this wrote in a Blender with no add-on
+    scripts/daz_import_probe.py verify --blend output/daz/g9_dressed.blend
 
 WHAT IS DOWNLOADED. `fetch` pins GitHub's archive of the version_5_2_0 tag by
 byte size and sha256, writes it to input/_devtools/import_daz/downloads/ as a
@@ -105,11 +151,57 @@ HOW IT RUNS WITHOUT A UI, the method scripts/mpfb_probe.py found for MPFB:
   7. With the body rig active, bpy.ops.daz.import_visemes() and
      bpy.ops.daz.import_facs() load the controllers as rig properties whose
      drivers move shape keys and bones.
+WHAT `scene` ADDS to that, in this order, each one a step that records its
+seconds, peak RSS and get_error_message() and carries on when it fails:
+  1. --morphs runs one standard morph operator per set (import_units,
+     import_body_morphs, import_jcms and the rest). Called from Python the
+     selector dialog never opens: Selector.getScriptedValues() returns
+     LS.selection, which is empty, so every file the add-on's paths table
+     lists for the figure is loaded (read in selector.py and morphing.py).
+  2. --custom-morphs runs bpy.ops.daz.import_custom_morphs() on named .dsf
+     files with onDrivers='RIG', which is how the character shape dials in
+     "Base Characters 9" load: the add-on's data/paths/genesis9.json has no
+     entry for them, so no standard set finds them.
+  3. --facs, as in `build`, so `render --blend` has its viseme properties.
+  4. Every numeric property on the rig object and its data is written to
+     <name>_morphs.json with the min, max, soft min, soft max and default the
+     importer gave it.
+  5. --set NAME=VALUE writes the property, tags the rig and its objects (a
+     plain write does not tag anything, so the drivers would not run), and
+     measures how far each mesh the rig deforms moves, in millimetres.
+  6. --wear imports a clothing or hair .duf with the figure already in the
+     scene. Each wearable arrives as its own armature and mesh; the probe
+     parents that armature to the body rig, selects both and calls
+     bpy.ops.daz.merge_rigs(useOnlySelected=True), after which the mesh is
+     parented to the body rig with its Armature modifier pointing at it.
+  7. bpy.ops.daz.transfer_shapekeys(transferMethod='NEAREST') from the body
+     to those meshes, unless --no-transfer. Its poll needs an active mesh
+     with shape keys, so with no morphs loaded it fails with "Operator
+     bpy.ops.daz.transfer_shapekeys.poll() failed, context is incorrect".
+  8. --set-dressed, the same as --set but after the wearables are on.
+  9. --pose runs bpy.ops.daz.import_pose() and counts the pose bones whose
+     matrix_basis changed. The probe passes affectMorphs=False, as the
+     operator's own invoke() does: called from Python the property keeps its
+     default True, and with useClearMorphs also True the pose preset zeroes
+     every morph dial on the figure. --pose-affects-morphs leaves it at True.
+ 10. After saving, `verify` reopens the .blend in a second Blender with no
+     add-on and no extension repository, counts the posed bones, clears the
+     pose and zeroes the sliders that were set, and reports how far each mesh
+     moves. --no-verify skips it.
 Every operator returns FINISHED even when it failed, so each step also
 records import_daz.get_error_message(), and a step that made nothing it
 should have made is marked failed. The importer's own terminal output goes to
 <name>_blender.log. The build carries on past a failed morph step and saves
 what it has.
+
+TWO VERTEX COUNTS, AND WHICH IS WHICH. `survey`, `mesh_facts` and `verify`'s
+`meshes` count the mesh as it is stored, the cage. Every count under a `moved`
+key, in a dial, in `pose` and in `verify`'s `pose_cleared` and `props_zeroed`,
+is taken on the mesh as Blender evaluates it, so a Subsurf modifier that is
+still on multiplies it. With --subdivision off the two agree, because every
+Subsurf in the scene is switched off before the first measurement and again as
+soon as the wearables are in; with --subdivision keep, the default, they do
+not, and the same mesh appears in one report at both counts.
 
 `render --blend` reads <name>_build.json for the viseme properties and runs
 two stages, each with a neutral row (every viseme property 0) and then a row
@@ -257,6 +349,104 @@ script. Peak memory is the Blender process's peak RSS; docker stats took 1 to
             to an AI model at all is unsettled (docs/reference/daz-genesis.md,
             "The AI clauses"), so the daz-figure skill has a person judge them.
 
+MEASURED on 2026-09-18 in comfyui-packaged, the same library and bpy, by the
+`scene` and `verify` examples above. Each item names the command that made it.
+  morph     The morphs example, 5.0 s wall, 4.86 s in Blender, peak 642.0 MB
+  sets      RSS, container 2.76 to 3.19 GiB. import_units,
+            import_expressions, import_visemes and import_head each returned
+            FINISHED and added nothing: the add-on's data/paths/genesis9.json
+            has no units, expressions, visemes or head entry (read).
+            import_body_morphs added 102 object and 251 data properties and 5
+            body shape keys in 0.19 s, import_jcms 116 and 122 with 103 keys,
+            import_flexions 27 and 27 with 14, import_masculine 13 and 13
+            with 11, import_feminine 11 and 11 with 9, import_powerpose 88
+            and 92 with 52, import_facs_expressions nothing.
+  character The same run: the six Base Characters 9 "figure_ctrl_Character"
+  dials     files, loaded with import_custom_morphs, added 86 object and 630
+            data properties and 61 shape keys in 1.43 s, and each of them
+            leaves get_error_message() "Found morphs that want to change the
+            rest pose." The rig ended with 270 bones, up from 152 after the
+            figure, and 1593 numeric properties, 444 on the object and 1149
+            on its data. Their hard min and max are the float limits; the
+            Daz limits are the soft range, 0.0 to 1.0 on Kat_figure_ctrl_
+            Character and -2.0 to 2.0 on body_bs_ProportionHeight. 417 of the
+            1593 have the soft range 0 to 1 and 862 have none (the "(fin)"
+            and "(rst)" twins and the corrective "cbs" morphs).
+  sliders   The same run, on the cage with every Subsurf off: setting
+            Kat_figure_ctrl_Character to 1.0 moved all 25182 body vertices,
+            by up to 59.67 mm; body_bs_ProportionHeight at 1.0 moved 22292 of
+            them by up to 14.0 mm.
+  character `build --figure "People/Genesis 9/Genesis 9.duf"` against `build
+  preset    --figure "People/Genesis 9/Characters/Kat for Genesis 9.duf"`,
+            1.4 s and 4.7 s wall: the base figure gives a rig of 157 bones
+            with 2 object and 4 data properties and 23 drivers, a body mesh
+            of 25182 vertices with no shape key, 2 images and 18 materials;
+            the Kat preset gives 158 bones with 47 and 64 properties and 90
+            drivers, the same 25182 vertices with 40 shape keys (39 driven),
+            18 images and 18 materials, and a different eyebrow figure (Card
+            Style 12, 9000 vertices, against Style 06, 6944). Its import step
+            alone took 3.38 s and reached 1436.3 MB peak RSS. The same
+            command with --no-textures gives the same counts and clears 29
+            image texture nodes, leaving 0 images in the file.
+  wearables The outfit example, 5.2 s wall, peak 998.4 MB RSS, container 2.22
+            to 2.90 GiB. Each wearable arrives as its own armature and mesh
+            (G9 Base Shirt 126 bones, G9 Base Shorts 126, dForce Pixie Hair
+            Cap 51) with the mesh parented to that armature and an "Armature
+            SkinBinding" modifier pointing at it. merge_rigs returned
+            FINISHED, left no other armature and did not change the body
+            rig's 233 bones, so every wearable bone is a duplicate of one the
+            figure already has; afterwards each mesh is parented to the body
+            rig, keeps its own vertex groups (shirt 20, shorts 7, hair cap
+            18) and its Armature modifier points at the body rig.
+  outfit    The same run: transfer_shapekeys returned FINISHED with no error
+  and a    and added 0 shape keys to the shirt and the shorts, which is the
+  dial      wiki's "Morphed (Characters): Don't fit meshes, but load
+            shapekeys. Not all shapekeys are found. Shapekeys are not
+            transferred to clothes" (Import_Import_DAZ_Manually.md). Setting
+            Kat_figure_ctrl_Character to 1.0 with the outfit on moved all of
+            the shirt's and the shorts' vertices by 57.25 mm, mean and
+            maximum the same, so the outfit follows the rest pose the dial
+            changes as a rigid body and not the body's new shape, while the
+            body's own vertices moved by up to 66.21 mm with a mean of 43.09.
+  pose      The same run: import_pose on "G9 Base Pose 13 Walking G9B.duf"
+            returned FINISHED, moved 48 of the rig's 233 pose bones (50 have
+            a rotation once the drivers have run) and wrote no f-curve. The
+            body moved 801.24 mm at most, the shirt 214.70, the shorts
+            214.97 and the hair cap 180.89. The strand mesh dForce Pixie Cut
+            Mesh did not move at all: its only vertex group is "dForce Pin",
+            a simulation group with no bone of that name, so its Armature
+            modifier deforms nothing. With --pose-affects-morphs, or from any
+            caller that does not pass affectMorphs, the same call put
+            Kat_figure_ctrl_Character back to 0.0.
+  no add-on `verify --blend output/daz/g9_outfit.blend`, 0.8 s wall, peak
+            578.5 MB: reopened with no DAZ add-on enabled and auto-run
+            scripts off, the file still has 233 bones, 88 posed bones, 618
+            drivers, 267 object and 438 data properties, and the dial still
+            reads 1.0. Clearing the pose moves the body 801.24 mm, the shirt
+            214.86 and the shorts 215.14; zeroing the one dial moves the body
+            66.21 mm and the outfit 57.25 mm. Nothing in the file needs the
+            add-on.
+  dressed   The dressed example, 17.5 s wall, 17.39 s in Blender, peak
+            1643.7 MB RSS, container 2.29 to 3.59 GiB, output/daz/g9_dressed
+            .blend 140,971,653 bytes. 258 bones, 578 object and 803 data
+            properties, 1031 drivers, all 17 viseme properties found; body
+            25182 vertices with 339 shape keys, shirt 8038, shorts 8256,
+            hair cap 1085, hair strands 236136, plus the five anatomy meshes.
+            import_facs took 5.68 s of it, the three wearables 5.09 s.
+  rendering `render --blend output/daz/g9_dressed.blend --only AA --sizes 128
+            --columns face --samples 16 --no-sheet`: 2 cells of 128 px in
+            20.0 s, 21.0 s wall, container peak 5.50 GiB. AA moves 2880 body
+            vertices by up to 7.5 mm and changes 218 of the cell's 6584
+            figure pixels. The same options on g9_cage.blend give the same
+            210 changed pixels of 6619 as the run of 2026-09-16, so the body
+            mesh change below did not move the older numbers.
+  body mesh Before 2026-09-18 `render` took the figure to be the largest mesh
+            parented to the rig, which on a dressed figure is the hair (236136
+            vertices against the body's 25182): the first render of
+            g9_dressed.blend reported AA moving 0 body vertices and framed
+            the head from the head bone. It now prefers the mesh the report
+            names, then the one with the most shape keys.
+
 Before each Blender job this waits, polling every 30 s, until ComfyUI's queue
 is empty and `docker top` shows no other `python3 -c` job in the container.
 --no-wait skips that. Peak memory is sampled from `docker stats` on the host
@@ -327,6 +517,18 @@ VISEMES = ["AA", "EE", "EH", "ER", "F", "IH", "IY", "K", "L", "M",
            "OW", "S", "SH", "T", "TH", "UW", "W"]
 PROP_PATTERN = r"facs_ctrl_v|ectrlv|viseme"
 MATERIAL_METHODS = ("EXTENDED_PRINCIPLED", "BSDF", "FBX_COMPATIBLE")
+# The importer's standard morph sets, from its own operator names. Which of
+# them find anything depends on the paths table for the figure, which for
+# Genesis 9 is data/paths/genesis9.json inside the add-on.
+MORPH_SETS = {
+    "units": "import_units", "expressions": "import_expressions",
+    "visemes": "import_visemes", "head": "import_head", "facs": "import_facs",
+    "facsdetails": "import_facs_details", "facsexpr": "import_facs_expressions",
+    "powerpose": "import_powerpose", "anime": "import_anime",
+    "body": "import_body_morphs", "jcms": "import_jcms",
+    "masculine": "import_masculine", "feminine": "import_feminine",
+    "flexions": "import_flexions",
+}
 FIT_METHODS = ("MORPHED", "UNIQUE", "SHARED", "DBZFILE")
 COLUMNS = ("body", "face", "face34")
 SIZES = [128, 220, 340]
@@ -457,7 +659,7 @@ def cmd_fetch(args) -> int:
 
 # ------------------------------------------------------------------ Blender side
 
-BUILD_SCRIPT = r'''
+PRELUDE = r'''
 import json, os, re, resource, signal, sys, time, traceback
 cfg = json.loads(sys.argv[-1])
 # The host's timeout only stops docker exec; SIGALRM's default action ends
@@ -633,7 +835,9 @@ def main_rig(objs):
     if not rigs:
         raise RuntimeError("the import made no top-level armature")
     return max(rigs, key=lambda o: len(o.data.bones))
+'''
 
+SETUP = r'''
 
 try:
     step("read_factory_settings(use_empty=True)",
@@ -750,6 +954,9 @@ try:
 
         result["merge_rigs"] = step(f"parent {len(subrigs)} anatomy rigs and merge_rigs", merge, fatal=False)
 
+'''
+
+BUILD_TAIL = r'''
     def import_morphs(op_name):
         def run():
             activate(rig)
@@ -829,7 +1036,9 @@ try:
             raise RuntimeError(f"save_as_mainfile returned {sorted(ret)}")
 
     step("save .blend", save)
-except Stop:
+'''
+
+EPILOGUE = r'''except Stop:
     pass
 except Exception:
     result["stopped_at"] = result["stopped_at"] or "outside a step"
@@ -844,6 +1053,433 @@ print("DAZ_BUILD " + json.dumps(result), flush=True)
 sys.stderr.flush()
 # Leave directly: an add-on or a Python-expression driver can leave the bpy
 # module hanging at interpreter exit (seen with MPFB and render_sheet.py).
+os._exit(0)
+'''
+
+SCENE_TAIL = r'''
+    import numpy as np
+
+    def numeric_props(ob):
+        """Every float or int custom property on the rig object and its data,
+        with the range the importer gave it."""
+        out = {}
+        for owner, label in ((ob, "object"), (ob.data, "data")):
+            for k in owner.keys():
+                v = owner[k]
+                if not isinstance(v, (int, float)) or isinstance(v, bool):
+                    continue
+                try:
+                    ui = owner.id_properties_ui(k).as_dict()
+                except (TypeError, KeyError, ValueError):
+                    ui = {}
+                out[k] = {"owner": label, "value": round(float(v), 6),
+                          "min": ui.get("min"), "max": ui.get("max"),
+                          "soft_min": ui.get("soft_min"), "soft_max": ui.get("soft_max"),
+                          "default": ui.get("default")}
+        return out
+
+    def prop_owner(name):
+        for owner in (rig, rig.data):
+            if name in owner.keys():
+                return owner
+        return None
+
+    def shape_key_counts():
+        return {o.name: (len(o.data.shape_keys.key_blocks) if o.data.shape_keys else 0)
+                for o in bpy.data.objects if o.type == "MESH"}
+
+    def coords(ob):
+        """The evaluated mesh's vertex positions in world space, metres."""
+        dg = bpy.context.evaluated_depsgraph_get()
+        eob = ob.evaluated_get(dg)
+        me = eob.to_mesh()
+        n = len(me.vertices)
+        co = np.empty(n * 3, dtype=np.float64)
+        me.vertices.foreach_get("co", co)
+        eob.to_mesh_clear()
+        co = co.reshape(n, 3)
+        m = np.array(ob.matrix_world.to_4x4())
+        return co @ m[:3, :3].T + m[:3, 3]
+
+    def moved(before, after):
+        if before.shape != after.shape:
+            return {"same_vertex_count": False,
+                    "vertices_before": int(before.shape[0]), "vertices_after": int(after.shape[0])}
+        d = np.linalg.norm(after - before, axis=1)
+        return {"vertices": int(before.shape[0]),
+                "moved": int((d > 1e-5).sum()),
+                "max_mm": round(float(d.max()) * 1000.0, 2) if d.size else 0.0,
+                "mean_mm": round(float(d.mean()) * 1000.0, 3) if d.size else 0.0}
+
+    def rig_meshes():
+        """Meshes the rig deforms, by find_armature(), which reads the armature
+        modifier first and then the parent."""
+        return [o for o in bpy.data.objects if o.type == "MESH" and o.find_armature() == rig]
+
+    def mesh_facts(ob):
+        arm = [[m.name, m.object.name if m.object else None] for m in ob.modifiers if m.type == "ARMATURE"]
+        return {"vertices": len(ob.data.vertices), "faces": len(ob.data.polygons),
+                "shape_keys": len(ob.data.shape_keys.key_blocks) if ob.data.shape_keys else 0,
+                "parent": ob.parent.name if ob.parent else None,
+                "parent_type": ob.parent_type if ob.parent else None,
+                "armature_modifiers": arm,
+                "follows_rig": ob.find_armature() == rig,
+                "vertex_groups": len(ob.vertex_groups),
+                "vertex_group_names": [g.name for g in ob.vertex_groups][:12],
+                "materials": [s.material.name for s in ob.material_slots if s.material],
+                "modifiers": [[m.name, m.type] for m in ob.modifiers]}
+
+    def update():
+        # Writing a custom property does not tag the rig on its own, so the
+        # drivers that read it are not re-evaluated without update_tag().
+        rig.update_tag()
+        rig.data.update_tag()
+        for ob in bpy.data.objects:
+            ob.update_tag()
+        bpy.context.view_layer.update()
+
+    body = max(rig_meshes(), key=lambda o: len(o.data.vertices)) if rig_meshes() else None
+    result["body_mesh"] = body.name if body else None
+
+    # ---------------------------------------------------------------- morphs
+    result["morph_sets"] = {}
+    for label, opname in cfg["morph_sets"]:
+        def load_set(opname=opname):
+            activate(rig)
+            daz.set_silent_mode(True)
+            before, keys_before = armature_props(rig), shape_key_counts()
+            ret = getattr(bpy.ops.daz, opname)()
+            daz.set_silent_mode(True)
+            after, keys_after = armature_props(rig), shape_key_counts()
+            added = {k: sorted(set(after.get(k, [])) - set(before.get(k, []))) for k in ("object", "data")}
+            keys = {k: v - keys_before.get(k, 0) for k, v in keys_after.items() if v - keys_before.get(k, 0)}
+            return {"operator": f"bpy.ops.daz.{opname}()", "returned": sorted(ret),
+                    "properties_added": {k: len(v) for k, v in added.items()},
+                    "first_properties": added["object"][:6],
+                    "shape_keys_added": keys,
+                    "get_error_message": daz.get_error_message()}
+        result["morph_sets"][label] = step(f"bpy.ops.daz.{opname}()", load_set, fatal=False)
+
+    if cfg["custom"]:
+        def load_custom():
+            activate(rig)
+            daz.set_silent_mode(True)
+            before, keys_before = armature_props(rig), shape_key_counts()
+            ret = bpy.ops.daz.import_custom_morphs(
+                directory=cfg["custom"]["dir"],
+                files=[{"name": n} for n in cfg["custom"]["files"]],
+                category=cfg["custom"]["category"],
+                bodypart=cfg["custom"]["bodypart"],
+                onDrivers="RIG")
+            daz.set_silent_mode(True)
+            after, keys_after = armature_props(rig), shape_key_counts()
+            added = {k: sorted(set(after.get(k, [])) - set(before.get(k, []))) for k in ("object", "data")}
+            keys = {k: v - keys_before.get(k, 0) for k, v in keys_after.items() if v - keys_before.get(k, 0)}
+            if not any(added.values()) and not keys:
+                raise RuntimeError("bpy.ops.daz.import_custom_morphs() returned "
+                                   f"{sorted(ret)} and added no property or shape key; "
+                                   f"get_error_message(): {daz.get_error_message()!r}")
+            return {"operator": "bpy.ops.daz.import_custom_morphs()", "returned": sorted(ret),
+                    "files": len(cfg["custom"]["files"]),
+                    "category": cfg["custom"]["category"],
+                    "properties_added": {k: len(v) for k, v in added.items()},
+                    "property_names": added["object"] + added["data"],
+                    "shape_keys_added": keys,
+                    "get_error_message": daz.get_error_message()}
+        result["custom_morphs"] = step(
+            f"bpy.ops.daz.import_custom_morphs() {cfg['custom']['category']}", load_custom, fatal=False)
+
+    if cfg["facs"]:
+        def load_facs():
+            activate(rig)
+            daz.set_silent_mode(True)
+            before = armature_props(rig)
+            ret = bpy.ops.daz.import_facs()
+            daz.set_silent_mode(True)
+            after = armature_props(rig)
+            added = {k: len(set(after.get(k, [])) - set(before.get(k, []))) for k in ("object", "data")}
+            if not any(added.values()):
+                raise RuntimeError(f"bpy.ops.daz.import_facs() returned {sorted(ret)} and added no "
+                                   f"property; get_error_message(): {daz.get_error_message()!r}")
+            return {"returned": sorted(ret), "properties_added": added,
+                    "get_error_message": daz.get_error_message()}
+        result["import_facs"] = step("bpy.ops.daz.import_facs()", load_facs, fatal=False)
+
+    step("list rig properties and their ranges", lambda: result.update(
+        {"rig_properties": numeric_props(rig)}), fatal=False)
+
+    def subdivision_off():
+        mods = [m for o in bpy.data.objects if o.type == "MESH" for m in o.modifiers if m.type == "SUBSURF"]
+        levels = sorted({(m.levels, m.render_levels) for m in mods})
+        for m in mods:
+            m.show_viewport = False
+            m.show_render = False
+        return {"subsurf_modifiers": len(mods), "levels_viewport_render": levels}
+
+    if cfg["subdivision"] == "off":
+        result["subdivision_off"] = step("switch off Subsurf modifiers", subdivision_off, fatal=False)
+
+    # ------------------------------------------------------------ set sliders
+    result["dials"] = {}
+    for name, value in cfg["set"]:
+        def set_one(name=name, value=value):
+            owner = prop_owner(name)
+            if owner is None:
+                raise KeyError(f"no property {name!r} on {rig.name} or {rig.name}.data; "
+                               f"{len(numeric_props(rig))} numeric properties exist")
+            meshes = rig_meshes()
+            update()
+            before = {ob.name: coords(ob) for ob in meshes}
+            was = float(owner[name])
+            owner[name] = float(value)
+            update()
+            after = {ob.name: coords(ob) for ob in meshes}
+            keys = {}
+            for ob in meshes:
+                if ob.data.shape_keys:
+                    keys[ob.name] = sum(1 for k in ob.data.shape_keys.key_blocks if abs(k.value) > 1e-4)
+            return {"property": name, "owner": "object" if owner is rig else "data",
+                    "from": was, "to": float(value),
+                    "moved": {n: moved(before[n], after[n]) for n in before},
+                    "shape_keys_nonzero": keys}
+        result["dials"][f"{name}={value}"] = step(f"set {name} = {value}", set_one, fatal=False)
+
+    # -------------------------------------------------------------- wearables
+    result["wearables"] = {}
+    for rel, absp in cfg["wear"]:
+        name = os.path.splitext(os.path.basename(absp))[0]
+
+        def wear(absp=absp, name=name):
+            entry = {"file": name}
+            activate(rig)
+            objs = import_duf(absp)
+            entry["objects"] = [[o.name, o.type] for o in objs]
+            meshes = [o for o in objs if o.type == "MESH"]
+            rigs = [o for o in objs if o.type == "ARMATURE"]
+            entry["before_merge"] = {o.name: mesh_facts(o) for o in meshes}
+            entry["own_rigs"] = {o.name: len(o.data.bones) for o in rigs}
+            if rigs:
+                bones_before = len(rig.data.bones)
+                for sub in rigs:
+                    wm = sub.matrix_world.copy()
+                    sub.parent = rig
+                    sub.matrix_world = wm
+                activate(rig)
+                for sub in rigs:
+                    sub.select_set(True)
+                daz.set_silent_mode(True)
+                ret = bpy.ops.daz.merge_rigs(useOnlySelected=True)
+                daz.set_silent_mode(True)
+                entry["merge_rigs"] = {
+                    "returned": sorted(ret), "bones_before": bones_before,
+                    "bones_after": len(rig.data.bones),
+                    "armatures_left": [o.name for o in bpy.data.objects
+                                       if o.type == "ARMATURE" and o != rig],
+                    "get_error_message": daz.get_error_message()}
+            entry["after_merge"] = {}
+            for o in meshes:
+                try:
+                    entry["after_merge"][o.name] = mesh_facts(o)
+                except ReferenceError:
+                    entry["after_merge"][o.name] = {"deleted_by_the_importer": True}
+            return entry
+        result["wearables"][name] = step(f"easy_import_daz wearable {name}", wear, fatal=False)
+
+    # Before anything else is measured. Every later step reads the evaluated
+    # mesh, so a wearable whose own Subsurf is still on would have its dial and
+    # pose counts taken on a subdivided mesh while `survey` counts its cage,
+    # and one report would carry two counts for the same mesh.
+    if cfg["subdivision"] == "off" and cfg["wear"]:
+        result["subdivision_off_wearables"] = step(
+            "switch off the wearables' Subsurf modifiers", subdivision_off, fatal=False)
+
+    if cfg["wear"] and cfg["transfer"] and body is not None:
+        def transfer():
+            targets = [o for o in rig_meshes() if o != body and o.name not in cfg["skip_transfer"]]
+            names = [o.name for o in targets]
+            before = {o.name: (len(o.data.shape_keys.key_blocks) if o.data.shape_keys else 0)
+                      for o in targets}
+            activate(body)
+            for o in targets:
+                o.select_set(True)
+            daz.set_silent_mode(True)
+            ret = bpy.ops.daz.transfer_shapekeys(transferMethod="NEAREST")
+            daz.set_silent_mode(True)
+            after = {o.name: (len(o.data.shape_keys.key_blocks) if o.data.shape_keys else 0)
+                     for o in targets}
+            return {"operator": "bpy.ops.daz.transfer_shapekeys(transferMethod='NEAREST')",
+                    "returned": sorted(ret), "targets": names,
+                    "shape_keys_added": {n: after[n] - before[n] for n in after},
+                    "get_error_message": daz.get_error_message()}
+        result["transfer_shapekeys"] = step("bpy.ops.daz.transfer_shapekeys()", transfer, fatal=False)
+
+    # a dial set after the clothes are on: does the outfit follow the shape?
+    for name, value in cfg["set_after"]:
+        def set_after(name=name, value=value):
+            owner = prop_owner(name)
+            if owner is None:
+                raise KeyError(f"no property {name!r} on {rig.name} or {rig.name}.data")
+            meshes = rig_meshes()
+            update()
+            before = {ob.name: coords(ob) for ob in meshes}
+            was = float(owner[name])
+            owner[name] = float(value)
+            update()
+            after = {ob.name: coords(ob) for ob in meshes}
+            return {"property": name, "from": was, "to": float(value),
+                    "moved": {n: moved(before[n], after[n]) for n in before}}
+        result["dials"][f"{name}={value} dressed"] = step(
+            f"set {name} = {value} with the outfit on", set_after, fatal=False)
+
+    # ------------------------------------------------------------------ pose
+    if cfg["pose"]:
+        def pose():
+            meshes = rig_meshes()
+            before_co = {ob.name: coords(ob) for ob in meshes}
+            before = {pb.name: pb.matrix_basis.copy() for pb in rig.pose.bones}
+            activate(rig)
+            daz.set_silent_mode(True)
+            ret = bpy.ops.daz.import_pose(
+                directory=os.path.dirname(cfg["pose"]),
+                files=[{"name": os.path.basename(cfg["pose"])}],
+                affectMorphs=cfg["pose_affect_morphs"])
+            daz.set_silent_mode(True)
+            update()
+            after_co = {ob.name: coords(ob) for ob in meshes}
+            changed = [pb.name for pb in rig.pose.bones
+                       if any(abs(a - b) > 1e-6 for row_a, row_b in zip(pb.matrix_basis, before[pb.name])
+                              for a, b in zip(row_a, row_b))]
+            rotated = [pb.name for pb in rig.pose.bones
+                       if pb.matrix_basis.to_quaternion().angle > 1e-4]
+            return {"operator": "bpy.ops.daz.import_pose()", "returned": sorted(ret),
+                    "affectMorphs": cfg["pose_affect_morphs"],
+                    "file": os.path.basename(cfg["pose"]),
+                    "bones": len(rig.pose.bones),
+                    "bones_moved": len(changed), "bones_rotated": len(rotated),
+                    "bones_moved_names": sorted(changed),
+                    "keyframes": (len(rig.animation_data.action.fcurves)
+                                  if rig.animation_data and rig.animation_data.action else 0),
+                    "moved": {n: moved(before_co[n], after_co[n]) for n in before_co},
+                    "get_error_message": daz.get_error_message()}
+        result["pose"] = step(f"bpy.ops.daz.import_pose() {os.path.basename(cfg['pose'])}",
+                              pose, fatal=False)
+
+    final = survey()
+    result["survey"] = final
+    arm = final["armatures"].get(rig.name, {})
+    names = set()
+    for v in arm.get("matching_properties", {}).values():
+        names.update(v)
+    result["viseme_props"] = {}
+    for v in cfg["visemes_list"]:
+        hits = sorted(n for n in names if re.fullmatch(rf"(facs_ctrl_v|ectrlv|ctrl_v|v){v}", n, re.I))
+        if hits:
+            result["viseme_props"][v] = hits[0]
+    result["viseme_props_owner"] = {
+        n: ("object" if n in rig.keys() else "data" if n in rig.data.keys() else None)
+        for n in result["viseme_props"].values()}
+
+    def save():
+        bpy.context.preferences.filepaths.save_version = 0
+        ret = bpy.ops.wm.save_as_mainfile(filepath=cfg["blend"], check_existing=False)
+        if "FINISHED" not in ret:
+            raise RuntimeError(f"save_as_mainfile returned {sorted(ret)}")
+
+    step("save .blend", save)
+'''
+
+BUILD_SCRIPT = PRELUDE + SETUP + BUILD_TAIL + EPILOGUE
+SCENE_SCRIPT = PRELUDE + SETUP + SCENE_TAIL + EPILOGUE
+
+# A .blend opened with no DAZ add-on: what survives the save, and does the
+# rig still carry the meshes?
+VERIFY_SCRIPT = r'''
+import json, os, resource, signal, sys, time
+cfg = json.loads(sys.argv[-1])
+signal.signal(signal.SIGALRM, signal.SIG_DFL)
+signal.alarm(cfg["timeout"])
+os.makedirs(cfg["user_resources"], exist_ok=True)
+os.environ["BLENDER_USER_RESOURCES"] = cfg["user_resources"]
+import bpy
+import numpy as np
+from mathutils import Matrix
+
+T0 = time.time()
+out = {}
+bpy.ops.wm.open_mainfile(filepath=cfg["blend"], load_ui=False)
+out["daz_addons_enabled"] = [a.module for a in bpy.context.preferences.addons if "daz" in a.module]
+out["scripts_auto_execute"] = bpy.context.preferences.filepaths.use_scripts_auto_execute
+rig = bpy.data.objects.get(cfg["rig"])
+if rig is None or rig.type != "ARMATURE":
+    print("DAZ_VERIFY " + json.dumps({"error": f"no armature named {cfg['rig']!r}"}), flush=True)
+    os._exit(0)
+
+
+def coords(ob):
+    dg = bpy.context.evaluated_depsgraph_get()
+    eob = ob.evaluated_get(dg)
+    me = eob.to_mesh()
+    n = len(me.vertices)
+    co = np.empty(n * 3, dtype=np.float64)
+    me.vertices.foreach_get("co", co)
+    eob.to_mesh_clear()
+    co = co.reshape(n, 3)
+    m = np.array(ob.matrix_world.to_4x4())
+    return co @ m[:3, :3].T + m[:3, 3]
+
+
+def moved(before, after):
+    d = np.linalg.norm(after - before, axis=1)
+    return {"vertices": int(before.shape[0]), "moved": int((d > 1e-5).sum()),
+            "max_mm": round(float(d.max()) * 1000.0, 2) if d.size else 0.0}
+
+
+def update():
+    rig.update_tag()
+    rig.data.update_tag()
+    for ob in bpy.data.objects:
+        ob.update_tag()
+    bpy.context.view_layer.update()
+
+
+meshes = [o for o in bpy.data.objects if o.type == "MESH" and o.find_armature() == rig]
+out["rig"] = {"name": rig.name, "bones": len(rig.data.bones),
+              "pose_bones_moved": sum(1 for pb in rig.pose.bones
+                                      if pb.matrix_basis != Matrix.Identity(4)),
+              "object_properties": len(rig.keys()), "data_properties": len(rig.data.keys()),
+              "drivers": (len(rig.animation_data.drivers) if rig.animation_data else 0)
+                         + (len(rig.data.animation_data.drivers) if rig.data.animation_data else 0)}
+out["meshes"] = {o.name: {"vertices": len(o.data.vertices),
+                          "shape_keys": len(o.data.shape_keys.key_blocks) if o.data.shape_keys else 0,
+                          "shape_keys_nonzero": (sum(1 for k in o.data.shape_keys.key_blocks
+                                                     if abs(k.value) > 1e-4)
+                                                 if o.data.shape_keys else 0),
+                          "armature_modifier": [m.object.name for m in o.modifiers
+                                                if m.type == "ARMATURE" and m.object],
+                          "parent": o.parent.name if o.parent else None}
+                 for o in meshes}
+out["props"] = {name: (rig[name] if name in rig.keys() else
+                       rig.data[name] if name in rig.data.keys() else None)
+                for name in cfg["props"]}
+
+posed = {o.name: coords(o) for o in meshes}
+for pb in rig.pose.bones:
+    pb.matrix_basis = Matrix.Identity(4)
+update()
+rest = {o.name: coords(o) for o in meshes}
+out["pose_cleared"] = {n: moved(rest[n], posed[n]) for n in posed}
+
+for name in cfg["props"]:
+    for owner in (rig, rig.data):
+        if name in owner.keys():
+            owner[name] = 0.0
+update()
+zeroed = {o.name: coords(o) for o in meshes}
+out["props_zeroed"] = {n: moved(zeroed[n], rest[n]) for n in rest}
+out["seconds"] = round(time.time() - T0, 2)
+out["peak_rss_mb"] = round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0, 1)
+print("DAZ_VERIFY " + json.dumps(out), flush=True)
+sys.stdout.flush()
 os._exit(0)
 '''
 
@@ -884,7 +1520,14 @@ missing = sorted(v for v, o in owners.items() if o is None)
 avail = [v for v in cfg["visemes"] if owners.get(v) is not None]
 order = [None] + [v for v in avail if not cfg["only"] or v in cfg["only"]]
 meshes = [o for o in bpy.data.objects if o.type == "MESH" and not o.hide_render]
-body = max((o for o in meshes if o.parent == rig), key=lambda o: len(o.data.vertices), default=None)
+# The body is the mesh the viseme drivers move. A dressed figure can carry a
+# hair or clothing mesh with more vertices than the body, so the mesh named in
+# the report wins, then the one with the most shape keys, then the largest.
+own = [o for o in meshes if o.parent == rig]
+body = next((o for o in own if o.name == cfg.get("body_mesh")), None)
+if body is None:
+    body = max(own, key=lambda o: (len(o.data.shape_keys.key_blocks) if o.data.shape_keys else 0,
+                                   len(o.data.vertices)), default=None)
 if body is None:
     raise SystemExit("no mesh parented to " + rig.name)
 mouth = next((o for o in meshes if "mouth" in o.name.lower()), None)
@@ -1578,6 +2221,294 @@ def summarise_build(res: dict, args, name: str) -> int:
     return rc if args.out.exists() else 1
 
 
+# ------------------------------------------------------------------ scene
+
+def dial_arg(text: str) -> tuple:
+    """NAME=VALUE for a rig property."""
+    if "=" not in text:
+        raise argparse.ArgumentTypeError(f"expected NAME=VALUE, got {text!r}")
+    name, _, value = text.partition("=")
+    try:
+        return (name.strip(), float(value))
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"{value!r} in {text!r} is not a number")
+
+
+def morph_sets_arg(text: str) -> list:
+    if not text.strip():
+        return []
+    out = []
+    for word in text.split(","):
+        word = word.strip().lower()
+        if not word:
+            continue
+        if word not in MORPH_SETS:
+            raise argparse.ArgumentTypeError(
+                f"unknown morph set {word!r}; expected any of {', '.join(sorted(MORPH_SETS))}")
+        if word not in [w for w, _ in out]:
+            out.append((word, MORPH_SETS[word]))
+    return out
+
+
+def csv_names(text: str) -> list[str]:
+    return [w.strip() for w in text.split(",") if w.strip()]
+
+
+def cmd_scene(args) -> int:
+    if not (EXT / "import_daz" / "blender_manifest.toml").exists():
+        print("  ! run `scripts/daz_import_probe.py fetch` first")
+        return 1
+    lib = args.library.resolve()
+    try:
+        lib.relative_to(ROOT)
+        print(f"  ! the library must be outside the repo, got {lib}")
+        return 2
+    except ValueError:
+        pass
+    lib_c = container_path(lib)
+    if lib_c is None:
+        print(f"  ! {container()} mounts no folder holding {lib}")
+        return 1
+    for rel in [args.figure] + args.wear + ([args.pose] if args.pose else []):
+        if not (lib / rel).is_file():
+            print(f"  ! not in the library: {lib / rel}")
+            return 1
+    if args.anatomy == "auto":
+        anatomy = anatomy_from_figure(lib / args.figure)
+    elif args.anatomy == "none":
+        anatomy = []
+    else:
+        anatomy = args.anatomy
+    custom = None
+    if args.custom_morphs:
+        cdir = lib / args.custom_morphs
+        if not cdir.is_dir():
+            print(f"  ! not a directory in the library: {cdir}")
+            return 1
+        files = args.custom_files or sorted(p.name for p in cdir.glob("*.dsf"))
+        missing = [n for n in files if not (cdir / n).is_file()]
+        if missing:
+            print(f"  ! not in {args.custom_morphs}: {missing}")
+            return 1
+        if not files:
+            print(f"  ! no .dsf file in {args.custom_morphs}")
+            return 1
+        custom = {"dir": f"{lib_c}/{args.custom_morphs}", "files": files,
+                  "category": args.custom_category, "bodypart": args.custom_bodypart}
+    morph_sets = [(label, op) for label, op in args.morphs if not (args.facs and label == "facs")]
+    name = args.out.stem
+    OUT.mkdir(parents=True, exist_ok=True)
+    DEV.mkdir(parents=True, exist_ok=True)
+    dev_c = c_path(DEV)
+    cfg = {
+        "user_resources": f"{dev_c}/blender_user",
+        "home": f"{dev_c}/home",
+        "repo_module": REPO_MODULE,
+        "repo_dir": f"{dev_c}/ext",
+        "library": lib_c,
+        "content_dirs": [lib_c],
+        "dir_check": True,
+        "figure": args.figure,
+        "anatomy": anatomy,
+        "material_method": args.material_method,
+        "fit": args.fit,
+        "verbosity": args.verbosity,
+        "morph_sets": morph_sets,
+        "custom": custom,
+        "facs": args.facs,
+        "set": args.set,
+        "set_after": args.set_dressed,
+        "wear": [[rel, f"{lib_c}/{rel}"] for rel in args.wear],
+        "transfer": not args.no_transfer,
+        "skip_transfer": args.skip_transfer,
+        "pose": f"{lib_c}/{args.pose}" if args.pose else "",
+        "pose_affect_morphs": args.pose_affects_morphs,
+        "subdivision": args.subdivision,
+        "prop_pattern": PROP_PATTERN,
+        "visemes_list": VISEMES,
+        "blend": c_path(args.out),
+        "log": c_path(OUT / f"{name}_blender.log"),
+        "partial": c_path(OUT / f"{name}_scene.partial.json"),
+        "timeout": args.timeout,
+    }
+    print(f"  container {container()}")
+    print(f"  library   {lib} (container {lib_c})")
+    print(f"  figure    {args.figure}")
+    print(f"  morphs    {', '.join(label for label, _ in morph_sets) or 'none'}"
+          f"{'; FACS' if args.facs else ''}"
+          f"{'; custom ' + str(len(custom['files'])) + ' file(s) from ' + args.custom_morphs if custom else ''}")
+    print(f"  wear      {len(args.wear)} file(s); pose {args.pose or 'none'}")
+    wait_for_idle(args.no_wait)
+    partial = OUT / f"{name}_scene.partial.json"
+    try:
+        res, wall, mem = run_blender(SCENE_SCRIPT, cfg, "DAZ_BUILD ", args.timeout, cfg["partial"])
+    except (KeyboardInterrupt, Stopped):
+        partial.unlink(missing_ok=True)
+        raise
+    report = {"date": time.strftime("%Y-%m-%d"), "container": container(),
+              "argv": ["scripts/daz_import_probe.py"] + sys.argv[1:], "wall_seconds": wall,
+              "docker_stats_memory": mem, "config": cfg}
+    rc = 0
+    if res is None:
+        no_result(wall, args.timeout)
+        if partial.exists():
+            report["blender_partial"] = json.loads(partial.read_text())
+            done = report["blender_partial"]["steps"]
+            print(f"  last step that finished: {done[-1]['step'] if done else 'none'}")
+        rc = 1
+    else:
+        props = res.pop("rig_properties", None)
+        if props:
+            path = OUT / f"{name}_morphs.json"
+            path.write_text(json.dumps(props, indent=1) + "\n")
+            print(f"  sliders   {len(props)} numeric rig properties, "
+                  f"{path.relative_to(ROOT)}")
+        report["blender"] = res
+        rc = summarise_scene(res, args, name)
+    partial.unlink(missing_ok=True)
+    if res is not None and not args.no_verify and args.out.exists() and res.get("body_rig"):
+        report["verify"] = verify_blend(args, args.out, res["body_rig"],
+                                        [n for n, _ in args.set + args.set_dressed])
+        if report["verify"] is None:
+            rc = 1
+    for suffix in ("_scene.json", "_build.json"):
+        (OUT / f"{name}{suffix}").write_text(json.dumps(report, indent=2) + "\n")
+    print(f"  memory    container {mem['baseline_gib']} GiB before, peak {mem['peak_gib']} GiB "
+          f"({mem['samples']} docker stats samples)")
+    in_blender = f", {res['blender_seconds']} s in Blender" if res else ""
+    print(f"  report    {(OUT / (name + '_scene.json')).relative_to(ROOT)}, copied to "
+          f"{name}_build.json for `render --blend`  ({wall} s wall{in_blender})")
+    print(f"  log       {(OUT / (name + '_blender.log')).relative_to(ROOT)}")
+    return rc
+
+
+def summarise_scene(res: dict, args, name: str) -> int:
+    for s in res["steps"]:
+        mark = "ok" if s["ok"] else "FAILED"
+        print(f"  {mark:6s} {s['seconds']:7.2f} s  {s['peak_rss_mb']:8.1f} MB peak  {s['step']}")
+        if not s["ok"]:
+            print(f"         {s['error']}")
+        msg = (s.get("get_error_message") or "").strip()
+        if msg:
+            print("         get_error_message(): " + msg.replace("\n", " | ")[:400])
+    if res.get("stopped_at") or res.get("fatal"):
+        print(f"  ! stopped at: {res.get('stopped_at')}")
+        if res.get("fatal"):
+            print(res["fatal"])
+        return 1
+    rc = 1 if res["failures"] else 0
+    for label, m in (res.get("morph_sets") or {}).items():
+        if m:
+            print(f"  morphs    {label}: {m['properties_added']} properties, "
+                  f"{sum(m['shape_keys_added'].values())} shape keys")
+    cm = res.get("custom_morphs")
+    if cm:
+        print(f"  custom    {cm['files']} file(s) as {cm['category']}: {cm['properties_added']} "
+              f"properties, {sum(cm['shape_keys_added'].values())} shape keys")
+    for key, d in (res.get("dials") or {}).items():
+        if not d:
+            continue
+        for mesh, mv in d["moved"].items():
+            if mv.get("moved"):
+                print(f"  dial      {key}: {mesh} {mv['moved']}/{mv['vertices']} vertices moved, "
+                      f"up to {mv['max_mm']} mm")
+    for wname, w in (res.get("wearables") or {}).items():
+        if not w:
+            continue
+        for mesh, f in w["after_merge"].items():
+            print(f"  wearable  {wname}: {mesh} {f.get('vertices')} vertices, parent "
+                  f"{f.get('parent')} ({f.get('parent_type')}), armature "
+                  f"{f.get('armature_modifiers')}, follows the rig: {f.get('follows_rig')}")
+    p = res.get("pose")
+    if p:
+        print(f"  pose      {p['file']}: {p['bones_moved']} of {p['bones']} pose bones moved, "
+              f"{p['keyframes']} f-curves")
+        for mesh, mv in p["moved"].items():
+            print(f"            {mesh}: {mv.get('moved')}/{mv.get('vertices')} vertices moved, "
+                  f"up to {mv.get('max_mm')} mm")
+    survey = res.get("survey", {})
+    for rig, a in survey.get("armatures", {}).items():
+        print(f"  rig       {rig}: {a['bones']} bones ({a['deform_bones']} deform), "
+              f"{a['custom_properties'].get('object', 0)} object and "
+              f"{a['custom_properties'].get('data', 0)} data properties, {a['drivers']} drivers")
+    for mesh, m in survey.get("meshes", {}).items():
+        print(f"  mesh      {mesh}: {m['vertices']} vertices, {m['shape_keys']} shape keys "
+              f"({m['shape_key_drivers']} driven)")
+    print(f"  visemes   {len(res.get('viseme_props') or {})} of {len(VISEMES)} found as rig properties")
+    props = res.get("viseme_props") or {}
+    if props:
+        poses = OUT / f"{name}_poses.json"
+        rows = [{"@props": {p: 0.0 for p in props.values()}}]
+        rows += [{"@props": {p: (1.0 if p == props[v] else 0.0) for p in props.values()}}
+                 for v in VISEMES if v in props]
+        poses.write_text(json.dumps(rows, indent=1) + "\n")
+        print(f"  poses     {poses.relative_to(ROOT)}")
+    print(f"  wrote     {args.out.relative_to(ROOT)}"
+          if args.out.exists() else f"  ! {args.out.relative_to(ROOT)} was not written")
+    return rc if args.out.exists() else 1
+
+
+# ------------------------------------------------------------------ verify
+
+def verify_blend(args, blend: Path, rig: str, props: list) -> dict | None:
+    """Open a saved .blend in a Blender with no DAZ add-on and report what is
+    left: the pose, the deformed meshes and the values of `props`."""
+    cfg = {"user_resources": f"{c_path(DEV)}/blender_user", "blend": c_path(blend),
+           "rig": rig, "props": sorted(set(props)), "timeout": args.timeout}
+    wait_for_idle(args.no_wait)
+    res, wall, mem = run_blender(VERIFY_SCRIPT, cfg, "DAZ_VERIFY ", args.timeout, cfg["blend"])
+    if res is None:
+        no_result(wall, args.timeout)
+        return None
+    if "error" in res:
+        # The Blender half exits 0 after printing this, so it is the only
+        # report there is: no rig by that name, nothing else to measure.
+        print("  ! " + res["error"])
+        return None
+    res["wall_seconds"] = wall
+    res["docker_stats_memory"] = mem
+    print(f"  verify    {blend.name} reopened with add-ons {res['daz_addons_enabled'] or 'none'}: "
+          f"{res['rig']['bones']} bones, {res['rig']['pose_bones_moved']} posed, "
+          f"{res['rig']['drivers']} drivers ({wall} s wall)")
+    for mesh, m in res["meshes"].items():
+        print(f"            {mesh}: {m['vertices']} vertices, {m['shape_keys']} shape keys "
+              f"({m['shape_keys_nonzero']} not zero), armature {m['armature_modifier']}")
+    for mesh, m in res["pose_cleared"].items():
+        print(f"            {mesh}: clearing the pose moves {m['moved']}/{m['vertices']} "
+              f"vertices, up to {m['max_mm']} mm")
+    for mesh, m in res["props_zeroed"].items():
+        print(f"            {mesh}: zeroing {len(cfg['props'])} slider(s) moves {m['moved']}/"
+              f"{m['vertices']} vertices, up to {m['max_mm']} mm")
+    return res
+
+
+def cmd_verify(args) -> int:
+    name = args.blend.stem
+    rig = args.rig
+    props = args.props or []
+    for suffix in ("_scene.json", "_build.json"):
+        path = OUT / f"{name}{suffix}"
+        if not path.exists():
+            continue
+        b = json.loads(path.read_text()).get("blender") or {}
+        rig = rig or b.get("body_rig")
+        if not args.props:
+            props = [d["property"] for d in (b.get("dials") or {}).values() if d]
+        break
+    if not rig:
+        print(f"  ! no --rig given and no report beside {args.blend.relative_to(ROOT)} names one")
+        return 1
+    res = verify_blend(args, args.blend, rig, props)
+    if res is None:
+        return 1
+    path = OUT / f"{name}_verify.json"
+    path.write_text(json.dumps(
+        {"date": time.strftime("%Y-%m-%d"), "container": container(),
+         "argv": ["scripts/daz_import_probe.py"] + sys.argv[1:], "verify": res}, indent=2) + "\n")
+    print(f"  report    {path.relative_to(ROOT)}")
+    return 0
+
+
 # ------------------------------------------------------------------ render
 
 def auto_label(args) -> str:
@@ -1655,6 +2586,7 @@ def cmd_render(args) -> int:
         "blend": c_path(blend),
         "rig": b["body_rig"],
         "props": props,
+        "body_mesh": b.get("body_mesh") or "",
         "visemes": VISEMES,
         "frame_key": "AA",
         "frames_dir": c_path(frames),
@@ -1983,6 +2915,73 @@ def main() -> int:
     b.add_argument("--verbosity", type=bounded(0, 4), default=3,
                    help="the importer's verbosity; 3 prints each path it cannot find (default 3)")
 
+    s = sub.add_parser("scene", help="figure, morph sets, sliders, wearables and a pose: .blend, "
+                                    "_scene.json, _morphs.json")
+    common(s, 3600)
+    s.add_argument("--out", type=out_path, required=True, help="output/daz/NAME.blend")
+    s.add_argument("--library", type=Path, default=DEFAULT_LIBRARY,
+                   help=f"host path of the Daz content library (default {DEFAULT_LIBRARY})")
+    s.add_argument("--figure", type=library_relative, default=DEFAULT_FIGURE,
+                   help="the figure or character preset .duf, relative to the library "
+                        f"(default {DEFAULT_FIGURE!r})")
+    s.add_argument("--anatomy", type=anatomy_arg, default="auto",
+                   help="as for build: auto, none, or library-relative .duf paths")
+    s.add_argument("--morphs", type=morph_sets_arg, default=[],
+                   help="standard morph sets to import, comma separated, from "
+                        + ", ".join(sorted(MORPH_SETS)) + "; each is one operator and loads every "
+                        "file the add-on's paths table lists for the figure")
+    s.add_argument("--custom-morphs", type=library_relative, default=None,
+                   help="a folder of .dsf morphs in the library to import with "
+                        "bpy.ops.daz.import_custom_morphs(), such as "
+                        "\"data/Daz 3D/Genesis 9/Base/Morphs/Daz 3D/Base Characters 9\"")
+    s.add_argument("--custom-files", type=csv_names, default=[],
+                   help="file names inside --custom-morphs, comma separated (default every .dsf)")
+    s.add_argument("--custom-category", default="Shapes",
+                   help="the category the custom morphs are filed under (default Shapes)")
+    s.add_argument("--custom-bodypart", choices=("Face", "Body", "Custom"), default="Custom",
+                   help="the operator's bodypart (default Custom)")
+    s.add_argument("--facs", action="store_true",
+                   help="also run bpy.ops.daz.import_facs(), so `render --blend` has its visemes")
+    s.add_argument("--set", type=dial_arg, action="append", default=[], metavar="NAME=VALUE",
+                   help="set a rig property after the morphs are loaded and measure how far each "
+                        "mesh moves; repeatable")
+    s.add_argument("--set-dressed", type=dial_arg, action="append", default=[], metavar="NAME=VALUE",
+                   help="the same, but after the wearables are on, to see whether they follow")
+    s.add_argument("--wear", type=library_relative, action="append", default=[],
+                   help="a clothing or hair .duf to import onto the figure already in the scene, "
+                        "then merge into its rig; repeatable, in the order given")
+    s.add_argument("--no-transfer", action="store_true",
+                   help="do not run bpy.ops.daz.transfer_shapekeys() from the body to the wearables")
+    s.add_argument("--skip-transfer", type=csv_names, default=[],
+                   help="object names to leave out of the shape key transfer, such as a hair mesh")
+    s.add_argument("--pose", type=library_relative, default=None,
+                   help="a pose preset .duf to apply with bpy.ops.daz.import_pose()")
+    s.add_argument("--subdivision", choices=("keep", "off"), default="keep",
+                   help="off saves every Subsurf modifier switched off (default keep)")
+    s.add_argument("--material-method", choices=MATERIAL_METHODS, default="EXTENDED_PRINCIPLED",
+                   help="the importer's material method (default EXTENDED_PRINCIPLED)")
+    s.add_argument("--fit", choices=FIT_METHODS, default="MORPHED",
+                   help="the importer's fitMeshes; DBZFILE needs a .dbz from Daz Studio "
+                        "(default MORPHED)")
+    s.add_argument("--verbosity", type=bounded(0, 4), default=3,
+                   help="the importer's verbosity (default 3)")
+    s.add_argument("--pose-affects-morphs", action="store_true",
+                   help="leave bpy.ops.daz.import_pose()'s affectMorphs at its property default, "
+                        "True, which with useClearMorphs also True zeroes every morph the figure "
+                        "carries; by default the probe passes affectMorphs=False, as the operator's "
+                        "own invoke() does when a person picks the file")
+    s.add_argument("--no-verify", action="store_true",
+                   help="do not reopen the saved .blend in a Blender with no add-on")
+
+    v = sub.add_parser("verify", help="reopen a .blend with no DAZ add-on: pose, meshes, sliders")
+    common(v, 900)
+    v.add_argument("--blend", type=blend_path, required=True, help="a .blend that `scene` wrote")
+    v.add_argument("--rig", default="",
+                   help="the armature to read (default the body_rig in the report beside the file)")
+    v.add_argument("--props", type=csv_names, default=[],
+                   help="rig properties to zero, to see what they still drive (default the ones "
+                        "the report says were set)")
+
     r = sub.add_parser("render", help="viseme rows: render_sheet.py sheet, face sheets, _render.json")
     common(r, 3600)
     r.add_argument("--blend", type=blend_path, required=True, help="a .blend that `build` wrote")
@@ -2027,6 +3026,10 @@ def main() -> int:
             return cmd_fetch(args)
         if args.cmd == "build":
             return cmd_build(args)
+        if args.cmd == "scene":
+            return cmd_scene(args)
+        if args.cmd == "verify":
+            return cmd_verify(args)
         return cmd_render(args)
     except KeyboardInterrupt:
         print("\n  ! stopped by Ctrl-C")
