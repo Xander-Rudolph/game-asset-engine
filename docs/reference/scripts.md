@@ -68,7 +68,7 @@ from Daz content to the gitignored `output/daz/`. None of it may be committed.
 
 | Script | Does |
 |---|---|
-| `daz_library.py` | Install Daz Install Manager zips downloaded by hand into a content library outside the repo, `MODELS_DIR/daz_library` by default, and record every file with its CRC-32, and the licence held with the date you read the EULA. Every path is checked before anything is written. `list`, `licence`, `verify`, `uninstall`, `case-check` and a `selftest` with invented packages. Standard library only, on the host. See [below](#daz-library-py). |
+| `daz_library.py` | Install Daz Install Manager zips downloaded by hand into a content library outside the repo, `MODELS_DIR/daz_library` by default, and record every file with its CRC-32, and the licence held with the date you read the EULA. Every path is checked before anything is written. `intake` does that for every zip in a folder, verifies what landed, deletes each zip and keeps a Markdown ledger beside them. `list`, `licence`, `verify`, `uninstall`, `case-check` and a `selftest` with invented packages. Standard library only, on the host. See [below](#daz-library-py). |
 | `daz_import_probe.py` | Import a Genesis figure into the container's Blender with the Diffeomorphic DAZ Importer, which `fetch` pins by size and sha256 into the gitignored `input/_devtools/import_daz/`. `build` saves a `.blend` whose 17 viseme controllers come from FACS, `scene` adds morph sets, character shape dials, sliders, clothing and hair merged into the figure's rig and a pose preset, `verify` reopens a saved `.blend` with no add-on, and `render` draws a row per viseme with `render_sheet.py` and in three framings of its own, or measures what each moves with `--motion-only`. See [below](#daz-import-probe-py). |
 | `daz_inventory.py` | List the figures, bones, morphs, aliases and HD morphs in a Daz content library outside this repo, reading every `.dsf` with the standard library. Figures are grouped by the content type their author set, aliases and other modifiers are counted apart from morphs, and a valid JSON file that is not DSON is skipped, not an error. It refuses a path in or above the repo. See [below](#daz-inventory-py). |
 
@@ -476,6 +476,7 @@ and never overwrites a timeline made from audio.
 ```sh
 scripts/daz_library.py install ZIP... [--dry-run] [--overwrite] [--eula-read YYYY-MM-DD]
                        [--interactive-license]
+scripts/daz_library.py intake [--source DIR] [--ledger NAME] [--dry-run] [--keep-zips]
 scripts/daz_library.py list
 scripts/daz_library.py licence SKU [--eula-read YYYY-MM-DD]
                        [--interactive-license | --standard-license]
@@ -551,6 +552,32 @@ and the URLs) is wording rebuilt whenever the record is saved, and `licence SKU`
 prints it. Records saved by the first version keep the older fields
 (`mesh_rig_morphs_textures_may_ship` and the like) until their next save.
 
+**`intake` is `install` over a folder you have finished with.** It installs
+every `.zip` in `<library>/Source`, or `--source DIR`, in a stable order with
+the parts of one product in one install run, so every check above still
+applies. After a package installs, the files the record now lists for that part
+are verified, present, a regular file, at their recorded size and CRC-32, and
+the part recorded complete. Only then is its zip deleted. A package that is
+refused, conflicts, stops part way or fails that verify keeps its zip, and so
+does every other part of the same product; `--keep-zips` deletes nothing and
+`--dry-run` writes nothing, deletes nothing and says what each zip would do. A
+zip whose files are all installed and identical is reported as `already
+installed` and deleted under the same rule. Nothing but a zip the run has just
+processed is ever deleted, and a folder with no `.zip` in it gives `no .zip
+files in <source>: nothing to do`, exit 0. The exit status is 2 for a refused
+name, package or path and 1 for a package left uninstalled by a conflict, a
+shortage of space or a stop part way.
+
+**The ledger** is one Markdown file in the source folder, `PROCESSED.md` unless
+`--ledger NAME` says otherwise, appended to and never rewritten, so a later
+intake adds rows below the earlier ones. Its header says what the file is, that
+the zips were deleted on purpose and that a package can be downloaded again
+from your own Daz account under the same SKU. Each row carries the date, the
+product name from `Supplement.dsx`, the SKU and part, the zip's name, its size
+in bytes and its sha256, what happened and what became of the zip, and the
+number of files the manifest listed for Content. It records names and counts
+only: no Daz content, and no file list long enough to reproduce a product.
+
 **`verify`** uses `lstat`, so a symlink at a recorded path is `not_a_file` even
 when it points at identical bytes. **`case-check`** lists names in one folder
 that differ only in case, and references inside the library's `.dsf` and `.duf`
@@ -568,8 +595,19 @@ Measured on 2026-09-16 with Genesis 9 Starter Essentials (SKU 86958), host
 4.80 s wall, `verify 86958 --crc` passed 6499 of 6499 in 0.51 to 0.93 s, and a
 dry run of all three parts against the installed library exited 0 in 6.84 s
 wall with every file identical. Installing all three into an empty library took
-7.59 and 6.90 s wall before the fixes. The [guide](/guide/daz-figures#a-library-outside-the-repo)
-has the rest.
+7.59 and 6.90 s wall before the fixes.
+
+Measured on 2026-09-19 on the same host, on six zips in
+`/models/daz_library/Source`, 2,224,386,560 bytes: `intake --dry-run` exited 0
+in 8.04 s wall (`time`), and `intake` took 8.64 s wall (`date +%s.%N` before
+and after). It found the three Genesis 9 Starter Essentials parts already
+installed, in 6.66 s for the product, and installed three products that were
+not: SKU 87397 in 0.60 s, SKU 88643 in 0.14 s and SKU 91304 in 0.28 s. Each
+part's recorded files then verified at their size and CRC-32 in 0.03 to 0.32 s,
+all six zips were deleted and six rows were appended to `Source/PROCESSED.md`.
+`verify --crc` over the four products passed 7,106 of 7,106 files in 0.62 s,
+and `intake` over the emptied folder exited 0 having done nothing. The
+[guide](/guide/daz-figures#a-library-outside-the-repo) has the rest.
 
 ### `daz_import_probe.py`
 

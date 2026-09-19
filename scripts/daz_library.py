@@ -6,6 +6,9 @@ r"""Install Daz Install Manager packages into a content library outside this rep
     scripts/daz_library.py install PACKAGE.zip --overwrite
     scripts/daz_library.py install PACKAGE.zip --eula-read 2026-09-16
     scripts/daz_library.py install PACKAGE.zip --interactive-license   # only once you have bought one
+    scripts/daz_library.py intake --dry-run
+    scripts/daz_library.py intake                       # every zip in <library>/Source
+    scripts/daz_library.py intake --source ~/Downloads --keep-zips
     scripts/daz_library.py list
     scripts/daz_library.py licence 86958
     scripts/daz_library.py licence 86958 --standard-license             # take a mistaken flag back off
@@ -126,6 +129,31 @@ any training until Daz answers in writing. An Interactive License does not lift
 that. The EULA carries no version and may change, so re-read it and record the
 date.
 
+INTAKE. `intake` is `install` over a folder of zips that you have finished with:
+it installs every .zip in <library>/Source (or --source DIR), in a stable order
+with the parts of one product in one install run, so every check `install`
+makes still applies. After a package installs, the files the record now lists
+for that part are verified, present, a regular file, at their recorded size and
+CRC-32, and the part recorded complete. Only then is the zip deleted, so a
+package that refuses, conflicts, stops part way or fails that verify keeps its
+zip, and so does every other part of the same product. --keep-zips deletes
+nothing; --dry-run writes nothing, deletes nothing and says what each zip would
+do. A zip whose files are all installed and identical is reported as already
+installed and deleted under the same rule. Nothing but a zip the run has just
+processed is ever deleted, and an intake over a folder with no .zip in it says
+so and does nothing.
+
+THE LEDGER. One Markdown file in the source folder, PROCESSED.md unless
+--ledger NAME says otherwise, appended to and never rewritten, so a later
+intake adds rows below the earlier ones. Its header says what the file is, that
+the zips were deleted on purpose and that a package can be downloaded again
+from your Daz account under the same SKU. Each row carries the date, the
+product name from Supplement.dsx, the SKU and part, the zip's name, its size in
+bytes and its sha256, what happened (installed, already installed, or refused
+and why) and what became of the zip, and the number of files the manifest
+listed for Content. It records names and counts only: no Daz content, and no
+file list long enough to reproduce a product.
+
 OTHER COMMANDS.
   list         products recorded: parts, files, bytes, licence
   licence SKU  print the licence held; --interactive-license,
@@ -205,6 +233,35 @@ order, recording on any stop); the "after the fixes" lines ran on this version.
   selftest  67 checks passed, 4.70 s and 4.80 s wall in two runs
             (`selftest --dir`).
 
+MEASURED on 2026-09-19 on the same host, on the six zips the owner had put in
+/models/daz_library/Source, 2224386560 bytes: the three Genesis 9 Starter
+Essentials parts, already installed, and three products that were not.
+  dry run   `intake --dry-run`: exit 0 in 8.04 s wall (`time`), 3 already
+            installed and 3 to install, nothing written and no zip touched.
+  intake    `intake`: 8.64 s wall (`date +%s.%N` before and after). SKU 86958's
+            three parts in 6.66 s, all 6505 listed files identical and nothing
+            written; SKU 87397 Mavick Hair and Beard, 120 files, 369742988
+            bytes, installed in 0.60 s; SKU 88643 dForce Leather Viking Armor,
+            242 files, 129116296 bytes, in 0.14 s; SKU 91304 Tubal Weapons
+            Collection, 245 files, 165205569 bytes, in 0.28 s. Each part's
+            recorded files then verified at their size and CRC-32 in 0.03 to
+            0.32 s, all six zips were deleted, 2224386560 bytes freed, and six
+            rows were appended to Source/PROCESSED.md. No package warned about
+            a path that differs only in case.
+  again     `intake` over the folder the run had emptied: exit 0, `no .zip
+            files in /models/daz_library/Source: nothing to do`.
+  after     `list` showed the four products, `verify --crc` passed on 7106 of
+            7106 files in 0.62 s by its own timer, and selftest still passed
+            its 67 checks (4.93 s wall).
+  refusals  five invented packages in a scratch folder, with no Daz content:
+            a zip whose name says part 02 while Supplement.dsx says (1 of 2),
+            a package cut to half its size, one part of a product holding an
+            entry stored as a symlink, its sibling part, and a zip whose name
+            does not match Daz's pattern. Exit 2, all five left in place, five
+            ledger rows saying why, and nothing written. A separate scratch
+            product with one part installing and the other hitting a conflict:
+            exit 1, both zips kept.
+
 Exit status: 0 done; 1 a conflict, a skipped or partial package, a verify or
 case-check finding, or a failed self-test check; 2 a refused path, name,
 package, library or argument; 128 plus the signal number for an install
@@ -255,6 +312,26 @@ XML_LIMIT = 64 << 20
 FREE_MARGIN = 256 << 20
 TEMP_SUFFIX = ".daz_library-part"
 SINGLE = "single"
+SOURCE = "Source"
+LEDGER = "PROCESSED.md"
+LEDGER_COLUMNS = ["Date", "Product", "SKU", "Part", "Package", "Bytes", "sha256", "What happened",
+                  "Files"]
+LEDGER_RULE = "|" + "---|" * len(LEDGER_COLUMNS)
+LEDGER_HEADER = f"""# Daz packages taken into this library
+
+`scripts/daz_library.py intake` extracted each package below into the content library that holds
+this folder, and recorded every file it placed in `.daz_library/<SKU>.json`. The zips were then
+deleted on purpose: the library holds the installed files, and any package can be downloaded
+again from your own Daz account under the same SKU, with Daz Install Manager or by hand. A row
+that says the zip was kept means it is still in this folder.
+
+This file records package names, byte counts, checksums and file counts only. It holds no Daz
+content, and no file list long enough to reproduce a product. Rows are appended, never rewritten,
+so a later `intake` adds to the table below.
+
+What the licence allows is in `{NOTE}`, and `scripts/daz_library.py licence SKU` prints it.
+
+"""
 
 
 class Refused(Exception):
@@ -465,6 +542,17 @@ def valid_sku(text: str) -> str:
     if not re.fullmatch(r"\d{1,8}", text, re.ASCII):
         raise argparse.ArgumentTypeError(f"a SKU is up to eight digits, got {text!r}")
     return str(int(text))
+
+
+def valid_ledger(text: str) -> str:
+    if "/" in text or "\\" in text or "\x00" in text or text in ("", ".", "..") \
+            or text.startswith("."):
+        raise argparse.ArgumentTypeError("the ledger is a file name in the source folder, "
+                                         f"got {text!r}")
+    if not text.lower().endswith(".md"):
+        raise argparse.ArgumentTypeError(f"the ledger is a Markdown file, so it ends in .md, "
+                                         f"got {text!r}")
+    return text
 
 
 def valid_part(text: str) -> str:
@@ -1007,6 +1095,14 @@ def record_run(lib: Path, records: dict, pkg: dict, items: list[dict], placed: l
 
 
 def cmd_install(args, lib: Path) -> int:
+    return run_install(args, lib)[0]
+
+
+def run_install(args, lib: Path, report: bool = True) -> tuple[int, dict]:
+    """Install one run of packages and return (exit status, the report).
+
+    With `report` off nothing is printed on stdout and the caller reports instead; refusals
+    still go to stderr. `intake` uses that to install one product at a time."""
     pkgs, opened = [], []
     for z in args.zips:
         try:
@@ -1014,16 +1110,17 @@ def cmd_install(args, lib: Path) -> int:
         except Refused as e:
             opened.append(str(e))
 
-    def refuse(messages: list[str], refusals: list[dict]) -> int:
+    def refuse(messages: list[str], refusals: list[dict]) -> tuple[int, dict]:
         for p in pkgs:
             p["zip"].close()
         for msg in messages:
             print(msg, file=sys.stderr)
         print("nothing was installed", file=sys.stderr)
-        if args.json:
-            print(json.dumps({"library": str(lib), "installed": False, "errors": messages,
-                              "refused_paths": refusals}, indent=1))
-        return 2
+        obj = {"library": str(lib), "installed": False, "errors": messages,
+               "refused_paths": refusals}
+        if report and args.json:
+            print(json.dumps(obj, indent=1))
+        return 2, obj
 
     # Plan before the lock only when refusing now spares creating the library or its lock
     # file, or when a package is refused already; an install plans again inside the lock.
@@ -1043,7 +1140,7 @@ def cmd_install(args, lib: Path) -> int:
     stop = StopRequest()
 
     def flush():
-        if not args.json and lines:
+        if report and not args.json and lines:
             print("\n".join(lines), flush=True)
             lines.clear()
 
@@ -1197,8 +1294,9 @@ def cmd_install(args, lib: Path) -> int:
            "licences": {s: current_licence(records[s]) for s in touched}}
     if stop.signum:
         obj["stopped_by"] = stop.name
-    emit(args, obj, lines)
-    return status
+    if report:
+        emit(args, obj, lines)
+    return status, obj
 
 
 def product_summary(rec: dict) -> dict:
@@ -1261,6 +1359,35 @@ def cmd_licence(args, lib: Path) -> int:
     return 0
 
 
+def verify_files(lib: Path, rec: dict, part: str | None, crc: bool) -> dict[str, list[str]]:
+    """Which of a record's files are missing or changed. `part` limits it to one part's files."""
+    problems: dict[str, list[str]] = {"missing": [], "not_a_file": [], "wrong_size": [],
+                                      "wrong_crc": [], "unsafe_path": []}
+    for rel, f in rec["files"].items():
+        if part is not None and part not in f.get("parts", []):
+            continue
+        why = unsafe(rel)
+        if why:
+            problems["unsafe_path"].append(rel)
+            continue
+        path = lib / rel
+        try:
+            st = os.lstat(path)     # a symlink is not a file this script placed
+        except FileNotFoundError:
+            problems["missing"].append(rel)
+            continue
+        except OSError:
+            problems["not_a_file"].append(rel)
+            continue
+        if not stat.S_ISREG(st.st_mode):
+            problems["not_a_file"].append(rel)
+        elif st.st_size != f["size"]:
+            problems["wrong_size"].append(rel)
+        elif crc and f.get("crc32") and f"{crc32_of(path):08x}" != f["crc32"]:
+            problems["wrong_crc"].append(rel)
+    return problems
+
+
 def cmd_verify(args, lib: Path) -> int:
     records = load_records(lib)
     if args.sku and args.sku not in records:
@@ -1270,28 +1397,7 @@ def cmd_verify(args, lib: Path) -> int:
     started = time.monotonic()
     for sku in skus:
         rec = records[sku]
-        problems = {"missing": [], "not_a_file": [], "wrong_size": [], "wrong_crc": [],
-                    "unsafe_path": []}
-        for rel, f in rec["files"].items():
-            why = unsafe(rel)
-            if why:
-                problems["unsafe_path"].append(rel)
-                continue
-            path = lib / rel
-            try:
-                st = os.lstat(path)     # a symlink is not a file this script placed
-            except FileNotFoundError:
-                problems["missing"].append(rel)
-                continue
-            except OSError:
-                problems["not_a_file"].append(rel)
-                continue
-            if not stat.S_ISREG(st.st_mode):
-                problems["not_a_file"].append(rel)
-            elif st.st_size != f["size"]:
-                problems["wrong_size"].append(rel)
-            elif args.crc and f.get("crc32") and f"{crc32_of(path):08x}" != f["crc32"]:
-                problems["wrong_crc"].append(rel)
+        problems = verify_files(lib, rec, None, bool(args.crc))
         bad = sum(len(v) for v in problems.values())
         status = 1 if bad else status
         incomplete = [p for p, pk in rec["packages"].items() if not pk.get("complete")]
@@ -1314,6 +1420,264 @@ def cmd_verify(args, lib: Path) -> int:
     if not skus:
         lines.insert(1, "  no products recorded")
     emit(args, {"library": str(lib), "products": out, "seconds": seconds}, lines)
+    return status
+
+
+def ledger_cell(value) -> str:
+    """One Markdown table cell: no line breaks, and a pipe escaped so it stays one cell."""
+    text = "" if value is None else str(value)
+    text = " ".join(text.split()).replace("|", "\\|")
+    return text or "-"
+
+
+def append_ledger(path: Path, rows: list[list]) -> dict:
+    """Append rows to the Markdown ledger, adding the header when the file is new. Earlier
+    rows are never read back or rewritten."""
+    try:
+        before = path.read_text(encoding="utf-8", errors="replace")
+    except FileNotFoundError:
+        before = ""
+    except OSError as e:
+        raise Refused(f"cannot read the ledger {path}: {e}") from None
+    head = ""
+    if not before.strip():
+        head = LEDGER_HEADER
+    elif not before.endswith("\n"):
+        head = "\n"
+    if LEDGER_RULE not in before:
+        head += "| " + " | ".join(LEDGER_COLUMNS) + " |\n" + LEDGER_RULE + "\n"
+    try:
+        with open(path, "a", encoding="utf-8") as f:
+            f.write(head + "".join("| " + " | ".join(ledger_cell(c) for c in row) + " |\n"
+                                   for row in rows))
+    except OSError as e:
+        raise Refused(f"cannot write the ledger {path}: {e}") from None
+    return {"path": str(path), "rows": len(rows), "created": not before.strip()}
+
+
+def shorten(why: str | None, source: Path) -> str | None:
+    """A refusal message with the source folder's path taken off the zip names in it."""
+    return None if why is None else why.replace(f"{source}{os.sep}", "")
+
+
+def intake_outcome(res: dict | None, errors: list[str]) -> tuple[str, str | None, int]:
+    """(what happened to one zip, why it was refused, the exit status it earns) from its entry
+    in the install report. 2 is a refused name, package or path; 1 is a package left uninstalled
+    by a conflict, a shortage of space or a stop part way."""
+    if res is None:
+        return "refused", "; ".join(errors) or "the package was refused", 2
+    conflict = (f"{plural(res.get('conflicts', 0), 'file')} already in the library with "
+                "different bytes")
+    state = res["status"]
+    if state == "planned":      # a dry run: what a real intake would do
+        if res.get("conflicts"):
+            return "refused", conflict, 1
+        return ("installed" if res.get("to_write") else "already installed"), None, 0
+    if state == "installed":
+        return ("installed" if res.get("written", 0) + res.get("replaced", 0)
+                else "already installed"), None, 0
+    why = {"conflicts": conflict,
+           "no_space": "not enough free space in the library",
+           "unreadable": f"comparing with the library failed ({res.get('error')})",
+           "partial": f"the install stopped part way ({res.get('error')})",
+           "interrupted": f"the install was stopped ({res.get('error')})",
+           "not_started": "the install stopped before this package"}
+    return "refused", why.get(state, f"the install reported {state}"), 1
+
+
+def cmd_intake(args, lib: Path) -> int:
+    """Install every zip in a folder, verify what landed, delete the zip and keep a ledger."""
+    source = Path(os.path.abspath(args.source)) if args.source else lib / SOURCE
+    why = repo_clash(source)
+    if why:
+        raise Refused(why)
+    if not source.is_dir():
+        raise Refused(f"no source folder at {source}; pass --source DIR")
+    ledger = source / args.ledger
+    try:
+        names = sorted(os.listdir(source))
+    except OSError as e:
+        raise Refused(f"cannot read {source}: {e}") from None
+
+    entries: list[dict] = []
+    for name in names:
+        if not name.lower().endswith(".zip"):
+            continue
+        path = source / name
+        try:
+            st = os.lstat(path)
+        except OSError as e:
+            raise Refused(f"cannot read {path}: {e}") from None
+        m = PACKAGE_RE.fullmatch(name)
+        entry = {"file": name, "path": path, "size": st.st_size,
+                 "sku": str(int(m.group(2))) if m else None,
+                 "part": (m.group(4) or SINGLE) if m else None}
+        if not stat.S_ISREG(st.st_mode):
+            entry.update(result="refused", why="not a regular file", severity=2, ready=False)
+        entries.append(entry)
+
+    lines = [f"Intake {source} into {lib}"]
+    if not entries:
+        lines.append(f"  no .zip files in {source}: nothing to do")
+        emit(args, {"library": str(lib), "source": str(source),
+                    "ledger": {"path": str(ledger), "rows": 0, "created": False},
+                    "dry_run": bool(args.dry_run), "keep_zips": bool(args.keep_zips),
+                    "products": 0, "packages": [], "counts": {}, "deleted": 0,
+                    "bytes_freed": 0}, lines)
+        return 0
+    lines.append(f"  {plural(len(entries), 'zip')}, {sum(e['size'] for e in entries)} bytes"
+                 + ("; dry run, nothing is written or deleted" if args.dry_run else ""))
+
+    groups: dict[str, list[dict]] = {}
+    for e in entries:                       # parts of one product go into one install run
+        groups.setdefault(e["sku"] or f"file:{e['file']}", []).append(e)
+    ordered = sorted(groups.values(),
+                     key=lambda g: (g[0]["sku"] is None, int(g[0]["sku"] or 0), g[0]["file"]))
+    for group in ordered:
+        group.sort(key=lambda e: (e["part"] or "", e["file"]))
+
+    rows, status, deleted, freed = [], 0, 0, 0
+    for group in ordered:
+        ready = [e for e in group if e.get("ready", True)]
+        obj: dict = {"packages": [], "errors": []}
+        seconds = 0.0
+        if ready:
+            sub = argparse.Namespace(zips=[e["path"] for e in ready], overwrite=False,
+                                     dry_run=bool(args.dry_run), interactive_license=False,
+                                     eula_read=None, json=False, examples=args.examples,
+                                     library=args.library)
+            started = time.monotonic()
+            _, obj = run_install(sub, lib, report=False)
+            seconds = round(time.monotonic() - started, 2)
+        by_file = {r["file"]: r for r in obj.get("packages", [])}
+        for e in group:
+            if e.get("ready", True):
+                e["install"] = by_file.get(e["file"])
+                e["result"], e["why"], e["severity"] = \
+                    intake_outcome(e["install"], obj.get("errors", []))
+        refused_here = [e for e in group if e["result"] == "refused"]
+        records = {} if args.dry_run else load_records(lib)
+        for e in group:
+            res = e.get("install") or {}
+            lines.append(f"{e['file']}")
+            lines.append(f"  SKU {e['sku'] or '-'}, part {e['part'] or '-'}"
+                         + (f", {res['product_name']}" if res.get("product_name") else ""))
+            if e["result"] == "refused":
+                status = max(status, e["severity"])
+                e["why"] = shorten(e["why"], source)
+                lines.append(f"  refused: {e['why']}")
+            else:
+                listed, wrote = res.get("listed", 0), res.get("bytes_written", 0)
+                if args.dry_run:
+                    lines.append(f"  would be {e['result']}: {plural(listed, 'file')} listed, "
+                                 f"{res.get('to_write', 0)} to write, "
+                                 f"{res.get('identical', 0)} identical")
+                else:
+                    lines.append(f"  {e['result']}: {plural(listed, 'file')} listed, "
+                                 f"{res.get('written', 0)} written ({wrote} bytes), "
+                                 f"{res.get('identical', 0)} identical, in "
+                                 f"{res.get('install_seconds', 0):.2f} s")
+            if res.get("case_twins"):
+                lines.append(f"  warning: {plural(res['case_twins'], 'new path')} differ only in "
+                             "case from another path; run case-check")
+            e["verified"] = None
+            if e["result"] != "refused" and not args.dry_run:
+                rec = records.get(e["sku"])
+                t0 = time.monotonic()
+                problems = verify_files(lib, rec, e["part"], True) if rec else \
+                    {"no_record": [f"no record for SKU {e['sku']}"]}
+                bad = sum(len(v) for v in problems.values())
+                pack = (rec or {}).get("packages", {}).get(e["part"], {})
+                if not pack.get("complete"):
+                    problems["incomplete"] = [e["part"]]
+                    bad += 1
+                checked = sum(1 for f in (rec or {}).get("files", {}).values()
+                              if e["part"] in f.get("parts", []))
+                e["verified"] = {"files": checked, "bad": bad,
+                                 "problems": {k: len(v) for k, v in problems.items() if v},
+                                 "examples": {k: v[:args.examples]
+                                              for k, v in problems.items() if v},
+                                 "seconds": round(time.monotonic() - t0, 2)}
+                lines.append(f"  verify: {checked - bad} of {checked} recorded files present at "
+                             f"their size and CRC-32 in {e['verified']['seconds']:.2f} s"
+                             + ("" if not bad else f"; {bad} FAILED"))
+                for k, v in problems.items():
+                    if v:
+                        lines.append(f"    {k.replace('_', ' ')}: {len(v)}")
+                        lines += [f"      {r}" for r in v[:args.examples]]
+            e["deleted"] = False
+            if args.dry_run:
+                e["zip"] = ("kept: it was refused" if e["result"] == "refused" else
+                            "kept: another package of this product was refused" if refused_here
+                            else "kept: --keep-zips" if args.keep_zips else
+                            "would be deleted once the install and the verify pass")
+            elif e["result"] == "refused":
+                e["zip"] = "kept: it was refused"
+            elif refused_here:
+                e["zip"] = ("kept: another package of this product was refused ("
+                            + ", ".join(r["file"] for r in refused_here) + ")")
+                status = max(status, 1)
+            elif e["verified"]["bad"]:
+                e["zip"] = "kept: the verify of its recorded files failed"
+                status = max(status, 1)
+            elif args.keep_zips:
+                e["zip"] = "kept: --keep-zips"
+            else:
+                try:
+                    now_st = os.lstat(e["path"])
+                except OSError:
+                    now_st = None
+                if now_st is None or not stat.S_ISREG(now_st.st_mode) \
+                        or now_st.st_size != e["size"]:
+                    e["zip"] = "kept: the zip changed while it was being processed"
+                    status = max(status, 1)
+                else:
+                    os.unlink(e["path"])
+                    e["deleted"] = True
+                    deleted += 1
+                    freed += e["size"]
+                    e["zip"] = "deleted"
+            lines.append(f"  zip: {e['zip']}")
+            if not args.dry_run:
+                sha = res.get("sha256")
+                if sha is None and os.path.lexists(e["path"]) and e.get("ready", True):
+                    sha = sha256_of(e["path"])
+                what = e["result"] if e["result"] != "refused" else f"refused: {e['why']}"
+                rows.append([now()[:10], res.get("product_name"), e["sku"], e["part"], e["file"],
+                             e["size"], sha, f"{what}; zip {e['zip']}", res.get("listed")])
+        if seconds:
+            lines.append(f"  {plural(len(ready), 'package')} for SKU "
+                         f"{group[0]['sku'] or '-'} in {seconds:.2f} s")
+
+    written = {"path": str(ledger), "rows": 0, "created": False}
+    if rows:
+        written = append_ledger(ledger, rows)
+    counted = {r: sum(1 for e in entries if e["result"] == r)
+               for r in ("installed", "already installed", "refused")}
+    lines.append(f"{plural(len(entries), 'zip')}: "
+                 + ", ".join(f"{n} {'would be ' if args.dry_run and r != 'refused' else ''}{r}"
+                             for r, n in counted.items()))
+    if args.dry_run:
+        lines.append("dry run: nothing was written, nothing was deleted, no ledger row added")
+    else:
+        lines.append(f"deleted {plural(deleted, 'zip')}, {freed} bytes freed; "
+                     f"{plural(written['rows'], 'row')} appended to {ledger}")
+        if counted["installed"] or counted["already installed"]:
+            lines.append("Renders and sprites may ship on conditions. The mesh, rig, morphs and "
+                         "textures need an")
+            lines.append("Interactive License, and conditions still apply under it. Keep Daz "
+                         "content out of the")
+            lines.append(f"AI stages. `licence SKU` gives the conditions ({NOTE}).")
+    out = [{k: e.get(k) for k in ("file", "sku", "part", "size", "result", "why", "zip",
+                                  "deleted", "verified")}
+           | {"product_name": (e.get("install") or {}).get("product_name"),
+              "sha256": (e.get("install") or {}).get("sha256"),
+              "listed": (e.get("install") or {}).get("listed"),
+              "install": e.get("install")} for e in entries]
+    emit(args, {"library": str(lib), "source": str(source), "ledger": written,
+                "dry_run": bool(args.dry_run), "keep_zips": bool(args.keep_zips),
+                "products": len(ordered), "packages": out, "counts": counted,
+                "deleted": deleted, "bytes_freed": freed}, lines)
     return status
 
 
@@ -2145,6 +2509,15 @@ def main() -> int:
                    help="record a bought Interactive License for this product")
     p.add_argument("--eula-read", type=valid_date, metavar="YYYY-MM-DD",
                    help="the date you last read the Daz EULA")
+    p = sub.add_parser("intake", parents=[common],
+                       help="install every zip in a folder, verify it and delete the zip")
+    p.add_argument("--source", type=Path, metavar="DIR",
+                   help=f"the folder of zips (default <library>/{SOURCE})")
+    p.add_argument("--ledger", type=valid_ledger, default=LEDGER, metavar="NAME",
+                   help=f"the Markdown file appended to in the source folder (default {LEDGER})")
+    p.add_argument("--dry-run", action="store_true",
+                   help="say what each zip would do; write nothing, delete nothing")
+    p.add_argument("--keep-zips", action="store_true", help="install and verify, delete no zip")
     sub.add_parser("list", parents=[common], help="products recorded in the library")
     p = sub.add_parser("licence", parents=[common], help="print or change the licence held")
     p.add_argument("sku", type=valid_sku)
@@ -2170,8 +2543,8 @@ def main() -> int:
         return selftest(args.dir)
     try:
         lib = library_path(args.library)
-        return {"install": cmd_install, "list": cmd_list, "licence": cmd_licence,
-                "verify": cmd_verify, "uninstall": cmd_uninstall,
+        return {"install": cmd_install, "intake": cmd_intake, "list": cmd_list,
+                "licence": cmd_licence, "verify": cmd_verify, "uninstall": cmd_uninstall,
                 "case-check": cmd_case_check}[args.cmd](args, lib)
     except Refused as e:
         print(e, file=sys.stderr)

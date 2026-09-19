@@ -77,6 +77,10 @@ Where CLAUDE.md's Owner decisions line names one, update it too.
 - **Exported visemes.** A game needs baked shapes, but the visemes are driver-driven. Not built: set each `facs_ctrl_v*`, `shape_key_add(from_mix=True)`, export glTF with morphs. Lip-sync's Genesis column can use `@props` now. Cost: minutes of CPU, once written.
 - **The `cleanup.py` guard on a case-insensitive disk.** It ran only on Linux copies. On macOS or `chattr +F` ext4, `scripts/cleanup.py keep _test --concept <image> --model output/Daz/g9_cage.blend`. Cost: seconds.
 
+- **The three products taken in on 2026-09-19 have never been opened in Blender.** Mavick hair and beard, the dForce Leather Viking Armor and the Tubal Weapons Collection are installed and verified, and nothing has imported them. Unknown: what Diffeomorphic makes of a gzip `.dsf`, of `Follower/Accessory` fitted armour, and of a 433,512 vertex strand hair, when the Starter Essentials' own strand hair rendered 0 pixels. `scripts/daz_import_probe.py scene --wearables`, then a clay render. Cost: minutes of CPU.
+- **`intake` paths that were reasoned about rather than forced.** An intake interrupted by a signal part way through a product group, a verify failing between install and deletion, and two intakes running at once. Each has a branch and a message; none was made to happen. Cost: minutes.
+- **`case-check` has not been rerun over the enlarged library.** Intake reported no new path differing only in case, which is weaker than the reference scan. `scripts/daz_library.py case-check`. Cost: seconds.
+
 ## The MCP server
 
 Built 2026-09-19 in `mcp/`: 23 tools over the protocol, 24 self-test checks, and Claude Code CLI 2.1.278 connected, called tools and shut it down cleanly.
