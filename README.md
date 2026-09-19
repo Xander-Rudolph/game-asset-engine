@@ -173,8 +173,13 @@ finished art direction looks like. Nothing in the default path reads from it.
 
 ### MCP
 
-`.mcp.json` declares the servers this repo expects. Keys come from the
-environment, never the repo:
+This repo has its own MCP server, so a client with no shell can drive the
+pipeline: engine health, graphs, the queue, sprite sheets, rigs and lip sync.
+It is registered by hand, in one command, and never ships in the plugin.
+[How to register it](https://xander-rudolph.github.io/game-asset-engine/guide/mcp).
+
+`.mcp.json` declares the third-party servers this repo expects. Keys come from
+the environment, never the repo:
 
 ```sh
 export MESHY_API_KEY=...
@@ -210,6 +215,7 @@ It deploys to GitHub Pages on every push to `main`.
 |---|---|
 | [Install and first run](https://xander-rudolph.github.io/game-asset-engine/guide/install) | Getting it running |
 | [Make your first asset](https://xander-rudolph.github.io/game-asset-engine/guide/first-asset) | Ten minutes, end to end |
+| [The MCP server](https://xander-rudolph.github.io/game-asset-engine/guide/mcp) | Driving the pipeline from a client that has no shell |
 | [Facings and camera angles](https://xander-rudolph.github.io/game-asset-engine/guide/facings) | Why a sprite faces the wrong way |
 | [Face counts and decimation](https://xander-rudolph.github.io/game-asset-engine/guide/decimation) | How much geometry you actually need |
 | [Rigging](https://xander-rudolph.github.io/game-asset-engine/guide/rigging) | Including heavy and scanned meshes |

@@ -129,6 +129,106 @@ services:
     profiles: ["comfy-local"]
     dns: 0.0.0.0
 
+  # The MCP server: this repo's pipeline, served to an MCP client.
+  #
+  #   docker compose --profile mcp up -d      # HTTP, on 127.0.0.1:8765 only
+  #
+  # Its own profile, so it starts with none of the pipeline profiles. `packaged`,
+  # `comfy` and `comfy-local` are unchanged by its presence: a service in a
+  # profile starts only when that profile is named.
+  #
+  # THE DOCKER SOCKET BELOW IS ROOT ON THE HOST. Anything that can talk to it can
+  # start a container that mounts / as root, so the uid this service runs as
+  # bounds nothing. It is mounted anyway, and on purpose: the Blender tools work
+  # by running `docker exec` against the ComfyUI container, and without the
+  # socket the server serves the ComfyUI graphs and not much else. The port is
+  # published on 127.0.0.1 and not 0.0.0.0 for the same reason, and that is not a
+  # detail to "fix" later: a server on 0.0.0.0 here hands the host to the LAN.
+  #
+  # Stdio, for a client that starts the server itself, is a `docker run` rather
+  # than a compose service; see mcp/README.md. Compose is for the shared HTTP one.
+  asset-engine-mcp:
+    build:
+      # ./mcp, not the repo root: the image copies nothing, so a context of the
+      # repo would tar output/ and input/ on every build for no reason.
+      context: ./mcp
+      dockerfile: Dockerfile
+    image: ${ASSET_ENGINE_MCP_IMAGE:-asset-engine-mcp:dev}
+    container_name: asset-engine-mcp
+    profiles: ["mcp"]
+    # No argument at all would speak MCP over stdin and stdout, which a
+    # detached container has nobody to speak to. ENTRYPOINT is the server, so
+    # these are appended to it.
+    #
+    # `--host 0.0.0.0` is NOT the loosening it looks like, and removing it
+    # breaks the service. The server binds 127.0.0.1 by default, which inside a
+    # container is the CONTAINER's loopback: a published port reaches the
+    # container's external address and nothing is listening there, so every
+    # request is refused (measured 2026-09-19: with the default bind, a POST to
+    # the published port returns nothing at all, while the container's own log
+    # says `http on 127.0.0.1:8765`). What keeps this private is the ports entry
+    # below, which publishes on 127.0.0.1 alone. The server logs a warning about
+    # binding off-loopback; here it means "reachable from this host's loopback
+    # and from containers on this compose network", not "reachable from the
+    # network".
+    command: ["--http", "--host", "0.0.0.0", "--port", "8765"]
+    ports:
+      # 127.0.0.1 is load-bearing. See the note above.
+      - "127.0.0.1:8765:8765"
+    environment:
+      # The three the server reads. ASSET_ENGINE_ROOT matches the mount below,
+      # which is also the path the repo has on the host, so a path in a tool call
+      # means the same thing on both sides of the socket.
+      - ASSET_ENGINE_ROOT=/asset-engine
+      - MODELS_DIR=/models
+      # Empty unless you set it: scripts/_engine.py then asks `docker ps` which
+      # ComfyUI container is up, which is the behaviour you want. Set it when
+      # several are running and you mean a particular one.
+      - ASSET_ENGINE_CONTAINER=${ASSET_ENGINE_CONTAINER:-}
+      # Not optional, and not a default anyone would guess. Every script here
+      # reads COMFY_URL and falls back to http://127.0.0.1:8188, which inside a
+      # container is the CONTAINER's own loopback, not the host's: the fallback
+      # finds nothing and the failure reads as "nothing answering at
+      # http://127.0.0.1:8188", as if ComfyUI were down. host.docker.internal is
+      # the host, via extra_hosts below. This assumes 8188 is published on an
+      # address the container can route to, which is what the pipeline profiles
+      # do today; the address that port is published on is an open owner
+      # decision, so check this line if that changes.
+      - COMFY_URL=${COMFY_URL:-http://host.docker.internal:8188}
+    volumes:
+      # The repo itself. Read-write, because the scripts write into output/, and
+      # mounted rather than baked so that editing a script takes effect on the
+      # next call instead of the next build.
+      - .:/asset-engine
+      # The weights, at the path ${MODELS_DIR} already resolves to from the repo
+      # root, so a script that reads MODELS_DIR from .env and one that reads it
+      # from the environment agree.
+      - ${MODELS_DIR}:/models
+      # The Docker socket: how scripts/_engine.py reaches ComfyUI and Blender.
+      # Root on the host. See the note above.
+      - /var/run/docker.sock:/var/run/docker.sock
+    extra_hosts:
+      # Resolves host.docker.internal to the host from inside the default bridge
+      # network, which Docker does not do by itself on Linux.
+      - "host.docker.internal:host-gateway"
+    # Write as the invoking user, exactly as the pipeline services do.
+    user: "${PUID:-1000}:${PGID:-1000}"
+    group_add:
+      # The socket is root:docker 0660, so the uid above cannot open it without
+      # docker's group as a supplementary gid. That gid is host-specific: 126 on
+      # the reference machine (`stat -c '%g' /var/run/docker.sock`, 2026-09-19).
+      # Put yours in .env as DOCKER_GID if it differs, or every tool that needs
+      # the container fails with "permission denied while trying to connect to
+      # the Docker daemon socket at unix:///var/run/docker.sock" (measured by
+      # running the image's `docker ps` as uid 1000 with no group_add,
+      # 2026-09-19).
+      - "${DOCKER_GID:-126}"
+    # The server spawns `docker exec` children and is PID 1 here. An init reaps
+    # them and passes signals on, so a stopped container does not leave a Blender
+    # job running in the ComfyUI container.
+    init: true
+    restart: unless-stopped
+
 volumes:
   unirig-home:
   comfy-user:

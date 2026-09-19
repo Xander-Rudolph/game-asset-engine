@@ -34,6 +34,11 @@ claude --plugin-dir .
 It loads the plugin for that session only. This is better while you're still
 editing the repo, since you always test what is on disk.
 
+Installing the plugin gives you the skills, which drive the pipeline from a
+shell. Driving it from a client that has no shell, or one that is not on this
+machine, is a separate registration and is not part of the plugin: see
+[the MCP server](/guide/mcp).
+
 ::: tip Private repos need working git credentials
 `marketplace add` clones the repo with your git credentials. If GitHub CLI or
 SSH auth is already set up, a private repo installs fine. If not, the add fails
@@ -162,8 +167,13 @@ than written as one paragraph.
 
 ## MCP servers
 
-`.mcp.json` declares what this repo expects. Keys come from the environment,
-never from the repo:
+This repo's own pipeline is served as MCP tools by `mcp/server.py`, which is
+registered by hand rather than shipped here, because it needs the Docker socket
+and a plugin's servers start for every installer with no per-server opt out.
+[The MCP server](/guide/mcp) covers it.
+
+What the plugin does ship is `.mcp.json`. Keys come from the environment, never
+from the repo:
 
 ```sh
 export MESHY_API_KEY=...

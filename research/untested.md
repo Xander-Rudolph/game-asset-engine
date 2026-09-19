@@ -77,6 +77,22 @@ Where CLAUDE.md's Owner decisions line names one, update it too.
 - **Exported visemes.** A game needs baked shapes, but the visemes are driver-driven. Not built: set each `facs_ctrl_v*`, `shape_key_add(from_mix=True)`, export glTF with morphs. Lip-sync's Genesis column can use `@props` now. Cost: minutes of CPU, once written.
 - **The `cleanup.py` guard on a case-insensitive disk.** It ran only on Linux copies. On macOS or `chattr +F` ext4, `scripts/cleanup.py keep _test --concept <image> --model output/Daz/g9_cage.blend`. Cost: seconds.
 
+- **The three products taken in on 2026-09-19 have never been opened in Blender.** Mavick hair and beard, the dForce Leather Viking Armor and the Tubal Weapons Collection are installed and verified, and nothing has imported them. Unknown: what Diffeomorphic makes of a gzip `.dsf`, of `Follower/Accessory` fitted armour, and of a 433,512 vertex strand hair, when the Starter Essentials' own strand hair rendered 0 pixels. `scripts/daz_import_probe.py scene --wearables`, then a clay render. Cost: minutes of CPU.
+- **`intake` paths that were reasoned about rather than forced.** An intake interrupted by a signal part way through a product group, a verify failing between install and deletion, and two intakes running at once. Each has a branch and a message; none was made to happen. Cost: minutes.
+- **`case-check` has not been rerun over the enlarged library.** Intake reported no new path differing only in case, which is weaker than the reference scan. `scripts/daz_library.py case-check`. Cost: seconds.
+
+## The MCP server
+
+Built 2026-09-19 in `mcp/`: 23 tools over the protocol, 24 self-test checks, and Claude Code CLI 2.1.278 connected, called tools and shut it down cleanly.
+
+- **Tools mapped from `--help` but never run through the server.** An argument named wrongly fails only when someone calls it: `bone_roles_map`, `bone_roles_compile`, `face_rig_add_jaw`, `decimation_report`, `normalise_mesh` and all three lip sync tools. Of the Blender group only `render_sprite_sheet` has run. Call each once through `python3 mcp/client_probe.py` or a client. Cost: minutes of CPU.
+- **`run_graph` has never queued a real job.** Only `--dry-run`, so its wall-clock behaviour and the files it reports after a generation are unverified. `interrupt_job` and `free_models` were never run either, because both reach a shared server. Cost: a GPU job, and a moment when nobody else is using the card.
+- **The compose service has never been started.** `docker compose --profile mcp config` resolves and the same flags were proved through `docker run`, but `init: true`, `restart: unless-stopped` and the compose-built image tag are read and not run. Cost: seconds, when the pipeline is idle.
+- **HTTP mode has only been driven on the loopback.** No TLS reverse proxy, and the server has no authentication of its own, so it must not leave localhost until that is settled. Cost: an afternoon, plus a decision about who may reach it.
+- **One client, one architecture.** Only Claude Code 2.1.278, only amd64. The idle timeout and `MCP_TIMEOUT` were not exercised, and `server/discover` was answered only to a hand-written client.
+- **`bash` and `curl` are in the image for the shell scripts, and no tool that uses one has run.** Cost: minutes.
+- **`DOCKER_GID` defaults to 126,** which is this host's socket group. On another machine the socket is a different group and the container cannot reach the daemon until `.env` says so.
+
 ## Pipeline scripts
 
 - **`fetch_tools.py` on a real drop.** Resume was simulated locally, so a real drop may corrupt the `.part`. Kill `--download rhubarb` from a scratch copy with `timeout 3`, and rerun. Cost: seconds and a download.
