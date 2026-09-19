@@ -118,6 +118,11 @@ for i in "${!NAMES[@]}"; do
     model="output/mesh/${name}_textured.glb"; [ -f "$model" ] || model="output/mesh/${name}.glb"
     [ -f "$model" ] || { printf '  %-16s nothing to render\n' "$name"; continue; }
     printf '  %-16s ' "$name"
+    # No --engine, so this takes render_sheet.py's default, Cycles on the card
+    # since 2026-09-18. It waits for a free card before each sheet, which here
+    # means after the texture stage has drained the queue. Sheets drawn before
+    # that switch came from EEVEE and will not match these, so re-render a set
+    # whole rather than adding to it; --engine eevee matches the older ones.
     python3 scripts/render_sheet.py "$model" --angles 4 --size 340 \
         --out "output/sheets/${name}.png" >>"$LOG" 2>&1 && printf 'render '
     tex=(); for m in "output/textures/${name}"/*.jpg; do [ -f "$m" ] && tex+=("$m"); done

@@ -210,6 +210,25 @@ anything the game will load.
 facing is lit identically. A fixed light makes one facing bright and the opposite
 one a silhouette, and no amount of colour correction later fixes it.
 
+**One engine for a whole set.** Since 2026-09-18 `render_sheet.py` path traces
+with Cycles on the graphics card; before that it rasterised with EEVEE on the
+CPU, and `--engine eevee` still does. The lights, the clay, the camera and the
+framing are identical either way, but Cycles occludes the white world dome
+where the mesh blocks it, so a belly, the underside of a jaw and the gap
+between two legs read darker. Mixing the two across one figure puts about 11
+per cent of its lit pixels 10 or more levels of 255 apart (2026-09-18), which
+on an atlas shows as one sprite that does not sit with the rest. The comparison that chose Cycles, with the images and the
+numbers, is [two render engines](/guide/render-engines).
+
+::: warning Every sheet drawn before the switch came from EEVEE
+Re-rendering one of them now redraws it on the other engine, and it will no
+longer match the sheets beside it. Re-render the whole set rather than topping
+it up, or pass `--engine eevee` to match what is already there. The engine is
+not recorded in the PNG: it is in the RENDERED json the Blender job prints,
+which a run reports as its `engine` line
+([scripts](/reference/scripts#render-sheet-py)).
+:::
+
 **Feet on the floor, not centre on the floor.** The model is anchored by the
 bottom of its bounding box, so a tall figure and a short one both stand on the
 same line in their cell. Centring instead makes tall figures float.

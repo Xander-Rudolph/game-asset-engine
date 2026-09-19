@@ -5,14 +5,20 @@ the repo, imported into Blender with its viseme controllers, and rendered as
 sprite rows. The renders may ship. The figure's 3D data may not, without an
 Interactive License.*
 
-Everything below was run on 2026-09-16 on the reference machine, on one
-product, Genesis 9 Starter Essentials (SKU 86958), downloaded in a browser. The
-library and inventory scripts ran on the host's `python3` 3.13. The importer and
-every render ran in the `comfyui-packaged` container's `bpy` 4.5.9 LTS, where
-EEVEE reports its renderer as `llvmpipe (LLVM 15.0.7, 256 bits)`: Mesa's
-software OpenGL on the CPU, not the graphics card. One figure was imported
-plainly and one character preset with its textures. Each section says what
-failed and what worked instead, and the page ends with
+Everything below was run on 2026-09-16 and 2026-09-18 on the reference machine,
+on one product, Genesis 9 Starter Essentials (SKU 86958), downloaded in a
+browser. The library and inventory scripts ran on the host's `python3` 3.13.
+The importer and every render ran in the `comfyui-packaged` container's `bpy`
+4.5.9 LTS, where EEVEE reports its renderer as `llvmpipe (LLVM 15.0.7, 256
+bits)`: Mesa's software OpenGL on the CPU, not the graphics card. Every render
+time on this page is an EEVEE one, and stays one: `scripts/render_sheet.py`
+took Cycles as its default on 2026-09-18, but `daz_import_probe.py` pins
+`--engine eevee` for its sheet stage so that it matches its own framings, which
+have no other engine ([scripts](/reference/scripts#render-sheet-py)). On 2026-09-16
+one figure was imported plainly and one character preset with its textures; on
+2026-09-18 one character was dialled, dressed, given hair and posed, and
+rendered ([a dressed, posed character, headless](#a-dressed-posed-character-headless)).
+Each section says what failed and what worked instead, and the page ends with
 [what was not tested](#what-was-not-tested).
 
 The background, and the licence read from Daz's own pages, is in the research
@@ -56,6 +62,9 @@ output/daz/                           Daz content: gitignored, never committed
   g9_cage_render_sheet_128.png        render_sheet.py: the whole figure, a row per viseme
   g9_cage_sheet_340_labelled.png      the probe's framings, a row per viseme
   g9_cage_render.json                 the command, every option, pixels changed
+  g9_dressed.blend                    a dialled, dressed, posed character, 140,971,653 bytes
+  g9_dressed_scene.json               every stage: morphs, dials, wearables, the pose
+  g9_dressed_morphs.json              every slider on the rig, with its range
 ```
 
 The whole run, with an approval after every step:
@@ -71,6 +80,10 @@ python3 scripts/daz_import_probe.py render --blend output/daz/g9_cage.blend \
     --only AA --sizes 128 --columns face --samples 16
 python3 scripts/daz_import_probe.py render --blend output/daz/g9_cage.blend
 ```
+
+Dialling, dressing and posing a character is the same script's `scene`
+subcommand, and `verify` reopens what it saved with no add-on at all
+([a dressed, posed character, headless](#a-dressed-posed-character-headless)).
 
 The `daz-figure` skill runs these one stage per turn, with the licence first,
 and has you open each sheet yourself rather than reading it into the
@@ -535,6 +548,304 @@ now the probe ends it. Another: `--only ,` once parsed as an empty list, which
 meant all 17, and started the full job, stopped by hand after 7 rows. It now
 exits 2 with `name at least one viseme, such as AA, from AA, EE, ...`.
 
+## A dressed, posed character, headless
+
+Everything above imports a figure and renders its mouth. This is the rest of
+what a person does in Daz Studio: dial a character's shape, put clothes and
+hair on it, pose it. Run on 2026-09-18 in the same container, with the same
+library and no Daz Studio anywhere, through `scripts/daz_import_probe.py
+scene`, which does the steps in the order below and records each one's
+seconds, peak RSS and `import_daz.get_error_message()`.
+
+```sh
+# every standard morph set, the six character dials, two sliders set and measured
+python3 scripts/daz_import_probe.py scene --out output/daz/g9_morphs.blend --anatomy none \
+    --morphs units,expressions,visemes,head,body,jcms,flexions,masculine,feminine,powerpose,facsexpr \
+    --custom-morphs "data/Daz 3D/Genesis 9/Base/Morphs/Daz 3D/Base Characters 9" \
+    --custom-files Kat_figure_ctrl_Character.dsf,Amala_figure_ctrl_Character.dsf,Fabrice_figure_ctrl_Character.dsf,Laura_figure_ctrl_Character.dsf,Matt_figure_ctrl_Character.dsf,Ty_figure_ctrl_Character.dsf \
+    --custom-category Characters --custom-bodypart Body \
+    --set Kat_figure_ctrl_Character=1.0 --set body_bs_ProportionHeight=1.0 --subdivision off
+
+# a character preset, with its rig, shape keys and materials
+python3 scripts/daz_import_probe.py build --figure "People/Genesis 9/Characters/Kat for Genesis 9.duf" \
+    --out output/daz/g9_char_kat.blend
+
+# a shirt, shorts and hair onto the figure, then a dial, then a pose
+python3 scripts/daz_import_probe.py scene --out output/daz/g9_outfit.blend --anatomy none \
+    --morphs body,jcms \
+    --custom-morphs "data/Daz 3D/Genesis 9/Base/Morphs/Daz 3D/Base Characters 9" \
+    --custom-files Kat_figure_ctrl_Character.dsf --custom-category Characters --custom-bodypart Body \
+    --wear "People/Genesis 9/Clothing/Daz Originals/Base Clothing/G9 Base Shirt.duf" \
+    --wear "People/Genesis 9/Clothing/Daz Originals/Base Clothing/G9 Base Shorts.duf" \
+    --wear "People/Genesis 9/Hair/Daz Originals/Base Hair/G9 Base dForce Pixie Hair.duf" \
+    --skip-transfer "dForce Pixie Cut Mesh,dForce Pixie Hair Cap Mesh" \
+    --set-dressed Kat_figure_ctrl_Character=1.0 \
+    --pose "People/Genesis 9/Poses/Daz Originals/Base Poses/Base/G9 Base Pose 13 Walking G9B.duf" \
+    --subdivision off
+
+# the character preset, dressed and posed, saved as the file the renders use
+python3 scripts/daz_import_probe.py scene --out output/daz/g9_dressed.blend \
+    --figure "People/Genesis 9/Characters/Kat for Genesis 9.duf" --anatomy auto \
+    --morphs body,jcms,flexions --facs \
+    --wear "People/Genesis 9/Clothing/Daz Originals/Base Clothing/G9 Base Shirt.duf" \
+    --wear "People/Genesis 9/Clothing/Daz Originals/Base Clothing/G9 Base Shorts.duf" \
+    --wear "People/Genesis 9/Hair/Daz Originals/Base Hair/G9 Base dForce Pixie Hair.duf" \
+    --skip-transfer "dForce Pixie Cut Mesh,dForce Pixie Hair Cap Mesh" \
+    --pose "People/Genesis 9/Poses/Daz Originals/Base Poses/Base/G9 Base Pose 13 Walking G9B.duf"
+
+# the saved file in a Blender with no add-on at all
+python3 scripts/daz_import_probe.py verify --blend output/daz/g9_outfit.blend
+```
+
+Those are the commands the numbers below came from, less the `--timeout` each
+carried and the `--no-verify` on the first. `scene` runs `verify` itself unless
+`--no-verify` is passed, so the last command repeats by hand what the outfit
+run already did.
+
+| Stage | Result | Cost |
+|---|---|---|
+| Eleven morph sets, six character dials, two sliders set | 1593 numeric properties on the rig | 5.0 s wall, 4.86 s in Blender, peak 642.0 MB, container 2.76 to 3.19 GiB |
+| A character preset | 158 bones, 40 body shape keys, 18 images | 4.7 s wall, against 1.4 s for `Genesis 9.duf`; the import step alone peaks at 1454.3 MB |
+| Three wearables merged into the figure's rig, then a dial and a pose | 233 bones, unchanged by the merge | 5.2 s wall for the whole command, peak 998.4 MB, container 2.22 to 2.90 GiB |
+| All of it at once, posed and saved | `g9_dressed.blend`, 140,971,653 bytes, 258 bones | 17.5 s wall, 17.39 s in Blender, peak 1643.7 MB, container 2.29 to 3.59 GiB |
+| Reopened with no DAZ add-on | 233 bones, 88 posed, 618 drivers, the dial still 1.0 | 0.8 s wall, peak 578.5 MB |
+
+### Morph sets load with no dialog
+
+A morph operator opens a file selector for a person. Called from Python it
+does not: `Selector.getScriptedValues()` returns `None` only for an operator
+that was invoked, and otherwise a selection that a plain call never fills, so
+the loop falls through to every file the add-on's table lists for the figure
+(read in `selector.py` and `morphing.py`). Each set is one operator, and
+`--morphs` names them:
+
+| `--morphs` name | Operator | Properties, object + data | Body shape keys | Seconds |
+|---|---|---|---|---|
+| `units` | `import_units` | 0 + 0 | 0 | 0.00 |
+| `expressions` | `import_expressions` | 0 + 0 | 0 | 0.00 |
+| `visemes` | `import_visemes` | 0 + 0 | 0 | 0.00 |
+| `head` | `import_head` | 0 + 0 | 0 | 0.00 |
+| `facsexpr` | `import_facs_expressions` | 0 + 0 | 0 | 0.00 |
+| `body` | `import_body_morphs` | 102 + 251 | 5 | 0.19 |
+| `jcms` | `import_jcms` | 116 + 122 | 103 | 0.36 |
+| `flexions` | `import_flexions` | 27 + 27 | 14 | 0.19 |
+| `masculine` | `import_masculine` | 13 + 13 | 11 | 0.21 |
+| `feminine` | `import_feminine` | 11 + 11 | 9 | 0.17 |
+| `powerpose` | `import_powerpose` | 88 + 92 | 52 | 1.24 |
+
+The first five add nothing for the same reason `import_visemes` does: the
+importer's `data/paths/genesis9.json` has no table for them. Ask for the ones
+you need, not all eleven: `body,jcms,flexions` is what the dressed build used.
+
+### A character's shape dials are custom morphs
+
+The six `*_figure_ctrl_Character.dsf` files under `data/Daz 3D/Genesis 9/Base/
+Morphs/Daz 3D/Base Characters 9` are in no standard set's table, so no
+standard operator finds them. `--custom-morphs` runs
+`bpy.ops.daz.import_custom_morphs()` on them with `onDrivers='RIG'`. All six
+added 86 object and 630 data properties and 61 body shape keys in 1.43 s, and
+every call left `get_error_message()` reading `Found morphs that want to
+change the rest pose.` One `*_figure_ctrl_Character.dsf` brings its own body
+and head morphs with it.
+
+### The sliders, and what they move
+
+`scene` writes every numeric property on the rig object and its data to
+`<name>_morphs.json` with its value, hard and soft limits and default. After
+the morphs run above there were 1593 of them, 444 on the object and 1149 on
+its armature data. The hard limits are the float limits; the Daz limits arrive
+as the soft range, so `Kat_figure_ctrl_Character` reads 0.0 to 1.0 and
+`body_bs_ProportionHeight` -2.0 to 2.0. Of the 1593, 417 have the soft range 0
+to 1, 256 have -1 to 1, 28 have -2 to 2 and 862 have none: those are the
+`(fin)` and `(rst)` twins and the corrective morphs, which the dials drive.
+
+`--set NAME=VALUE` writes one and measures the result. Writing the property is
+not enough on its own, because a plain write tags nothing and the depsgraph
+never runs the drivers; `scene` tags the rig and its objects afterwards. On the
+cage with Subsurf off:
+
+| Dial | Vertices moved, of 25,182 | Largest | Mean |
+|---|---|---|---|
+| `Kat_figure_ctrl_Character` 0 to 1 | 25,182 | 59.67 mm | 42.15 mm |
+| `body_bs_ProportionHeight` 0 to 1 | 22,292 | 14.0 mm | 2.34 mm |
+
+### A character preset against the base figure
+
+`--figure` takes a character preset, and the rest of the build is the same.
+Measured with `build` on 2026-09-18, each run with `--figure` and `--out`
+alone, so no `--facs` and the importer's own Subsurf levels kept:
+
+| | `Genesis 9.duf` | `Kat for Genesis 9.duf` |
+|---|---|---|
+| Wall time | 1.4 s | 4.7 s |
+| Bones | 157 | 158 |
+| Properties, object + data | 2 + 4 | 47 + 64 |
+| Drivers | 23 | 90 |
+| Body mesh | 25,182 vertices, 0 shape keys | 25,182 vertices, 40 shape keys, 39 driven |
+| Images | 2 | 18 |
+| Eyebrows | Card Style 06, 6944 vertices | Card Style 12, 9000 vertices |
+
+`--no-textures` gives the same mesh, rig and shape key counts with 29 image
+texture nodes cleared and no image left in the file. It does not save memory
+during the import: that step still peaked at 1454.3 MB, because the importer
+reads the maps as it goes. It saves it at render time (see
+[textures](#textures-cost-memory-at-render-time)).
+
+### Clothing and hair, and what Morphed fitting loses
+
+`--wear` imports a clothing or hair `.duf` with the figure already in the
+scene, in the order given. Each one arrives as its own armature and mesh, the
+mesh parented to that armature with an `Armature SkinBinding` modifier
+pointing at it: G9 Base Shirt 126 bones, G9 Base Shorts 126, dForce Pixie Hair
+Cap 51. `easy_import_daz`'s own `merge_rigs` only merges the rigs that one
+import made, so `scene` parents each new armature to the body rig and calls
+`bpy.ops.daz.merge_rigs(useOnlySelected=True)` again. It left no armature over
+and did not change the body rig's 233 bones, so every wearable bone duplicates
+one the figure already has. Afterwards each mesh is parented to the body rig,
+its modifier points at it, and it keeps its own vertex groups: shirt 20,
+shorts 7, hair cap 18.
+
+::: warning Without a .dbz, an outfit follows the figure but does not reshape
+The default fitting route wants a `.dbz` exported from inside Daz Studio, one
+per `.duf`. `scene --fit DBZFILE` exits 1 at the figure import: the operator
+returned `FINISHED` and made no object, and `get_error_message()` said
+
+```
+Mesh fitting set to DBZ (JSON).
+Export "/app/models/daz_library/People/Genesis 9/Genesis 9.dbz"
+from Daz Studio to fit to dbz file.
+See documentation for more information.
+```
+
+So this host uses Morphed fitting, and
+`bpy.ops.daz.transfer_shapekeys(transferMethod='NEAREST')` returned
+`FINISHED`, said nothing, and added **0 shape keys** to the shirt, the shorts
+and the face meshes. That is the importer's own documented limit for this
+route: "Not all shapekeys are found. Shapekeys are not transferred to
+clothes". What it costs, measured: setting `Kat_figure_ctrl_Character` to 1.0
+with the outfit on moved every shirt and shorts vertex by 57.25 mm, mean and
+maximum equal, a rigid follow of the changed rest pose, while the body itself
+reshaped by up to 66.21 mm with a mean of 43.09. Dial a character in and the
+clothes go along; they do not take its shape.
+
+`transfer_shapekeys` also cannot run at all on a figure with no shape keys:
+its poll wants an active mesh that has some, and it fails with `RuntimeError:
+Operator bpy.ops.daz.transfer_shapekeys.poll() failed, context is incorrect`.
+Import a morph set first, or pass `--no-transfer`.
+:::
+
+The strand hair is a third case. `dForce Pixie Cut Mesh`, 236,136 vertices and
+no faces, has one vertex group, `dForce Pin`, which is a simulation group and
+not a bone, so its Armature modifier deforms nothing: the pose below moved 0
+of its vertices, while every vertex of the 1085-vertex hair cap moved. It also
+draws nothing (see
+[rendering the dressed figure](#rendering-the-dressed-figure)). Pass it to
+`--skip-transfer` so the shape key transfer leaves it alone.
+
+### A pose preset
+
+`--pose` runs `bpy.ops.daz.import_pose()`. On `G9 Base Pose 13 Walking
+G9B.duf` it moved 48 of the rig's 233 pose bones, 50 carrying a rotation once
+the drivers had run, and wrote no f-curve, so it is a pose and not an
+animation. The clothing followed through the shared rig: the body moved up to
+801.24 mm, the shirt 214.70, the shorts 214.97, the hair cap 180.89 and the
+hair strands 0.00.
+
+::: danger A pose preset zeroes every dial unless you say otherwise
+`import_pose` inherits `affectMorphs` and `useClearMorphs`, both `True` by
+default, and the operator sets `affectMorphs=False` only in its `invoke()`,
+which a Python caller never reaches (read in `animation.py`). The first run
+here put `Kat_figure_ctrl_Character` back to 0.0, so the character's shape was
+gone from the posed figure. `scene` now passes `affectMorphs=False`, as a person
+picking the file in the UI would get. `--pose-affects-morphs` puts the old
+behaviour back, for when a pose preset is meant to reset the figure.
+:::
+
+### The saved file needs no add-on
+
+```sh
+python3 scripts/daz_import_probe.py verify --blend output/daz/g9_outfit.blend
+```
+
+`verify` opens the `.blend` in a second Blender with no DAZ add-on enabled, no
+extension repository and auto-run scripts off, then counts what is there,
+clears the pose and zeroes the dials that were set. On the outfit build, 0.8 s
+wall at a peak of 578.5 MB: 233 bones, 88 of them posed, 618 drivers, 267
+object and 438 data properties, and `Kat_figure_ctrl_Character` still reading
+1.0. Clearing the pose moved the body 801.24 mm, the shirt 214.86 and the
+shorts 215.14; zeroing the dial moved the body 66.21 mm and the outfit 57.25.
+`scene` runs it for you unless you pass `--no-verify`.
+
+### Rendering the dressed figure
+
+`g9_dressed.blend` is 140,971,653 bytes: 258 bones, 578 object and 803 data
+properties, 1031 drivers, all 17 viseme properties, a body of 25,182 vertices
+with 339 shape keys, a shirt of 8038, shorts of 8256, a hair cap of 1085,
+236,136 hair strand vertices and the five anatomy meshes. Measured on
+2026-09-18, from a copy with all 8 Subsurf modifiers off, because
+`render_sheet.py` opens a `.blend` as saved and the body carries render level
+3. `daz_import_probe.py render --subdivision off` makes that copy and deletes
+it again; the sheets below came from one kept beside the file, made the same
+way in 0.6 s:
+
+```sh
+python3 scripts/render_sheet.py output/daz/g9_dressed_nosubsurf.blend \
+    --poses static --size 220 --clay --zoom 1.35 --check --engine eevee \
+    --out output/daz/g9_dressed_iso_clay_220_zoom135.png
+python3 scripts/daz_import_probe.py render --blend output/daz/g9_dressed.blend \
+    --no-sheet --sizes 340 --columns face --only AA --samples 16 --label portraitclay
+```
+
+`--engine eevee` is written in because these runs were made before Cycles
+became `render_sheet.py`'s default, later the same day. Without it the command still works
+and is faster, but it draws a different sheet from the one timed below and from
+the probe's own cells beside it.
+
+| Render, all of them EEVEE on llvmpipe | Cells | Time | Container peak |
+|---|---|---|---|
+| `render_sheet.py --size 128 --clay`, the isometric default | 4 | 45.5 s | 3.46 GiB |
+| the same at `--size 220` | 4 | 47.7 s | 3.46 GiB |
+| the same with the imported materials | 0 of 4 | ended by its alarm at 1500 s | not sampled to a peak |
+| `render --sizes 340 --columns face --only AA --samples 16 --no-sheet` | 2 | 18.8 s in Blender, 24.2 s wall | 3.97 GiB |
+| the same with `--materials` | 2 | 479.0 s | 8.54 GiB |
+
+Two things to know before asking for a sheet with the Daz materials on. The
+run above took the EEVEE default of 64 samples, Blender's own, which was
+`render_sheet.py`'s default at the time,
+and on this figure that came out at 26.2 s a sample, from Blender's own
+progress lines (sample 1 at 39.01 s, sample 25 at 642.38 s, sample 50 at
+1296.78 s), so one cell is about 1700 s and a four-facing sheet about 6800 s.
+In clay the same four cells take 45.5 s. Nothing forces the 64: `render_sheet.py
+--samples N` lowers it, and the default engine is now Cycles, which path traces
+on the card instead of rasterising on the CPU through llvmpipe, and on another
+model drew a 16 cell sheet 35 times faster
+([scripts](/reference/scripts#render-sheet-py), 2026-09-18). A materials sheet
+at a low `--samples`, and one on Cycles, are both unmeasured on this figure.
+The probe's own
+renderer also takes `--samples` and keeps the file's settings, which is why the
+340 px portraits above are affordable at 16.
+
+In clay, fitted from two runs at each size, a cell costs about 6.9 s at 128 px
+over about 17.8 s of fixed cost, and about 9.1 s at 220 px over about 10.5 s.
+Those two slopes are derived from four runs, not measured directly.
+
+What the sheets showed, all of it counted with numpy and none of it looked at:
+the four facings cover 10.3 to 11.0 per cent of their cells at 128 px, and at
+the default `--zoom 1.15` the back view is clipped at both sizes, `cell r0c2
+touches its border: the subject is clipped`, which `--zoom 1.35` cleared.
+Ignore the rest of that message. It ends `Lower --zoom or raise --size`, and
+both halves are wrong: `render_sheet.py` sets the camera's ortho scale to the
+subject's extent times `--zoom`, so lowering `--zoom` tightens the frame and
+clips harder, while `--size` only changes how many pixels a cell has, which is
+why 220 px clipped by 9 pixels where 128 px clipped by 7. Raise `--zoom` to
+widen the frame. A
+walking pose row differs from a rest row by 1830 to 2491 pixels a facing, 700
+to 1573 of them silhouette. A shape dial swept 0.0, 0.5 and 1.0 down the rows
+through `"@props"` raised the opaque pixels at every facing, 3694 to 3787 to
+3902 at azimuth 45. And the 236,136-vertex strand hair contributes exactly 0
+pixels: deleting it gave a 340 px clay portrait identical to the one with it,
+0 of 231,200 pixels different by even one level.
+
 ## Keeping Daz content where it belongs
 
 - **`output/daz/` is Daz content**, and gitignored. The `.blend`, logs, reports
@@ -574,7 +885,30 @@ exits 2 with `name at least one viseme, such as AA, from AA, EE, ...`.
 - **The Mouth's controllers as separate dials**, FACS Details and HD morphs,
   the six Toon sub-figures and their FilaToon shaders.
 - **A `.dbz` fit from Daz Studio**, other material methods, the importer's
-  texture resize, and Cycles.
+  texture resize, and the imported materials under Cycles, which
+  `render_sheet.py` now defaults to but which the probe's own renderer has
+  not. Without a `.dbz` the clothes get no shape keys
+  from the body; how much of that a `.dbz` would recover is unmeasured, and a
+  hand-built shape transfer was not tried.
+- **The rest of the library.** One character preset of 6, two clothing items of
+  40, one hair of 27 and one pose preset of 87 were run. The `anime` and
+  `facsdetails` morph sets and the one-shot
+  `bpy.ops.daz.import_standard_morphs()` were never called, and neither were
+  geografts.
+- **dForce simulation.** The pixie hair's 236,136 strand vertices stay in their
+  rest shape in the saved file, follow no bone and draw no pixel.
+- **Two dials at once, and values outside the Daz soft range.** One dial was
+  swept, at 0.0, 0.5 and 1.0, in clay, at one size.
+- **A four-facing sheet with the imported materials**, at any size, and any
+  sheet at the Subsurf levels the importer saves. The one attempt at materials
+  through `render_sheet.py` was ended by its alarm at 1500 s with no cell
+  finished.
+- **A portrait through `render_sheet.py`.** It frames the whole subject and has
+  no way to aim at the head, so every portrait here comes from the probe's own
+  renderer.
+- **Any of these sheets beside a pipeline sprite.** Coverage and cell geometry
+  were measured so they can be compared, but no side by side against a sheet
+  from `output/sheets/` was run.
 - **Exporting the visemes** as baked blend shapes to glTF or FBX, and any
   engine reading them. Shipping those needs an Interactive License anyway.
 - **Lip sync's Genesis column** ([the mapping](/reference/lip-sync#the-mapping-to-adopt))
@@ -584,6 +918,9 @@ exits 2 with `name at least one viseme, such as AA, from AA, EE, ...`.
   open ([Honest uncertainty](/reference/daz-genesis#honest-uncertainty)). The
   by-eye reading above was made that way; until the owner decides, the skill
   reads no render into the conversation.
-- **Peak VRAM**, since EEVEE here draws on the CPU, and render times with other
-  jobs running in the container.
+- **Peak VRAM**, since both render stages here rasterise with EEVEE on the CPU:
+  the probe's own renderer has no other engine, and its `render_sheet.py` stage
+  is pinned to `--engine eevee`. A Genesis sheet on the card, through
+  `render_sheet.py`'s Cycles default, would have one and has not been run.
+  Also render times with other jobs running in the container.
 - **The default importer verbosity** on a wrong content path; the run used 3.

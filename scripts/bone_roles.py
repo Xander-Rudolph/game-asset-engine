@@ -549,17 +549,57 @@ def three_numbers(v) -> bool:
         for x in v))
 
 
-def compile_frames(frames: list, rolemap: dict) -> tuple[list, dict, dict]:
+LEG_CHAIN = ("hip", "thigh", "shin")
+
+
+def level_feet(frame: dict) -> tuple[dict, dict]:
+    """Keep each foot level unless the frame says otherwise.
+
+    A foot inherits every rotation above it, so a leg that swings without an
+    ankle of its own leaves the figure on tip-toes: the walk's contact frames
+    put one foot 21 degrees toes-up and the other 37 toes-down, measured on the
+    28 and 47 bone rigs on 2026-09-18. Here a foot's own "rotate" x is read as
+    degrees from level, toes up positive, and the leg's own swing is taken off
+    it. A side whose leg swings but whose foot is not named gets a level foot.
+
+    Returns (frame, levelled) where levelled maps the foot role to the degrees
+    that were taken off, for the report.
+    """
+    out = dict(frame)
+    levelled = {}
+    for side in ("left", "right"):
+        swing = 0.0
+        for part in LEG_CHAIN:
+            t = frame.get(f"{side}_{part}")
+            if isinstance(t, dict) and three_numbers(t.get("rotate")):
+                swing += float(t["rotate"][0])
+        if not swing:
+            continue
+        role = f"{side}_foot"
+        t = out.get(role)
+        given = list(t["rotate"]) if isinstance(t, dict) and three_numbers(t.get("rotate")) else [0, 0, 0]
+        rest = dict(t) if isinstance(t, dict) else {}
+        rest["rotate"] = [round(given[0] - swing, 3) + 0.0, given[1], given[2]]
+        out[role] = rest
+        levelled[role] = round(swing, 3) + 0.0
+    return out, levelled
+
+
+def compile_frames(frames: list, rolemap: dict, feet: str = "level") -> tuple[list, dict, dict, dict]:
     """Role frames to transforms frames. Returns (frames, missing, ignored):
     missing maps a role the rig lacks to its frame numbers, ignored maps a role
     whose translate Blender would ignore (a connected bone) to its frame numbers."""
     axes = rolemap["axes"]
     c = transpose([axes["right"], axes["forward"], axes["up"]])  # columns
     roles, rest, connected = rolemap["roles"], rolemap["rest"], rolemap["connected"]
-    out, missing, ignored = [], {}, {}
+    out, missing, ignored, levelled = [], {}, {}, {}
     for fi, frame in enumerate(frames, 1):
         if not isinstance(frame, dict):
             raise SystemExit(f"frame {fi}: expected an object of role: transform")
+        if feet == "level":
+            frame, took = level_feet(frame)
+            for role, deg in took.items():
+                levelled.setdefault(role, []).append((fi, deg))
         oframe = {}
         for key in frame:
             if key.startswith("@"):
@@ -611,7 +651,7 @@ def compile_frames(frames: list, rolemap: dict) -> tuple[list, dict, dict]:
             if o:
                 oframe[bone] = o
         out.append(oframe)
-    return out, missing, ignored
+    return out, missing, ignored, levelled
 
 
 # --- the command line --------------------------------------------------------
@@ -739,7 +779,7 @@ def cmd_compile(args) -> int:
     frames = read_list(src, "frames")
     rig = resolve(args.rig)
     m = load_rolemap(rig, args.timeout)
-    out_frames, missing, ignored = compile_frames(frames, m)
+    out_frames, missing, ignored, levelled = compile_frames(frames, m, args.feet)
     stem = rig.name.split(".")[0]
     out = resolve(args.out) if args.out else ROOT / "output" / "poses" / f"{stem}_{src.stem}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -752,6 +792,12 @@ def cmd_compile(args) -> int:
     print(f"  bones    {', '.join(bones)}")
     if copied:
         print(f"  copied   {', '.join(copied)}, unchanged for render_sheet.py")
+    for role, took in sorted(levelled.items()):
+        where = ", ".join(f"frame {fi} {deg:+g}" for fi, deg in took)
+        print(f"  levelled {role}: the leg's swing taken off the ankle ({where} deg)")
+    if args.feet == "raw":
+        print("  feet     raw: each foot keeps whatever the leg above it turned, "
+              "which leaves a swinging leg on tip-toes")
     if len({m['roles'].get(r) for r in ('root', 'pelvis')}) == 1 and any(
             'root' in f and 'pelvis' in f for f in frames):
         print("  note     root and pelvis are one bone here; root applied outside pelvis")
@@ -830,6 +876,12 @@ def main() -> int:
     p.add_argument("rig", type=Path, help="a .roles.json from map, or the rig itself")
     p.add_argument("--out", type=Path,
                    help="transforms JSON (default output/poses/<rig>_<poses>.json)")
+    p.add_argument("--feet", choices=("level", "raw"), default="level",
+                   help="level (default): a foot's own rotate x is degrees from level, "
+                        "toes up positive, and the swing of the leg above it is taken "
+                        "off, so a planted foot stays flat. raw: the foot keeps "
+                        "whatever the leg above it turned, which is what pose files "
+                        "written before 2026-09-18 assumed")
     p.add_argument("--timeout", type=int, default=600,
                    help="seconds before giving up on Blender when RIG is a model "
                         "(default 600)")

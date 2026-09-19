@@ -303,6 +303,15 @@ file fits only the rig it was written for, which is why the role poses in
 `poses/roles/` are compiled per rig. If `map` stops, or a bone has no role, the
 `pose-sheet` skill covers posing by bone name.
 
+**For a set, one engine.** Since 2026-09-18 `render_sheet.py` draws with Cycles
+on the graphics card, which is why a sheet now takes seconds rather than
+minutes, and it waits for a free card before it starts. Sheets already in
+`output/sheets/` were drawn by EEVEE on the CPU, and the two are not the same
+picture: mixing them puts about 11 per cent of a figure's lit pixels 10 or more
+levels of 255 apart (2026-09-18). Re-render a set whole rather than adding one
+new sheet to it, or pass `--engine eevee` to match what is there. A run says
+which engine it used on its `engine` line, and the PNG does not record it.
+
 **For a set, one scale.** Each model is framed to its own bounding box. Size
 unrigged meshes with `scripts/normalise_mesh.py <meshes> --height <units>`
 (`--footprint <units>` if tile bound), confirm with the same command plus
