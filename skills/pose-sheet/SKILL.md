@@ -211,9 +211,18 @@ scripts/render_sheet.py output/rigged/<name>.fbx \
 
 Other flags: `--angles`, `--azimuth-start`, `--elevation`, `--size`, `--zoom`,
 `--persp`, `--span`, `--key`, `--ambient`, `--clay`, `--clay-color`, `--flat`,
-`--check`, `--keep-frames` and `--timeout`. The per-cell PNGs under
+`--engine`, `--samples`, `--denoise`, `--check`, `--keep-frames`, `--timeout`,
+`--max-wait` and `--no-wait`. The per-cell PNGs under
 `output/_sheet_frames/` are deleted once the sheet is composed unless you pass
 `--keep-frames`.
+
+**It renders on the card.** Since 2026-09-18 the default engine is Cycles,
+which path traces on the GPU: one 16 cell sheet took 3.12 s where EEVEE took
+108.7 s (`docs/reference/scripts.md`, "`render_sheet.py`").
+Blender and ComfyUI share one card, so a sheet waits, polling every 30 s, until
+ComfyUI's queue is empty and no other Blender job runs in the container. The
+run prints what it is waiting for. `--engine eevee` rasterises on the CPU
+instead and never waits.
 
 ## 5. Check what is arithmetic, then look at what is not
 
@@ -261,6 +270,17 @@ a confident, well rendered, wrong cycle. Judge it at the size it ships at, not a
   measured 2.000 tall), so upright figures under one `--span` render the same
   height and a model longer than it is tall comes back shorter. Say so. Use
   `--persp` only if asked.
+- **One engine for a whole set.** The two engines draw the same figure with
+  different occlusion: mixing them puts about 11 per cent of a figure's lit
+  pixels 10 or more levels of 255 apart (2026-09-18), which shows as one sprite
+  sitting oddly beside the rest on an atlas. Every sheet drawn before the
+  default changed on 2026-09-18 came from EEVEE, so do not top such a set up
+  with a new sheet:
+  re-render the set whole, or pass `--engine eevee` to match it. Which engine
+  drew a sheet is not in the PNG. It is in the RENDERED json the Blender job
+  prints, which the run reports as `engine  Cycles on the GPU (...), 128
+  samples, not denoised` or `engine  EEVEE Next, 64 samples`. If you cannot
+  find that line for the sheets already on disk, ask before adding to them.
 - **Untextured meshes get grey clay automatically**, because Blender's default
   white against a white world light renders as a featureless blob. Say that
   rather than letting grey read as a bug.

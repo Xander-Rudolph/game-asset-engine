@@ -10,7 +10,11 @@ on one product, Genesis 9 Starter Essentials (SKU 86958), downloaded in a
 browser. The library and inventory scripts ran on the host's `python3` 3.13.
 The importer and every render ran in the `comfyui-packaged` container's `bpy`
 4.5.9 LTS, where EEVEE reports its renderer as `llvmpipe (LLVM 15.0.7, 256
-bits)`: Mesa's software OpenGL on the CPU, not the graphics card. On 2026-09-16
+bits)`: Mesa's software OpenGL on the CPU, not the graphics card. Every render
+time on this page is an EEVEE one, and stays one: `scripts/render_sheet.py`
+took Cycles as its default on 2026-09-18, but `daz_import_probe.py` pins
+`--engine eevee` for its sheet stage so that it matches its own framings, which
+have no other engine ([scripts](/reference/scripts#render-sheet-py)). On 2026-09-16
 one figure was imported plainly and one character preset with its textures; on
 2026-09-18 one character was dialled, dressed, given hair and posed, and
 rendered ([a dressed, posed character, headless](#a-dressed-posed-character-headless)).
@@ -786,13 +790,18 @@ way in 0.6 s:
 
 ```sh
 python3 scripts/render_sheet.py output/daz/g9_dressed_nosubsurf.blend \
-    --poses static --size 220 --clay --zoom 1.35 --check \
+    --poses static --size 220 --clay --zoom 1.35 --check --engine eevee \
     --out output/daz/g9_dressed_iso_clay_220_zoom135.png
 python3 scripts/daz_import_probe.py render --blend output/daz/g9_dressed.blend \
     --no-sheet --sizes 340 --columns face --only AA --samples 16 --label portraitclay
 ```
 
-| Render | Cells | Time | Container peak |
+`--engine eevee` is written in because these runs were made before Cycles
+became `render_sheet.py`'s default, later the same day. Without it the command still works
+and is faster, but it draws a different sheet from the one timed below and from
+the probe's own cells beside it.
+
+| Render, all of them EEVEE on llvmpipe | Cells | Time | Container peak |
 |---|---|---|---|
 | `render_sheet.py --size 128 --clay`, the isometric default | 4 | 45.5 s | 3.46 GiB |
 | the same at `--size 220` | 4 | 47.7 s | 3.46 GiB |
@@ -801,15 +810,18 @@ python3 scripts/daz_import_probe.py render --blend output/daz/g9_dressed.blend \
 | the same with `--materials` | 2 | 479.0 s | 8.54 GiB |
 
 Two things to know before asking for a sheet with the Daz materials on. The
-run above took `render_sheet.py`'s EEVEE default of 64 samples, Blender's own,
+run above took the EEVEE default of 64 samples, Blender's own, which was
+`render_sheet.py`'s default at the time,
 and on this figure that came out at 26.2 s a sample, from Blender's own
 progress lines (sample 1 at 39.01 s, sample 25 at 642.38 s, sample 50 at
 1296.78 s), so one cell is about 1700 s and a four-facing sheet about 6800 s.
 In clay the same four cells take 45.5 s. Nothing forces the 64: `render_sheet.py
---samples N` lowers it, and `--engine cycles` path traces on the card instead
-of rasterising on the CPU through llvmpipe, which its `--help` says is far
-faster here (read on 2026-09-18, not run on this figure). A materials sheet at
-a low `--samples`, and one on Cycles, are both unmeasured. The probe's own
+--samples N` lowers it, and the default engine is now Cycles, which path traces
+on the card instead of rasterising on the CPU through llvmpipe, and on another
+model drew a 16 cell sheet 35 times faster
+([scripts](/reference/scripts#render-sheet-py), 2026-09-18). A materials sheet
+at a low `--samples`, and one on Cycles, are both unmeasured on this figure.
+The probe's own
 renderer also takes `--samples` and keeps the file's settings, which is why the
 340 px portraits above are affordable at 16.
 
@@ -873,7 +885,9 @@ pixels: deleting it gave a 340 px clay portrait identical to the one with it,
 - **The Mouth's controllers as separate dials**, FACS Details and HD morphs,
   the six Toon sub-figures and their FilaToon shaders.
 - **A `.dbz` fit from Daz Studio**, other material methods, the importer's
-  texture resize, and Cycles. Without a `.dbz` the clothes get no shape keys
+  texture resize, and the imported materials under Cycles, which
+  `render_sheet.py` now defaults to but which the probe's own renderer has
+  not. Without a `.dbz` the clothes get no shape keys
   from the body; how much of that a `.dbz` would recover is unmeasured, and a
   hand-built shape transfer was not tried.
 - **The rest of the library.** One character preset of 6, two clothing items of
@@ -904,6 +918,9 @@ pixels: deleting it gave a 340 px clay portrait identical to the one with it,
   open ([Honest uncertainty](/reference/daz-genesis#honest-uncertainty)). The
   by-eye reading above was made that way; until the owner decides, the skill
   reads no render into the conversation.
-- **Peak VRAM**, since EEVEE here draws on the CPU, and render times with other
-  jobs running in the container.
+- **Peak VRAM**, since both render stages here rasterise with EEVEE on the CPU:
+  the probe's own renderer has no other engine, and its `render_sheet.py` stage
+  is pinned to `--engine eevee`. A Genesis sheet on the card, through
+  `render_sheet.py`'s Cycles default, would have one and has not been run.
+  Also render times with other jobs running in the container.
 - **The default importer verbosity** on a wrong content path; the run used 3.

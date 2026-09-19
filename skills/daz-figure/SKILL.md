@@ -13,8 +13,11 @@ from Daz's own pages, is in `docs/reference/daz-genesis.md`, "Licences" and
 Everything below was measured on 2026-09-16 and 2026-09-18 on one product,
 Genesis 9 Starter Essentials (SKU 86958): the library scripts on the host's
 `python3`, the importer and the renders in the container's `bpy` 4.5.9, whose
-EEVEE draws through llvmpipe on the CPU, not on the card. Genesis 8, 8.1 and
-other products were never run.
+EEVEE draws through llvmpipe on the CPU, not on the card. Every time below is
+an EEVEE one and stays one: `daz_import_probe.py` rasterises its own framings
+with EEVEE and pins `--engine eevee` on its `render_sheet.py` stage, rather
+than taking the Cycles default that script took on 2026-09-18. Genesis 8, 8.1
+and other products were never run.
 
 **One stage per turn.** The licence, the install, the build, then whichever of
 the morphs, character, outfit and pose stages they want, then the renders. Show
@@ -392,13 +395,16 @@ On a dressed, posed figure, measured on 2026-09-18 from
 container peak 5.50 GiB. A four-facing sheet through `render_sheet.py` in clay
 took 45.5 s at 128 px and 47.7 s at 220 px for 4 cells. With the imported
 materials that same sheet did not finish one cell in 1500 s and was ended by
-its alarm: that run took `render_sheet.py`'s EEVEE default of 64 samples, which
-came to 26.2 s a sample here. The probe's own renderer takes `--samples`, and
+its alarm: that run took the EEVEE default of 64 samples, which came to 26.2 s
+a sample here. The probe's own renderer takes `--samples`, and
 2 portrait cells at 340 px and 16 samples cost 479.0 s with materials against
 18.8 s in clay. Offer clay first, and never start a materials sheet at the
-default 64 without saying it is hours. `render_sheet.py --samples N` and
-`--engine cycles`, which path traces on the card rather than on the CPU, are
-both untried on this figure, so do not promise a time for either.
+default 64 without saying it is hours. Lowering `--samples`, and
+`render_sheet.py`'s own Cycles default, which path traces on the card rather
+than on the CPU, are both untried on this figure, so do not promise a time for
+either. A sheet asked for outside the probe, by running `render_sheet.py`
+directly on a Genesis `.blend`, takes Cycles now and will not match the EEVEE
+sheets in `output/daz/`.
 
 ```sh
 python3 scripts/daz_import_probe.py render --blend output/daz/g9_cage.blend \

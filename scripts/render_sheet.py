@@ -29,9 +29,10 @@ UniRigExportPosedFBX wants, so in-graph posing is unreachable headlessly.
     scripts/render_sheet.py output/face_rig/spheres/target_keys.blend \\
         --poses transforms:output/face_rig/sphere_keys.json --zoom 1.6
 
-    # the same sheet path traced on the GPU instead of rasterised on the CPU
+    # the same sheet rasterised on the CPU by EEVEE, to match a set drawn
+    # before Cycles became the default
     scripts/render_sheet.py output/rigged/unit_rogue.fbx \\
-        --poses transforms:output/poses/unit_rogue_attack.json --engine cycles
+        --poses transforms:output/poses/unit_rogue_attack.json --engine eevee
 
 Sheet layout is poses down, angles across: the order most engines want when
 slicing a sheet into a flipbook.
@@ -84,13 +85,20 @@ for a single number; the pose then renders with the property as it was.
 Unknown shape keys and properties, and refused property values, are reported
 like unknown bones, on the terminal and in the result.
 
-TWO ENGINES. The default is EEVEE, which in this container has no GPU: the
-NVIDIA runtime gives it compute libraries only, so EGL falls back to Mesa
-llvmpipe and EEVEE rasterises on the CPU. `--engine cycles` path traces on the
-card instead, because Cycles needs no GL context, and it is the faster of the
-two here by a wide margin. Everything else is held the same: the transparent
-film, the clay material and its colour, the sun parented to the camera, the
-world ambient, the camera and its framing, the cell size and the poses.
+TWO ENGINES, AND CYCLES IS THE DEFAULT since 2026-09-18. Cycles path traces on
+the card, because it needs no GL context and the NVIDIA runtime's compute
+libraries are all it asks for. `--engine eevee` rasterises instead, and in this
+container EEVEE has no GPU: that runtime carries no graphics libraries, so EGL
+falls back to Mesa llvmpipe and EEVEE draws on the CPU. Measured in
+comfyui-packaged on 2026-09-18 on one 16 cell sheet (`--poses
+transforms:output/poses/alchemist_warrior_walk.json --angles 4 --size 128` on
+output/assets/alchemist_warrior/rig.fbx): 108.7 s wall on EEVEE against 3.12 s
+on Cycles, and per 128 px cell 5.97 s against 0.138 s at 128 samples. Cycles
+took 1,531 MiB of the 16,376 MiB card while it ran and less host memory
+than EEVEE, 869 MB against 2,386 MB. Everything but the engine is held the same
+either way: the transparent film, the clay material and its colour, the sun
+parented to the camera, the world ambient, the camera and its framing, the cell
+size and the poses.
 
 A Cycles render waits for the card first, polling every 30 s until ComfyUI's
 queue is empty and no other Blender job runs in the container, the same wait
@@ -100,24 +108,34 @@ card (2026-09-16, docs/reference/lip-sync.md), and a second job beside it is a
 CUDA out-of-memory error, not a fallback to the CPU. It stops without rendering
 after `--max-wait` seconds, and at once when `docker top` or the queue cannot be
 read, which is not the same as an idle machine. `--no-wait` skips the wait.
-EEVEE never waits, because it never touches the card.
+An EEVEE render never waits, because it never touches the card.
 
-The look is not the same, and is not meant to be. A sun that rides the camera
-and a white world dome are rasterised by EEVEE with no bounce lighting at
-factory settings: `scene.eevee.use_raytracing` is False out of the box and this
-script leaves it there, so ambient light reaches everywhere equally and a sheet
-comes out flat and even. Switching it on moves EEVEE towards Cycles without
-landing on it: on the clay basilisk at 4 cells (2026-09-18) the lit surface went
-from 131.88 to 128.77 of 255, past Cycles' 129.92, for 40.10 s against 34.42 s,
-while the mean absolute difference from Cycles rose from 3.39 to 4.03. Cycles
-traces the same two lights, so the world dome is occluded where the mesh blocks
-it: armpits, the inside of a bent elbow, the ground between the feet and every
-crevice go darker, the lit faces stay about where EEVEE put them, and the sheet
-reads with more contrast and more form. The sun's shadows are sharper. Below
-the sample count that converges, the difference from EEVEE is noise rather than
-shading. Use one
-engine for a whole set: two sheets rendered by different engines will not sit
-beside each other on an atlas.
+The look is not the same, and is not meant to be: it is the same drawing with
+occlusion added. At sprite size the two agree over most of the figure, 95 per
+cent of lit pixels within 3.2 levels of 255, but Cycles traces the same two
+lights, so the white world dome is occluded where the mesh blocks it. On a clay
+mesh the belly, the underside of the jaw and the gap between the legs separate,
+the lit faces stay about where EEVEE put them, the sun's shadows are sharper,
+and an open viseme that moved a pixel 37 levels under EEVEE moves it 89 under
+Cycles (all 2026-09-18). EEVEE has no bounce lighting at factory settings:
+`scene.eevee.use_raytracing` is False out of the box and this script leaves it
+there, which is why an EEVEE sheet comes out flat and even. Switching it on
+moves EEVEE towards Cycles without landing on it: on the clay basilisk at 4
+cells (2026-09-18) the lit surface went from 131.88 to 128.77 of 255, past
+Cycles' 129.92, for 40.10 s against 34.42 s, while the mean absolute difference
+from Cycles rose from 3.39 to 4.03. Below the sample count that converges, the
+difference from EEVEE is noise rather than shading.
+
+ONE ENGINE FOR A WHOLE SET. The two are not interchangeable: mixing them puts
+about 11 per cent of a figure's lit pixels 10 or more levels apart (2026-09-18),
+so two sheets drawn by different engines will not sit beside each other on an
+atlas. Every sheet in this repo was drawn by EEVEE until the default changed
+on 2026-09-18, and one of those re-rendered now will not match the rest of its
+set, so re-render such a set whole rather than topping it up, or pass `--engine eevee` to match what is already there. Which
+engine drew a sheet is not recorded in the PNG: it is in the RENDERED json the
+Blender job prints, reported as the `engine` line of a run, either
+`engine  Cycles on the GPU (<device>), 128 samples, not denoised` or
+`engine  EEVEE Next, 64 samples`.
 
 A .blend is opened as saved instead of imported into an empty scene, because
 an import keeps shape keys but not the drivers that connect rig properties to
@@ -157,12 +175,14 @@ SVC = _container()
 # Blender's hard limits on a shape key's slider range, and so on its value.
 SHAPE_KEY_LIMIT = 10.0
 
-# Samples per cell when --samples is not given. EEVEE's is left to Blender:
-# nothing sets taa_render_samples, so every sheet rendered before this option
-# existed still renders byte for byte the same. The number is recorded here only
-# so --help can state it (bpy 4.5.9 factory settings, read 2026-09-18).
+# Samples per cell when --samples is not given. EEVEE's is still left to
+# Blender: nothing sets taa_render_samples, so a sheet asked for with
+# --engine eevee renders byte for byte as it did before this option, and before
+# Cycles became the default. The number is recorded here only so --help can
+# state it (bpy 4.5.9 factory settings, read 2026-09-18).
 EEVEE_SAMPLES = 64
-# Cycles' default. Measured on this repo's alchemist_warrior walk, 4 poses by 4
+# Cycles' default, and the default engine's. Measured on this repo's
+# alchemist_warrior walk, 4 poses by 4
 # angles, 2026-09-18: against a 2048 sample render of the same cells, the error
 # left on the silhouette edge falls 22.7, 9.9, 4.3, 3.1, 2.6 levels of 255 at
 # 16, 32, 64, 128 and 256 samples, while a 256 px cell costs 0.142, 0.149,
@@ -384,9 +404,9 @@ key_ob.rotation_euler = Euler((math.radians(55), 0, math.radians(30)), "XYZ")
 key_ob.parent = cam            # light rides the camera: every facing lit alike
 
 # --- engine -----------------------------------------------------------------
-# EEVEE is the default and is left exactly as it was: nothing here touches
-# taa_render_samples unless --samples asked for it, so a sheet rendered before
-# this option existed still comes out byte for byte the same.
+# Cycles is the default; EEVEE is left exactly as it was, so that --engine eevee
+# still draws what it drew before the default changed. Nothing here touches
+# taa_render_samples unless --samples asked for it.
 render_device = None
 device_names = []
 # Anything the operator has to know goes in here as well as on stdout: the host
@@ -800,20 +820,26 @@ def main() -> int:
                          "a scale and a golem looms over a goblin")
     ap.add_argument("--key", type=float, default=1.6, help="sun strength")
     ap.add_argument("--ambient", type=float, default=0.22, help="world light strength")
-    ap.add_argument("--engine", choices=("eevee", "cycles"), default="eevee",
-                    help="eevee (default) rasterises, and in this container it "
+    ap.add_argument("--engine", choices=("cycles", "eevee"), default="cycles",
+                    help="cycles (the default since 2026-09-18) path traces on "
+                         "the card, needs no GL context, and waits for a free "
+                         "card first. eevee rasterises, and in this container it "
                          "does that on the CPU through llvmpipe because the "
-                         "NVIDIA runtime gives no GL libraries. cycles path "
-                         "traces on the card, needs no GL context, and is far "
-                         "faster here, but its look has real ambient occlusion "
-                         "and sharper shadows: see the description above")
+                         "NVIDIA runtime gives no GL libraries: about 35 times "
+                         "slower on the sheet measured above, and flat where "
+                         "cycles has real ambient occlusion and sharper "
+                         "shadows. Use one engine for a "
+                         "whole set, and pass eevee to match a set rendered "
+                         "before the default changed: see the description "
+                         "above")
     ap.add_argument("--samples", type=int, default=None, metavar="N",
                     help=f"samples per cell, from 1 to {MAX_SAMPLES['cycles']} for "
                          f"cycles and {MAX_SAMPLES['eevee']} for eevee, which are "
-                         f"the engines' own limits. Default {EEVEE_SAMPLES} for "
-                         f"eevee, which is Blender's own and is left untouched, and "
-                         f"{CYCLES_SAMPLES} for cycles. Adaptive sampling stays "
-                         "on in cycles, so N is a ceiling rather than a count")
+                         f"the engines' own limits. The default follows the engine: "
+                         f"{CYCLES_SAMPLES} for cycles, and {EEVEE_SAMPLES} for "
+                         f"eevee, which is Blender's own and is left untouched. "
+                         "Adaptive sampling stays on in cycles, so N is a ceiling "
+                         "rather than a count")
     ap.add_argument("--denoise", action="store_true",
                     help="cycles only, and warned about and ignored under eevee, "
                          "which has no denoiser: denoise with OpenImageDenoise, which runs "
@@ -889,8 +915,9 @@ def main() -> int:
         "clay": args.clay,
         "clay_color": [float(x) for x in args.clay_color.split(",")],
         "engine": args.engine,
-        # 0 means "whatever the engine already had", which for EEVEE is how a
-        # sheet rendered before this option existed stays byte for byte the same.
+        # 0 means "whatever the engine already had", which for EEVEE is how
+        # --engine eevee still draws what it drew before Cycles became the
+        # default: byte for byte the same, Date chunk aside.
         "samples": args.samples or (CYCLES_SAMPLES if args.engine == "cycles" else 0),
         "denoise": args.denoise,
     }

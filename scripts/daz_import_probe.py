@@ -207,7 +207,11 @@ not, and the same mesh appears in one report at both counts.
 two stages, each with a neutral row (every viseme property 0) and then a row
 per viseme, all 17 or those --only names:
   1. scripts/render_sheet.py: the whole figure, one angle, at --sheet-size,
-     each row setting its viseme property to 1 through "@props".
+     each row setting its viseme property to 1 through "@props". It is run
+     with --engine eevee, pinned rather than left to that script's default,
+     which became Cycles on 2026-09-18: stage 2 below rasterises with EEVEE,
+     the two stages are read side by side, and every render number this file
+     records was measured on EEVEE.
      render_sheet.py opens a .blend as saved, so with --subdivision off (the
      default) this first opens the file and, if any Subsurf modifier is on,
      saves a copy beside it with every one off, _<name>_sheet_<pid>.blend,
@@ -2666,8 +2670,15 @@ def run_render_sheet(args, name: str, prefix: str, props: dict, report: dict) ->
                 print(f"  subsurf   none of {info['subsurf_modifiers']} Subsurf modifiers on; "
                       f"render_sheet.py opens the file as saved ({wall} s)")
         entry["opened"] = str(opened.relative_to(ROOT))
+        # --engine eevee is pinned, not left to render_sheet.py's default, which
+        # became Cycles on 2026-09-18. This stage is read beside stage 2, whose
+        # renderer is EEVEE in this file, and every render number recorded here
+        # and in docs/reference/daz-genesis.md was measured on EEVEE. Taking the
+        # new default would change the pixels under those numbers without
+        # re-measuring them.
         cmd = [sys.executable, str(ROOT / "scripts" / "render_sheet.py"), str(opened),
                "--poses", f"transforms:{poses}", "--angles", "1", "--size", str(args.sheet_size),
+               "--engine", "eevee",
                "--out", str(sheet), "--check", "--timeout", str(args.timeout)]
         wait_for_idle(args.no_wait)
         print("  render_sheet.py " + " ".join(cmd[2:]), flush=True)
@@ -3001,7 +3012,10 @@ def main() -> int:
     r.add_argument("--threshold", type=bounded(0, 254), default=8,
                    help="0 to 254 channel difference that counts as a changed pixel (default 8)")
     r.add_argument("--samples", type=bounded(0, None), default=0,
-                   help="EEVEE render samples; 0 keeps Blender's default")
+                   help="EEVEE render samples for the probe's own framings; 0 keeps "
+                        "Blender's default of 64. Both stages rasterise with EEVEE: "
+                        "the render_sheet.py stage is pinned to --engine eevee and "
+                        "does not take this number")
     r.add_argument("--subdivision", choices=("off", "as-saved"), default="off",
                    help="off renders the cage in both stages, handing render_sheet.py a copy of the "
                         ".blend with its Subsurf modifiers switched off when any is on; as-saved "

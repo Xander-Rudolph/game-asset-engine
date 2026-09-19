@@ -23,10 +23,12 @@ the mouth shapes read at sprite sizes.
         --samples 16 --keep-frames
 
     # the same rows through render_sheet.py, whole figure only, from the
-    # poses file that `build` writes
+    # poses file that `build` writes. --engine eevee is pinned so these cells
+    # can be read beside this probe's own, which rasterise with EEVEE below;
+    # render_sheet.py's own default became Cycles on 2026-09-18
     scripts/render_sheet.py output/mpfb/human_visemes.blend \
         --poses transforms:output/mpfb/human_visemes_poses.json --angles 1 --size 128 \
-        --out output/mpfb/human_visemes_render_sheet_128.png
+        --engine eevee --out output/mpfb/human_visemes_render_sheet_128.png
 
 WHAT IS DOWNLOADED. `fetch` pins four archives by URL, byte size and sha256,
 writes each to input/_devtools/mpfb2/downloads/<file>.part, and renames it
@@ -132,7 +134,8 @@ unless one is named:
            gpu.platform.renderer_get()), not the GPU. The no-helpers render
            example above (15 cells of 128 px, --samples 16) took 43 s and
            then 31.5 s, and the render_sheet.py example (15 cells of 128 px,
-           64 samples) 88.6 s.
+           EEVEE at 64 samples, which was that script's default then and is
+           now its --engine eevee) 88.6 s.
   visible  Pixels changed against viseme_sil (threshold 8), fewest to most
            over the other 14 visemes:
                     128 px      220 px      340 px
@@ -985,8 +988,11 @@ def main() -> int:
     r.add_argument("--threshold", type=bounded(0, 254), default=8,
                    help="0 to 254 channel difference that counts as a changed pixel (default 8)")
     r.add_argument("--samples", type=bounded(0, None), default=0,
-                   help="EEVEE render samples; 0 keeps Blender's default, which "
-                        "render_sheet.py also leaves alone")
+                   help="EEVEE render samples; 0 keeps Blender's default of 64. "
+                        "This probe rasterises with EEVEE, and so does "
+                        "render_sheet.py when given --engine eevee, as the "
+                        "example above does; that script's own default is now "
+                        "Cycles")
     r.add_argument("--keep-frames", action="store_true",
                    help="keep the per-cell PNGs under output/mpfb/_frames/")
     args = ap.parse_args()

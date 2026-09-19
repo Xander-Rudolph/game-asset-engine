@@ -89,7 +89,7 @@ Run both before a commit, with `npm run docs:build`.
 scripts/render_sheet.py MODEL [--poses SPEC] [--angles N] [--azimuth-start DEG]
                         [--elevation DEG] [--size PX] [--zoom N] [--persp]
                         [--span UNITS] [--key N] [--ambient N]
-                        [--engine {eevee,cycles}] [--samples N] [--denoise]
+                        [--engine {cycles,eevee}] [--samples N] [--denoise]
                         [--clay] [--clay-color R,G,B] [--flat] [--out PATH]
                         [--check] [--keep-frames] [--timeout SECONDS]
                         [--max-wait SECONDS] [--no-wait]
@@ -112,10 +112,11 @@ sheet is put together. `--keep-frames` leaves them in `output/_sheet_frames/`.
 Defaults are the isometric camera: elevation 30, first facing at 45 degrees,
 orthographic. See [facings](/guide/facings).
 
-**`--engine`, `--samples` and `--denoise`.** `--engine` picks EEVEE, the
-default, or Cycles, and `--samples N` sets the samples a cell gets: 64 for
-EEVEE, which is Blender's own and is left untouched, and 128 for Cycles, where
-adaptive sampling makes it a ceiling. `N` is checked on the host, before the
+**`--engine`, `--samples` and `--denoise`.** `--engine` picks Cycles, the
+default since 2026-09-18, or EEVEE. `--samples N` sets the samples a cell gets,
+and its default follows the engine: 128 for Cycles, where adaptive sampling
+makes it a ceiling, and 64 for EEVEE, which is Blender's own and is left
+untouched. `N` is checked on the host, before the
 model loads, and refused unless it is a whole number from 1 to 16,777,216 for
 Cycles or 2,147,483,647 for EEVEE, which are the engines' own limits on the
 property in bpy 4.5.9:
@@ -131,26 +132,53 @@ nothing and says so rather than being ignored: `! --denoise is a Cycles option
 and does nothing here: EEVEE has no denoiser, and this sheet renders exactly as
 it would without it. Add --engine cycles to denoise.`
 
-EEVEE rasterises on the CPU through llvmpipe in this container, because the
-NVIDIA runtime gives it no GL libraries, while Cycles path traces on the card.
+Cycles path traces on the card, because it needs no GL context. EEVEE
+rasterises on the CPU through llvmpipe in this container, because the NVIDIA
+runtime gives it no GL libraries, and that is why the default changed.
 Measured on 2026-09-18 in `comfyui-packaged`, on the 16 cell sheet
 `scripts/render_sheet.py output/assets/alchemist_warrior/rig.fbx --poses
 transforms:output/poses/alchemist_warrior_walk.json --angles 4 --size 128`:
-EEVEE took 108.7 s wall and Cycles, with `--engine cycles`, 3.12 s wall. Cycles
+EEVEE, then the default, took 108.7 s wall and Cycles 3.12 s wall, which is
+5.97 s against 0.138 s per 128 px cell at 128 samples. Cycles
 took 1,531 MiB of the RTX 4070 Ti SUPER's 16,376 MiB while it ran (nvidia-smi
-sampled every 0.1 s, 1,865 MiB in use on the card before it started). The look
-is not the same either, so read `--help` before mixing engines across one set.
+sampled every 0.1 s, 1,865 MiB in use on the card before it started) and less
+host memory than EEVEE, 869 MB against 2,386 MB.
 
 EEVEE at factory settings has no bounce lighting: `scene.eevee.use_raytracing`
 is `False` out of the box (read from bpy 4.5.9 after
 `wm.read_factory_settings`, 2026-09-18) and the script leaves it there, which is
-why a sheet comes out flat and even. Switching it on moves EEVEE towards Cycles
-without landing on it: on the clay basilisk at 4 cells, 2026-09-18, the lit
-surface went from 131.88 to 128.77 of 255, past Cycles' 129.92, for 40.10 s
+why an EEVEE sheet comes out flat and even. Switching it on moves EEVEE towards
+Cycles without landing on it: on the clay basilisk at 4 cells, 2026-09-18, the
+lit surface went from 131.88 to 128.77 of 255, past Cycles' 129.92, for 40.10 s
 against 34.42 s, while the mean absolute difference from Cycles rose from 3.39
 to 4.03.
 
-**Waiting for the card.** A Cycles render waits first, polling every 30 s until
+::: warning One engine for a whole set
+The two are the same drawing with occlusion added, not the same pixels.
+Measured on 2026-09-18: at sprite size 95 per cent of lit pixels move under 3.2
+levels of 255, but Cycles separates a clay mesh's belly, the underside of its
+jaw and the gap between its legs, an open viseme that moved a pixel 37 levels
+under EEVEE moves it 89 under Cycles, and mixing engines across one figure puts
+about 11 per cent of its lit pixels 10 or more levels apart. Two sheets drawn
+by different engines will not sit beside each other on an atlas.
+
+**Every sheet in this repo was drawn by EEVEE until the default changed on
+2026-09-18**, so one of those re-rendered now will not match the rest of its
+set. Re-render such a set whole
+rather than topping it up, or pass `--engine eevee` to match what is already
+there.
+
+Which engine drew a sheet is not recorded in the PNG. It is in the RENDERED
+json the Blender job prints, which the run reports as its `engine` line, either
+`engine  Cycles on the GPU (<device>), 128 samples, not denoised` or
+`engine  EEVEE Next, 64 samples`, along with the device, the sample count and
+whether it was denoised.
+The comparison behind the default is [two render engines](/guide/render-engines).
+:::
+
+**Waiting for the card.** A Cycles render, which since 2026-09-18 is what a
+sheet is unless `--engine eevee` says otherwise, waits first: it polls every
+30 s until
 ComfyUI's queue is empty and no other `python3 -c` job runs in the container,
 the same wait `scripts/make_mouths.py` does before an edit. Blender and ComfyUI
 share one card: an image edit through `make_mouths.py` peaked at 15,178 to
@@ -645,7 +673,12 @@ or `--props` it reads them from the `_scene.json` beside the file.
 **`render`** reads `NAME_build.json` for the viseme properties and runs two
 stages, each a neutral row and then a row per viseme, all 17 or those `--only`
 names: `render_sheet.py` on the whole figure at `--sheet-size`, then the probe's
-`body`, `face` and `face34` framings at `--sizes`. With `--subdivision off`, the
+`body`, `face` and `face34` framings at `--sizes`. Both stages rasterise with
+EEVEE on the CPU: the probe's own renderer has no other engine, and the
+`render_sheet.py` stage is pinned to `--engine eevee` rather than taking that
+script's Cycles default, so the two can be read side by side and so the numbers
+below still describe what it draws. `--samples` sets the probe's own framings
+only. With `--subdivision off`, the
 default, a `.blend` with any Subsurf modifier on is copied to
 `output/daz/_NAME_sheet_<pid>.blend` with them off for `render_sheet.py`, and
 the copy is deleted afterwards. `--only` given an empty list exits 2 with `name
@@ -750,10 +783,13 @@ graphs do not.
 **Blender lives in the container.** Sheet rendering, posing, decimation measuring,
 weight transfer, `face_rig.py`, `bone_roles.py`, `mpfb_probe.py` and
 `daz_import_probe.py` all run `python3` inside it. That is the only place in this stack with a glTF importer, an
-FBX importer and a renderer together. The renderer is not the graphics card:
-measured in `comfyui-packaged` on 2026-09-16, EEVEE there draws through
-llvmpipe, Mesa's software OpenGL, on the CPU
-([DAZ Genesis, rendering](/reference/daz-genesis#rendering)).
+FBX importer and a renderer together. Which of them reaches the graphics card
+depends on the engine: measured in `comfyui-packaged` on 2026-09-16, EEVEE
+there draws through llvmpipe, Mesa's software OpenGL, on the CPU
+([DAZ Genesis, rendering](/reference/daz-genesis#rendering)), while Cycles finds
+the card through CUDA and needs no GL context (2026-09-18). `render_sheet.py`
+uses Cycles by default; `decimation_report.py`, `mpfb_probe.py` and
+`daz_import_probe.py` rasterise with EEVEE, so they stay on the CPU.
 
 **Some run only on the host.** `fetch_tools.py`, `daz_library.py` and
 `daz_inventory.py` use only the standard library. `lipsync_cues.py` runs Rhubarb from `tools/`, so the
