@@ -44,6 +44,7 @@ import re
 import shutil
 import subprocess
 import sys
+import urllib.parse
 import time
 from pathlib import Path, PurePosixPath
 
@@ -81,14 +82,10 @@ FANCY_COLOURS = {"Dark Blue", "Fuchsia", "Neon Blue"}
 SKIP_CHARACTERS = {
     "Julian 9 Surfer": "the owner judged it broken on 2026-09-21",
 }
-# Wearables to leave out of a roll, and why.
-SKIP_WEARABLES = {
-    # Measured on 2026-09-18: this strand hair's 236,136 vertex mesh carries one
-    # vertex group, a dForce pin group with no bone, so a pose moves none of it
-    # and deleting it changed 0 pixels of a 340 px render. Only its 1085 vertex
-    # cap draws, so a character wearing it looks bald.
-    "G9 Base dForce Pixie Hair": "a dForce strand mesh that renders nothing here",
-}
+# Wearables to leave out of a roll by name, and why. Strand hair is not in here:
+# `draws_nothing` reads its geometry and gives the counts, which is how the two
+# in this library were both caught without either being named.
+SKIP_WEARABLES: dict[str, str] = {}
 
 
 def product_key(name: str) -> str:
@@ -124,6 +121,49 @@ def character_build(path: Path) -> str | None:
     if masculine == feminine:
         return None
     return "masculine" if masculine > feminine else "feminine"
+
+
+def draws_nothing(lib: Path, path: Path) -> str | None:
+    """Why a wearable would render as almost nothing, or None.
+
+    Strand-based hair imports as vertices with no polygons, and Cycles draws a
+    polygon-free mesh as nothing at all: the Genesis 9 pixie hair is 236,136
+    vertices and 0 faces, and the Egg Roll hair 167,264 and 0, each leaving
+    only a cap of a thousand-odd faces to show (2026-09-21). Read from the
+    geometry the wearable names, not from a list of product names.
+    """
+    try:
+        doc = json.loads(raw_duf(path))
+    except (OSError, ValueError, EOFError):
+        return None
+    urls, big = set(), None
+    def walk(node):
+        if isinstance(node, dict):
+            for key, value in node.items():
+                if key == "url" and isinstance(value, str) and ".dsf" in value.lower():
+                    urls.add(urllib.parse.unquote(value.split("#")[0]).lstrip("/"))
+                walk(value)
+        elif isinstance(node, list):
+            for value in node:
+                walk(value)
+    walk((doc.get("scene") or {}).get("nodes") or [])
+    for rel in sorted(urls):
+        geometry = lib / rel
+        if not geometry.is_file():
+            continue
+        try:
+            data = json.loads(raw_duf(geometry))
+        except (OSError, ValueError, EOFError):
+            continue
+        for g in data.get("geometry_library") or []:
+            verts = len((g.get("vertices") or {}).get("values") or [])
+            polys = len((g.get("polylist") or {}).get("values") or [])
+            if big is None or verts > big[0]:
+                big = (verts, polys, rel.rsplit("/", 1)[-1])
+    if big and big[1] == 0:
+        return (f"its largest mesh, {big[2]}, is {big[0]} vertices with no polygons, "
+                "which renders as nothing")
+    return None
 
 
 def own_skin(path: Path) -> bool:
@@ -227,8 +267,9 @@ def catalogue(lib: Path, generation: str | None = None) -> dict:
     for path in sorted(lib.glob(f"{here}/Hair/*/*/*.duf")):
         if duf_type(path) != "wearable":
             continue
-        if path.stem in SKIP_WEARABLES:
-            cat["skipped"].append({"name": path.stem, "why": SKIP_WEARABLES[path.stem]})
+        why = SKIP_WEARABLES.get(path.stem) or draws_nothing(lib, path)
+        if why:
+            cat["skipped"].append({"name": path.stem, "why": why})
             continue
         # A hair keeps its colours in a folder beside it, one preset each.
         # Usually they are named after the hair, "Mavick Hair" and "Mavick Hair
@@ -258,6 +299,10 @@ def catalogue(lib: Path, generation: str | None = None) -> dict:
 
     for path in sorted(lib.glob(f"{here}/Clothing/*/*/*.duf")):
         if duf_type(path) != "wearable" or path.stem in SKIP_WEARABLES:
+            continue
+        why = draws_nothing(lib, path)
+        if why:
+            cat["skipped"].append({"name": path.stem, "why": why})
             continue
         cat["outfits"].setdefault(path.parent.name, []).append(
             {"file": rel(lib, path), "name": path.stem})

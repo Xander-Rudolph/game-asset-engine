@@ -1309,7 +1309,11 @@ ships no skin is left out, with the reason. An outfit is rolled a product at a
 time, and where the product ships a preset that wears all of it, such as
 `LVA !All` or `WW Complete Set`, that is worn rather than a guess at which
 pieces go together. A wearable is a `.duf` under `Hair/` or `Clothing/` whose
-own `asset_info` says `wearable`. A weapon is one of the right-hand grips, which
+own `asset_info` says `wearable`, unless its largest mesh has no polygons: such
+a mesh renders as nothing, and both dForce hairs in this library are that, at
+236,136 and 167,264 vertices with zero faces each, leaving only a cap of about
+a thousand faces to show. That is read from the geometry each wearable names,
+so the next one is caught without anybody naming it. A weapon is one of the right-hand grips, which
 arrive bone-parented to `r_hand`. A pose is one whose name says standing,
 walking, flexing, running or stretching, because the other 61 of the 87 are
 seated, laying or flying. The roll is seeded, so the same seed and the same
