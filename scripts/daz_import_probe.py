@@ -1137,6 +1137,7 @@ def replace_mat_presets(specs):
                 if not want:
                     continue
                 did = {"material": mat.name, "object": ob.name, "maps": {}}
+                tree = mat.node_tree
                 images = want.get("images") or {}
                 for node in mat.node_tree.nodes:
                     if node.type != "TEX_IMAGE" or node.image is None:
@@ -1154,7 +1155,25 @@ def replace_mat_presets(specs):
                 if base is not None and not base.is_linked and want.get("colour"):
                     base.default_value = tuple(want["colour"]) + (1.0,)
                     did["colour"] = [round(c, 4) for c in want["colour"]]
-                if did["maps"] or "colour" in did:
+                elif base is not None and base.is_linked and want.get("colour") \
+                        and tuple(round(c, 3) for c in want["colour"]) != (1.0, 1.0, 1.0):
+                    # Daz multiplies a mappable colour channel by its map, so a
+                    # hair cap keeps its own scalp texture and takes the
+                    # preset's grey with it. Filling in what is missing cannot
+                    # do that, because nothing is missing: the map is already
+                    # there and it is the wrong colour on its own.
+                    source = base.links[0].from_socket
+                    mix = tree.nodes.new("ShaderNodeMix")
+                    mix.data_type = "RGBA"
+                    mix.blend_type = "MULTIPLY"
+                    mix.location = (bsdf.location.x - 220, bsdf.location.y + 120)
+                    mix.inputs[0].default_value = 1.0
+                    tree.links.remove(base.links[0])
+                    tree.links.new(source, mix.inputs[6])
+                    mix.inputs[7].default_value = tuple(want["colour"]) + (1.0,)
+                    tree.links.new(mix.outputs[2], base)
+                    did["colour_multiplied"] = [round(c, 4) for c in want["colour"]]
+                if did["maps"] or "colour" in did or "colour_multiplied" in did:
                     entry["swapped"].append(did)
                 else:
                     entry["left_alone"].append(did)

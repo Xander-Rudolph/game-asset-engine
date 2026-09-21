@@ -629,6 +629,16 @@ It is applied after `--mat-preset`, because the importer leaves a skin's Base
 Color with nothing linked into it and the colour map a swap points elsewhere is
 one the fill pass has just added.
 
+**A colour with a map behind it multiplies.** Daz treats a mappable colour
+channel as the value times its map, so a hair colour preset carries both: flat
+grey for the strands, which have no map, and the same grey over the cap, which
+ships a scalp texture. Filling in what is missing cannot do that, because
+nothing is missing. So where a preset gives a colour and the material's Base
+Color is already linked, the swap puts a multiply between the two. Measured on
+the Mavick hair and beard, whose grey preset covers five strand materials by
+value and the cap by multiply: without it the cap kept its own brown and read
+as hair that did not match the beard.
+
 **Why not the importer's own material loader.** `bpy.ops.daz.import_daz_materials`
 is built for exactly this, and on 2026-09-21 it left a Genesis 9 body with
 three of its seven material slots: `Fingernails`, `Toenails` and `Legs`
@@ -1380,6 +1390,13 @@ which is the one to open: every character on a flat grey, its views side by
 side, under a line naming its base, hair, outfit and weapon. The `.blend` goes
 when its views are drawn, unless `--keep-blend`, because a dressed figure is
 about 150 MB and twelve are 1.8 GB.
+
+### Naming a character
+
+A rolled character is named after what it is made of, `04-ty-basics`. One that
+has been kept is somebody: give a roster entry a `"name"` and the slug, the
+folder, the two images and the label on the sheet all take it, as
+`01-warrior`, `06-lord-entropy`, `11-alchemist`.
 
 ### Keeping four of twelve
 

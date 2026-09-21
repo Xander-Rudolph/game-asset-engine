@@ -394,8 +394,11 @@ def roll(rng: random.Random, cat: dict, index: int, base: dict, poses: str = "no
         recipe["wear"].append(hair["file"])
         colour = pick(rng, hair.get("colours") or [])
         if colour:
+            # A colour preset replaces rather than fills: the strands take its
+            # colour where they have none of their own, and the cap, which
+            # ships a scalp texture, takes it as a multiply the way Daz does.
             recipe["hair_colour"] = colour["colour"]
-            recipe["mat_presets"].append(colour["file"])
+            recipe["mat_replaces"].append(colour["file"])
     if build == "masculine":
         beard = pick(rng, mine(cat["beards"]), 0.6)
         if beard:
@@ -404,7 +407,7 @@ def roll(rng: random.Random, cat: dict, index: int, base: dict, poses: str = "no
             same = [c for c in (beard.get("colours") or [])
                     if colour and c["colour"] == colour["colour"]]
             if same:
-                recipe["mat_presets"].append(same[0]["file"])
+                recipe["mat_replaces"].append(same[0]["file"])
 
     free = {g: mine(items) for g, items in cat["outfits"].items()}
     free = {g: items for g, items in free.items() if items}
@@ -455,6 +458,15 @@ def roll(rng: random.Random, cat: dict, index: int, base: dict, poses: str = "no
 
 
 def slug_of(recipe: dict) -> str:
+    """The folder and file name for a character.
+
+    A rolled character is named after what it is made of. One that has been
+    kept and named in a roster file is named after the name, because by then
+    it is somebody.
+    """
+    if recipe.get("name"):
+        return f"{recipe['index']:02d}-" + (re.sub(r"[^a-z0-9]+", "-",
+                                                   recipe["name"].lower()).strip("-") or "x")
     bits = [f"{recipe['index']:02d}", recipe["base_character"].lower()]
     if recipe["outfit"]:
         # The outfit's product, in a word: its first, once a maker's prefix is
@@ -571,6 +583,9 @@ def roster_sheet(rows: list[dict], out: Path, cell: int, per_row: int) -> dict |
                                      (x0 + j * cell, y0))
         recipe = row["recipe"]
         bits = [recipe["base_character"], recipe.get("skin") or "own skin"]
+        if recipe.get("name"):
+            bits = [f"{recipe['name']} ({recipe['base_character']})",
+                    recipe.get("skin") or "own skin"]
         if recipe.get("hair_colour"):
             bits.append(f"{recipe['hair_colour'].lower()} hair"
                         + (" and beard" if recipe.get("beard") else ""))
@@ -644,6 +659,7 @@ def read_roster(path: Path) -> list[dict]:
                              ("mat_replaces", []), ("pose", None), ("prop", None),
                              ("hair", None), ("beard", None), ("outfit", []),
                              ("hide", []), ("hide_figure", False), ("hide_materials", []),
+                             ("name", None),
                              ("skin", "the character's own"), ("hair_colour", None)):
             recipe.setdefault(key, default)
     return recipes
@@ -700,7 +716,7 @@ def cmd_make(args) -> int:
     print(f"  poses     {args.poses}"
           + (" (the rest pose Genesis 9 ships with)" if args.poses == "none" else ""))
     for recipe in recipes:
-        print(f"  {slug_of(recipe):16s} {recipe['base_character']:7s} "
+        print(f"  {slug_of(recipe):20s} {recipe['base_character']:7s} "
               f"skin {recipe['skin']:18s} hair {recipe['hair_colour'] or '-':6s} "
               f"beard {'y' if recipe['beard'] else '-'}; "
               f"{', '.join(recipe['outfit']) or 'no outfit'}; "
