@@ -432,6 +432,93 @@ importer adds), 157 after the merge, and 177 after FACS: 143 Daz bones, with
 `Genesis 9 Dev Load.duf` with `--anatomy none` built in 0.9 s wall with 150
 bones.
 
+### The maps the anatomy figures arrive without
+
+An eyelash figure imported on its own renders as a set of opaque fans across
+the eyelid. It is not a Blender problem, and not a bad transmap: the figure
+carries no map at all. `data/Daz 3D/Genesis 9/Genesis 9 Eyelashes/Tools/Script
+Loads/Genesis 9 Eyelashes.duf` is a wearable with two materials, `Eyelashes
+Lower` and `Eyelashes Upper`, whose `Cutout Opacity` channel is the number 1
+and whose file has no `image_library` at all (read 2026-09-21). The eyes, the
+mouth and the eyebrow cards are the same. Daz Studio fills them in afterwards
+by running a MAT preset, and the importer never runs one.
+
+So `build` and `scene` now apply those presets themselves, and say what each
+one filled in. `--no-auto-materials` puts the old behaviour back.
+
+```sh
+# the presets beside the figure and beside each anatomy file, then one named
+python3 scripts/daz_import_probe.py build \
+    --figure "People/Genesis 9/Characters/Kat for Genesis 9.duf" \
+    --mat-preset "People/Genesis 9/Anatomy/Daz Originals/Base Anatomy/Eyebrows Card/Materials/G9 Eyebrows Color Red.duf" \
+    --subdivision off --out output/daz/g9_kat.blend
+```
+
+Three rules find them, each one a shape this product uses: a character preset
+keeps its materials in a `Materials` folder beside it (`Kat G9 All MAT.duf`),
+an anatomy figure keeps a `<name> MAT.duf` next to itself, and the eyebrow
+cards keep one preset per colour, of which none is the default, so Brown is
+taken. A preset named with `--mat-preset` is applied before those, and whatever
+is set first wins.
+
+**Only what is missing is filled in.** A material with something linked into
+Base Color keeps it, and one that is already see-through, through a Transparent
+BSDF, a `DAZ Transparent` group or its own Alpha, is left alone. So this adds
+the eyelash, eyebrow, eye, mouth and teeth maps and changes nothing about the
+skin the importer built. On Kat it filled in 16 of the 16 materials the presets
+name, and the file went from 18 images to 29.
+
+What it reads from a preset is the cutout opacity map or value, the colour map
+or flat colour, and a layered colour image when every layer is laid plainly
+over the one below. Nothing else: no normal map, no roughness, no layer with a
+rotation, an offset, a scale or a blend mode of its own. Each of those is named
+in the report as unresolved rather than guessed at.
+
+### Why the probe reads the preset itself
+
+`bpy.ops.daz.import_daz_materials` exists for this and does load a preset onto
+selected meshes, but it drops the maps of any material whose name has a space
+in it. A hierarchical preset writes its values as "animations" whose url names
+the material and the channel:
+
+```
+Genesis9Eyelashes#materials/Eyelashes%20Lower:?extra/studio_material_channels/channels/Cutout%20Opacity/image_file
+```
+
+The operator keys those by the url-quoted name, `Eyelashes%20Lower`, and looks
+them up under the material's plain name, `Eyelashes Lower` (`main.py`,
+`splitUrl` and `run`, read at the 5.2.0 tag). The two never meet. Run on Kat's
+own presets on 2026-09-21 it returned `FINISHED` and left `Eyelashes Lower`,
+`Eyelashes Upper`, `Eye Left`, `Eye Right`, `EyeMoisture Left` and `EyeMoisture
+Right` with no image, while `Eyebrows_Primary`, which has no space, got all
+five of its maps. So the probe parses the preset itself and wires the channels
+it understands.
+
+### Material merging is off
+
+`easy_import_daz` merges materials that are identical at import time, and every
+anatomy material arrives bare and so identical to its neighbour. The eyelash
+mesh came out with one material slot for both lash surfaces, and the eyes with
+one for all four, which left nowhere for their preset to put anything. The
+probe passes `useMergeMaterials=False`, and the eyes and lashes keep their own
+materials.
+
+### What the fix is worth, in pixels
+
+Each mesh rendered on its own at 512 px, Cycles on the card, 16 samples,
+nothing else in frame, counting pixels with alpha above 0.5 out of 262,144
+(2026-09-21, Kat):
+
+| Mesh | Before | After | Mean alpha |
+|---|---|---|---|
+| `Genesis 9 Eyelashes Mesh` | 11,801 | 1,848 | 0.0449 to 0.0081 |
+| `G9 Eyebrows Card Style 12 Mesh` | 9,981 | 4,664 | 0.0377 to 0.0172 |
+
+The cards are still there and still the same size. What changed is that the
+lash strokes drawn on them are now the only opaque part, which is what the
+`Genesis9_Eyelashes02_C.jpg` map says: 94.5% of it is below 8 of 255 and 3.1%
+above 200.
+
 ### import_visemes does nothing on Genesis 9
 
 ```sh
@@ -895,8 +982,11 @@ In clay the same four cells take 45.5 s. Nothing forces the 64: `render_sheet.py
 --samples N` lowers it, and the default engine is now Cycles, which path traces
 on the card instead of rasterising on the CPU through llvmpipe, and on another
 model drew a 16 cell sheet 35 times faster
-([scripts](/reference/scripts#render-sheet-py), 2026-09-18). A materials sheet
-at a low `--samples`, and one on Cycles, are both unmeasured on this figure.
+([scripts](/reference/scripts#render-sheet-py), 2026-09-18). On 2026-09-21
+Cycles drew a dressed, posed Genesis figure with its materials on at 768 px in
+about 1.5 s a cell, twelve figures over, which is the measurement this
+paragraph was waiting for ([below](#a-roster-of-characters-rolled-from-the-library)).
+A materials sheet at a low `--samples` under EEVEE is still unmeasured.
 The probe's own
 renderer also takes `--samples` and keeps the file's settings, which is why the
 340 px portraits above are affordable at 16.
@@ -921,6 +1011,94 @@ through `"@props"` raised the opaque pixels at every facing, 3694 to 3787 to
 3902 at azimuth 45. And the 236,136-vertex strand hair contributes exactly 0
 pixels: deleting it gave a 340 px clay portrait identical to the one with it,
 0 of 231,200 pixels different by even one level.
+
+## A roster of characters, rolled from the library
+
+One figure at a time is the slow way to find out what a library can do.
+`scripts/daz_characters.py` draws a whole roster out of it: a character preset,
+either another character's shape dial or a few proportion dials, an eyebrow
+colour, hair, a beard, an outfit, a weapon and an upright pose, then builds each
+one through `scene` and renders it front and side.
+
+```sh
+python3 scripts/daz_characters.py list                        # what each slot can be
+python3 scripts/daz_characters.py make --count 12 --seed 20260921 --dry-run
+python3 scripts/daz_characters.py make --count 12 --seed 20260921 --size 768
+```
+
+Nothing is named in the script. The slots are read from the library, one figure
+generation at a time, which is the folder under `People/` that the character
+presets sit in: that is what keeps a Genesis 8 hair and a Genesis 9 Toon outfit
+out of a Genesis 9 roll, both of which were offered before the generation was
+pinned. A wearable is a `.duf` under `Hair/` or `Clothing/` whose own
+`asset_info` says `wearable`. A weapon is one of the right-hand grips, which
+arrive bone-parented to `r_hand`. A pose is one whose name says standing,
+walking, flexing, running or stretching, because the other 61 of the 87 are
+seated, laying or flying. The roll is seeded, so the same seed and the same
+library give the same roster, and `--dry-run` prints it without building
+anything.
+
+### Framing a set
+
+Every character is drawn by `render_sheet.py --azimuths 0,90 --elevation 0`:
+square on at eye level, front and side, two cells cut into two files.
+`--azimuths` was added for this, because `--angles` only ever gives evenly
+spaced facings and 0 and 90 are not two of four.
+
+The framing is `--span`, a fixed world height, rather than each figure's own
+extent, so a short character reads as short instead of being scaled up to fill
+its cell. At `--span 2.0` eleven of twelve fitted and one, in a stretching
+pose, was cut off at the top, so the default is 2.4 m. The twelve then filled
+53.5% to 78.6% of their cells' height, with every pair of feet on the same
+line.
+
+### What a run costs and what it keeps
+
+Measured on 2026-09-21 in `comfyui-packaged` on the reference machine, twelve
+characters at 768 px with Cycles on the card:
+
+| | |
+|---|---|
+| Build, each | 13.3 to 23.1 s, 230.6 s over the twelve |
+| Draw, two views each | 2.1 to 3.9 s, 34.3 s over the twelve, 1.43 s a cell |
+| Every exit code | 0, for both commands, twelve times |
+| Each `.blend`, before it was deleted | 70,952,378 to 172,618,316 bytes |
+| Kept on disk | 6.2 MB |
+| Drawn, per view | 28,764 to 61,725 pixels of 589,824 |
+
+That is the first measurement of a Daz figure rendered with its materials on
+Cycles, and it settles a question this page left open: on EEVEE through
+llvmpipe, with the imported materials and the default 64 samples, one 128 px
+cell was about 1700 s and never finished inside its alarm. The same figures
+with materials, at 768 px on the card at 128 samples, take 1.43 s a cell.
+
+Each character keeps, under `output/daz/characters/<slug>/`:
+
+```
+<slug>_front.png, <slug>_side.png     the two views
+<slug>.json                           the roll, the two commands that rebuild
+                                      it, exit codes, seconds, drawn pixels
+<slug>_scene.json                     the probe's own report for that build
+<slug>_build.log, <slug>_render.log   what the two commands printed
+```
+
+and beside them `characters.json`, the run's index, and `contact_sheet.png`,
+every front view on one page. The `.blend` goes when its views are drawn,
+unless `--keep-blend`, because a dressed figure is about 150 MB and twelve are
+1.8 GB.
+
+### What it does not roll
+
+- **A hair or clothing colour.** Those materials arrive with their own maps,
+  and the material pass only fills in what is missing, so a colour preset would
+  change nothing while the JSON claimed it had. Only the eyebrows, which arrive
+  bare, take a colour.
+- **A grip.** A weapon is bone-parented to the right hand, but the fingers stay
+  open: closing them is a second pose file, and `scene` applies one pose.
+- **Anything about what it looks like.** The run reports how many pixels each
+  view drew, and nothing else. Whether the armour clips, whether the hair reads
+  as hair and whether the weapon sits in the hand rather than through it is for
+  a person looking at the contact sheet.
 
 ## Keeping Daz content where it belongs
 
@@ -951,10 +1129,13 @@ pixels: deleting it gave a 340 px clay portrait identical to the one with it,
 - **Installing again on the real library after the fixes.** Only the dry run,
   `list`, `licence` and `verify --crc` ran there; part 03 was installed into a
   throwaway library.
-- **Daz Studio's own gzip-compressed files.** None of the product's 3210 `.dsf`
-  or 637 `.duf` files is gzip (`daz_inventory.py` for the `.dsf`, and an ad hoc
-  read of every file's first two bytes for both), so the gzip paths ran only on
-  synthetic files and a gzip copy of `Genesis 9.duf`, and no build ran on one.
+- **A corrupt gzip file.** Gzip content itself is no longer untested: the
+  products taken in on 2026-09-19 brought 260 gzip `.dsf` and `.duf` files, and
+  they import. `LVA_Vest_3751.dsf` is gzip and its 3,751 vertex mesh arrived
+  fitted; every `Tubal Sword *.duf` is gzip and one was read, imported and
+  bone-parented (2026-09-21). None of Starter Essentials' own 3210 `.dsf` or
+  637 `.duf` files is gzip. A truncated or corrupt gzip file, which should
+  raise `zlib.error`, has still never been fed to any of this.
 - **The library's harder stops:** a full disk, SIGKILL or power loss, two
   installs racing without an injected delay, and another program changing the
   library during an install.
@@ -966,13 +1147,27 @@ pixels: deleting it gave a 340 px clay portrait identical to the one with it,
   not. Without a `.dbz` the clothes get no shape keys
   from the body; how much of that a `.dbz` would recover is unmeasured, and a
   hand-built shape transfer was not tried.
-- **The rest of the library.** One character preset of 6, two clothing items of
-  40, one hair of 27 and one pose preset of 87 were run. The `anime` and
-  `facsdetails` morph sets and the one-shot
-  `bpy.ops.daz.import_standard_morphs()` were never called, and neither were
-  geografts.
+- **The rest of the library.** The roster run on 2026-09-21 covered all 6
+  character presets, both Base Clothing pieces the roll uses, 6 of the 7 Viking
+  armour pieces, the Mavick hair and beard, 4 of the 5 Tubal weapons and 12 of
+  the 87 poses. Still untouched: every Toon figure, every geograft, the bikini
+  and bra, `LVA !All`, and the 75 poses that are seated, laying or flying. The
+  `anime` and `facsdetails` morph sets and the one-shot
+  `bpy.ops.daz.import_standard_morphs()` were never called.
 - **dForce simulation.** The pixie hair's 236,136 strand vertices stay in their
-  rest shape in the saved file, follow no bone and draw no pixel.
+  rest shape in the saved file, follow no bone and draw no pixel, which is why
+  `daz_characters.py` leaves that product out of a roll and says so. The Mavick
+  hair, 433,512 vertices, does follow the rig through an armature modifier, and
+  what it looks like has not been judged.
+- **What any of it looks like.** Twelve characters were built and drawn on
+  2026-09-21 and the run measured only how many pixels each view covered.
+  Nobody has said whether the armour clips through the body, whether the hair
+  reads as hair, or whether a weapon sits in the hand rather than through it.
+- **What the material pass leaves out.** It wires cutout opacity, a colour map
+  or flat colour, and a plainly stacked layered colour image. A normal map, a
+  roughness map, a layered image with an offset, a scale, a rotation or its own
+  blend mode, and every other Iray Uber channel stay as the importer set them,
+  and the cost of that to a render is unmeasured.
 - **Two dials at once, and values outside the Daz soft range.** One dial was
   swept, at 0.0, 0.5 and 1.0, in clay, at one size.
 - **A four-facing sheet with the imported materials**, at any size, and any

@@ -16,6 +16,9 @@ UniRigExportPosedFBX wants, so in-graph posing is unreachable headlessly.
     # explicit frames
     scripts/render_sheet.py output/golem_anim.fbx --poses frames:1,7,13,19
 
+    # a character reference: front and side, square on at eye level
+    scripts/render_sheet.py output/rigged/unit_rogue.fbx --azimuths 0,90 --elevation 0
+
     # hand-authored poses: a role pose file from poses/roles/, compiled into
     # bone transforms for this rig by scripts/bone_roles.py, then rendered
     scripts/bone_roles.py compile poses/roles/attack.json output/rigged/unit_rogue.fbx \\
@@ -788,6 +791,17 @@ def wait_for_machine(server: str, max_wait: int) -> None:
         time.sleep(pause)
 
 
+def csv_degrees(text: str) -> list[float]:
+    """Explicit facings, in degrees: "0,90" for a front and a side."""
+    try:
+        out = [float(v) for v in text.split(",") if v.strip()]
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"expected degrees, comma separated, got {text!r}")
+    if not out:
+        raise argparse.ArgumentTypeError("expected at least one azimuth")
+    return out
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -799,6 +813,10 @@ def main() -> int:
                          'transforms pose may also hold "@shape_keys" and "@props"')
     ap.add_argument("--angles", type=int, default=4,
                     help="azimuths around the subject (default 4: front/right/back/left)")
+    ap.add_argument("--azimuths", type=csv_degrees, default=None, metavar="DEG,DEG",
+                    help="the facings to draw, comma separated, instead of --angles "
+                         "evenly spaced ones: 0,90 is a front and a side. --angles, "
+                         "--azimuth-start and --flat are then ignored")
     ap.add_argument("--azimuth-start", type=float, default=45.0,
                     help="degrees of the first facing. Default 45, which is what a "
                          "2:1 isometric grid needs")
@@ -893,7 +911,8 @@ def main() -> int:
     # west) must be rendered at 45/135/225/315, not 0/90/180/270. Otherwise the
     # sprite faces square-on while the ground runs diagonally under it.
     start = 0.0 if args.flat else args.azimuth_start
-    azimuths = [start + i * (360.0 / args.angles) for i in range(args.angles)]
+    azimuths = (args.azimuths if args.azimuths
+                else [start + i * (360.0 / args.angles) for i in range(args.angles)])
     # Unique per run: a fixed shared directory means two renders running at the
     # same time interleave their frames and each composes a sheet containing the
     # other's model. Seen for real when a batch render overlapped a manual one.

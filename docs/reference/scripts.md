@@ -70,6 +70,7 @@ from Daz content to the gitignored `output/daz/`. None of it may be committed.
 |---|---|
 | `daz_library.py` | Install Daz Install Manager zips downloaded by hand into a content library outside the repo, `MODELS_DIR/daz_library` by default, and record every file with its CRC-32, and the licence held with the date you read the EULA. Every path is checked before anything is written. `intake` does that for every zip in a folder, verifies what landed, deletes each zip and keeps a Markdown ledger beside them. `list`, `licence`, `verify`, `uninstall`, `case-check` and a `selftest` with invented packages. Standard library only, on the host. See [below](#daz-library-py). |
 | `daz_import_probe.py` | Import a Genesis figure into the container's Blender with the Diffeomorphic DAZ Importer, which `fetch` pins by size and sha256 into the gitignored `input/_devtools/import_daz/`. `build` saves a `.blend` whose 17 viseme controllers come from FACS, `scene` adds morph sets, character shape dials, sliders, clothing and hair merged into the figure's rig and a pose preset, `verify` reopens a saved `.blend` with no add-on, and `render` draws a row per viseme with `render_sheet.py` and in three framings of its own, or measures what each moves with `--motion-only`. See [below](#daz-import-probe-py). |
+| `daz_characters.py` | Roll random Genesis characters from whatever the Daz library holds, build each one in the container's Blender through `daz_import_probe.py`, render it front and side with `render_sheet.py`, and write a JSON beside its two images holding the roll, the two commands that rebuild it and what was drawn. `list` prints what the library offers for each slot. The `.blend` is deleted once the views are drawn. See [below](#daz-characters-py). |
 | `daz_inventory.py` | List the figures, bones, morphs, aliases and HD morphs in a Daz content library outside this repo, reading every `.dsf` with the standard library. Figures are grouped by the content type their author set, aliases and other modifiers are counted apart from morphs, and a valid JSON file that is not DSON is skipped, not an error. It refuses a path in or above the repo. See [below](#daz-inventory-py). |
 
 ## Keeping the repo honest
@@ -87,7 +88,8 @@ Run both before a commit, with `npm run docs:build`.
 
 ```sh
 scripts/render_sheet.py MODEL [--poses SPEC] [--angles N] [--azimuth-start DEG]
-                        [--elevation DEG] [--size PX] [--zoom N] [--persp]
+                        [--azimuths DEG,DEG] [--elevation DEG] [--size PX]
+                        [--zoom N] [--persp]
                         [--span UNITS] [--key N] [--ambient N]
                         [--engine {cycles,eevee}] [--samples N] [--denoise]
                         [--clay] [--clay-color R,G,B] [--flat] [--out PATH]
@@ -96,6 +98,11 @@ scripts/render_sheet.py MODEL [--poses SPEC] [--angles N] [--azimuth-start DEG]
 ```
 
 `--poses` takes `static`, `frames:1,7,13`, `even:N` or `transforms:FILE`.
+
+`--angles N` spaces N facings evenly from `--azimuth-start`. `--azimuths` names
+them instead, comma separated, for a set of facings that is not evenly spaced:
+`--azimuths 0,90 --elevation 0` is the front and side a character reference
+wants. It overrides `--angles`, `--azimuth-start` and `--flat`.
 
 `--span <units>` frames against a fixed world height rather than the subject's
 own extent, which is what makes a set share a scale. Without it each model is
@@ -616,6 +623,7 @@ scripts/daz_import_probe.py fetch
 scripts/daz_import_probe.py build --out output/daz/NAME.blend [--facs] [--visemes]
                             [--subdivision {keep,off}] [--figure DUF]
                             [--anatomy auto|none|DUF,...] [--library DIR]
+                            [--mat-preset DUF[@MESH,...]] [--no-auto-materials]
                             [--no-textures] [--material-method M] [--fit F]
                             [--content-dir DIR] [--no-dir-check] [--verbosity N]
                             [--timeout SECONDS] [--no-wait]
@@ -624,6 +632,7 @@ scripts/daz_import_probe.py scene --out output/daz/NAME.blend [--figure DUF]
                             [--morphs SET,...] [--custom-morphs DIR]
                             [--custom-files F,...] [--custom-category NAME]
                             [--custom-bodypart {Face,Body,Custom}] [--facs]
+                            [--mat-preset DUF[@MESH,...]] [--no-auto-materials]
                             [--set NAME=VALUE] [--wear DUF] [--no-transfer]
                             [--skip-transfer NAME,...] [--set-dressed NAME=VALUE]
                             [--pose DUF] [--pose-affects-morphs] [--no-verify]
@@ -661,6 +670,19 @@ from the figure's `.duf`, gzip-compressed or plain. Use `--facs`: on Genesis 9
 `--subdivision off`: the default `keep` saves the importer's Subsurf levels, up
 to 3 for render. It writes `NAME.blend`, `NAME_build.json`, which records the
 command line and every step, `NAME_blender.log` and `NAME_poses.json`.
+
+**Material presets.** A Genesis 9 eyelash, eye, mouth or eyebrow figure arrives
+with no map at all, and Daz Studio fills them in afterwards with a MAT preset.
+Both `build` and `scene` now do that: they read the presets beside the figure
+and beside each anatomy file and wire the cutout opacity, the colour map or
+flat colour, and a plainly stacked layered colour image, filling in only what a
+material is missing. `--mat-preset FILE[@MESH,...]` names one, applied before
+those and winning over them; `--no-auto-materials` leaves the materials as the
+importer built them, which draws an eyelash card as an opaque fan. The report
+says, per preset, what was filled in, what was left alone, and what it could
+not resolve. Material merging is off in every import, because bare anatomy
+materials are identical and were merged into one slot. See
+[Daz figures](/guide/daz-figures).
 
 **`scene`** does everything `build` does and then drives the figure, in this
 order, each step recording its seconds, peak RSS and
@@ -772,6 +794,53 @@ peak of 578.5 MB. `render --blend output/daz/g9_dressed.blend --only AA --sizes
 128 --columns face --samples 16 --no-sheet` drew 2 cells in 20.0 s. What each
 stage measured, and the two things that need Daz Studio, are in the
 [guide](/guide/daz-figures#a-dressed-posed-character-headless).
+
+### `daz_characters.py`
+
+```sh
+scripts/daz_characters.py list [--library DIR] [--generation NAME]
+scripts/daz_characters.py make [--count N] [--seed N] [--size PX]
+                          [--azimuths DEG,DEG] [--facings front,side]
+                          [--elevation DEG] [--span METRES] [--samples N]
+                          [--library DIR] [--generation NAME] [--timeout SECONDS]
+                          [--keep-blend] [--dry-run]
+```
+
+A roster of characters out of whatever the library holds. Each one is a draw:
+a Daz character preset, then either another character's shape dial or two or
+three proportion dials, an eyebrow colour, hair, a beard, an outfit, a weapon
+and an upright pose. The draw is seeded, so the same seed and the same library
+give the same characters, and `--dry-run` prints the roll and builds nothing.
+
+Every slot is read from the library rather than named in the script, and from
+one figure generation at a time: `--generation` names the folder under
+`People/`, and by default it is the one the character presets sit in, so a
+Genesis 8 hair and a Genesis 9 Toon outfit are left out of a Genesis 9 roll.
+A wearable is anything under `Hair/` or `Clothing/` whose `.duf` says it is
+one; the weapons are the `Base`, `Masculine` and `Feminine` right-hand grips,
+which arrive bone-parented to `r_hand`; the poses are the ones whose names say
+standing, walking, flexing, running or stretching, because the rest are seated,
+laying or flying. The dForce pixie hair is left out and the run says why: its
+strand mesh follows no bone and draws nothing.
+
+Each character is built by `daz_import_probe.py scene` and drawn by
+`render_sheet.py --azimuths 0,90 --elevation 0`, square on at eye level, framed
+against a fixed `--span` so a short character reads as short. The sheet is cut
+into one image per facing, and the `.blend`, about 150 MB, is deleted once they
+are drawn unless `--keep-blend`.
+
+**What a run writes**, under `output/daz/characters/<slug>/`: `<slug>_front.png`
+and `<slug>_side.png`, `<slug>.json` with the roll, the two commands that
+rebuild it, the exit codes, the seconds and the drawn pixel count of each view,
+`<slug>_scene.json` from the probe, and the two logs. Beside them,
+`characters.json` indexes the run and `contact_sheet.png` puts every front view
+on one page. All of it is Daz content: gitignored, and never committed.
+
+**Measured on 2026-09-21**, twelve characters at 768 px, Cycles on the card at
+128 samples, in `comfyui-packaged`: 13.3 to 23.1 s to build each one and 2.1 to
+3.9 s to draw its two views, 230.6 s and 34.3 s over the twelve, every exit
+code 0, and 6.2 MB kept once the twelve `.blend` files, 71 to 173 MB each, were
+deleted.
 
 ### `daz_inventory.py`
 

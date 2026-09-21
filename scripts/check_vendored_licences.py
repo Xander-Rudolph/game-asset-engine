@@ -78,6 +78,13 @@ ALLOW = [
     ("scripts/lipsync_cues.py", "Valve",
      "credits the 0.08 s window of Valve's phoneme filter as the source of the share "
      "frame rule, a number read in docs/reference/source-filmmaker.md, not SDK code"),
+    ("scripts/daz_characters.py", "Daz",
+     "rolls characters out of a user's own Daz content library outside the repo and "
+     "renders them into gitignored output/daz/, so it names the maker, its folder layout "
+     "and its file names; no Daz content is in the file"),
+    ("scripts/daz_characters.py", "Genesis",
+     "the figures it rolls are Genesis ones, named in its help and in the folders it "
+     "reads; no Genesis data is in the file"),
     ("scripts/daz_inventory.py", "Daz",
      "reads a user's own Daz content library from outside the repo and refuses a path "
      "inside it, so it names the maker, its folders and its spec; its test library is "
