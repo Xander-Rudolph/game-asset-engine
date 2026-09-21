@@ -1392,6 +1392,21 @@ character folders the run did not write, so what is left under
 2026-09-21: four characters rebuilt in 79.5 s, drawn in 10.7 s, eight folders
 pruned, `output/daz/` down from 8.1 MB to 2.8 MB.
 
+### Hiding the figure under the costume
+
+`scene --hide-figure` keeps the figure's own meshes out of the render: its
+body, and the eyes, mouth, eyelashes, tear and eyebrows that its post-load
+script brought with it. `--hide NAME,...` names any others. Nothing is deleted
+and nothing moves, so the clothes still fit what they were fitted to and the
+declip still has a body to push them off; `render_sheet.py` frames only what it
+can see.
+
+That is what a costume with a skull where the face should be needs. Measured on
+2026-09-21, a Dark Sovereign set worn over a Genesis 9 character: six meshes
+hidden, twelve rendered, every garment 0.00% inside the body, and the drawn
+silhouette went from about 57,000 pixels for the same character in a shirt to
+134,130 for the robes.
+
 ### What it does not roll
 
 - **A hair or clothing colour.** Those materials arrive with their own maps,

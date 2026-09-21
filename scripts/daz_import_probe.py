@@ -1352,6 +1352,10 @@ try:
         if objs:
             anatomy.append((name, objs))
     result["anatomy_objects"] = {n: [[o.name, o.type] for o in objs] for n, objs in anatomy}
+    # The figure's own meshes: its body and the eyes, mouth, lashes, tear and
+    # eyebrows that a post-load script brings with it. What --hide-figure hides.
+    figure_meshes = {o.name for _, objs in anatomy for o in objs if o.type == "MESH"}
+    figure_meshes.update(o.name for o in new if o.type == "MESH")
 
     subrigs = [o for _, objs in anatomy for o in objs if o.type == "ARMATURE" and o.parent is None]
     if subrigs:
@@ -1882,6 +1886,32 @@ SCENE_TAIL = r'''
                 raise RuntimeError("no mesh to measure against")
             return fit_report(worn, meshes)
         result["fit"] = step("measure how each mesh sits on the body", measure_fit, fatal=False)
+
+    if cfg["hide"] or cfg["hide_figure"]:
+        def hide():
+            """Keep a mesh out of the render without deleting it.
+
+            A figure under a costume is the case this exists for: hide the body
+            and its eyes, mouth and lashes and what is left is the robes and
+            whatever the costume puts where a face was. The meshes stay in the
+            file, so the clothes still fit what they were fitted to, and
+            render_sheet.py frames only what it can see.
+            """
+            wanted = set(cfg["hide"])
+            if cfg["hide_figure"]:
+                wanted |= set(figure_meshes)
+            hidden, missing = [], sorted(n for n in cfg["hide"]
+                                         if n not in {o.name for o in bpy.data.objects})
+            for ob in bpy.data.objects:
+                if ob.type == "MESH" and ob.name in wanted:
+                    ob.hide_render = True
+                    ob.hide_viewport = True
+                    hidden.append(ob.name)
+            return {"hidden": sorted(hidden), "not_found": missing,
+                    "figure_meshes": sorted(figure_meshes) if cfg["hide_figure"] else [],
+                    "still_rendered": sorted(o.name for o in bpy.data.objects
+                                             if o.type == "MESH" and not o.hide_render)}
+        result["hide"] = step("hide meshes from the render", hide, fatal=False)
 
     final = survey()
     result["survey"] = final
@@ -3241,6 +3271,8 @@ def cmd_scene(args) -> int:
         "mat_replaces": mat_preset_specs(lib, chosen_replaces(lib, args)),
         "role_tokens": list(ROLE_TOKENS),
         "fit_report": args.fit_report,
+        "hide": args.hide,
+        "hide_figure": args.hide_figure,
         "declip": args.declip,
         "declip_max_verts": args.declip_max_verts,
         "declip_skip": args.declip_skip,
@@ -3915,6 +3947,15 @@ def main() -> int:
                         "what a skin swap needs, where every channel changes rather than the "
                         "missing ones. Applied after --mat-preset, because that is what puts "
                         "a skin's colour map into Base Color. Repeatable")
+    s.add_argument("--hide", type=csv_names, default=[],
+                   help="mesh names to keep out of the render, comma separated. They stay in "
+                        "the file and keep their place: the clothes still fit what they were "
+                        "fitted to, and render_sheet.py frames only what it can see")
+    s.add_argument("--hide-figure", action="store_true",
+                   help="hide the figure's own meshes, its body and the eyes, mouth, lashes, "
+                        "tear and eyebrows a post-load script brings with it, leaving whatever "
+                        "it is wearing. A costume with a skull where the face was is the case "
+                        "this exists for")
     s.add_argument("--declip", type=float, default=0.0, metavar="MM",
                    help="push every worn mesh's vertices out of the body until they stand "
                         "this many millimetres clear of it, which is what stops a hip "

@@ -528,6 +528,10 @@ python3 scripts/daz_characters.py make --count 12 --seed 20260921 --size 768
   `--declip`, 1.5 mm by default, then pushes each worn garment clear, which
   took a pair of shorts from 73.3% inside to 0. Every character's JSON carries
   the fit numbers, under `fit`, and the run prints the worst worn mesh.
+- **A costume can replace the figure.** `scene --hide-figure` keeps the body,
+  eyes, mouth, lashes and eyebrows out of the render and leaves what the figure
+  is wearing, which is how a Dark Sovereign set renders as a skull in a hood.
+  In a roster file a character carries it as `"hide_figure": true`.
 - **The skin and the hair colour are rolled.** One of the four base skins for
   the figure's build, or the character's own, swapped map for map, and one of
   the six hair colours the library ships, which the beard matches.

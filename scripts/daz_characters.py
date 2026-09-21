@@ -439,6 +439,10 @@ def build_command(recipe: dict, blend: Path, lib: Path, timeout: int,
            "--timeout", str(timeout)]
     if declip > 0 and not recipe["pose"]:
         cmd += ["--declip", str(declip)]
+    if recipe.get("hide_figure"):
+        cmd += ["--hide-figure"]
+    if recipe.get("hide"):
+        cmd += ["--hide", ",".join(recipe["hide"])]
     custom = recipe["custom_morphs"]
     if custom:
         cmd += ["--custom-morphs", custom["folder"], "--custom-files", ",".join(custom["files"]),
@@ -540,6 +544,8 @@ def roster_sheet(rows: list[dict], out: Path, cell: int, per_row: int) -> dict |
                                  for o in recipe["outfit"]))
         if recipe.get("prop"):
             bits.append(recipe["prop"].replace("Tubal ", "").replace(" RT", ""))
+        if recipe.get("hide_figure"):
+            bits.append("figure hidden")
         draw.rectangle((x0, y0 + cell, x0 + views * cell, y0 + cell + label + pad),
                        fill=(58, 60, 64, 255))
         draw.text((x0 + pad, y0 + cell + pad // 2), f"{row['slug']}  {', '.join(bits)}",
@@ -600,6 +606,7 @@ def read_roster(path: Path) -> list[dict]:
                              ("custom_morphs", None), ("wear", []), ("mat_presets", []),
                              ("mat_replaces", []), ("pose", None), ("prop", None),
                              ("hair", None), ("beard", None), ("outfit", []),
+                             ("hide", []), ("hide_figure", False),
                              ("skin", "the character's own"), ("hair_colour", None)):
             recipe.setdefault(key, default)
     return recipes

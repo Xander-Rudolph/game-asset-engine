@@ -648,7 +648,8 @@ scripts/daz_import_probe.py scene --out output/daz/NAME.blend [--figure DUF]
                             [--custom-files F,...] [--custom-category NAME]
                             [--custom-bodypart {Face,Body,Custom}] [--facs]
                             [--mat-preset DUF[@MESH,...]] [--mat-replace DUF[@MESH,...]]
-                            [--no-auto-materials] [--declip MM] [--declip-max-verts N]
+                            [--no-auto-materials] [--hide NAME,...] [--hide-figure]
+                            [--declip MM] [--declip-max-verts N]
                             [--declip-skip NAME,...] [--no-fit-report]
                             [--set NAME=VALUE] [--wear DUF] [--no-transfer]
                             [--skip-transfer NAME,...] [--set-dressed NAME=VALUE]
@@ -687,6 +688,12 @@ from the figure's `.duf`, gzip-compressed or plain. Use `--facs`: on Genesis 9
 `--subdivision off`: the default `keep` saves the importer's Subsurf levels, up
 to 3 for render. It writes `NAME.blend`, `NAME_build.json`, which records the
 command line and every step, `NAME_blender.log` and `NAME_poses.json`.
+
+**Hiding a figure under its costume.** `--hide-figure` keeps the figure's own
+meshes out of the render, its body and the eyes, mouth, lashes, tear and
+eyebrows a post-load script brings with it, and `--hide NAME,...` names any
+others. Nothing is deleted, so the clothes still fit and `render_sheet.py`
+frames what is left: a skull inside a hood instead of a face.
 
 **Fit, and pushing a garment out.** Every build measures how each mesh sits
 against the body: how many of its vertices are inside it, how deep, and the
