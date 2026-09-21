@@ -1,0 +1,12 @@
+{
+  "type": "stdio",
+  "command": "${ASSET_ENGINE_PYTHON:-/usr/bin/python3}",
+  "args": ["${ASSET_ENGINE_ROOT:-/asset-engine}/mcp/server.py"],
+  "env": {
+    "ASSET_ENGINE_ROOT": "${ASSET_ENGINE_ROOT:-/asset-engine}",
+    "ASSET_ENGINE_PYTHON": "${ASSET_ENGINE_PYTHON:-/usr/bin/python3}",
+    "MODELS_DIR": "${MODELS_DIR:-}",
+    "COMFY_URL": "${COMFY_URL:-http://127.0.0.1:8188}",
+    "ASSET_ENGINE_CONTAINER": "${ASSET_ENGINE_CONTAINER:-}"
+  }
+}

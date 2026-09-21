@@ -76,7 +76,42 @@ and Daz content stays out of every AI stage.
 
 ## MCP servers
 
-`.mcp.json` declares the servers this repo expects:
+Two, and they are not the same kind of thing. One is this repo's own pipeline,
+wrapped as tools and registered by hand on the machine that runs it. The other
+is a hosted service declared in `.mcp.json`.
+
+### This repo's own server
+
+`mcp/server.py` serves 23 of this repo's scripts as MCP tools, so a client with
+no shell, or a client that is not on this machine, can drive the pipeline:
+engine health, what is on disk, queueing a graph, Blender sprite sheets and
+rigging, and lip sync cues. Nothing that deletes, uninstalls, downloads weights
+or publishes is exposed (`python3 mcp/server.py --list-tools`, 2026-09-19).
+
+Register it with one command, and read
+[the MCP server](/guide/mcp) before you do, because the Blender tools need the
+Docker socket and socket access is root on the host:
+
+```sh
+claude mcp add-json asset-engine "$(curl -fsSL https://xander-rudolph.github.io/game-asset-engine/mcp/asset-engine.json)"
+```
+
+::: warning Why it is registered by hand rather than shipped in the plugin
+A plugin can carry MCP servers, and every server it carries starts for everyone
+who enables the plugin, with no per-server opt out
+([Claude Code MCP documentation](https://code.claude.com/docs/en/mcp), read
+2026-09-19). Anything at the plugin root, `.mcp.json` included, is part of what
+an installer gets.
+
+A server that wants the Docker socket is not something a person should acquire
+as a side effect of installing a plugin, so this one is not shipped that way.
+It is published as a config file and a command instead, which is also why
+`.mcp.json` in this repo declares Meshy and not this.
+:::
+
+### Meshy, a hosted service
+
+`.mcp.json` declares the servers this repo ships to installers:
 
 ```json
 {

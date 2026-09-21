@@ -58,6 +58,7 @@ export default defineConfig({
             { text: 'Install and first run', link: '/guide/install' },
             { text: 'Running the published image', link: '/guide/running-the-image' },
             { text: 'Installing it for Claude', link: '/guide/claude' },
+            { text: 'The MCP server', link: '/guide/mcp' },
             { text: 'Make your first asset', link: '/guide/first-asset' },
           ],
         },

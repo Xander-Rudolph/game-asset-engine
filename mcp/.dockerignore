@@ -1,0 +1,9 @@
+# This image copies nothing. The repo, mcp/server.py included, arrives as a bind
+# mount at /asset-engine, so the build context only has to be big enough to hold
+# the Dockerfile itself, which Docker reads separately.
+#
+# Excluding everything keeps it that way: the build context is tarred and handed
+# to the daemon before the first instruction is read, cached build or not, and a
+# context that quietly grows is a build that quietly slows. If a COPY is ever
+# added here, un-ignore exactly the file it copies and nothing else.
+*

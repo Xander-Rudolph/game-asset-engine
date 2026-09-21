@@ -42,6 +42,13 @@ SKIP_PREFIXES = ("docs/", "research/")
 # Covers every line in that file that hits that marker, so give a reason that
 # would still hold if the file grew another mention.
 ALLOW = [
+    ("mcp/server.py", "Daz",
+     "two tools name the maker: inspect_daz_library reads a content library the user "
+     "installed, and daz_library_list reports what is in it. Both describe a library "
+     "outside this repo, and no Daz content is in the file"),
+    ("mcp/README.md", "Daz",
+     "says the server's Daz tools read a library outside the repo, and that no Daz "
+     "content enters it"),
     ("CLAUDE.md", "Valve",
      "the maintainer rules file, forbidding that maker's content in the repo"),
     ("CLAUDE.md", "Daz",

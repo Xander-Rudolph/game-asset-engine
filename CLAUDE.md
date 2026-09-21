@@ -6,7 +6,8 @@ Driving the pipeline? The skills carry it, and every one starts with `scripts/do
 
 - `skills/` ships to every plugin installer, and every description costs always-on tokens. Measure the cost with `claude --plugin-dir . plugin details game-asset-engine` after changing a description, rather than quoting an old figure.
 - Maintainer skills go in `.claude/skills/`, which installers never load. Anything at the plugin root, `.mcp.json` included, starts for every installer.
-- MCP: do not add a server that repeats `run_workflow.py`, `validate_workflows.py`, `doctor.py`, `fetch_models.py` or `gh`. Personal servers stay at user scope with `${VAR}` keys.
+- MCP: do not add a third-party server that repeats `run_workflow.py`, `validate_workflows.py`, `doctor.py`, `fetch_models.py` or `gh`. Inside Claude Code the shell already runs those, so such a server is surface without value. Personal servers stay at user scope with `${VAR}` keys.
+- `mcp/` is this repo's own MCP server, which deliberately does repeat those scripts, because it serves clients that have no shell. It is registered by hand and never shipped in the plugin, since a plugin server starts for every installer with no per-server opt out. It takes the Docker socket, which is root on this host, so treat anything that can reach it as root. See `docs/guide/mcp.md`.
 - `research/claims/` holds the claim registers behind the research notes in `docs/reference/`; `research/README.md` explains them.
 - `research/untested.md` lists what was built but not tested for real, and the owner decisions still open. Remove an item once it is settled.
 - `tools/` is the gitignored cache of command-line tools that `scripts/fetch_tools.py` fetches from `tools.json`.

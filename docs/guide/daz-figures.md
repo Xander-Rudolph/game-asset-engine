@@ -5,9 +5,14 @@ the repo, imported into Blender with its viseme controllers, and rendered as
 sprite rows. The renders may ship. The figure's 3D data may not, without an
 Interactive License.*
 
-Everything below was run on 2026-09-16 and 2026-09-18 on the reference machine,
-on one product, Genesis 9 Starter Essentials (SKU 86958), downloaded in a
-browser. The library and inventory scripts ran on the host's `python3` 3.13.
+Everything below was run on 2026-09-16, 2026-09-18 and 2026-09-19 on the
+reference machine, mostly on one product, Genesis 9 Starter Essentials (SKU
+86958), downloaded in a browser. Three more products were taken into the same
+library on 2026-09-19 with `daz_library.py intake`, and only the library and
+inventory sections measure them
+([a folder of downloads](#a-folder-of-downloads-in-one-command),
+[what the library holds](#what-the-library-holds)). No figure of theirs has
+been imported, dressed, posed or rendered. The library and inventory scripts ran on the host's `python3` 3.13.
 The importer and every render ran in the `comfyui-packaged` container's `bpy`
 4.5.9 LTS, where EEVEE reports its renderer as `llvmpipe (LLVM 15.0.7, 256
 bits)`: Mesa's software OpenGL on the CPU, not the graphics card. Every render
@@ -53,6 +58,7 @@ not legal advice.
 /models/daz_library/                  MODELS_DIR/daz_library, outside the repo
   data/  People/  Runtime/            the product, as Daz Studio would lay it out
   .daz_library/86958.json             what was installed, and the licence held
+  Source/PROCESSED.md                 what `intake` took in, once its zips were deleted
 input/_devtools/import_daz/           the importer, fetched and pinned, gitignored
 output/daz/                           Daz content: gitignored, never committed
   g9_cage.blend                       the imported figure, 70,928,008 bytes
@@ -133,6 +139,56 @@ identical bytes, so a later part skips them.
 
 The first three rows ran before the review fixes and were not run again. The
 times are to the page cache: nothing is synced to disk.
+
+### A folder of downloads, in one command
+
+```sh
+python3 scripts/daz_library.py intake --dry-run   # then again without --dry-run
+```
+
+`intake` is `install` over a folder of zips you have finished with. It installs
+every `.zip` in `MODELS_DIR/daz_library/Source`, or `--source DIR`, in a stable
+order with the parts of one product in one run, so every check `install` makes
+still applies. After a package installs, the files the record now lists for
+that part are verified, present, a regular file, at their recorded size and
+CRC-32, and the part recorded complete; only then is its zip deleted. A package
+that is refused, conflicts, stops part way or fails that verify keeps its zip,
+and so does every other part of the same product. `--keep-zips` deletes
+nothing, `--dry-run` writes nothing and says what each zip would do, and a
+folder with no `.zip` in it gives `no .zip files in <source>: nothing to do`.
+
+It leaves one Markdown file behind in that folder, `PROCESSED.md` unless
+`--ledger NAME` says otherwise, appended to and never rewritten. Each row gives
+the date, the product name from `Supplement.dsx`, the SKU and part, the zip's
+name, its size and sha256, what happened and what became of the zip, and the
+number of files the manifest listed. It records names and counts only, so no
+Daz content and no reproducible file list ever leaves the library.
+
+Measured on 2026-09-19 on the host's `python3`, on six zips that were in
+`/models/daz_library/Source`, 2,224,386,560 bytes in all:
+
+| Run | Result | Time |
+|---|---|---|
+| `intake --dry-run` | exit 0; 3 zips already installed, 3 to install, nothing written | 8.04 s wall (`time`) |
+| `intake` | all 6 installed or already installed, verified, deleted; 2,224,386,560 bytes freed, 6 ledger rows | 8.64 s wall |
+| SKU 86958, three parts, already installed | 6,505 listed files all identical, nothing written | 6.66 s for the product |
+| SKU 87397 Mavick Hair and Beard | 120 files, 369,742,988 bytes written | 0.60 s, verify 0.07 s |
+| SKU 88643 dForce Leather Viking Armor | 242 files, 129,116,296 bytes written | 0.14 s, verify 0.03 s |
+| SKU 91304 Tubal Weapons Collection | 245 files, 165,205,569 bytes written | 0.28 s, verify 0.03 s |
+| `intake` again over the emptied folder | exit 0, nothing done | under 0.1 s |
+| `verify --crc` over all four products | 7,106 of 7,106 files | 0.62 s |
+
+No package warned about a path that differs only in case. The SKU 86958 parts
+took most of the wall time because a package that is already installed is still
+read in full: its sha256, then a byte comparison of every file it lists.
+
+Five invented packages in a scratch folder, with no Daz content in them, were
+all refused and all left in place, exit 2: a zip whose name says part 02 while
+`Supplement.dsx` says `(1 of 2)`, a package cut to half its size, one part of a
+product holding an entry stored as a symlink, that part's sibling, and a zip
+whose name does not match Daz's pattern. A separate scratch product whose part
+01 installed while part 02 hit a conflict exited 1 and kept both zips, which is
+the rule that stops a half-taken product losing its downloads.
 
 ### What it refuses
 
@@ -268,6 +324,26 @@ The research note quotes the product page's "753 ... Maps (256 x 256 to 8192 x
 8192)". That was not reproduced: a PIL header read of `Runtime/Textures` found
 762 image files, and 45 of them are smaller than 256 px. Which files Daz counts
 as maps was not checked.
+
+### What the three 2026-09-19 products added
+
+Run again on 2026-09-19, after `intake`, `daz_inventory.py /models/daz_library
+--brief` exited 0 with nothing on stderr and read 3418 `.dsf` files in 5.41 s:
+183 gzip, 3234 plain, the same 1 skipped as not DSON and 0 unreadable. The 183
+gzip files are the first in this library: Genesis 9 Starter Essentials ships
+none, and the research note's "the shipped files are not compressed" is about
+that product. The three products added 208 `.dsf` and 16 figure files:
+
+| Product | Figure files | Content types | Vertices, bones, morphs |
+|---|---|---|---|
+| Mavick Hair and Beard (87397) | 4 | all `Follower/Hair` | Mavick Beard G8M 178,464 vertices, 133,848 quads, in two folders with 87 and 50 bones; Mavick HairStyle G8M 433,512 vertices, 336,418 quads and 56 triangles, in two folders with 26 and 50 bones; 1, 1, 7 and 8 morphs |
+| dForce Leather Viking Armor (88643) | 7 | 3 `Follower/Wardrobe` (Shirt, Pant, Shoes), 4 `Follower/Accessory` (Torso twice, Arms/Lower, Waist) | Shirt 10,438 vertices and 57 bones; Arm Guard 28,366 and 37; Boots 6,420 and 53; Vest Straps 5,580 and 15; Pant 4,526 and 22; Vest 3,751 and 36; Belt 1,948 and 10; 159 morphs in all |
+| Tubal Weapons Collection (91304) | 5 | all `Prop` | WarHammer 62,307 vertices, Sword 43,411, Dagger 43,073, Shield 41,375, Spear 31,003; no bones and no morphs |
+
+Every one of those 176 morphs falls in the inventory's `other` group: none is
+an `eCTRLv`, `facs_ctrl_v`, `facs_bs_`, `facs_cbs_`, `facs_jnt_`, `pJCM` or
+`body_cbs_` name, so none of the three adds a viseme or a FACS dial. What the
+Diffeomorphic importer makes of them was not tried.
 
 The first run on real content found two bugs, both fixed:
 
