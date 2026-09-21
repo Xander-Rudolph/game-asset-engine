@@ -649,7 +649,8 @@ scripts/daz_import_probe.py scene --out output/daz/NAME.blend [--figure DUF]
                             [--custom-bodypart {Face,Body,Custom}] [--facs]
                             [--mat-preset DUF[@MESH,...]] [--mat-replace DUF[@MESH,...]]
                             [--no-auto-materials] [--hide NAME,...] [--hide-figure]
-                            [--declip MM] [--declip-max-verts N]
+                            [--hide-material NAME,...]
+                            [--declip MM] [--declip-max-push MM] [--declip-max-verts N]
                             [--declip-skip NAME,...] [--no-fit-report]
                             [--set NAME=VALUE] [--wear DUF] [--no-transfer]
                             [--skip-transfer NAME,...] [--set-dressed NAME=VALUE]
@@ -688,6 +689,10 @@ from the figure's `.duf`, gzip-compressed or plain. Use `--facs`: on Genesis 9
 `--subdivision off`: the default `keep` saves the importer's Subsurf levels, up
 to 3 for render. It writes `NAME.blend`, `NAME_build.json`, which records the
 command line and every step, `NAME_blender.log` and `NAME_poses.json`.
+
+**Hiding one zone of a garment.** `--hide-material NAME,...` takes a material
+zone's alpha to zero, which is how a hooded cloak loses its hood and keeps the
+cloak. The mesh stays whole, so the framing still allows for it.
 
 **Hiding a figure under its costume.** `--hide-figure` keeps the figure's own
 meshes out of the render, its body and the eyes, mouth, lashes, tear and

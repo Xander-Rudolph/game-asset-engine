@@ -1234,6 +1234,15 @@ Measured on Kat on 2026-09-21 at `--declip 1.5`, in 1.13 s:
 | `LVA Pant` | 33.9% | 0.0% | 1,977 of 4,526 | 18.40 mm |
 | `Mavick HairStyle` | 0.5% | 0.5% | left alone, 433,512 vertices | |
 
+**A vertex too deep to be clipping is left alone.** A hood sits around a head
+rather than through it, and pushing its vertices onto the scalp is what "the
+cloak is shifted down" looks like: on the Wise Wizard's cloak, 1,749 vertices
+were moved and the worst by 68.09 mm. `--declip-max-push`, 20 mm by default,
+leaves those where the author put them. With the cap the same cloak moves 1,031
+vertices, leaves 718 alone and keeps 4.95% of itself inside the head, which is
+what a hood is; the shorts and trousers that needed pushing, at 13.95 and
+18.40 mm, still get it.
+
 Only what the rig deforms is pushed. A bone-parented prop, a staff or a
 brooch, is placed rather than fitted, and pushing its vertices onto the body
 would bend it: the Wise Wizard's brooch had all 4,560 of them moved before that
@@ -1391,6 +1400,16 @@ character folders the run did not write, so what is left under
 `output/daz/characters/` is that roster and nothing else. Measured on
 2026-09-21: four characters rebuilt in 79.5 s, drawn in 10.7 s, eight folders
 pruned, `output/daz/` down from 8.1 MB to 2.8 MB.
+
+### Hiding one zone of a garment
+
+A garment is one mesh with several material zones, and the zone is often
+exactly the part to lose: the Wise Wizard's cloak keeps its hood in
+`03CloakHood`, apart from the cloak itself. `scene --hide-material NAME,...`
+takes a zone's alpha to zero, removing any link into it first so the zero
+holds, and Cycles then renders nothing there. The mesh stays whole, so
+`render_sheet.py` still frames the space the hood occupied: expect a little
+headroom above a figure whose hood was hidden.
 
 ### Hiding the figure under the costume
 

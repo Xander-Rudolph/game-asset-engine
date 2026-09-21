@@ -978,7 +978,7 @@ def body_of(rig, meshes):
                               len(o.data.vertices)))
 
 
-def declip(body, meshes, margin, max_verts, skip, passes=4):
+def declip(body, meshes, margin, max_verts, skip, max_push=0.0, passes=4):
     """Push a garment's vertices out of the body it is worn on.
 
     A garment is authored for one figure and worn by another, and no amount of
@@ -1022,13 +1022,20 @@ def declip(body, meshes, margin, max_verts, skip, passes=4):
                 continue
             rotate_back = ob.matrix_world.to_3x3().inverted()
             keys = ob.data.shape_keys.key_blocks if ob.data.shape_keys else []
-            moved, worst = 0, 0.0
+            moved, worst, deep = 0, 0.0, 0
             for i, point in enumerate(here):
                 hit, normal, index, dist = tree.find_nearest(point)
                 if hit is None:
                     continue
                 signed = (point - hit).dot(normal)
                 if signed >= margin:
+                    continue
+                if max_push and (margin - signed) > max_push:
+                    # Too deep to be cloth clipping. A hood sits around a head
+                    # rather than through it, and dragging its vertices onto
+                    # the scalp is what "the cloak is shifted down" looks like:
+                    # on the Wise Wizard's cloak the worst push was 68.09 mm.
+                    deep += 1
                     continue
                 delta = rotate_back @ ((hit + normal * margin) - point)
                 ob.data.vertices[i].co = ob.data.vertices[i].co + delta
@@ -1039,6 +1046,7 @@ def declip(body, meshes, margin, max_verts, skip, passes=4):
             if moved:
                 ob.data.update()
             out[ob.name]["passes"].append(moved)
+            out[ob.name]["left_deep"] = deep
             out[ob.name]["moved"] = max(out[ob.name]["moved"], moved)
             out[ob.name]["max_push_mm"] = max(out[ob.name]["max_push_mm"],
                                               round(worst * 1000, 2))
@@ -1049,7 +1057,8 @@ def declip(body, meshes, margin, max_verts, skip, passes=4):
     for name, entry in out.items():
         if "vertices" in entry:
             entry["moved_pct"] = round(100.0 * entry["moved"] / max(1, entry["vertices"]), 2)
-    return {"margin_mm": round(margin * 1000, 2), "max_vertices": max_verts, "meshes": out}
+    return {"margin_mm": round(margin * 1000, 2), "max_vertices": max_verts,
+            "max_push_mm": round(max_push * 1000, 2) if max_push else None, "meshes": out}
 
 
 def fit_report(body, meshes, tolerance=0.0005):
@@ -1151,6 +1160,40 @@ def replace_mat_presets(specs):
                     entry["left_alone"].append(did)
         report.append(entry)
     return report
+
+
+def hide_materials(names):
+    """Make a material invisible, so part of a mesh drops out of the render.
+
+    A garment is one mesh with several material zones, and a zone is often
+    exactly the part someone wants gone: the Wise Wizard's cloak keeps its hood
+    in "03CloakHood", separate from the cloak itself. Alpha goes to zero, which
+    Cycles renders as nothing at all, and any link into Alpha is taken out
+    first so the zero holds.
+    """
+    wanted = {n.casefold() for n in names}
+    done, missing = [], set(wanted)
+    for mat in bpy.data.materials:
+        key = base_material_name(mat.name).casefold()
+        if key not in wanted or mat.node_tree is None:
+            continue
+        missing.discard(key)
+        bsdf = principled_of(mat)
+        if bsdf is None or bsdf.inputs.get("Alpha") is None:
+            done.append({"material": mat.name, "skipped": "no single Principled BSDF"})
+            continue
+        alpha = bsdf.inputs["Alpha"]
+        unlinked = 0
+        for link in list(alpha.links):
+            mat.node_tree.links.remove(link)
+            unlinked += 1
+        alpha.default_value = 0.0
+        done.append({"material": mat.name, "alpha": 0.0, "links_removed": unlinked,
+                     "objects": sorted(o.name for o in bpy.data.objects
+                                       if o.type == "MESH"
+                                       and mat.name in [sl.material.name for sl in o.material_slots
+                                                        if sl.material])})
+    return {"hidden": done, "not_found": sorted(missing)}
 
 
 def apply_mat_presets(specs):
@@ -1824,7 +1867,7 @@ SCENE_TAIL = r'''
                        if o.name in worn_meshes and o.find_armature() == rig]
             before = fit_report(body_now, wearing)
             done = declip(body_now, wearing, cfg["declip"] / 1000.0, cfg["declip_max_verts"],
-                          set(cfg["declip_skip"]))
+                          set(cfg["declip_skip"]), cfg["declip_max_push"] / 1000.0)
             done["inside_before"] = {k: v["inside_pct"] for k, v in before["meshes"].items()}
             after = fit_report(body_now, wearing)
             done["inside_after"] = {k: v["inside_pct"] for k, v in after["meshes"].items()}
@@ -1886,6 +1929,11 @@ SCENE_TAIL = r'''
                 raise RuntimeError("no mesh to measure against")
             return fit_report(worn, meshes)
         result["fit"] = step("measure how each mesh sits on the body", measure_fit, fatal=False)
+
+    if cfg["hide_materials"]:
+        result["hide_materials"] = step(
+            "hide %d material zone(s)" % len(cfg["hide_materials"]),
+            lambda: hide_materials(cfg["hide_materials"]), fatal=False)
 
     if cfg["hide"] or cfg["hide_figure"]:
         def hide():
@@ -3273,8 +3321,10 @@ def cmd_scene(args) -> int:
         "fit_report": args.fit_report,
         "hide": args.hide,
         "hide_figure": args.hide_figure,
+        "hide_materials": args.hide_material,
         "declip": args.declip,
         "declip_max_verts": args.declip_max_verts,
+        "declip_max_push": args.declip_max_push,
         "declip_skip": args.declip_skip,
         "set": args.set,
         "set_after": args.set_dressed,
@@ -3951,6 +4001,10 @@ def main() -> int:
                    help="mesh names to keep out of the render, comma separated. They stay in "
                         "the file and keep their place: the clothes still fit what they were "
                         "fitted to, and render_sheet.py frames only what it can see")
+    s.add_argument("--hide-material", type=csv_names, default=[],
+                   help="material zones to render as nothing, comma separated, such as the "
+                        "hood zone of a hooded cloak. Their alpha goes to zero and any link "
+                        "into it is removed first")
     s.add_argument("--hide-figure", action="store_true",
                    help="hide the figure's own meshes, its body and the eyes, mouth, lashes, "
                         "tear and eyebrows a post-load script brings with it, leaving whatever "
@@ -3962,6 +4016,11 @@ def main() -> int:
                         "coming through a pair of shorts authored for another figure. It "
                         "edits the rest shape, so it refuses to run on a posed figure "
                         "(default 0, off)")
+    s.add_argument("--declip-max-push", type=float, default=20.0, metavar="MM",
+                   help="leave a vertex where it is when moving it clear would take more "
+                        "than this, because that is not cloth clipping: a hood sits around "
+                        "a head and pushing it onto the scalp is what a cloak shifted down "
+                        "looks like. 0 lifts the cap (default 20)")
     s.add_argument("--declip-max-verts", type=int, default=100000, metavar="N",
                    help="leave a mesh with more vertices than this alone, so a card hair "
                         "keeps its shape (default 100000)")

@@ -77,6 +77,10 @@ WHOLE_OUTFIT = re.compile(r"(?:^|\s)!|complete|whole set|load all|\bset\b", re.I
 # Eyebrow colours the library ships that no one grows. Still rolled, but one
 # character in five rather than one in three.
 FANCY_COLOURS = {"Dark Blue", "Fuchsia", "Neon Blue"}
+# Characters to leave out of a roll, and why.
+SKIP_CHARACTERS = {
+    "Julian 9 Surfer": "the owner judged it broken on 2026-09-21",
+}
 # Wearables to leave out of a roll, and why.
 SKIP_WEARABLES = {
     # Measured on 2026-09-18: this strand hair's 236,136 vertex mesh carries one
@@ -85,6 +89,20 @@ SKIP_WEARABLES = {
     # cap draws, so a character wearing it looks bald.
     "G9 Base dForce Pixie Hair": "a dForce strand mesh that renders nothing here",
 }
+
+
+def product_key(name: str) -> str:
+    """The first two words of a product's name, lowercased.
+
+    What ties a wearable to the character it was made for. A hair, a beard and
+    an outfit that ship beside a character carry that character's name: "Wise
+    Wizard HD" the figure, "Wise Wizard 2025" the beard, "Wise Wizard Remaster
+    2025" the set. Measured on 2026-09-21, that beard floats a mean of 33.26 mm
+    off another character's chin, so it is rolled only onto its own.
+    """
+    words = [w for w in re.sub(r"\s+for\s+Genesis\s+\d.*$", "", name, flags=re.I).split()
+             if w.lower() not in ("dforce", "g9", "the")]
+    return " ".join(words[:2]).casefold()
 
 
 def character_build(path: Path) -> str | None:
@@ -178,6 +196,9 @@ def catalogue(lib: Path, generation: str | None = None) -> dict:
             continue
         build = character_build(path)
         name = path.stem.split(" for ")[0].strip()
+        if name in SKIP_CHARACTERS:
+            cat["skipped"].append({"name": name, "why": SKIP_CHARACTERS[name]})
+            continue
         if build is None:
             # No base named. That only matters because the base decides which
             # skins fit, so a character that brings its own skin is still
@@ -255,6 +276,14 @@ def catalogue(lib: Path, generation: str | None = None) -> dict:
                 entry = {"file": rel(lib, path), "name": path.stem,
                          "upright": bool(UPRIGHT.search(path.stem))}
                 cat["poses"][build].append(entry)
+
+    # Whatever ships beside a character belongs to that character.
+    owners = {product_key(c["name"]): c["name"] for c in cat["characters"]}
+    for entry in cat["hair"] + cat["beards"] + [o for g in cat["outfits"].values() for o in g]:
+        folder = PurePosixPath(entry["file"]).parent
+        if folder.name.lower() == "individual items":
+            folder = folder.parent
+        entry["owner"] = owners.get(product_key(folder.name))
 
     # Two folders of dials, and a character takes one of them: the probe loads
     # one custom morph folder per run, and no standard morph set carries either
@@ -355,7 +384,11 @@ def roll(rng: random.Random, cat: dict, index: int, base: dict, poses: str = "no
 
     # The hair and the beard take the same colour, because a person's do.
     colour = None
-    hair = pick(rng, cat["hair"], 0.85)
+    def mine(items):
+        """What this character may wear: anything free, plus its own."""
+        return [i for i in items if i.get("owner") in (None, base["name"])]
+
+    hair = pick(rng, mine(cat["hair"]), 0.85)
     if hair:
         recipe["hair"] = hair["name"]
         recipe["wear"].append(hair["file"])
@@ -364,7 +397,7 @@ def roll(rng: random.Random, cat: dict, index: int, base: dict, poses: str = "no
             recipe["hair_colour"] = colour["colour"]
             recipe["mat_presets"].append(colour["file"])
     if build == "masculine":
-        beard = pick(rng, cat["beards"], 0.6)
+        beard = pick(rng, mine(cat["beards"]), 0.6)
         if beard:
             recipe["beard"] = beard["name"]
             recipe["wear"].append(beard["file"])
@@ -373,8 +406,10 @@ def roll(rng: random.Random, cat: dict, index: int, base: dict, poses: str = "no
             if same:
                 recipe["mat_presets"].append(same[0]["file"])
 
-    group = recipe.get("outfit_kind") or rng.choice(sorted(cat["outfits"]))
-    pieces = cat["outfits"].get(group) or []
+    free = {g: mine(items) for g, items in cat["outfits"].items()}
+    free = {g: items for g, items in free.items() if items}
+    group = recipe.get("outfit_kind") or rng.choice(sorted(free) or sorted(cat["outfits"]))
+    pieces = free.get(group) or cat["outfits"].get(group) or []
     whole = [o for o in pieces if WHOLE_OUTFIT.search(o["name"])]
     if group == "Base Clothing":
         # The only product that is separate garments rather than a set, and the
@@ -443,6 +478,8 @@ def build_command(recipe: dict, blend: Path, lib: Path, timeout: int,
         cmd += ["--hide-figure"]
     if recipe.get("hide"):
         cmd += ["--hide", ",".join(recipe["hide"])]
+    if recipe.get("hide_materials"):
+        cmd += ["--hide-material", ",".join(recipe["hide_materials"])]
     custom = recipe["custom_morphs"]
     if custom:
         cmd += ["--custom-morphs", custom["folder"], "--custom-files", ",".join(custom["files"]),
@@ -606,7 +643,7 @@ def read_roster(path: Path) -> list[dict]:
                              ("custom_morphs", None), ("wear", []), ("mat_presets", []),
                              ("mat_replaces", []), ("pose", None), ("prop", None),
                              ("hair", None), ("beard", None), ("outfit", []),
-                             ("hide", []), ("hide_figure", False),
+                             ("hide", []), ("hide_figure", False), ("hide_materials", []),
                              ("skin", "the character's own"), ("hair_colour", None)):
             recipe.setdefault(key, default)
     return recipes
