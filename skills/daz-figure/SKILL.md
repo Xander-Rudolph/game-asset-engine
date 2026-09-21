@@ -495,8 +495,8 @@ python3 scripts/daz_characters.py make --count 12 --seed 20260921 --size 768
 - **Show the dry run first and get an answer.** It prints each character's
   base, hair, beard, outfit, weapon and pose, and builds nothing.
 - **Say the cost.** Measured on 2026-09-21 on twelve characters at 768 px:
-  13.3 to 23.1 s to build each one and 2.1 to 3.9 s to draw its two views,
-  230.6 s and 34.3 s over the twelve, and 6.2 MB kept once each `.blend` was
+  10.3 to 25.4 s to build each one and 2.1 to 4.3 s to draw its two views,
+  227.7 s and 38.1 s over the twelve, and 8.0 MB kept once each `.blend` was
   deleted.
 - Every slot comes from the library, one figure generation at a time, so a
   Genesis 8 hair is never put on a Genesis 9 figure. The same seed and library
@@ -506,10 +506,15 @@ python3 scripts/daz_characters.py make --count 12 --seed 20260921 --size 768
   `<slug>_scene.json`, and two logs. `characters.json` indexes the run and
   `contact_sheet.png` puts every front view on one page. The `.blend` is
   deleted unless `--keep-blend`.
-- **Have the user open `output/daz/characters/contact_sheet.png`**; do not read
-  it yourself (step 1). Ask whether the armour clips, whether the hair reads as
-  hair and whether a weapon sits in the hand. Beside their answer, give the
-  `drawn_px` of each view from its JSON.
+- **Have the user open `output/daz/characters/roster_sheet.png`**, which holds
+  every character's views on one page; do not read it yourself (step 1). Ask
+  whether the armour clips, whether the hair reads as hair and whether a weapon
+  sits in the hand. Beside their answer, give the `drawn_px` of each view from
+  its JSON.
+- **Every figure stands in the rest pose**, which is Genesis 9's A pose, unless
+  `--poses upright` or `--poses any` is asked for. The lights are brighter than
+  a sprite sheet's, `--key 6.5 --ambient 1.3`, because Daz skin comes out at a
+  mean of 0.248 of 1 under the sheet's own 1.6 and 0.22.
 - What it does not do: it never rolls a hair or clothing colour, because those
   materials already carry their maps and the material pass only fills in what
   is missing; a weapon arrives in the hand with the fingers open, because the

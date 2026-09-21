@@ -800,17 +800,30 @@ stage measured, and the two things that need Daz Studio, are in the
 ```sh
 scripts/daz_characters.py list [--library DIR] [--generation NAME]
 scripts/daz_characters.py make [--count N] [--seed N] [--size PX]
-                          [--azimuths DEG,DEG] [--facings front,side]
-                          [--elevation DEG] [--span METRES] [--samples N]
+                          [--poses {none,upright,any}] [--azimuths DEG,DEG]
+                          [--facings front,side] [--elevation DEG] [--span METRES]
+                          [--key N] [--ambient N] [--samples N]
+                          [--sheet-cell PX] [--sheet-columns N] [--any-brow-colour]
                           [--library DIR] [--generation NAME] [--timeout SECONDS]
                           [--keep-blend] [--dry-run]
 ```
 
-A roster of characters out of whatever the library holds. Each one is a draw:
-a Daz character preset, then either another character's shape dial or two or
-three proportion dials, an eyebrow colour, hair, a beard, an outfit, a weapon
-and an upright pose. The draw is seeded, so the same seed and the same library
-give the same characters, and `--dry-run` prints the roll and builds nothing.
+A roster of characters out of whatever the library holds. The character presets
+are dealt out, so twelve characters use all six twice; everything else is a
+draw: another character's shape dial or two or three proportion dials, an
+eyebrow colour, hair, a beard, an outfit and a weapon. The draw is seeded, so
+the same seed and the same library give the same characters, and `--dry-run`
+prints the roll and builds nothing.
+
+**No pose by default.** Genesis 9's rest pose is the A pose a character sheet
+wants; `--poses upright` rolls a standing, walking, flexing, running or
+stretching one, and `--poses any` rolls from all 58. `--span` follows: 2.0 m in
+the rest pose, 2.4 m when a pose is rolled, because a stretching figure reaches
+higher than a standing one.
+
+**Lit brighter than a sprite sheet.** `--key 6.5 --ambient 1.3` rather than
+`render_sheet.py`'s 1.6 and 0.22, under which a Daz figure's lit pixels
+averaged 0.248 of 1 (2026-09-21).
 
 Every slot is read from the library rather than named in the script, and from
 one figure generation at a time: `--generation` names the folder under
@@ -833,14 +846,16 @@ are drawn unless `--keep-blend`.
 and `<slug>_side.png`, `<slug>.json` with the roll, the two commands that
 rebuild it, the exit codes, the seconds and the drawn pixel count of each view,
 `<slug>_scene.json` from the probe, and the two logs. Beside them,
-`characters.json` indexes the run and `contact_sheet.png` puts every front view
-on one page. All of it is Daz content: gitignored, and never committed.
+`characters.json` indexes the run and `roster_sheet.png` holds every character,
+views side by side on a flat grey under a line naming what it is made of, at
+`--sheet-cell` pixels a cell and `--sheet-columns` characters a row. All of it
+is Daz content: gitignored, and never committed.
 
-**Measured on 2026-09-21**, twelve characters at 768 px, Cycles on the card at
-128 samples, in `comfyui-packaged`: 13.3 to 23.1 s to build each one and 2.1 to
-3.9 s to draw its two views, 230.6 s and 34.3 s over the twelve, every exit
-code 0, and 6.2 MB kept once the twelve `.blend` files, 71 to 173 MB each, were
-deleted.
+**Measured on 2026-09-21**, twelve characters in the rest pose at 768 px,
+Cycles on the card at 128 samples, in `comfyui-packaged`: 10.3 to 25.4 s to
+build each one and 2.1 to 4.3 s to draw its two views, 227.7 s and 38.1 s over
+the twelve, every exit code 0, and 8.0 MB kept once the twelve `.blend` files,
+71 to 173 MB each, were deleted. The sheet is 4096 by 1629 px.
 
 ### `daz_inventory.py`
 

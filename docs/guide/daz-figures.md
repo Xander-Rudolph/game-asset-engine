@@ -469,10 +469,33 @@ skin the importer built. On Kat it filled in 16 of the 16 materials the presets
 name, and the file went from 18 images to 29.
 
 What it reads from a preset is the cutout opacity map or value, the colour map
-or flat colour, and a layered colour image when every layer is laid plainly
-over the one below. Nothing else: no normal map, no roughness, no layer with a
-rotation, an offset, a scale or a blend mode of its own. Each of those is named
-in the report as unresolved rather than guessed at.
+or flat colour, a layered colour image when every layer is laid plainly over
+the one below, and the refraction weight and index. Nothing else: no normal
+map, no roughness, no layer with a rotation, an offset, a scale or a blend mode
+of its own. Each of those is named in the report as unresolved rather than
+guessed at.
+
+### The film of moisture over an eye
+
+Genesis 9 puts a separate surface over each eyeball, `EyeMoisture`, and the
+character preset gives it `Refraction Weight` 1, `Refraction Index` 1.38,
+`Thin Walled` true and a white diffuse. Reading only the colour out of that
+makes it an opaque white dome, which is worse than leaving it bare: the eyes
+disappear behind it. So a preset's refraction weight of 0.5 or more becomes the
+Principled BSDF's Transmission Weight, with the index as its IOR, and the
+material turns to glass.
+
+Measured on Kat on 2026-09-21, the Eyes mesh rendered on its own at 512 px in
+Cycles at 64 samples, over the 30,453 pixels it covers either way:
+
+| | Lit mean RGB | Colour spread |
+|---|---|---|
+| Colour only | 0.6461, 0.6461, 0.6461 | 0.000 |
+| With the refraction | 0.3171, 0.2888, 0.2775 | 0.041 |
+
+The first row is a grey dome, the same value in all three channels, which is
+what a white surface with no transmission renders as. The second is the iris
+seen through it.
 
 ### Why the probe reads the preset itself
 
@@ -1026,6 +1049,10 @@ python3 scripts/daz_characters.py make --count 12 --seed 20260921 --dry-run
 python3 scripts/daz_characters.py make --count 12 --seed 20260921 --size 768
 ```
 
+The six character presets are dealt out rather than drawn one at a time, so
+twelve characters use each of them twice instead of landing on the same one
+four times. Everything else is a roll.
+
 Nothing is named in the script. The slots are read from the library, one figure
 generation at a time, which is the folder under `People/` that the character
 presets sit in: that is what keeps a Genesis 8 hair and a Genesis 9 Toon outfit
@@ -1038,6 +1065,15 @@ seated, laying or flying. The roll is seeded, so the same seed and the same
 library give the same roster, and `--dry-run` prints it without building
 anything.
 
+### The rest pose, on purpose
+
+No pose is applied by default. Genesis 9's rest pose is the A pose a character
+sheet wants, and the library's poses are stretching, running, seated, laying
+and flying: they hide as much as they show, and an arm across the chest tells
+you nothing about the armour under it. `--poses upright` rolls one of the 26
+standing, walking, flexing, running or stretching poses, and `--poses any` from
+all 58.
+
 ### Framing a set
 
 Every character is drawn by `render_sheet.py --azimuths 0,90 --elevation 0`:
@@ -1047,10 +1083,26 @@ spaced facings and 0 and 90 are not two of four.
 
 The framing is `--span`, a fixed world height, rather than each figure's own
 extent, so a short character reads as short instead of being scaled up to fill
-its cell. At `--span 2.0` eleven of twelve fitted and one, in a stretching
-pose, was cut off at the top, so the default is 2.4 m. The twelve then filled
-53.5% to 78.6% of their cells' height, with every pair of feet on the same
-line.
+its cell. A Genesis 9 figure is 1.755 m from heel to crown, and
+`render_sheet.py` shows `--span` times its `--zoom` of 1.15, so the default is
+2.0 m in the rest pose: the twelve then filled 75.0% to 80.2% of their cells,
+with every pair of feet on one line and nothing touching an edge. With a pose
+rolled it is 2.4 m, because at 2.0 a stretching figure was cut off at the top.
+
+### Light, because Daz skin is dark under a sprite sheet's
+
+`render_sheet.py` lights a sheet flat and even, at a sun of 1.6 and a world of
+0.22, which suits a clay mesh and leaves a Daz figure in the dark. Measured on
+a dressed figure at 512 px on 2026-09-21, over its lit pixels:
+
+| Sun, world | Mean | Median | 95th | Clipped |
+|---|---|---|---|---|
+| 1.6, 0.22 | 0.248 | 0.228 | 0.337 | none |
+| 5.0, 1.0 | 0.375 | 0.376 | 0.620 | 0.04% |
+| 6.5, 1.3 | 0.425 | 0.427 | 0.698 | 0.06% |
+| 8.0, 1.6 | 0.468 | 0.471 | 0.765 | 0.10% |
+
+So a roster is drawn at 6.5 and 1.3, and `--key` and `--ambient` move it.
 
 ### What a run costs and what it keeps
 
@@ -1059,12 +1111,13 @@ characters at 768 px with Cycles on the card:
 
 | | |
 |---|---|
-| Build, each | 13.3 to 23.1 s, 230.6 s over the twelve |
-| Draw, two views each | 2.1 to 3.9 s, 34.3 s over the twelve, 1.43 s a cell |
+| Build, each | 10.3 to 25.4 s, 227.7 s over the twelve |
+| Draw, two views each | 2.1 to 4.3 s, 38.1 s over the twelve, 1.59 s a cell |
 | Every exit code | 0, for both commands, twelve times |
-| Each `.blend`, before it was deleted | 70,952,378 to 172,618,316 bytes |
-| Kept on disk | 6.2 MB |
-| Drawn, per view | 28,764 to 61,725 pixels of 589,824 |
+| Each `.blend`, before it was deleted | 71 to 173 MB |
+| Kept on disk | 8.0 MB, the sheet 4096 by 1629 px of it |
+| Height of each figure in its cell | 75.0% to 80.2%, feet on one line |
+| Lit pixels, per figure | a mean of 0.224 to 0.481 of 1, which is the spread of Daz's own skin tones |
 
 That is the first measurement of a Daz figure rendered with its materials on
 Cycles, and it settles a question this page left open: on EEVEE through
@@ -1082,10 +1135,11 @@ Each character keeps, under `output/daz/characters/<slug>/`:
 <slug>_build.log, <slug>_render.log   what the two commands printed
 ```
 
-and beside them `characters.json`, the run's index, and `contact_sheet.png`,
-every front view on one page. The `.blend` goes when its views are drawn,
-unless `--keep-blend`, because a dressed figure is about 150 MB and twelve are
-1.8 GB.
+and beside them `characters.json`, the run's index, and `roster_sheet.png`,
+which is the one to open: every character on a flat grey, its views side by
+side, under a line naming its base, hair, outfit and weapon. The `.blend` goes
+when its views are drawn, unless `--keep-blend`, because a dressed figure is
+about 150 MB and twelve are 1.8 GB.
 
 ### What it does not roll
 

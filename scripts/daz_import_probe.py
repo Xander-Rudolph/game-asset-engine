@@ -161,9 +161,12 @@ HOW IT RUNS WITHOUT A UI, the method scripts/mpfb_probe.py found for MPFB:
      afterwards by running a MAT preset. So the build reads those presets
      itself and wires what it understands, filling in only what a material is
      missing: the cutout opacity map (or value), the colour map or flat
-     colour, and a layered colour image whose layers are laid plainly over
-     one another. Without this an eyelash card renders as an opaque fan
-     across the eyelid. --mat-preset names one and wins over the presets
+     colour, a layered colour image whose layers are laid plainly over one
+     another, and a refraction weight of 0.5 or more, which becomes the
+     Principled BSDF's Transmission Weight with the preset's refraction index
+     as its IOR. Without the first an eyelash card renders as an opaque fan
+     across the eyelid; without the last the film of moisture over each eye
+     renders as an opaque white dome. --mat-preset names one and wins over the presets
      found beside the figure; --no-auto-materials turns the search off.
      bpy.ops.daz.import_daz_materials is not used: it keys a preset's channel
      values by the url-quoted material name and looks them up under the plain
@@ -1003,6 +1006,18 @@ def apply_mat_presets(specs):
                     did["alpha_value"] = want["alpha_value"]
                 if "alpha_image" in did or "alpha_value" in did:
                     filled["alpha"].add(mat.name)
+                # A refractive surface, such as the film of moisture over an
+                # eye: opaque white without this, and glass with it.
+                transmission = bsdf.inputs.get("Transmission Weight")
+                if (want.get("refraction", 0.0) >= cfg["refractive"] and transmission is not None
+                        and not transmission.is_linked and transmission.default_value == 0.0
+                        and mat.name not in filled["alpha"]):
+                    transmission.default_value = want["refraction"]
+                    ior = bsdf.inputs.get("IOR")
+                    if ior is not None and want.get("ior") and not ior.is_linked:
+                        ior.default_value = want["ior"]
+                    did["refraction"] = want["refraction"]
+                    did["ior"] = want.get("ior")
                 base = bsdf.inputs.get("Base Color")
                 if mat.name in filled["colour"]:
                     did["colour_kept"] = "set by an earlier preset"
@@ -1025,7 +1040,7 @@ def apply_mat_presets(specs):
                 if any(k in did for k in ("colour_image", "colour_layers", "colour")):
                     filled["colour"].add(mat.name)
                 if any(k in did for k in ("alpha_image", "alpha_value", "colour_image",
-                                          "colour_layers", "colour")):
+                                          "colour_layers", "colour", "refraction")):
                     entry["applied"].append(did)
                 else:
                     entry["left_alone"].append(did)
@@ -2286,7 +2301,11 @@ def anatomy_from_figure(figure: Path) -> list[str]:
 # whose url names the material and the channel, which is what every
 # hierarchical preset does. Both are read below. Only the channels this script
 # can wire are kept, and the values are the file's own: nothing is guessed.
-PRESET_CHANNELS = ("Cutout Opacity", "diffuse")
+PRESET_CHANNELS = ("Cutout Opacity", "diffuse", "Refraction Weight", "Refraction Index")
+# A surface this refractive is glass, not a solid: the Genesis 9 eye moisture
+# and tear layers set Refraction Weight to 1, and without it they render as
+# opaque white domes over the eyes.
+REFRACTIVE = 0.5
 # Suffixes Daz puts on a material instance, as in "Eyelashes Lower-1".
 DAZ_INSTANCE = re.compile(r"-\d+$")
 
@@ -2423,8 +2442,15 @@ def preset_materials(path: Path, lib: Path) -> dict:
     for name, channels in sorted(raw.items()):
         spec = {}
         for channel, image_key, value_key in (("Cutout Opacity", "alpha_image", "alpha_value"),
-                                              ("diffuse", "colour_image", "colour")):
+                                              ("diffuse", "colour_image", "colour"),
+                                              ("Refraction Weight", None, "refraction"),
+                                              ("Refraction Index", None, "ior")):
             bits = channels.get(channel) or {}
+            if image_key is None:
+                value = bits.get("value")
+                if isinstance(value, (int, float)) and not isinstance(value, bool):
+                    spec[value_key] = float(value)
+                continue
             if bits.get("image_file"):
                 rel = library_image(lib, bits["image_file"])
                 if rel:
@@ -2533,7 +2559,7 @@ def print_mat_presets(res: dict) -> None:
         bits = []
         for did in applied:
             what = [k for k in ("alpha_image", "alpha_value", "colour_image",
-                                "colour_layers", "colour") if k in did]
+                                "colour_layers", "colour", "refraction") if k in did]
             bits.append(f"{did['material']} ({', '.join(what)})")
         print(f"  preset    {name}: filled in {len(applied)} of {len(entry['matched'])} matched"
               + (f"; {', '.join(bits)}" if bits else ""))
@@ -2637,6 +2663,7 @@ def cmd_build(args) -> int:
         "anatomy": anatomy,
         "material_method": args.material_method,
         "merge_materials": False,
+        "refractive": REFRACTIVE,
         "fit": args.fit,
         "verbosity": args.verbosity,
         "visemes": args.visemes,
@@ -2833,6 +2860,7 @@ def cmd_scene(args) -> int:
         "anatomy": anatomy,
         "material_method": args.material_method,
         "merge_materials": False,
+        "refractive": REFRACTIVE,
         "fit": args.fit,
         "verbosity": args.verbosity,
         "morph_sets": morph_sets,

@@ -27,10 +27,11 @@ not, without an Interactive License for each product used. None of it goes into
 an AI stage, a commit or the container image. output/daz/ is gitignored.
 
 WHAT A RUN COSTS. Measured on 2026-09-21 in comfyui-packaged on the reference
-machine, twelve characters at 768 px with Cycles on the card: 13.3 to 23.1 s to
-build each one and 2.1 to 3.9 s to draw its two views, 230.6 s and 34.3 s over
-the twelve. Each .blend was 71 to 173 MB and is deleted once the views are
-drawn, unless --keep-blend, which left 6.2 MB of images and reports.
+machine, twelve characters in the rest pose at 768 px with Cycles on the card:
+10.3 to 25.4 s to build each one and 2.1 to 4.3 s to draw its two views,
+227.7 s and 38.1 s over the twelve. Each .blend was 71 to 173 MB and is deleted
+once the views are drawn, unless --keep-blend, which left 8.0 MB of images,
+reports and one 4096 by 1629 px sheet.
 """
 from __future__ import annotations
 
@@ -158,11 +159,11 @@ def catalogue(lib: Path, generation: str | None = None) -> dict:
                              "build": build.lower(), "hand": hand})
 
     for path in sorted(lib.glob(f"{here}/Poses/*/*/*/*.duf")):
-        if not UPRIGHT.search(path.stem):
-            continue
         for build, folders in POSE_FOLDERS.items():
             if path.parent.name in folders:
-                cat["poses"][build].append({"file": rel(lib, path), "name": path.stem})
+                entry = {"file": rel(lib, path), "name": path.stem,
+                         "upright": bool(UPRIGHT.search(path.stem))}
+                cat["poses"][build].append(entry)
 
     # Two folders of dials, and a character takes one of them: the probe loads
     # one custom morph folder per run, and no standard morph set carries either
@@ -186,9 +187,23 @@ def pick(rng: random.Random, items: list, chance: float = 1.0):
     return rng.choice(items)
 
 
-def roll(rng: random.Random, cat: dict, index: int) -> dict:
+def base_order(rng: random.Random, characters: list, count: int) -> list:
+    """Which character preset each roll starts from.
+
+    Drawn rather than chosen at random one at a time, so twelve characters use
+    all six presets twice rather than landing on Ty four times.
+    """
+    order = []
+    while len(order) < count:
+        batch = list(characters)
+        rng.shuffle(batch)
+        order += batch
+    return order[:count]
+
+
+def roll(rng: random.Random, cat: dict, index: int, base: dict, poses: str = "none",
+         any_brow: bool = False) -> dict:
     """One character: what it is made of, before anything is built."""
-    base = rng.choice(cat["characters"])
     build = base["build"]
     recipe = {"index": index, "figure": base["file"], "base_character": base["name"],
               "build": build, "morph_sets": ["body", "jcms"], "dials": {},
@@ -222,7 +237,7 @@ def roll(rng: random.Random, cat: dict, index: int) -> dict:
 
     brows = base.get("eyebrows") or []
     natural = [b for b in brows if b["colour"] not in FANCY_COLOURS]
-    brow = pick(rng, natural if natural and rng.random() < 0.8 else brows)
+    brow = pick(rng, brows if any_brow or not natural else natural)
     if brow:
         recipe["mat_presets"].append(brow["file"])
         recipe["eyebrow_colour"] = brow["colour"]
@@ -240,7 +255,7 @@ def roll(rng: random.Random, cat: dict, index: int) -> dict:
     armour = [o for o in cat["outfits"].get("dForce Leather Viking Armor for Genesis 9", [])
               if not o["name"].startswith("LVA !")]
     basics = cat["outfits"].get("Base Clothing", [])
-    if armour and rng.random() < 0.6:
+    if armour and rng.random() < 0.5:
         core = [o for o in armour if o["name"] in ("LVA Vest", "LVA Pant", "LVA Boots")]
         extra = [o for o in armour if o not in core]
         chosen = core + rng.sample(extra, k=rng.randint(0, min(2, len(extra))))
@@ -265,10 +280,15 @@ def roll(rng: random.Random, cat: dict, index: int) -> dict:
         recipe["prop"] = prop["name"]
         recipe["wear"].append(prop["file"])
 
-    pose = pick(rng, cat["poses"][build])
+    # No pose by default: Genesis 9's rest pose is the A pose a character sheet
+    # wants, and a stretching or running pose hides as much as it shows.
+    choices = [p for p in cat["poses"][build] if poses == "any" or p["upright"]]
+    pose = pick(rng, choices) if poses != "none" else None
     if pose:
         recipe["pose"] = pose["file"]
         recipe["pose_name"] = pose["name"]
+    else:
+        recipe["pose_name"] = "rest (A pose)"
     return recipe
 
 
@@ -302,7 +322,8 @@ def build_command(recipe: dict, blend: Path, lib: Path, timeout: int) -> list[st
 def render_command(blend: Path, sheet: Path, args) -> list[str]:
     cmd = [sys.executable, str(SHEET), str(blend), "--azimuths", args.azimuths,
            "--elevation", str(args.elevation), "--size", str(args.size),
-           "--span", str(args.span), "--out", str(sheet)]
+           "--span", str(args.span), "--key", str(args.key),
+           "--ambient", str(args.ambient), "--out", str(sheet)]
     if args.samples:
         cmd += ["--samples", str(args.samples)]
     return cmd
@@ -333,24 +354,57 @@ def cut_cells(sheet: Path, size: int, names: list[str]) -> list[dict]:
     return out
 
 
-def contact_sheet(rows: list[dict], out: Path, size: int, columns: int = 4) -> dict | None:
-    """Every character's front view on one page, to open instead of twelve."""
-    from PIL import Image
-    fronts = [out.parent / r["slug"] / next(v["file"] for v in r["views"] if v["facing"] == "front")
-              for r in rows if r.get("views")]
-    if not fronts:
+def label_font(size: int):
+    from PIL import ImageFont
+    try:
+        return ImageFont.load_default(size=size)
+    except TypeError:                 # Pillow before 10.1 has one fixed size
+        return ImageFont.load_default()
+
+
+def roster_sheet(rows: list[dict], out: Path, cell: int, per_row: int) -> dict | None:
+    """Every character on one page: its views side by side, under its name.
+
+    On a mid grey, because a sheet of cut-out figures on nothing is hard to read
+    and half of what wants looking at is the silhouette's edge. Mid rather than
+    dark, so black leather and pale skin both show against it.
+    """
+    from PIL import Image, ImageDraw
+    drawn = [r for r in rows if r.get("views")]
+    if not drawn:
         return None
-    cell = max(64, size // 2)
-    columns = min(columns, len(fronts))
-    lines = (len(fronts) + columns - 1) // columns
-    page = Image.new("RGBA", (columns * cell, lines * cell), (0, 0, 0, 0))
-    for i, path in enumerate(fronts):
-        with Image.open(path) as img:
-            page.paste(img.convert("RGBA").resize((cell, cell), Image.LANCZOS),
-                       ((i % columns) * cell, (i // columns) * cell))
+    views = max(len(r["views"]) for r in drawn)
+    per_row = max(1, min(per_row, len(drawn)))
+    lines = (len(drawn) + per_row - 1) // per_row
+    label = max(14, cell // 24)
+    pad = label // 2
+    width = per_row * views * cell
+    height = lines * (cell + label + pad)
+    page = Image.new("RGBA", (width, height), (118, 120, 124, 255))
+    draw = ImageDraw.Draw(page)
+    font = label_font(label)
+    for i, row in enumerate(drawn):
+        x0 = (i % per_row) * views * cell
+        y0 = (i // per_row) * (cell + label + pad)
+        for j, view in enumerate(row["views"]):
+            path = out.parent / row["slug"] / view["file"]
+            with Image.open(path) as img:
+                page.alpha_composite(img.convert("RGBA").resize((cell, cell), Image.LANCZOS),
+                                     (x0 + j * cell, y0))
+        recipe = row["recipe"]
+        bits = [recipe["base_character"]]
+        bits += [b for b in (recipe.get("hair"), recipe.get("beard")) if b]
+        if recipe["outfit"]:
+            bits.append("+".join(o.replace("G9 Base ", "").replace("LVA ", "") for o in recipe["outfit"]))
+        if recipe.get("prop"):
+            bits.append(recipe["prop"].replace("Tubal ", ""))
+        draw.rectangle((x0, y0 + cell, x0 + views * cell, y0 + cell + label + pad),
+                       fill=(58, 60, 64, 255))
+        draw.text((x0 + pad, y0 + cell + pad // 2), f"{row['slug']}  {', '.join(bits)}",
+                  fill=(232, 232, 236, 255), font=font)
     page.save(out)
-    return {"file": out.name, "cells": len(fronts), "cell_px": cell,
-            "bytes": out.stat().st_size}
+    return {"file": out.name, "characters": len(drawn), "views_each": views,
+            "cell_px": cell, "size": list(page.size), "bytes": out.stat().st_size}
 
 
 def cmd_list(args) -> int:
@@ -372,7 +426,8 @@ def cmd_list(args) -> int:
     for skipped in cat["skipped"]:
         print(f"  left out  {skipped['name']}: {skipped['why']}")
     for build, poses in cat["poses"].items():
-        print(f"  poses     {build}: {len(poses)} upright")
+        print(f"  poses     {build}: {sum(1 for p in poses if p['upright'])} upright "
+              f"of {len(poses)}")
     return 0
 
 
@@ -386,12 +441,16 @@ def cmd_make(args) -> int:
         print(f"  ! {lib} holds no Genesis character preset to start from")
         return 1
     rng = random.Random(args.seed)
-    recipes = [roll(rng, cat, i + 1) for i in range(args.count)]
+    bases = base_order(rng, cat["characters"], args.count)
+    recipes = [roll(rng, cat, i + 1, bases[i], args.poses, args.any_brow_colour)
+               for i in range(args.count)]
     print(f"  library   {lib}")
     print(f"  seed      {args.seed}, {args.count} character(s)")
     print(f"  render    {args.size} px cells at azimuths {args.azimuths}, elevation "
-          f"{args.elevation}, span {args.span}"
+          f"{args.elevation}, span {args.span}, key {args.key}, ambient {args.ambient}"
           + (f", {args.samples} samples" if args.samples else ""))
+    print(f"  poses     {args.poses}"
+          + (" (the rest pose Genesis 9 ships with)" if args.poses == "none" else ""))
     for recipe in recipes:
         print(f"  {slug_of(recipe):16s} {recipe['base_character']:7s} "
               f"hair {recipe['hair'] or '-'}; beard {recipe['beard'] or '-'}; "
@@ -433,6 +492,7 @@ def cmd_make(args) -> int:
         row["render"] = {"exit": code, "seconds": seconds, "size": args.size,
                          "azimuths": [float(a) for a in args.azimuths.split(",")],
                          "elevation": args.elevation, "span": args.span,
+                         "key": args.key, "ambient": args.ambient,
                          "samples": args.samples, "engine": engine[7:].strip() or None}
         if sheet.exists():
             row["views"] = cut_cells(sheet, args.size, args.facings)
@@ -459,17 +519,19 @@ def cmd_make(args) -> int:
         (folder / f"{slug}.json").write_text(json.dumps(row, indent=1) + "\n")
         rows.append(row)
 
-    page = contact_sheet(rows, OUT / "contact_sheet.png", args.size)
+    page = roster_sheet(rows, OUT / "roster_sheet.png", args.sheet_cell, args.sheet_columns)
     index = {"date": time.strftime("%Y-%m-%d"), "seed": args.seed, "library": str(lib),
-             "count": len(rows), "failed": failed, "contact_sheet": page,
+             "count": len(rows), "failed": failed, "roster_sheet": page,
+             "poses": args.poses,
              "characters": [{"slug": r["slug"], "base": r["recipe"]["base_character"],
                              "files": [v["file"] for v in r["views"]],
                              "error": r.get("error")} for r in rows]}
     (OUT / "characters.json").write_text(json.dumps(index, indent=1) + "\n")
     print(f"  index     {(OUT / 'characters.json').relative_to(ROOT)}")
     if page:
-        print(f"  contact   {(OUT / page['file']).relative_to(ROOT)}  "
-              f"({page['cells']} cells of {page['cell_px']} px)")
+        print(f"  sheet     {(OUT / page['file']).relative_to(ROOT)}  "
+              f"({page['characters']} characters, {page['views_each']} views each, "
+              f"{page['size'][0]}x{page['size'][1]} px)")
     print(f"  done      {len(rows) - failed} of {len(rows)} character(s); "
           f"{sum(len(r['views']) for r in rows)} image(s) under {OUT.relative_to(ROOT)}")
     print("  licence   renders may ship on conditions; the .blend and the figure may not. "
@@ -503,13 +565,37 @@ def main() -> int:
                        help="what to call each facing in the file names (default front,side)")
         p.add_argument("--elevation", type=float, default=0.0,
                        help="camera elevation; 0 is eye level, square on (default 0)")
-        p.add_argument("--span", type=float, default=2.4,
-                       help="frame every character against this height in metres, so a short "
-                            "character reads as short (default 2.4, which is what a figure in "
-                            "a stretching pose needs: at 2.0 one of twelve was cut off at the "
-                            "top on 2026-09-21)")
+        p.add_argument("--span", type=float, default=None,
+                       help="frame every character against this height in metres, so a "
+                            "short character reads as short. The default follows --poses: "
+                            "2.0 for the rest pose, where a Genesis 9 figure is about "
+                            "1.76 m and fills three quarters of the cell, and 2.4 when a "
+                            "pose is rolled, because at 2.0 a stretching figure was cut "
+                            "off at the top on 2026-09-21")
         p.add_argument("--samples", type=int, default=None,
                        help="render samples per cell (default: render_sheet.py's own)")
+        p.add_argument("--key", type=float, default=6.5,
+                       help="sun strength. The default is 6.5, not render_sheet.py's 1.6, "
+                            "because Daz skin is dark under a sprite sheet's light: "
+                            "measured on 2026-09-21 on a dressed figure, the lit pixels "
+                            "averaged 0.248 of 1 at 1.6 and 0.425 at 6.5, with 0.06 per "
+                            "cent of them clipped (default 6.5)")
+        p.add_argument("--ambient", type=float, default=1.3,
+                       help="world light strength, raised with the sun for the same "
+                            "reason (default 1.3)")
+        p.add_argument("--poses", choices=("none", "upright", "any"), default="none",
+                       help="none leaves every figure in the rest pose Genesis 9 ships "
+                            "with, which is the A pose a character sheet wants (default); "
+                            "upright rolls a standing, walking, flexing, running or "
+                            "stretching pose; any rolls from every pose the library has")
+        p.add_argument("--any-brow-colour", action="store_true",
+                       help="let a roll pick the blue, fuchsia and neon eyebrows the "
+                            "library ships; by default only the six that grow on people")
+        p.add_argument("--sheet-cell", type=int, default=512,
+                       help="pixels per cell on the one sheet that holds every character "
+                            "(default 512; the per-character images keep --size)")
+        p.add_argument("--sheet-columns", type=int, default=4,
+                       help="characters per row on that sheet (default 4)")
         p.add_argument("--timeout", type=int, default=3600,
                        help="seconds for each Blender build (default 3600)")
         p.add_argument("--keep-blend", action="store_true",
@@ -520,6 +606,8 @@ def main() -> int:
     args = ap.parse_args()
     if args.cmd == "list":
         return cmd_list(args)
+    if args.span is None:
+        args.span = 2.0 if args.poses == "none" else 2.4
     args.facings = [f.strip() for f in args.facings.split(",") if f.strip()]
     if len(args.facings) != len(args.azimuths.split(",")):
         ap.error("--facings must name as many facings as --azimuths has angles")
