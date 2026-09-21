@@ -140,6 +140,12 @@ python3 scripts/daz_library.py verify 86958 --crc
 python3 scripts/daz_library.py licence 86958
 ```
 
+- **Content that is not a Daz package** installs the same way with
+  `--vendor NAME`, such as `--vendor Renderosity`: the record is named after
+  the file, the content root is found by looking, and this script states none
+  of that vendor's terms. It names the terms files the package shipped and
+  leaves the reading to the user. Until they record having read them, treat
+  that content exactly as Daz content.
 - **`--eula-read` only with the date the user gave.** Never invent one; without
   it `list` shows `EULA last read: not recorded`. Add it later with
   `licence 86958 --eula-read YYYY-MM-DD`.

@@ -68,7 +68,7 @@ from Daz content to the gitignored `output/daz/`. None of it may be committed.
 
 | Script | Does |
 |---|---|
-| `daz_library.py` | Install Daz Install Manager zips downloaded by hand into a content library outside the repo, `MODELS_DIR/daz_library` by default, and record every file with its CRC-32, and the licence held with the date you read the EULA. Every path is checked before anything is written. `intake` does that for every zip in a folder, verifies what landed, deletes each zip and keeps a Markdown ledger beside them. `list`, `licence`, `verify`, `uninstall`, `case-check` and a `selftest` with invented packages. Standard library only, on the host. See [below](#daz-library-py). |
+| `daz_library.py` | Install content zips downloaded by hand into a content library outside the repo, `MODELS_DIR/daz_library` by default, and record every file with its CRC-32, and the licence held with the date you read the EULA. Every path is checked before anything is written. `intake` does that for every zip in a folder, verifies what landed, deletes each zip and keeps a Markdown ledger beside them. `list`, `licence`, `verify`, `uninstall`, `case-check` and a `selftest` with invented packages. Standard library only, on the host. See [below](#daz-library-py). |
 | `daz_import_probe.py` | Import a Genesis figure into the container's Blender with the Diffeomorphic DAZ Importer, which `fetch` pins by size and sha256 into the gitignored `input/_devtools/import_daz/`. `build` saves a `.blend` whose 17 viseme controllers come from FACS, `scene` adds morph sets, character shape dials, sliders, clothing and hair merged into the figure's rig and a pose preset, `verify` reopens a saved `.blend` with no add-on, and `render` draws a row per viseme with `render_sheet.py` and in three framings of its own, or measures what each moves with `--motion-only`. See [below](#daz-import-probe-py). |
 | `daz_characters.py` | Roll random Genesis characters from whatever the Daz library holds, build each one in the container's Blender through `daz_import_probe.py`, render it front and side with `render_sheet.py`, and write a JSON beside its two images holding the roll, the two commands that rebuild it and what was drawn. `list` prints what the library offers for each slot. The `.blend` is deleted once the views are drawn. See [below](#daz-characters-py). |
 | `daz_inventory.py` | List the figures, bones, morphs, aliases and HD morphs in a Daz content library outside this repo, reading every `.dsf` with the standard library. Figures are grouped by the content type their author set, aliases and other modifiers are counted apart from morphs, and a valid JSON file that is not DSON is skipped, not an error. It refuses a path in or above the repo. See [below](#daz-inventory-py). |
@@ -482,8 +482,10 @@ and never overwrites a timeline made from audio.
 
 ```sh
 scripts/daz_library.py install ZIP... [--dry-run] [--overwrite] [--eula-read YYYY-MM-DD]
+                              [--interactive-license] [--vendor NAME]
                        [--interactive-license]
 scripts/daz_library.py intake [--source DIR] [--ledger NAME] [--dry-run] [--keep-zips]
+                              [--vendor NAME]
 scripts/daz_library.py list
 scripts/daz_library.py licence SKU [--eula-read YYYY-MM-DD]
                        [--interactive-license | --standard-license]
@@ -494,6 +496,18 @@ scripts/daz_library.py selftest [--dir DIR]
 ```
 
 Every command but `selftest` takes `--library DIR`, `--json` and `--examples N`.
+**Packages that are not Daz packages.** A Daz Install Manager zip is named for
+its SKU and lists its files in `Manifest.dsx`. A zip from anywhere else has
+neither, so `--vendor NAME` records who made it, the record is named after the
+file, and the content root is found by looking: the first folder, or the zip
+root, that holds one of a library's own folders. Anything beside those is left
+in the zip and named. The licence wording in this script was read from Daz's
+EULA and is not applied to anyone else's content: the record keeps the vendor,
+the terms files the package shipped and the date you say you read them. A Daz
+package a browser numbered as a second download is refused by name, because it
+would otherwise install a second copy of a product under a name of its own. See
+[Daz figures](/guide/daz-figures#content-that-is-not-a-daz-package).
+
 `selftest --json` fails with `daz_library.py: error: unrecognized arguments:
 --json`.
 

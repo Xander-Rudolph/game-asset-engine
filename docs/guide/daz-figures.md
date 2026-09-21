@@ -355,6 +355,98 @@ The first run on real content found two bugs, both fixed:
   file whose only key is `group_list`, made a clean install exit 1. A valid
   JSON file with no DSON key is now skipped and listed as not DSON.
 
+## Content that is not a Daz package
+
+A Daz Install Manager zip is the well-lit path: its name carries the SKU and
+the part, and `Manifest.dsx` lists every file to install. Content from
+elsewhere, such as Renderosity's free section, comes in other shapes, and
+`daz_library.py install --vendor NAME` takes all of them. Three turned up on
+2026-09-21, in fourteen zips:
+
+| Shape | Where the content starts | Seen in |
+|---|---|---|
+| `Manifest.dsx` at the zip root | `Content/`, as the manifest says | 8 of 14 |
+| A library folder named in the zip | `My DAZ 3D Library/` | 2 of 14 |
+| The folders at the zip root | the root itself | 1 of 14 |
+
+Where there is no manifest, the content root is found by looking: the first
+folder, or the zip root, that holds one of a library's own folders, such as
+`data`, `People`, `Runtime`, `Props` or `Documentation`. Everything beside
+those, a `readme/` folder or a loose PDF, is left in the zip and named in the
+report.
+
+Three of the fourteen were refused, each for a reason worth keeping:
+
+- `IntergenPoseTransfer.dll`, a Daz Studio plugin. No content folder, and a
+  Windows plugin for a program this stack does not run.
+- A PDF on its own. No content folder either.
+- `IM00087397-01_...(1).zip`, a Daz package a browser had numbered as a second
+  download. Its name no longer matches Daz's pattern, so it would have been
+  installed a second time under a name of its own; the refusal says to rename
+  it or delete it.
+
+### Whose terms
+
+The licence wording in these scripts was read from Daz's EULA, and applies to
+Daz's content. For a package from anywhere else the script states nothing: the
+record keeps the vendor's name, the paths of the terms files the package
+shipped, and the date the owner says they read them.
+
+```
+$ python3 scripts/daz_library.py licence mvrazel_carter-9_100068
+Licence for mvrazel_carter-9_100068 (Carter 9): from Renderosity; this script has read
+none of its terms
+  The package shipped 1 file of terms. Read them in the library before shipping anything
+  made from this content:
+    Documentation/License.txt
+```
+
+Until those terms are read and recorded, this repo treats that content exactly
+as it treats Daz content: out of the repo, out of a build, and out of every AI
+stage.
+
+### What fourteen free packages actually held
+
+Installed on 2026-09-21, 11 packages, 3,464 files, 571 MB, all verified by
+CRC-32:
+
+- **Seven Genesis 9 characters** (Anjali, Carter, Heath, James, Kiva, Rebecca,
+  Shelly), each a head and body morph with a `.duf` that loads them. They
+  carry no skin of their own: each names the base Genesis 9 masculine or
+  feminine maps, which the Starter Essentials already installed. `Carter 9.duf`
+  imported in 1.03 s, 25,182 vertices with 3 shape keys, its own eyebrow card
+  style and every anatomy figure.
+- **An eighth character** that names neither base. `daz_characters.py` leaves
+  it out of a roll and says why: nothing in the file says which skins fit it.
+- **Two hand-grip pose sets**, which landed under the library's own `Props/`
+  rather than under a figure. They are a second pose, for the fingers, and
+  `scene` applies one pose, so nothing uses them yet.
+- **A 558 MB material set** for a hair figure this library does not have: 792
+  material presets and their textures, and no geometry at all. It installs
+  cleanly and there is nothing to put it on.
+
+### One library, two spellings of one folder
+
+The characters install under `data/DAZ 3D/`, and Daz's own content is under
+`data/Daz 3D/`. On this filesystem those are two folders, and `case-check`
+finds them:
+
+```
+On disk: 1 folders hold names that differ only in case (2 names)
+  data: DAZ 3D | Daz 3D
+References in 5713 .dsf and .duf files: 50365 references to 6480 distinct paths
+  6125 match a path exactly
+  103 match a path only when case is ignored
+```
+
+The mismatch is not new and not only ours: 52 of those references spell
+`runtime` where the disk has `Runtime`, and one product misspells its own
+folder as `Tubal WEapons Collection`. Daz Studio runs on a case-insensitive
+filesystem and never notices. Neither did the importer: the character above
+loaded with its morphs from one spelling and its base figure from the other.
+Nothing here rewrites a path to match the disk, because a package that says
+`DAZ 3D` is installed as it is written.
+
 ## The importer, fetched and pinned
 
 ```sh

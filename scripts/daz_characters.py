@@ -37,6 +37,7 @@ sheet.
 from __future__ import annotations
 
 import argparse
+import gzip
 import json
 import random
 import re
@@ -75,6 +76,34 @@ SKIP_WEARABLES = {
     # cap draws, so a character wearing it looks bald.
     "G9 Base dForce Pixie Hair": "a dForce strand mesh that renders nothing here",
 }
+
+
+def character_build(path: Path) -> str | None:
+    """Whether a character is built on the masculine or the feminine base.
+
+    Read from the file rather than guessed at: a Genesis 9 character preset
+    names the base it uses, through its skin maps or its morphs, hundreds of
+    times. A file that names neither is left out of a roll, because the base
+    is what decides which skins fit it.
+    """
+    try:
+        text = raw_duf(path)
+    except (OSError, ValueError, EOFError):
+        return None
+    masculine = len(re.findall("Masculine", text))
+    feminine = len(re.findall("Feminine", text))
+    if masculine == feminine:
+        return None
+    return "masculine" if masculine > feminine else "feminine"
+
+
+def raw_duf(path: Path) -> str:
+    """A .duf as text, gzip-compressed or plain."""
+    try:
+        with gzip.open(path, "rt", encoding="utf-8-sig") as f:
+            return f.read()
+    except gzip.BadGzipFile:
+        return path.read_text(encoding="utf-8-sig")
 
 
 def duf_type(path: Path) -> str:
@@ -118,12 +147,16 @@ def catalogue(lib: Path, generation: str | None = None) -> dict:
            "skipped": []}
     here = f"People/{generation}"
 
-    for path in sorted(lib.glob(f"{here}/Characters/* for *.duf")):
-        skin = sorted(path.parent.glob(f"*/{path.stem.split(' for ')[0]}*/Materials/*Skin MAT*.duf"))
-        masculine = bool(skin) and bool(MASCULINE_MAP.search(json.dumps(
-            read_duf(skin[0]).get("image_library", []))))
-        cat["characters"].append({"file": rel(lib, path), "name": path.stem.split(" for ")[0],
-                                  "build": "masculine" if masculine else "feminine"})
+    for path in sorted(lib.glob(f"{here}/Characters/**/*.duf")):
+        if duf_type(path) != "character":
+            continue
+        build = character_build(path)
+        name = path.stem.split(" for ")[0].strip()
+        if build is None:
+            cat["skipped"].append({"name": name, "why": "the .duf says nothing about which "
+                                                        "base it is built on, so no skin fits it"})
+            continue
+        cat["characters"].append({"file": rel(lib, path), "name": name, "build": build})
 
     # The eyebrows are a figure of their own, and which one a character loads is
     # its own business: the six Genesis 9 characters are split between card and
