@@ -94,6 +94,8 @@ Where CLAUDE.md's Owner decisions line names one, update it too.
 - **The eyebrow colour an auto run picks.** Brown, because the cards ship nine colours and no default. Nobody has said Brown is right, and a figure whose hair is white gets brown brows unless `--mat-preset` says otherwise. Cost: a decision.
 - **`daz_characters.py` beyond the happy path.** Run with the rest pose and with rolled poses, 12 for 12 both times (2026-09-21). Never run: a build that fails half way (the row is written with its error and the run carries on, by reading), `--keep-blend`, `--generation` given by hand, `--poses any`, `--any-brow-colour`, a library with no character preset, and a second run over the same folder, which overwrites a slug's files. Cost: minutes.
 
+- **The two marketplace licences have no claim register.** RenderHub's and Renderosity's terms were read once each, on 2026-09-21, by research agents, and written into `docs/guide/licensing.md` with their URLs. Nothing has re-checked them, no id in `research/claims/` backs them, and three phrases in Renderosity's Extended License, "encryption protection", "uses modifications of the original Product file(s)" and a bar on "convert" beside a permission to embed, are undefined on the page. Before anything bought from either site ships, those want a written answer from the vendor and a register of their own. Cost: an afternoon, plus two emails.
+
 ## The MCP server
 
 Built 2026-09-19 in `mcp/`: 23 tools over the protocol, 24 self-test checks, and Claude Code CLI 2.1.278 connected, called tools and shut it down cleanly.

@@ -198,11 +198,156 @@ Each is dated and links the text it read.
   under the standard Daz EULA. The mesh, rig or morphs inside a build need an
   Interactive License for each product, and the EULA's AI clause puts feeding
   Daz content to this pipeline's models in doubt
-  ([DAZ Genesis](/reference/daz-genesis#licences)).
+  ([DAZ Genesis](/reference/daz-genesis#licences)). Where a bought model may
+  ship whole is [below](#marketplaces-where-a-full-model-may-ship).
 - **Source engine tools.** None is in the image. The Source SDK code may be used
   only to develop a Source 1 mod of a Valve game, and content made with Valve's
   developer tools, such as studiomdl, is non-commercial by default
   ([Source Filmmaker](/reference/source-filmmaker#licences-copy-learn-from-never-vendor)).
+
+## Marketplaces: where a full model may ship
+
+Everything above is about models this pipeline runs. This is about models you
+buy. The distinction that matters is the one Daz draws: a render may ship, the
+mesh may not. Two marketplaces were read on 2026-09-21 to find where that is
+not the rule. Both were read once, from public pages, with nothing bought and
+nothing downloaded, and neither has a claim register behind it yet.
+
+| | Renders in a shipped game | The mesh inside the build |
+|---|---|---|
+| Daz 3D, standard EULA | Yes, on conditions | No: needs an Interactive License per product ([note](/reference/daz-genesis#licences)) |
+| Renderosity, Standard License | Yes, "2D rendered images for games" | No, in as many words |
+| Renderosity, Extended License | Yes | Yes, with encryption and modification conditions |
+| RenderHub, Personal Use Only | No, non-commercial only | No |
+| RenderHub, Extended Use License | Yes | Yes, no extraction or revenue conditions |
+
+### Renderosity: two tiers, and the game clause is in the paid one
+
+The [Standard License](https://www.renderosity.com/standard-license) is
+renders-only and says so. It allows "2D rendered images for games or
+backgrounds" (s.3a) and forbids using a product "in real-time rendering games
+(where the Product files are distributed)" (s.4a). That is the claim already in
+the research note as DAZ-058.
+
+The [Extended License](https://www.renderosity.com/extended-license) is the one
+that changes the answer. Section 3(d): "The Buyer may use the Product to
+incorporate and embed into an electronic game or interactive media and
+distribute that new work provided there is encryption protection, the new work
+does not compete with the original, and the new work uses modifications of the
+original Product file(s)." Extraction stays barred (s.4f), and a vendor who can
+show the original can be extracted from your work "may require both the
+original and derivative work, and all copies thereof, to be deleted" (s.5b).
+There is no attribution duty and no revenue cap; the only number is a 100,000
+run limit on physical items (s.3e).
+
+Three phrases in that clause are undefined on the page, and a game pipeline
+runs straight into all three: what counts as "encryption protection", whether a
+normal engine build satisfies it, what "uses modifications of the original
+Product file(s)" requires of you, and how the same licence can forbid
+"convert" (s.4a) while contemplating embedding in an engine, which converts.
+Those need a written answer from Renderosity before anything ships, not a
+reading.
+
+Which tier a product offers is on its page as an "Available Uses:" line, and is
+a filter: `?licenses=2` on a department listing shows only the Extended ones.
+In the 3D Models department that is 5,924 products against 14,006 Standard.
+
+**Free Stuff is a separate system with no licence at all.** The section carries
+no terms, and each item's real terms are a text file inside the zip, which is
+how the Genesis 9 characters in this library came with "free for both personal
+and commercial use in rendered images and animations" and a bar on
+redistributing the files. That is renders-only, per item, and unknowable before
+you download. It is claim DAZ-059.
+
+### RenderHub: one tier does all of it
+
+Two tiers, named in the [3D Content Licensing Agreement](https://www.renderhub.com/info/3d-content-licensing)
+(Rev: 2022.02.10, section V). The **Extended Use License** "permits both
+non-commercial and commercial use", and its permitted uses name "Computer games
+and software (computer/web/mobile games, virtual and augmented worlds,
+simulation and training environments, software user interfaces, electronic
+textbooks)". There is no interactive tier to buy on top, no revenue cap, no
+end-user count, no commercial attribution, and no duty to protect the asset
+against extraction: extract, encrypt, obfuscate and compiled appear nowhere in
+the Agreement. The **Personal Use Only License** is non-commercial and does not
+list games at all.
+
+Both tiers forbid reselling the asset and allow redistribution only where "the
+Digital Asset becomes part of a larger Creation", a Creation being "any work
+created by you". A game is such a work; the Agreement never says so in those
+words, and that inference is the one load-bearing step in the reasoning.
+Shipping the same assets as a browsable content pack is a different thing, and
+the Competition clause, which bars use "that displaces the market for the
+original Digital Asset", is where that would be argued.
+
+The tier is printed on every product page and every listing card, and cannot be
+filtered on. Free items carry tiers too and generate no invoice, so RenderHub's
+own admin advises screenshotting the product page with its licence badge,
+because that is the only evidence you will have
+([forum](https://www.renderhub.com/forum/6543/free-stuff-license), 2024-03-11).
+
+### The licence is not the risk. Provenance is
+
+RenderHub vets nothing it sells. A badge states what RenderHub permits, not
+what the seller owned, and its free rigged humans include characters named for
+films, wrestling promotions and games, every one badged Extended Use. The
+Agreement disclaims exactly this: "RenderHub does not own or license any Other
+Intellectual Property", defined to include trademark, trade dress and right of
+publicity, and it asks you to make "an independent assessment". Assets built on
+Unreal's MetaHuman framework carry Epic's terms, which the product page does
+not mention.
+
+### Both sites sell Daz figure content, and a game licence does not rescue it
+
+This is the trap to know. Renderosity's character departments are 96 to 99.5
+per cent content **for** a figure you do not get: filter Characters to Genesis 9
+with an Extended licence and 190 of the 196 results are "3D Figure Assets",
+which are morphs, skins and material presets. RenderHub has a whole Daz section
+badged Extended Use in the same way. Either way the vendor licenses only what
+the vendor made, and the Genesis mesh, rig and UVs are not in the box. An
+Extended licence on a Genesis morph ships you a morph.
+
+Tell them apart from the product page. Renderosity: the "Software" field says a
+Daz Studio or Poser version rather than FBX, Unity or Unreal, the breadcrumb
+says Characters, Clothing, Hair or Morphs rather than 3D Models, and the
+description names `.duf` files. RenderHub: the page has "Software: Daz Studio"
+and "Compatible Figure" rows, and "Included Formats" says Daz. On both,
+`.duf` items also turn up in ordinary model listings, so the section is not a
+wall.
+
+### Neither site says anything about AI
+
+Not a permission and not a prohibition, on either. Renderosity's published AI
+policy governs what you upload to its galleries; RenderHub's governs what
+vendors upload to sell. Neither licence mentions training, datasets or machine
+learning at all. A product page on Renderosity may carry an "AI Use:" line, but
+that is the vendor disclosing how the asset was made, which says nothing about
+what a buyer may do and adds a provenance question of its own.
+
+For this pipeline, which feeds images to Qwen-Image and meshes to generators,
+that silence is the same open question the Daz EULA raises in the other
+direction. It needs a written answer per vendor before bought content goes into
+an AI stage.
+
+### What a bought model still needs here
+
+A licence that permits the mesh in a build is the first condition, not the only
+one. The rest is the same as for anything generated: a scale the pipeline can
+normalise (`normalise_mesh.py`), a rig the sheets can pose or a skeleton
+`bone_roles.py` can name, a face budget the target can carry
+(`decimation_report.py`), and a provenance row in `sources.json` recording
+where it came from and under which licence, written by `cleanup.py keep
+--source --licence --licence-url`.
+
+### What was not read
+
+RenderHub's checkout was not observed, so whether it offers a licence upgrade
+there is unverified; its AI policy was read, its buyer-side silence inferred
+from the absence of the words. On Renderosity, the vendor packaging guidelines
+and the submission PDF return 403, so what vendors are told to put in a zip is
+unverified, and individual product pages began returning 500 part way through
+the reading, so several were read once and not re-checked. No account was
+created on either site, nothing was bought, and no file was downloaded.
 
 ## Decide per asset, before it ships
 

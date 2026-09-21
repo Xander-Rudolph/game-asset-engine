@@ -70,7 +70,10 @@ MASCULINE_MAP = re.compile(r"Masculine", re.I)
 NOT_CHARACTERS = {"Clothing", "Hair", "Poses", "Props", "Anatomy", "Materials",
                   "Developer Kit", "Expressions", "Shapes"}
 # A preset that wears a whole outfit at once, however its maker spelled it.
-WHOLE_OUTFIT = re.compile(r"!all|complete|whole set|load all|\bset\b", re.I)
+# The bang is a Daz shelf convention: it sorts a name to the top of the folder,
+# and that is where a vendor puts the load-everything preset, whether the name
+# begins with it ("!All") or carries it mid-name ("Asphalt Hound !Outfit").
+WHOLE_OUTFIT = re.compile(r"(?:^|\s)!|complete|whole set|load all|\bset\b", re.I)
 # Eyebrow colours the library ships that no one grows. Still rolled, but one
 # character in five rather than one in three.
 FANCY_COLOURS = {"Dark Blue", "Fuchsia", "Neon Blue"}
