@@ -458,6 +458,62 @@ def roster_sheet(rows: list[dict], out: Path, cell: int, per_row: int) -> dict |
             "cell_px": cell, "size": list(page.size), "bytes": out.stat().st_size}
 
 
+def cmd_keep(args) -> int:
+    """Write the recipes of the characters worth keeping to one file.
+
+    A roll is only as good as its luck, and most of a roster is thrown away.
+    The ones that are kept go into a roster file, which `make --from` builds
+    again exactly: the same figure, skin, hair colour, outfit and weapon, with
+    no seed to remember. Edit the file to change one of them.
+    """
+    wanted = [w.strip() for w in args.slugs.split(",") if w.strip()]
+    folders = sorted(d for d in args.dir.iterdir() if d.is_dir())
+    chosen, missing = [], []
+    for want in wanted:
+        prefixes = [f"{want}-"]
+        if want.isdigit():
+            prefixes.append(f"{int(want):02d}-")
+        hit = next((d for d in folders
+                    if d.name == want or any(d.name.startswith(p) for p in prefixes)), None)
+        if hit is None or not (hit / f"{hit.name}.json").is_file():
+            missing.append(want)
+            continue
+        chosen.append(json.loads((hit / f"{hit.name}.json").read_text())["recipe"])
+    if missing:
+        print(f"  ! no character in {args.dir} for: {', '.join(missing)}")
+        return 1
+    roster = {"date": time.strftime("%Y-%m-%d"), "from": str(args.dir),
+              "characters": chosen}
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(json.dumps(roster, indent=1) + "\n")
+    for recipe in chosen:
+        print(f"  kept      {slug_of(recipe):18s} {recipe['base_character']:8s} "
+              f"{recipe['skin']}, {recipe['hair_colour'] or 'no'} hair")
+    print(f"  roster    {args.out}  ({len(chosen)} character(s))")
+    print("  rebuild   scripts/daz_characters.py make --from "
+          f"{args.out.relative_to(ROOT) if args.out.is_relative_to(ROOT) else args.out}")
+    return 0
+
+
+def read_roster(path: Path) -> list[dict]:
+    try:
+        doc = json.loads(path.read_text())
+    except (OSError, ValueError) as exc:
+        raise SystemExit(f"  ! cannot read the roster {path}: {exc}")
+    recipes = doc.get("characters") if isinstance(doc, dict) else doc
+    if not isinstance(recipes, list) or not recipes:
+        raise SystemExit(f"  ! {path} holds no characters")
+    for i, recipe in enumerate(recipes, 1):
+        recipe.setdefault("index", i)
+        for key, default in (("morph_sets", ["body", "jcms"]), ("dials", {}),
+                             ("custom_morphs", None), ("wear", []), ("mat_presets", []),
+                             ("mat_replaces", []), ("pose", None), ("prop", None),
+                             ("hair", None), ("beard", None), ("outfit", []),
+                             ("skin", "the character's own"), ("hair_colour", None)):
+            recipe.setdefault(key, default)
+    return recipes
+
+
 def cmd_list(args) -> int:
     cat = catalogue(args.library.resolve(), args.generation)
     print(f"  library   {cat['library']}")
@@ -487,18 +543,22 @@ def cmd_make(args) -> int:
     if not lib.is_dir():
         print(f"  ! no library at {lib}")
         return 2
-    cat = catalogue(lib, args.generation)
-    if not cat["characters"]:
-        print(f"  ! {lib} holds no Genesis character preset to start from")
-        return 1
-    rng = random.Random(args.seed)
-    bases = base_order(rng, cat["characters"], args.count)
-    kinds = base_order(rng, ["armour", "basics"], args.count)
-    recipes = [roll(rng, cat, i + 1, bases[i], args.poses, args.any_brow_colour,
-                    args.dials, kinds[i])
-               for i in range(args.count)]
+    if args.recipes_from:
+        recipes = read_roster(args.recipes_from)
+    else:
+        cat = catalogue(lib, args.generation)
+        if not cat["characters"]:
+            print(f"  ! {lib} holds no Genesis character preset to start from")
+            return 1
+        rng = random.Random(args.seed)
+        bases = base_order(rng, cat["characters"], args.count)
+        kinds = base_order(rng, ["armour", "basics"], args.count)
+        recipes = [roll(rng, cat, i + 1, bases[i], args.poses, args.any_brow_colour,
+                        args.dials, kinds[i])
+                   for i in range(args.count)]
     print(f"  library   {lib}")
-    print(f"  seed      {args.seed}, {args.count} character(s)")
+    print(f"  roster    {args.recipes_from}, {len(recipes)} character(s)"
+          if args.recipes_from else f"  seed      {args.seed}, {args.count} character(s)")
     print(f"  render    {args.size} px cells at azimuths {args.azimuths}, elevation "
           f"{args.elevation}, span {args.span}, key {args.key}, ambient {args.ambient}"
           + (f", {args.samples} samples" if args.samples else ""))
@@ -588,14 +648,28 @@ def cmd_make(args) -> int:
         (folder / f"{slug}.json").write_text(json.dumps(row, indent=1) + "\n")
         rows.append(row)
 
+    pruned = []
+    if args.prune:
+        kept = {row["slug"] for row in rows}
+        for folder in sorted(d for d in OUT.iterdir() if d.is_dir()):
+            if folder.name not in kept:
+                shutil.rmtree(folder)
+                pruned.append(folder.name)
+
     page = roster_sheet(rows, OUT / "roster_sheet.png", args.sheet_cell, args.sheet_columns)
-    index = {"date": time.strftime("%Y-%m-%d"), "seed": args.seed, "library": str(lib),
+    index = {"date": time.strftime("%Y-%m-%d"),
+             "seed": None if args.recipes_from else args.seed,
+             "roster": str(args.recipes_from) if args.recipes_from else None,
+             "library": str(lib),
              "count": len(rows), "failed": failed, "roster_sheet": page,
-             "poses": args.poses,
+             "pruned": pruned, "poses": args.poses,
              "characters": [{"slug": r["slug"], "base": r["recipe"]["base_character"],
                              "files": [v["file"] for v in r["views"]],
                              "error": r.get("error")} for r in rows]}
     (OUT / "characters.json").write_text(json.dumps(index, indent=1) + "\n")
+    if pruned:
+        print(f"  pruned    {len(pruned)} folder(s) this run did not write: "
+              + ", ".join(pruned[:6]) + (" ..." if len(pruned) > 6 else ""))
     print(f"  index     {(OUT / 'characters.json').relative_to(ROOT)}")
     if page:
         print(f"  sheet     {(OUT / page['file']).relative_to(ROOT)}  "
@@ -612,6 +686,13 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
+    k = sub.add_parser("keep", help="write the recipes of named characters to a roster file")
+    k.add_argument("slugs", help="which to keep, comma separated, by slug or by number: 1,3,4,12")
+    k.add_argument("--dir", type=Path, default=OUT,
+                   help=f"the run to take them from (default {OUT.relative_to(ROOT)})")
+    k.add_argument("--out", type=Path, default=OUT / "roster.json",
+                   help=f"where to write the roster (default {(OUT / 'roster.json').relative_to(ROOT)})")
+
     for name, help_text in (("list", "what the library offers for each slot"),
                             ("make", "roll characters, build them and render them")):
         p = sub.add_parser(name, help=help_text)
@@ -623,6 +704,10 @@ def main() -> int:
                             "A Genesis 8 hair does not fit a Genesis 9 figure")
         if name == "list":
             continue
+        p.add_argument("--from", dest="recipes_from", type=Path, default=None, metavar="FILE",
+                       help="build the characters in this roster file instead of rolling "
+                            "new ones, as `keep` writes it. The roll options are then "
+                            "unused, and the file is what to edit to change a character")
         p.add_argument("--count", type=int, default=12, help="how many characters (default 12)")
         p.add_argument("--seed", type=int, default=int(time.strftime("%Y%m%d")),
                        help="the roll's seed; the same seed and library give the same "
@@ -684,9 +769,15 @@ def main() -> int:
         p.add_argument("--keep-blend", action="store_true",
                        help="keep each .blend, about 150 MB each, instead of deleting it "
                             "once its views are drawn")
+        p.add_argument("--prune", action="store_true",
+                       help="delete the character folders this run did not write, so what "
+                            "is left under output/daz/characters/ is this roster and "
+                            "nothing else")
         p.add_argument("--dry-run", action="store_true",
                        help="print the roll and build nothing")
     args = ap.parse_args()
+    if args.cmd == "keep":
+        return cmd_keep(args)
     if args.cmd == "list":
         return cmd_list(args)
     if args.span is None:

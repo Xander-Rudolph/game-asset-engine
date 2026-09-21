@@ -1245,6 +1245,26 @@ side, under a line naming its base, hair, outfit and weapon. The `.blend` goes
 when its views are drawn, unless `--keep-blend`, because a dressed figure is
 about 150 MB and twelve are 1.8 GB.
 
+### Keeping four of twelve
+
+A roll is luck, and a roster is read by a person who keeps some of it. The ones
+kept go into a roster file, which builds them again with no seed to remember:
+
+```sh
+python3 scripts/daz_characters.py keep 1,3,4,12         # writes roster.json
+# edit roster.json: a character's clothes, its hair colour, its weapon
+python3 scripts/daz_characters.py make --from output/daz/characters/roster.json --prune
+```
+
+The file holds one recipe per character, the same shape each character's JSON
+already records, so editing it is how a character changes without rolling
+anything: swap the `.duf` paths under `wear` for another outfit's, or the
+colour preset under `mat_presets` for another colour. `--prune` deletes the
+character folders the run did not write, so what is left under
+`output/daz/characters/` is that roster and nothing else. Measured on
+2026-09-21: four characters rebuilt in 79.5 s, drawn in 10.7 s, eight folders
+pruned, `output/daz/` down from 8.1 MB to 2.8 MB.
+
 ### What it does not roll
 
 - **A hair or clothing colour.** Those materials arrive with their own maps,

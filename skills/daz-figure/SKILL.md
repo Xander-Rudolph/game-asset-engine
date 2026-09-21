@@ -525,7 +525,12 @@ python3 scripts/daz_characters.py make --count 12 --seed 20260921 --size 768
 - **The skin and the hair colour are rolled.** One of the four base skins for
   the figure's build, or the character's own, swapped map for map, and one of
   the six hair colours the library ships, which the beard matches.
-- What it does not do: it never rolls a hair or clothing colour, because those
+- **When they say which ones to keep**, do not re-roll: `daz_characters.py keep
+  1,3,4,12` writes those recipes to `output/daz/characters/roster.json`, editing
+  that file is how one of them changes its clothes or its hair, and
+  `make --from output/daz/characters/roster.json --prune` builds exactly those
+  and deletes the rest.
+- What it does not do: it never rolls a clothing colour, because those
   materials already carry their maps and the material pass only fills in what
   is missing; a weapon arrives in the hand with the fingers open, because the
   grip pose is a second pose file and only one pose is applied.
@@ -540,7 +545,8 @@ output/daz/                          Daz content: gitignored, never committed
   characters/<slug>/                 a rolled character: two views, its JSON,
                                      its scene report and two logs
   characters/characters.json         the run's index
-  characters/contact_sheet.png       every front view on one page
+  characters/roster.json             the recipes of the ones kept, to build again
+  characters/roster_sheet.png        every character's views on one page
   g9_cage.blend                      70928008 bytes
   g9_cage_build.json, _blender.log, _poses.json, _motion.json
   g9_cage[_<label>]_render.json, _render_sheet_128.png,

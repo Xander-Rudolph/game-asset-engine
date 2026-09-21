@@ -814,7 +814,8 @@ stage measured, and the two things that need Daz Studio, are in the
 
 ```sh
 scripts/daz_characters.py list [--library DIR] [--generation NAME]
-scripts/daz_characters.py make [--count N] [--seed N] [--size PX]
+scripts/daz_characters.py keep SLUGS [--dir DIR] [--out FILE]
+scripts/daz_characters.py make [--from FILE] [--prune] [--count N] [--seed N] [--size PX]
                           [--poses {none,upright,any}] [--dials {none,small,any}]
                           [--declip MM] [--azimuths DEG,DEG] [--facings front,side]
                           [--elevation DEG] [--span METRES] [--key N] [--ambient N]
@@ -864,6 +865,15 @@ Each character is built by `daz_import_probe.py scene` and drawn by
 against a fixed `--span` so a short character reads as short. The sheet is cut
 into one image per facing, and the `.blend`, about 150 MB, is deleted once they
 are drawn unless `--keep-blend`.
+
+**Keeping the ones worth keeping.** A roll is only as good as its luck, and
+most of a roster is thrown away. `keep 1,3,4,12` writes those characters'
+recipes to `roster.json`, and `make --from roster.json` builds exactly them
+again, with no seed to remember: the same figure, skin, hair colour, outfit
+and weapon. The file is JSON and is meant to be edited, which is how a
+character changes its clothes or its hair without rolling anything.
+`make --prune` then deletes the character folders the run did not write, so
+what is left is that roster and nothing else.
 
 **What a run writes**, under `output/daz/characters/<slug>/`: `<slug>_front.png`
 and `<slug>_side.png`, `<slug>.json` with the roll, the two commands that
