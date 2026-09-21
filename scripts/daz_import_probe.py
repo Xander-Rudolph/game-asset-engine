@@ -1812,7 +1812,12 @@ SCENE_TAIL = r'''
                 raise RuntimeError("no body mesh to push away from")
             if cfg["pose"]:
                 raise RuntimeError("a pose is applied, and this edits the rest shape")
-            wearing = [o for o in meshes if o.name in worn_meshes]
+            # Only what the rig deforms. A bone-parented prop, a staff or a
+            # brooch, is placed rather than fitted, and pushing its vertices
+            # to the body would bend it: the Wise Wizard's brooch had all
+            # 4,560 of them moved before this rule (2026-09-21).
+            wearing = [o for o in meshes
+                       if o.name in worn_meshes and o.find_armature() == rig]
             before = fit_report(body_now, wearing)
             done = declip(body_now, wearing, cfg["declip"] / 1000.0, cfg["declip_max_verts"],
                           set(cfg["declip_skip"]))
@@ -2888,6 +2893,48 @@ def mat_preset_arg(text: str) -> tuple:
     return library_relative(file), names
 
 
+def resolve_in_library(lib: Path, rel: str) -> tuple[str | None, bool]:
+    """A library-relative path as it is actually spelled on disk.
+
+    Daz content is written for a case-insensitive filesystem and does not
+    always agree with itself. The Wise Wizard's own post-load script asks for
+    "WW_eyebrows.duf" where its package installed "WW_Eyebrows.duf", and on
+    this filesystem that is a missing file. Exact match first; then one
+    case-insensitive step per segment, which is what Daz Studio gets for free.
+    Returns (the path on disk, whether the case had to be fixed).
+    """
+    if (lib / rel).exists():
+        return rel, False
+    here, parts = lib, []
+    for want in PurePosixPath(rel).parts:
+        if (here / want).exists():
+            here, _ = here / want, parts.append(want)
+            continue
+        try:
+            found = next((n for n in sorted(os.listdir(here))
+                          if n.casefold() == want.casefold()), None)
+        except OSError:
+            return None, False
+        if found is None:
+            return None, False
+        here, _ = here / found, parts.append(found)
+    return "/".join(parts), True
+
+
+def resolve_all(lib: Path, rels: list[str]) -> tuple[list[str], list[list[str]], list[str]]:
+    """Every path as it is spelled on disk, what was re-cased, and what is missing."""
+    out, fixed, missing = [], [], []
+    for rel in rels:
+        found, changed = resolve_in_library(lib, rel)
+        if found is None:
+            missing.append(rel)
+            continue
+        out.append(found)
+        if changed:
+            fixed.append([rel, found])
+    return out, fixed, missing
+
+
 def out_path(text: str) -> Path:
     p = Path(text)
     p = (ROOT / p) if not p.is_absolute() else p
@@ -2958,6 +3005,7 @@ def cmd_build(args) -> int:
         anatomy = []
     else:
         anatomy = args.anatomy
+    anatomy, recased, missing_anatomy = resolve_all(lib, anatomy)
     name = args.out.stem
     OUT.mkdir(parents=True, exist_ok=True)
     DEV.mkdir(parents=True, exist_ok=True)
@@ -2972,6 +3020,8 @@ def cmd_build(args) -> int:
         "dir_check": not args.no_dir_check,
         "figure": args.figure,
         "anatomy": anatomy,
+        "anatomy_recased": recased,
+        "anatomy_missing": missing_anatomy,
         "material_method": args.material_method,
         "merge_materials": False,
         "refractive": REFRACTIVE,
@@ -2997,6 +3047,10 @@ def cmd_build(args) -> int:
     print(f"  library   {lib} (container {lib_c})")
     print(f"  figure    {args.figure}")
     print(f"  anatomy   {len(anatomy)} post-load figure file(s)" if anatomy else "  anatomy   none")
+    for asked, found in recased:
+        print(f"            re-cased: {asked} is on disk as {found}")
+    for gone in missing_anatomy:
+        print(f"  ! the figure names a post-load file that is not in the library: {gone}")
     print(f"  materials {mat_preset_line(cfg['mat_presets'])}")
     print(f"  morphs    visemes {'yes' if args.visemes else 'no'}, FACS {'yes' if args.facs else 'no'}; "
           f"materials {args.material_method}; fit {args.fit}"
@@ -3141,6 +3195,7 @@ def cmd_scene(args) -> int:
         anatomy = []
     else:
         anatomy = args.anatomy
+    anatomy, recased, missing_anatomy = resolve_all(lib, anatomy)
     custom = None
     if args.custom_morphs:
         cdir = lib / args.custom_morphs
@@ -3172,6 +3227,8 @@ def cmd_scene(args) -> int:
         "dir_check": True,
         "figure": args.figure,
         "anatomy": anatomy,
+        "anatomy_recased": recased,
+        "anatomy_missing": missing_anatomy,
         "material_method": args.material_method,
         "merge_materials": False,
         "refractive": REFRACTIVE,
@@ -3209,6 +3266,11 @@ def cmd_scene(args) -> int:
           f"{'; FACS' if args.facs else ''}"
           f"{'; custom ' + str(len(custom['files'])) + ' file(s) from ' + args.custom_morphs if custom else ''}")
     print(f"  wear      {len(args.wear)} file(s); pose {args.pose or 'none'}")
+    print(f"  anatomy   {len(anatomy)} post-load figure file(s)" if anatomy else "  anatomy   none")
+    for asked, found in recased:
+        print(f"            re-cased: {asked} is on disk as {found}")
+    for gone in missing_anatomy:
+        print(f"  ! the figure names a post-load file that is not in the library: {gone}")
     print(f"  materials {mat_preset_line(cfg['mat_presets'])}")
     wait_for_idle(args.no_wait)
     partial = OUT / f"{name}_scene.partial.json"

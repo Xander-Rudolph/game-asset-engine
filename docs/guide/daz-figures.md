@@ -1196,6 +1196,27 @@ armour and in the base clothing, with no dials at all:
 So the armour fits the masculine figures and Amala and Laura, and the base
 shorts fit nobody with hips.
 
+### A product that misspells its own file
+
+The Wise Wizard's character preset names its eyebrow figure
+`data/Dan Alfaro/WWHD2024/Tools/Script Loads/WW_eyebrows.duf`. The package
+installed `WW_Eyebrows.duf`. On Windows, where Daz Studio runs, those are the
+same file; here they are not, and the eyebrows silently failed to load.
+
+So every library path the probe is given, the figure, each post-load anatomy
+file, each wearable and the pose, is looked up as it is written first and then
+one case-insensitive step per segment, and the run says what it re-cased:
+
+```
+  anatomy   5 post-load figure file(s)
+            re-cased: .../Script Loads/WW_eyebrows.duf is on disk as
+                      .../Script Loads/WW_Eyebrows.duf
+```
+
+Nothing is renamed on disk. The library keeps what the package installed, the
+record still verifies, and `daz_library.py case-check` still reports the
+mismatch for whoever wants to know how much of it there is.
+
 ### Pushing a garment out of the body
 
 `scene --declip MM` moves every vertex of a worn mesh that sits behind the
@@ -1212,6 +1233,11 @@ Measured on Kat on 2026-09-21 at `--declip 1.5`, in 1.13 s:
 | `G9 Base Shorts` | 73.3% | 0.0% | 6,727 of 8,256 on the first pass | 13.95 mm |
 | `LVA Pant` | 33.9% | 0.0% | 1,977 of 4,526 | 18.40 mm |
 | `Mavick HairStyle` | 0.5% | 0.5% | left alone, 433,512 vertices | |
+
+Only what the rig deforms is pushed. A bone-parented prop, a staff or a
+brooch, is placed rather than fitted, and pushing its vertices onto the body
+would bend it: the Wise Wizard's brooch had all 4,560 of them moved before that
+rule, and keeps its shape and its 3.25% overlap after it.
 
 A mesh above `--declip-max-verts`, 100,000 by default, is left alone, which is
 how a card hair keeps the shape that is its style. A garment carrying shape
@@ -1233,9 +1259,10 @@ python3 scripts/daz_characters.py make --count 12 --seed 20260921 --dry-run
 python3 scripts/daz_characters.py make --count 12 --seed 20260921 --size 768
 ```
 
-The six character presets are dealt out rather than drawn one at a time, so
-twelve characters use each of them twice instead of landing on the same one
-four times, and the two kinds of outfit are dealt out the same way. Everything
+The character presets are dealt out rather than drawn one at a time, so twelve
+characters spread over the library's own instead of landing on the same one
+four times, and the outfit products are dealt out the same way, one roll each
+in turn. Everything
 else is a roll: a skin, a hair colour, a beard, an eyebrow colour, which
 armour pieces, and a weapon.
 
@@ -1252,8 +1279,16 @@ Nothing is named in the script. The slots are read from the library, one figure
 generation at a time, which is the folder under `People/` that the character
 presets sit in: that is what keeps a Genesis 8 hair and a Genesis 9 Toon outfit
 out of a Genesis 9 roll, both of which were offered before the generation was
-pinned. A wearable is a `.duf` under `Hair/` or `Clothing/` whose own
-`asset_info` says `wearable`. A weapon is one of the right-hand grips, which
+pinned. A character is any `.duf` whose own `asset_info` says `character`,
+wherever it sits: one vendor files its own under
+`People/<generation>/<vendor>/<product>/` rather than under `Characters/`.
+Which base a character is built on decides which skins fit it, so a preset that
+names neither keeps the skin it ships with, and one that names neither and
+ships no skin is left out, with the reason. An outfit is rolled a product at a
+time, and where the product ships a preset that wears all of it, such as
+`LVA !All` or `WW Complete Set`, that is worn rather than a guess at which
+pieces go together. A wearable is a `.duf` under `Hair/` or `Clothing/` whose
+own `asset_info` says `wearable`. A weapon is one of the right-hand grips, which
 arrive bone-parented to `r_hand`. A pose is one whose name says standing,
 walking, flexing, running or stretching, because the other 61 of the 87 are
 seated, laying or flying. The roll is seeded, so the same seed and the same

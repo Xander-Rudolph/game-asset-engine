@@ -61,10 +61,16 @@ DEFAULT_LIBRARY = Path("/models/daz_library")
 UPRIGHT = re.compile(r"standing|walking|flexing|running|stretching", re.I)
 # The masculine and feminine pose folders, and the shared one.
 POSE_FOLDERS = {"masculine": ("Base", "Base Masculine"),
-                "feminine": ("Base", "Base Feminine")}
+                "feminine": ("Base", "Base Feminine"),
+                "unknown": ("Base",)}
 # Which of the six Genesis 9 characters are built on the masculine base. Read
 # from their skin: the preset names its maps G9Masculine01 or G9Feminine01.
 MASCULINE_MAP = re.compile(r"Masculine", re.I)
+# Folders under a generation that hold something other than a character.
+NOT_CHARACTERS = {"Clothing", "Hair", "Poses", "Props", "Anatomy", "Materials",
+                  "Developer Kit", "Expressions", "Shapes"}
+# A preset that wears a whole outfit at once, however its maker spelled it.
+WHOLE_OUTFIT = re.compile(r"!all|complete|whole set|load all|\bset\b", re.I)
 # Eyebrow colours the library ships that no one grows. Still rolled, but one
 # character in five rather than one in three.
 FANCY_COLOURS = {"Dark Blue", "Fuchsia", "Neon Blue"}
@@ -95,6 +101,14 @@ def character_build(path: Path) -> str | None:
     if masculine == feminine:
         return None
     return "masculine" if masculine > feminine else "feminine"
+
+
+def own_skin(path: Path) -> bool:
+    """Whether a character preset brings its own texture maps."""
+    try:
+        return bool(read_duf(path).get("image_library"))
+    except (OSError, ValueError, EOFError):
+        return False
 
 
 def raw_duf(path: Path) -> str:
@@ -142,19 +156,36 @@ def catalogue(lib: Path, generation: str | None = None) -> dict:
                           (p.relative_to(lib) for p in lib.glob("People/*/Characters/* for *.duf"))})
         generation = holders[0] if holders else "Genesis 9"
     cat = {"characters": [], "eyebrows": [], "hair": [], "beards": [],
-           "outfits": {}, "props": [], "poses": {"masculine": [], "feminine": []},
+           "outfits": {}, "props": [],
+           "poses": {"masculine": [], "feminine": [], "unknown": []},
            "shape_dials": [], "skins": {}, "library": str(lib), "generation": generation,
            "skipped": []}
     here = f"People/{generation}"
 
-    for path in sorted(lib.glob(f"{here}/Characters/**/*.duf")):
-        if duf_type(path) != "character":
+    # A character preset is usually under Characters/, and not always: one
+    # vendor puts its own under People/<generation>/<vendor>/<product>/. So
+    # every .duf outside the folders that hold something else is read, and the
+    # file's own asset type decides. The generation's base figure is a
+    # character too, and is not one to roll: it has no shape and no skin.
+    base_figure = (lib / here / f"{generation}.duf").resolve()
+    for path in sorted(lib.glob(f"{here}/**/*.duf")):
+        if any(part in NOT_CHARACTERS for part in path.relative_to(lib / here).parts[:-1]):
+            continue
+        if path.resolve() == base_figure or duf_type(path) != "character":
             continue
         build = character_build(path)
         name = path.stem.split(" for ")[0].strip()
         if build is None:
-            cat["skipped"].append({"name": name, "why": "the .duf says nothing about which "
-                                                        "base it is built on, so no skin fits it"})
+            # No base named. That only matters because the base decides which
+            # skins fit, so a character that brings its own skin is still
+            # rollable and simply keeps it.
+            if own_skin(path):
+                cat["characters"].append({"file": rel(lib, path), "name": name,
+                                          "build": "unknown"})
+            else:
+                cat["skipped"].append({"name": name,
+                                       "why": "it ships no skin of its own and its .duf says "
+                                              "nothing about which base's skin would fit it"})
             continue
         cat["characters"].append({"file": rel(lib, path), "name": name, "build": build})
 
@@ -173,12 +204,24 @@ def catalogue(lib: Path, generation: str | None = None) -> dict:
         if path.stem in SKIP_WEARABLES:
             cat["skipped"].append({"name": path.stem, "why": SKIP_WEARABLES[path.stem]})
             continue
-        # A hair keeps its colours in a folder beside it, one preset each,
-        # named after the hair: "Mavick Hair" and "Mavick Hair Black".
-        colours = []
-        for preset in sorted(path.parent.glob(f"*/{path.stem} *.duf")):
-            colours.append({"file": rel(lib, preset),
-                            "colour": preset.stem[len(path.stem):].strip()})
+        # A hair keeps its colours in a folder beside it, one preset each.
+        # Usually they are named after the hair, "Mavick Hair" and "Mavick Hair
+        # Black", and one product names them after nothing in particular,
+        # "Wise Wizard LongBeard" and "WWBeard Grey". So the named ones are
+        # taken when there are any, and otherwise every material preset in a
+        # folder beside the wearable, whose last word is the colour. That
+        # second rule only holds while one wearable owns the folder, which is
+        # checked: a folder shared by a hair and a beard keeps the first rule.
+        colours = [{"file": rel(lib, preset),
+                    "colour": preset.stem[len(path.stem):].strip()}
+                   for preset in sorted(path.parent.glob(f"*/{path.stem} *.duf"))]
+        if not colours and sum(1 for sib in path.parent.glob("*.duf")
+                               if duf_type(sib) == "wearable") == 1:
+            for preset in sorted(path.parent.glob("*/*.duf")):
+                if duf_type(preset).startswith("preset_material") or \
+                        duf_type(preset) == "preset_hierarchical_material":
+                    colours.append({"file": rel(lib, preset),
+                                    "colour": preset.stem.split()[-1]})
         where = cat["beards"] if "beard" in path.stem.lower() else cat["hair"]
         where.append({"file": rel(lib, path), "name": path.stem, "colours": colours})
 
@@ -299,6 +342,8 @@ def roll(rng: random.Random, cat: dict, index: int, base: dict, poses: str = "no
         recipe["eyebrow_colour"] = brow["colour"]
 
     # One of the base skins for this build, or the one the character came with.
+    # A character whose base is unknown keeps its own: nothing says which of
+    # the base skins would fit it.
     skins = cat["skins"].get(build) or []
     skin = pick(rng, skins, 0.75)
     if skin:
@@ -325,17 +370,22 @@ def roll(rng: random.Random, cat: dict, index: int, base: dict, poses: str = "no
             if same:
                 recipe["mat_presets"].append(same[0]["file"])
 
-    armour = [o for o in cat["outfits"].get("dForce Leather Viking Armor for Genesis 9", [])
-              if not o["name"].startswith("LVA !")]
-    basics = cat["outfits"].get("Base Clothing", [])
-    if armour and (recipe.get("outfit_kind") == "armour"
-                   or (recipe.get("outfit_kind") is None and rng.random() < 0.5)):
-        core = [o for o in armour if o["name"] in ("LVA Vest", "LVA Pant", "LVA Boots")]
-        extra = [o for o in armour if o not in core]
-        chosen = core + rng.sample(extra, k=rng.randint(0, min(2, len(extra))))
+    group = recipe.get("outfit_kind") or rng.choice(sorted(cat["outfits"]))
+    pieces = cat["outfits"].get(group) or []
+    whole = [o for o in pieces if WHOLE_OUTFIT.search(o["name"])]
+    if group == "Base Clothing":
+        # The only product that is separate garments rather than a set, and the
+        # only one with pieces that suit one build and not the other.
+        wanted = ("Shirt", "Shorts") if build == "masculine" or rng.random() < 0.5 \
+            else ("Bra", "Shorts")
+        chosen = [o for o in pieces if o["name"].split()[-1] in wanted]
+    elif whole:
+        # A set that ships a preset holding all of it: wear that, not a guess
+        # at which pieces go together.
+        chosen = [rng.choice(whole)]
     else:
-        wanted = ("Shirt", "Shorts") if build == "masculine" or rng.random() < 0.5 else ("Bra", "Shorts")
-        chosen = [o for o in basics if o["name"].split()[-1] in wanted]
+        rest = [o for o in pieces if o not in whole]
+        chosen = rng.sample(rest, k=min(len(rest), rng.randint(3, 5))) if rest else []
     for piece in chosen:
         recipe["outfit"].append(piece["name"])
         recipe["wear"].append(piece["file"])
@@ -369,7 +419,12 @@ def roll(rng: random.Random, cat: dict, index: int, base: dict, poses: str = "no
 def slug_of(recipe: dict) -> str:
     bits = [f"{recipe['index']:02d}", recipe["base_character"].lower()]
     if recipe["outfit"]:
-        bits.append("viking" if recipe["outfit"][0].startswith("LVA") else "basics")
+        # The outfit's product, in a word: its first, once a maker's prefix is
+        # off the front. "dForce Leather Viking Armor" is leather, "Wise Wizard
+        # Remaster 2025" is wise.
+        words = [w for w in (recipe.get("outfit_kind") or "").split()
+                 if w.lower() not in ("dforce", "g9", "the")]
+        bits.append(words[0].lower() if words else "kit")
     return "-".join(re.sub(r"[^a-z0-9]+", "", b) or "x" for b in bits)
 
 
@@ -585,7 +640,7 @@ def cmd_make(args) -> int:
             return 1
         rng = random.Random(args.seed)
         bases = base_order(rng, cat["characters"], args.count)
-        kinds = base_order(rng, ["armour", "basics"], args.count)
+        kinds = base_order(rng, sorted(cat["outfits"]) or ["Base Clothing"], args.count)
         recipes = [roll(rng, cat, i + 1, bases[i], args.poses, args.any_brow_colour,
                         args.dials, kinds[i])
                    for i in range(args.count)]
