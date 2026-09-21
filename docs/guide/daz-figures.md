@@ -373,7 +373,9 @@ Where there is no manifest, the content root is found by looking: the first
 folder, or the zip root, that holds one of a library's own folders, such as
 `data`, `People`, `Runtime`, `Props` or `Documentation`. Everything beside
 those, a `readme/` folder or a loose PDF, is left in the zip and named in the
-report.
+report, and so is what a desktop leaves behind: a `__MACOSX` folder and every
+`.DS_Store`, `Thumbs.db` and `desktop.ini`. One character package on
+2026-09-21 carried 165 such entries against its 126 files of content.
 
 Three of the fourteen were refused, each for a reason worth keeping:
 

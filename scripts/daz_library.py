@@ -296,6 +296,10 @@ from xml.sax.saxutils import quoteattr
 ROOT = Path(__file__).resolve().parent.parent
 # Daz's documented pattern text, used with fullmatch and re.ASCII so that a
 # trailing newline or a non-ASCII digit does not pass
+# What a zip carries that a library should not: the folder macOS puts its
+# resource forks in, and the files it and Windows leave in every directory.
+JUNK_DIRS = {"__macosx"}
+JUNK_NAMES = {".ds_store", "thumbs.db", "desktop.ini"}
 # The folders a Daz content library holds at its root. A zip with none of them
 # anywhere near its root holds nothing this can install, whoever made it.
 CONTENT_DIRS = {
@@ -990,12 +994,16 @@ def open_loose(path: Path, zf, infos: list, by_name: dict, source: str, m) -> di
                       + (", ".join(skipped[:6]) or "nothing") + ". A content package holds "
                       "data/, People/, Runtime/ or another library folder, at its root or "
                       "under one folder")
-    values, seen = [], set()
+    values, seen, junk = [], set(), 0
     for info in infos:
         if info.is_dir() or not info.filename.startswith(root):
             continue
         rel = info.filename[len(root):]
         if not rel or rel.split("/")[0].casefold() not in CONTENT_DIRS:
+            continue
+        parts = [part.casefold() for part in rel.split("/")]
+        if parts[-1] in JUNK_NAMES or any(part in JUNK_DIRS for part in parts[:-1]):
+            junk += 1
             continue
         if info.filename in seen:
             continue
@@ -1005,6 +1013,8 @@ def open_loose(path: Path, zf, infos: list, by_name: dict, source: str, m) -> di
         zf.close()
         raise Refused(f"refusing {path}: its content folders hold no files")
     unlisted = sum(1 for i in infos if not i.is_dir() and i.filename not in seen)
+    if junk:
+        skipped.append(f"{junk} macOS and Windows scratch file(s)")
     return {"path": path, "file": path.name, "zip": zf, "entries": by_name,
             "prefix": None, "sku": package_key(path.stem), "sku8": None, "root": root,
             "source": source, "licence_files": licence_files(values, root),
@@ -1223,16 +1233,20 @@ def plan_install(pkgs: list[dict], lib: Path) -> tuple[dict, list, list[dict], l
             messages.append(f"refusing {', '.join(p['file'] for p in group)}: two zips for "
                             f"SKU {sku} part {part}")
     for sku in sorted({p["sku"] for p in pkgs}):
-        gids = {p["global_id"] for p in pkgs if p["sku"] == sku}
+        # A package with no Manifest.dsx has no GlobalID, and every one of them
+        # would otherwise look like every other: the checks below are about a
+        # zip carrying an id that belongs to another product, which a package
+        # with no id cannot do.
+        gids = {p["global_id"] for p in pkgs if p["sku"] == sku and p["global_id"]}
         if len(gids) > 1:
             messages.append(f"refusing the SKU {sku} zips: they carry different GlobalIDs "
                             f"({', '.join(sorted(gids))})")
         rec = records.get(sku)
-        if rec and rec.get("global_id") not in gids:
+        if gids and rec and rec.get("global_id") and rec.get("global_id") not in gids:
             messages.append(f"refusing the SKU {sku} zips: GlobalID {sorted(gids)[0]} differs "
                             f"from the {rec.get('global_id')} recorded for SKU {sku}")
         for other, orec in records.items():
-            if other != sku and orec.get("global_id") in gids:
+            if other != sku and orec.get("global_id") and orec.get("global_id") in gids:
                 messages.append(f"refusing the SKU {sku} zips: GlobalID "
                                 f"{orec.get('global_id')} is recorded for SKU {other}")
     plans, refusals = [], []
