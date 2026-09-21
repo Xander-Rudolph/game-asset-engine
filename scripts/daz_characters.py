@@ -97,8 +97,10 @@ def product_key(name: str) -> str:
     What ties a wearable to the character it was made for. A hair, a beard and
     an outfit that ship beside a character carry that character's name: "Wise
     Wizard HD" the figure, "Wise Wizard 2025" the beard, "Wise Wizard Remaster
-    2025" the set. Measured on 2026-09-21, that beard floats a mean of 33.26 mm
-    off another character's chin, so it is rolled only onto its own.
+    2025" the set. The tie keeps a product's kit together in a roll; it is not
+    a fit fix, and measurement says so: that beard's mean gap from the body is
+    33.26 mm on its own character and 33.26 mm on another's, because it is a
+    long beard that hangs, not a misfitted one (2026-09-21).
     """
     words = [w for w in re.sub(r"\s+for\s+Genesis\s+\d.*$", "", name, flags=re.I).split()
              if w.lower() not in ("dforce", "g9", "the")]
@@ -492,6 +494,10 @@ def build_command(recipe: dict, blend: Path, lib: Path, timeout: int,
         cmd += ["--hide", ",".join(recipe["hide"])]
     if recipe.get("hide_materials"):
         cmd += ["--hide-material", ",".join(recipe["hide_materials"])]
+    if recipe.get("skip_transfer"):
+        cmd += ["--skip-transfer", ",".join(recipe["skip_transfer"])]
+    for mesh, move in (recipe.get("offsets") or {}).items():
+        cmd += ["--offset", f"{mesh}=" + ",".join(str(v) for v in move)]
     custom = recipe["custom_morphs"]
     if custom:
         cmd += ["--custom-morphs", custom["folder"], "--custom-files", ",".join(custom["files"]),
@@ -659,7 +665,7 @@ def read_roster(path: Path) -> list[dict]:
                              ("mat_replaces", []), ("pose", None), ("prop", None),
                              ("hair", None), ("beard", None), ("outfit", []),
                              ("hide", []), ("hide_figure", False), ("hide_materials", []),
-                             ("name", None),
+                             ("name", None), ("skip_transfer", []), ("offsets", {}),
                              ("skin", "the character's own"), ("hair_colour", None)):
             recipe.setdefault(key, default)
     return recipes

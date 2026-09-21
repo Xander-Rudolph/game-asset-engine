@@ -649,7 +649,7 @@ scripts/daz_import_probe.py scene --out output/daz/NAME.blend [--figure DUF]
                             [--custom-bodypart {Face,Body,Custom}] [--facs]
                             [--mat-preset DUF[@MESH,...]] [--mat-replace DUF[@MESH,...]]
                             [--no-auto-materials] [--hide NAME,...] [--hide-figure]
-                            [--hide-material NAME,...]
+                            [--hide-material NAME,...] [--offset MESH=DX,DY,DZ]
                             [--declip MM] [--declip-max-push MM] [--declip-max-verts N]
                             [--declip-skip NAME,...] [--no-fit-report]
                             [--set NAME=VALUE] [--wear DUF] [--no-transfer]
@@ -689,6 +689,11 @@ from the figure's `.duf`, gzip-compressed or plain. Use `--facs`: on Genesis 9
 `--subdivision off`: the default `keep` saves the importer's Subsurf levels, up
 to 3 for render. It writes `NAME.blend`, `NAME_build.json`, which records the
 command line and every step, `NAME_blender.log` and `NAME_poses.json`.
+
+**Moving a garment.** `--offset "MESH=DX,DY,DZ"` shifts a worn mesh in
+millimetres along the world axes before the declip runs. Measure first: on a
+measured figure the hooded cloak's apex sat 69.6 mm below the crown of the head
+it covers, and raising it that far lifts its hem by the same amount.
 
 **Hiding one zone of a garment.** `--hide-material NAME,...` takes a material
 zone's alpha to zero, which is how a hooded cloak loses its hood and keeps the

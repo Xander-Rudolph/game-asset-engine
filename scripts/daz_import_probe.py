@@ -978,6 +978,35 @@ def body_of(rig, meshes):
                               len(o.data.vertices)))
 
 
+def offset_meshes(moves):
+    """Move a worn mesh bodily, in millimetres, along the world axes.
+
+    The blunt instrument, for a garment that sits where its author put it and
+    that is not where this figure needs it. Measured before it is used: the
+    Wise Wizard's cloak tops out 69.6 mm below the crown of the head it is
+    hooded over. The rest shape moves and every shape key with it, so this is
+    only sound on an unposed figure, as the declip is.
+    """
+    from mathutils import Vector
+    out = {}
+    for name, (dx, dy, dz) in moves.items():
+        ob = bpy.data.objects.get(name)
+        if ob is None or ob.type != "MESH":
+            out[name] = {"skipped": "no mesh of that name"}
+            continue
+        delta = ob.matrix_world.to_3x3().inverted() @ Vector((dx / 1000.0, dy / 1000.0,
+                                                              dz / 1000.0))
+        keys = ob.data.shape_keys.key_blocks if ob.data.shape_keys else []
+        for i, v in enumerate(ob.data.vertices):
+            v.co = v.co + delta
+            for block in keys:
+                block.data[i].co = block.data[i].co + delta
+        ob.data.update()
+        out[name] = {"moved_mm": [dx, dy, dz], "vertices": len(ob.data.vertices),
+                     "shape_keys": len(keys)}
+    return out
+
+
 def declip(body, meshes, margin, max_verts, skip, max_push=0.0, passes=4):
     """Push a garment's vertices out of the body it is worn on.
 
@@ -1869,6 +1898,14 @@ SCENE_TAIL = r'''
                     "moved": {n: moved(before[n], after[n]) for n in before}}
         result["dials"][f"{name}={value} dressed"] = step(
             f"set {name} = {value} with the outfit on", set_after, fatal=False)
+
+    if cfg["offsets"]:
+        def move_them():
+            if cfg["pose"]:
+                raise RuntimeError("a pose is applied, and this edits the rest shape")
+            return offset_meshes({n: v for n, v in cfg["offsets"]})
+        result["offsets"] = step("move %d worn mesh(es)" % len(cfg["offsets"]),
+                                 move_them, fatal=False)
 
     if cfg["declip"] > 0 and worn_meshes:
         def push_out():
@@ -2983,6 +3020,19 @@ def print_mat_presets(res: dict) -> None:
             print(f"            {u['material']} {u['channel']}: {u['reason']}")
 
 
+def offset_arg(text: str) -> tuple:
+    """MESH=DX,DY,DZ in millimetres."""
+    name, _, numbers = text.partition("=")
+    try:
+        values = [float(v) for v in numbers.split(",")]
+    except ValueError:
+        values = []
+    if not name.strip() or len(values) != 3:
+        raise argparse.ArgumentTypeError(
+            f"expected MESH=DX,DY,DZ in millimetres, got {text!r}")
+    return name.strip(), values
+
+
 def mat_preset_arg(text: str) -> tuple:
     """A library-relative preset, optionally @ the meshes it applies to."""
     file, at, objects = text.partition("@")
@@ -3341,6 +3391,7 @@ def cmd_scene(args) -> int:
         "hide": args.hide,
         "hide_figure": args.hide_figure,
         "hide_materials": args.hide_material,
+        "offsets": args.offset,
         "declip": args.declip,
         "declip_max_verts": args.declip_max_verts,
         "declip_max_push": args.declip_max_push,
@@ -4020,6 +4071,12 @@ def main() -> int:
                    help="mesh names to keep out of the render, comma separated. They stay in "
                         "the file and keep their place: the clothes still fit what they were "
                         "fitted to, and render_sheet.py frames only what it can see")
+    s.add_argument("--offset", type=offset_arg, action="append", default=[],
+                   metavar="MESH=DX,DY,DZ",
+                   help="move a worn mesh bodily, in millimetres along the world axes, "
+                        "before anything is pushed clear of the body. For a garment that "
+                        "sits where its author put it rather than where this figure needs "
+                        "it. Repeatable, and refused on a posed figure")
     s.add_argument("--hide-material", type=csv_names, default=[],
                    help="material zones to render as nothing, comma separated, such as the "
                         "hood zone of a hooded cloak. Their alpha goes to zero and any link "

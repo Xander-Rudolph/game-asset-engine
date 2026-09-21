@@ -1418,6 +1418,21 @@ character folders the run did not write, so what is left under
 2026-09-21: four characters rebuilt in 79.5 s, drawn in 10.7 s, eight folders
 pruned, `output/daz/` down from 8.1 MB to 2.8 MB.
 
+### Moving a garment that sits where its author put it
+
+`scene --offset "MESH=DX,DY,DZ"` moves a worn mesh bodily, in millimetres along
+the world axes, before anything is pushed clear of the body. It edits the rest
+shape and every shape key with it, so a posed figure is refused, as for the
+declip.
+
+Measure before using it. On the Wise Wizard in his own hooded cloak, read from
+the saved file on 2026-09-21: the figure stands 1,700.2 mm to the crown of its
+head and the cloak tops out at 1,630.6 mm, so the hood's apex is 69.6 mm below
+the head it covers. Raising the cloak by 70 mm puts them level, and lifts its
+hem, which reached the floor at -0.7 mm, the same 70 mm into the air. That is
+the trade this tool makes: it moves the whole garment, and it cannot move part
+of one.
+
 ### Hiding one zone of a garment
 
 A garment is one mesh with several material zones, and the zone is often
