@@ -28,10 +28,11 @@ an AI stage, a commit or the container image. output/daz/ is gitignored.
 
 WHAT A RUN COSTS. Measured on 2026-09-21 in comfyui-packaged on the reference
 machine, twelve characters in the rest pose at 768 px with Cycles on the card:
-10.3 to 25.4 s to build each one and 2.1 to 4.3 s to draw its two views,
-227.7 s and 38.1 s over the twelve. Each .blend was 71 to 173 MB and is deleted
-once the views are drawn, unless --keep-blend, which left 8.0 MB of images,
-reports and one 4096 by 1629 px sheet.
+10.3 to 25.5 s to build each one and 2.1 to 3.1 s to draw its two views,
+230.9 s and 30.9 s over the twelve, with no garment left inside a body. Each
+.blend was 71 to 179 MB and is deleted once the views are drawn, unless
+--keep-blend, which left 8.1 MB of images, reports and one 4096 by 1629 px
+sheet.
 """
 from __future__ import annotations
 
@@ -113,7 +114,7 @@ def catalogue(lib: Path, generation: str | None = None) -> dict:
         generation = holders[0] if holders else "Genesis 9"
     cat = {"characters": [], "eyebrows": [], "hair": [], "beards": [],
            "outfits": {}, "props": [], "poses": {"masculine": [], "feminine": []},
-           "shape_dials": [], "library": str(lib), "generation": generation,
+           "shape_dials": [], "skins": {}, "library": str(lib), "generation": generation,
            "skipped": []}
     here = f"People/{generation}"
 
@@ -139,8 +140,19 @@ def catalogue(lib: Path, generation: str | None = None) -> dict:
         if path.stem in SKIP_WEARABLES:
             cat["skipped"].append({"name": path.stem, "why": SKIP_WEARABLES[path.stem]})
             continue
+        # A hair keeps its colours in a folder beside it, one preset each,
+        # named after the hair: "Mavick Hair" and "Mavick Hair Black".
+        colours = []
+        for preset in sorted(path.parent.glob(f"*/{path.stem} *.duf")):
+            colours.append({"file": rel(lib, preset),
+                            "colour": preset.stem[len(path.stem):].strip()})
         where = cat["beards"] if "beard" in path.stem.lower() else cat["hair"]
-        where.append({"file": rel(lib, path), "name": path.stem})
+        where.append({"file": rel(lib, path), "name": path.stem, "colours": colours})
+
+    for path in sorted(lib.glob(f"{here}/Materials/*/*/G9 * Skin * MAT.duf")):
+        build = "masculine" if "Masculine" in path.stem else "feminine"
+        cat["skins"].setdefault(build, []).append(
+            {"file": rel(lib, path), "name": path.stem.replace("G9 ", "").replace(" MAT", "")})
 
     for path in sorted(lib.glob(f"{here}/Clothing/*/*/*.duf")):
         if duf_type(path) != "wearable" or path.stem in SKIP_WEARABLES:
@@ -202,29 +214,39 @@ def base_order(rng: random.Random, characters: list, count: int) -> list:
 
 
 def roll(rng: random.Random, cat: dict, index: int, base: dict, poses: str = "none",
-         any_brow: bool = False) -> dict:
+         any_brow: bool = False, dials: str = "none", outfit_kind: str | None = None) -> dict:
     """One character: what it is made of, before anything is built."""
     build = base["build"]
     recipe = {"index": index, "figure": base["file"], "base_character": base["name"],
               "build": build, "morph_sets": ["body", "jcms"], "dials": {},
-              "custom_morphs": None, "wear": [], "mat_presets": [], "pose": None,
-              "prop": None, "hair": None, "beard": None, "outfit": []}
+              "custom_morphs": None, "wear": [], "mat_presets": [], "mat_replaces": [],
+              "pose": None, "prop": None, "hair": None, "beard": None, "outfit": [],
+              "skin": "the character's own", "hair_colour": None,
+              "outfit_kind": outfit_kind}
 
     # Either another character's shape mixed in, or a handful of proportion
     # dials: one folder of custom morphs per build, so one or the other.
+    #
+    # Off by default, and measured: a dial reshapes the body and nothing else
+    # follows it. On 2026-09-21 a figure with three proportion dials set had
+    # 68.7% of its trouser vertices inside its own legs, against 9.6% for the
+    # same outfit with no dials, and its eyes sat 14 mm inside its head.
     others = [d for d in cat["shape_dials"] if not d["property"].startswith(base["name"])]
     packs = ([("shape", others)] if others else []) + \
             ([("proportions", cat["proportion_dials"])] if cat["proportion_dials"] else [])
+    if dials == "none":
+        packs = []
+        recipe["dial_pack"] = "none"
     if packs:
-        kind, dials = packs[rng.randrange(len(packs))]
+        kind, pack = packs[rng.randrange(len(packs))]
         recipe["dial_pack"] = kind
         if kind == "shape":
-            mix = rng.choice(dials)
+            mix = rng.choice(pack)
             recipe["custom_morphs"] = {"folder": mix["folder"], "files": [mix["file"]],
                                        "category": "Characters", "bodypart": "Body"}
             recipe["dials"][mix["property"]] = round(rng.uniform(0.2, 0.65), 2)
         else:
-            chosen = rng.sample(dials, k=min(len(dials), rng.randint(2, 3)))
+            chosen = rng.sample(pack, k=min(len(pack), rng.randint(2, 3)))
             recipe["custom_morphs"] = {"folder": chosen[0]["folder"],
                                        "files": [d["file"] for d in chosen],
                                        "category": "Shapes", "bodypart": "Body"}
@@ -233,7 +255,8 @@ def roll(rng: random.Random, cat: dict, index: int, base: dict, poses: str = "no
                 # pair Daz splits in two, Larger and Smaller, starts at 0:
                 # body_bs_ProportionSmaller at -0.13 moved 0 vertices on
                 # 2026-09-21, while ChestWidth at 0.5 moved 11,822.
-                recipe["dials"][dial["property"]] = round(rng.uniform(0.15, 0.8), 2)
+                span = (0.15, 0.35) if dials == "small" else (0.15, 0.8)
+                recipe["dials"][dial["property"]] = round(rng.uniform(*span), 2)
 
     brows = base.get("eyebrows") or []
     natural = [b for b in brows if b["colour"] not in FANCY_COLOURS]
@@ -242,20 +265,38 @@ def roll(rng: random.Random, cat: dict, index: int, base: dict, poses: str = "no
         recipe["mat_presets"].append(brow["file"])
         recipe["eyebrow_colour"] = brow["colour"]
 
+    # One of the base skins for this build, or the one the character came with.
+    skins = cat["skins"].get(build) or []
+    skin = pick(rng, skins, 0.75)
+    if skin:
+        recipe["skin"] = skin["name"]
+        recipe["mat_replaces"].append(skin["file"])
+
+    # The hair and the beard take the same colour, because a person's do.
+    colour = None
     hair = pick(rng, cat["hair"], 0.85)
     if hair:
         recipe["hair"] = hair["name"]
         recipe["wear"].append(hair["file"])
+        colour = pick(rng, hair.get("colours") or [])
+        if colour:
+            recipe["hair_colour"] = colour["colour"]
+            recipe["mat_presets"].append(colour["file"])
     if build == "masculine":
         beard = pick(rng, cat["beards"], 0.6)
         if beard:
             recipe["beard"] = beard["name"]
             recipe["wear"].append(beard["file"])
+            same = [c for c in (beard.get("colours") or [])
+                    if colour and c["colour"] == colour["colour"]]
+            if same:
+                recipe["mat_presets"].append(same[0]["file"])
 
     armour = [o for o in cat["outfits"].get("dForce Leather Viking Armor for Genesis 9", [])
               if not o["name"].startswith("LVA !")]
     basics = cat["outfits"].get("Base Clothing", [])
-    if armour and rng.random() < 0.5:
+    if armour and (recipe.get("outfit_kind") == "armour"
+                   or (recipe.get("outfit_kind") is None and rng.random() < 0.5)):
         core = [o for o in armour if o["name"] in ("LVA Vest", "LVA Pant", "LVA Boots")]
         extra = [o for o in armour if o not in core]
         chosen = core + rng.sample(extra, k=rng.randint(0, min(2, len(extra))))
@@ -299,11 +340,14 @@ def slug_of(recipe: dict) -> str:
     return "-".join(re.sub(r"[^a-z0-9]+", "", b) or "x" for b in bits)
 
 
-def build_command(recipe: dict, blend: Path, lib: Path, timeout: int) -> list[str]:
+def build_command(recipe: dict, blend: Path, lib: Path, timeout: int,
+                  declip: float = 0.0) -> list[str]:
     cmd = [sys.executable, str(PROBE), "scene", "--out", str(blend),
            "--library", str(lib), "--figure", recipe["figure"],
            "--morphs", ",".join(recipe["morph_sets"]), "--subdivision", "off",
            "--timeout", str(timeout)]
+    if declip > 0 and not recipe["pose"]:
+        cmd += ["--declip", str(declip)]
     custom = recipe["custom_morphs"]
     if custom:
         cmd += ["--custom-morphs", custom["folder"], "--custom-files", ",".join(custom["files"]),
@@ -312,6 +356,8 @@ def build_command(recipe: dict, blend: Path, lib: Path, timeout: int) -> list[st
         cmd += ["--set", f"{name}={value}"]
     for preset in recipe["mat_presets"]:
         cmd += ["--mat-preset", preset]
+    for preset in recipe["mat_replaces"]:
+        cmd += ["--mat-replace", preset]
     for wear in recipe["wear"]:
         cmd += ["--wear", wear]
     if recipe["pose"]:
@@ -392,12 +438,17 @@ def roster_sheet(rows: list[dict], out: Path, cell: int, per_row: int) -> dict |
                 page.alpha_composite(img.convert("RGBA").resize((cell, cell), Image.LANCZOS),
                                      (x0 + j * cell, y0))
         recipe = row["recipe"]
-        bits = [recipe["base_character"]]
-        bits += [b for b in (recipe.get("hair"), recipe.get("beard")) if b]
+        bits = [recipe["base_character"], recipe.get("skin") or "own skin"]
+        if recipe.get("hair_colour"):
+            bits.append(f"{recipe['hair_colour'].lower()} hair"
+                        + (" and beard" if recipe.get("beard") else ""))
+        elif recipe.get("beard"):
+            bits.append("beard")
         if recipe["outfit"]:
-            bits.append("+".join(o.replace("G9 Base ", "").replace("LVA ", "") for o in recipe["outfit"]))
+            bits.append("+".join(o.replace("G9 Base ", "").replace("LVA ", "")
+                                 for o in recipe["outfit"]))
         if recipe.get("prop"):
-            bits.append(recipe["prop"].replace("Tubal ", ""))
+            bits.append(recipe["prop"].replace("Tubal ", "").replace(" RT", ""))
         draw.rectangle((x0, y0 + cell, x0 + views * cell, y0 + cell + label + pad),
                        fill=(58, 60, 64, 255))
         draw.text((x0 + pad, y0 + cell + pad // 2), f"{row['slug']}  {', '.join(bits)}",
@@ -442,7 +493,9 @@ def cmd_make(args) -> int:
         return 1
     rng = random.Random(args.seed)
     bases = base_order(rng, cat["characters"], args.count)
-    recipes = [roll(rng, cat, i + 1, bases[i], args.poses, args.any_brow_colour)
+    kinds = base_order(rng, ["armour", "basics"], args.count)
+    recipes = [roll(rng, cat, i + 1, bases[i], args.poses, args.any_brow_colour,
+                    args.dials, kinds[i])
                for i in range(args.count)]
     print(f"  library   {lib}")
     print(f"  seed      {args.seed}, {args.count} character(s)")
@@ -453,9 +506,10 @@ def cmd_make(args) -> int:
           + (" (the rest pose Genesis 9 ships with)" if args.poses == "none" else ""))
     for recipe in recipes:
         print(f"  {slug_of(recipe):16s} {recipe['base_character']:7s} "
-              f"hair {recipe['hair'] or '-'}; beard {recipe['beard'] or '-'}; "
+              f"skin {recipe['skin']:18s} hair {recipe['hair_colour'] or '-':6s} "
+              f"beard {'y' if recipe['beard'] else '-'}; "
               f"{', '.join(recipe['outfit']) or 'no outfit'}; "
-              f"prop {recipe['prop'] or '-'}; pose {recipe.get('pose_name', '-')}")
+              f"prop {recipe['prop'] or '-'}")
     if args.dry_run:
         print("  dry run: nothing was built")
         return 0
@@ -471,12 +525,27 @@ def cmd_make(args) -> int:
                "licence": "Daz Standard License: a render may ship on the conditions in "
                           "docs/reference/daz-genesis.md; the 3D data needs an Interactive "
                           "License for each product used"}
-        cmd = build_command(recipe, blend, lib, args.timeout)
+        cmd = build_command(recipe, blend, lib, args.timeout, args.declip)
         row["build_command"] = " ".join(cmd[1:])
         code, seconds, _ = run(cmd, folder / f"{slug}_build.log")
         row["build"] = {"exit": code, "seconds": seconds,
                         "blend_bytes": blend.stat().st_size if blend.exists() else 0}
-        print(f"  {slug:16s} built in {seconds}s (exit {code})", flush=True)
+        report = OUT.parent / f"{slug}_scene.json"
+        if report.exists():
+            blender = json.loads(report.read_text()).get("blender", {})
+            fit = (blender.get("fit") or {}).get("meshes", {})
+            worn = set(blender.get("worn_meshes") or [])
+            row["fit"] = {"body": (blender.get("fit") or {}).get("body"),
+                          "worn": sorted(worn),
+                          "inside_pct": {name: m["inside_pct"] for name, m in fit.items()},
+                          "max_depth_mm": {name: m["max_depth_mm"] for name, m in fit.items()}}
+            row["declip"] = blender.get("declip")
+        fit = row.get("fit", {})
+        worn_fit = {k: v for k, v in fit.get("inside_pct", {}).items()
+                    if k in set(fit.get("worn", []))}
+        worst = max(worn_fit.items(), key=lambda kv: kv[1], default=("nothing worn", 0.0))
+        print(f"  {slug:16s} built in {seconds}s (exit {code}); worst worn fit: "
+              f"{worst[0][:26]} {worst[1]}% inside", flush=True)
         if not blend.exists():
             row["error"] = "the scene build wrote no .blend; see the build log"
             rows.append(row)
@@ -588,6 +657,20 @@ def main() -> int:
                             "with, which is the A pose a character sheet wants (default); "
                             "upright rolls a standing, walking, flexing, running or "
                             "stretching pose; any rolls from every pose the library has")
+        p.add_argument("--dials", choices=("none", "small", "any"), default="none",
+                       help="none leaves every figure the shape its character preset "
+                            "gives it (default), because a dial reshapes the body and "
+                            "nothing it wears follows: with three proportion dials set, "
+                            "68.7 per cent of a figure's trouser vertices sat inside its "
+                            "own legs on 2026-09-21, against 9.6 per cent with none. "
+                            "small keeps a rolled dial under 0.35, any is the full range")
+        p.add_argument("--declip", type=float, default=1.5, metavar="MM",
+                       help="push each worn garment this far clear of the body, which is "
+                            "what stops a hip coming through a pair of shorts authored "
+                            "for another figure: on a measured figure the shorts went "
+                            "from 73.3 per cent of their vertices inside the body to 0. "
+                            "Skipped when a pose is rolled, because it edits the rest "
+                            "shape (default 1.5)")
         p.add_argument("--any-brow-colour", action="store_true",
                        help="let a roll pick the blue, fuchsia and neon eyebrows the "
                             "library ships; by default only the six that grow on people")

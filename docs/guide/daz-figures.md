@@ -517,6 +517,34 @@ Right` with no image, while `Eyebrows_Primary`, which has no space, got all
 five of its maps. So the probe parses the preset itself and wires the channels
 it understands.
 
+### Swapping a skin, without rebuilding the material
+
+`--mat-preset` fills in what a material is missing and never replaces what is
+there, which is right for the bare anatomy and useless for a skin: a skin swap
+changes every channel. `--mat-replace` does that, and does it by pointing each
+image node at another file rather than rebuilding anything.
+
+The match is the file name. Every Genesis 9 map is named
+`<skin>_<part>_<role>_<udim>`, and the role is the last of those that matters:
+`D` colour, `SSS` translucency, `R` roughness, `SO` specular overlay, `NM`
+normal, `SLW` specular lobe weight. So for each material the preset names, each
+of its image nodes is looked up by the role its current file says it has, and
+swapped for the preset's file with the same role. The graph the importer built
+is untouched. Measured on Kat with `G9 Feminine Skin 03 MAT.duf`: 7 materials,
+4 to 6 maps each, nothing left over.
+
+It is applied after `--mat-preset`, because the importer leaves a skin's Base
+Color with nothing linked into it and the colour map a swap points elsewhere is
+one the fill pass has just added.
+
+**Why not the importer's own material loader.** `bpy.ops.daz.import_daz_materials`
+is built for exactly this, and on 2026-09-21 it left a Genesis 9 body with
+three of its seven material slots: `Fingernails`, `Toenails` and `Legs`
+survived, `Head`, `Body`, `Arms` and `Mouth Cavity` did not. It also drops the
+channels of any material whose name holds a space, as
+[above](#why-the-probe-reads-the-preset-itself). Neither fault is worth working
+around when reading the file is this cheap.
+
 ### Material merging is off
 
 `easy_import_daz` merges materials that are identical at import time, and every
@@ -1035,6 +1063,70 @@ through `"@props"` raised the opaque pixels at every facing, 3694 to 3787 to
 pixels: deleting it gave a 340 px clay portrait identical to the one with it,
 0 of 231,200 pixels different by even one level.
 
+### Cloth that clips, measured rather than judged
+
+A garment worn by a figure it was not authored for comes through the skin, and
+that is not a matter of taste: a garment vertex on the far side of the body's
+surface is inside the body, and the render shows skin where cloth should be.
+Every `scene` build now measures it. For each mesh it reports how many of its
+vertices are inside, how deep the worst one is and the mean gap, against the
+body's evaluated surface, and `--no-fit-report` turns it off.
+
+Read the garments, not the anatomy. An eyeball belongs inside the head: the
+Genesis 9 eyes measure 17% to 28% inside whatever you do, and so do the tear
+and eyelash surfaces. A pair of shorts at 73% inside is a fault.
+
+**What the dials cost.** Measured on 2026-09-21 on one character in the same
+outfit, with and without the three proportion dials a roll had given it:
+
+| | With the dials | With none |
+|---|---|---|
+| `LVA Pant` inside | 68.7%, up to 70.8 mm | 9.6%, up to 8.9 mm |
+| `LVA Shirt` inside | 69.8%, up to 62.4 mm | 0.02%, up to 1.6 mm |
+| `Genesis 9 Eyes` inside | 75.7%, up to 14.1 mm | 17.1%, up to 1.1 mm |
+| `Genesis 9 Mouth` inside | 50.9%, up to 18.3 mm | 2.6%, up to 4.7 mm |
+
+A dial reshapes the body and nothing it wears follows, because without a `.dbz`
+from Daz Studio the clothes take no shape keys from it, and neither do the eye,
+mouth and eyelash figures. That is why `daz_characters.py` rolls no dials by
+default.
+
+**What is left over without dials.** All six character presets, each in the
+armour and in the base clothing, with no dials at all:
+
+| Figure | Worst garment | Inside |
+|---|---|---|
+| Fabrice, Matt, Ty | none: the worst mesh is an eye or an eyelash | under 18% |
+| Amala | `G9 Base Shorts` | 47.1%, up to 9 mm |
+| Laura | `G9 Base Shorts` | 50.6%, up to 9 mm |
+| Kat | `G9 Base Shorts`, `LVA Pant` | 73.3% and 33.9%, up to 17 mm |
+
+So the armour fits the masculine figures and Amala and Laura, and the base
+shorts fit nobody with hips.
+
+### Pushing a garment out of the body
+
+`scene --declip MM` moves every vertex of a worn mesh that sits behind the
+body's surface until it stands that far clear of it. The measuring is done on
+the evaluated mesh and the moving on the rest shape, because that is what the
+`.blend` keeps and the two differ: a character morph drives bones, so a figure
+is deformed before any pose is applied. The difference is taken out by
+repeating, up to four passes, and the passes stop when nothing moves.
+
+Measured on Kat on 2026-09-21 at `--declip 1.5`, in 1.13 s:
+
+| Mesh | Inside before | Inside after | Vertices moved | Worst push |
+|---|---|---|---|---|
+| `G9 Base Shorts` | 73.3% | 0.0% | 6,727 of 8,256 on the first pass | 13.95 mm |
+| `LVA Pant` | 33.9% | 0.0% | 1,977 of 4,526 | 18.40 mm |
+| `Mavick HairStyle` | 0.5% | 0.5% | left alone, 433,512 vertices | |
+
+A mesh above `--declip-max-verts`, 100,000 by default, is left alone, which is
+how a card hair keeps the shape that is its style. A garment carrying shape
+keys moves with them: every key block takes the same delta, so whatever it was
+adding it still adds. A posed figure is refused, because the rest shape is what
+is being edited.
+
 ## A roster of characters, rolled from the library
 
 One figure at a time is the slow way to find out what a library can do.
@@ -1051,7 +1143,18 @@ python3 scripts/daz_characters.py make --count 12 --seed 20260921 --size 768
 
 The six character presets are dealt out rather than drawn one at a time, so
 twelve characters use each of them twice instead of landing on the same one
-four times. Everything else is a roll.
+four times, and the two kinds of outfit are dealt out the same way. Everything
+else is a roll: a skin, a hair colour, a beard, an eyebrow colour, which
+armour pieces, and a weapon.
+
+Each character keeps the shape its preset gives it. `--dials small` and
+`--dials any` roll body dials on top of that, and the measurements
+[above](#cloth-that-clips-measured-rather-than-judged) are why they are off:
+the clothes and the face do not follow a dial.
+
+A skin is one of the four base skins for the figure's build, or the one the
+character came with, swapped map for map with `--mat-replace`. Hair and beard
+take the same colour, from the colour presets that sit beside the hair.
 
 Nothing is named in the script. The slots are read from the library, one figure
 generation at a time, which is the folder under `People/` that the character
@@ -1111,13 +1214,14 @@ characters at 768 px with Cycles on the card:
 
 | | |
 |---|---|
-| Build, each | 10.3 to 25.4 s, 227.7 s over the twelve |
-| Draw, two views each | 2.1 to 4.3 s, 38.1 s over the twelve, 1.59 s a cell |
+| Build, each | 10.3 to 25.5 s, 230.9 s over the twelve |
+| Draw, two views each | 2.1 to 3.1 s, 30.9 s over the twelve |
 | Every exit code | 0, for both commands, twelve times |
-| Each `.blend`, before it was deleted | 71 to 173 MB |
-| Kept on disk | 8.0 MB, the sheet 4096 by 1629 px of it |
-| Height of each figure in its cell | 75.0% to 80.2%, feet on one line |
-| Lit pixels, per figure | a mean of 0.224 to 0.481 of 1, which is the spread of Daz's own skin tones |
+| Each `.blend`, before it was deleted | 71 to 179 MB |
+| Kept on disk | 8.1 MB, the sheet 4096 by 1629 px of it |
+| Height of each figure in its cell | 74.0% to 79.6%, feet on one line |
+| Garment vertices inside a body | 0.00% on every garment of all twelve, after 36,455 were pushed out |
+| Lit pixels, per figure | a mean of 0.241 to 0.433 of 1, which is the spread of Daz's own skin tones |
 
 That is the first measurement of a Daz figure rendered with its materials on
 Cycles, and it settles a question this page left open: on EEVEE through

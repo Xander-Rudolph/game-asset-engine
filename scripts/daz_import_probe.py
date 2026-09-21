@@ -174,6 +174,22 @@ HOW IT RUNS WITHOUT A UI, the method scripts/mpfb_probe.py found for MPFB:
      splitUrl and run, read at the 5.2.0 tag). useMergeMaterials is also off,
      because bare anatomy materials are identical and were merged into one
      slot, leaving nowhere to put the maps.
+  9. --mat-replace is the other half of that: it swaps the maps a material
+     already has for another preset's, matched by what each file name says
+     the map is for (D, SSS, R, SO, NM, SLW), which is what a skin swap
+     needs. It runs after the fill, because the fill is what puts a skin's
+     colour map into Base Color, and it leaves the graph alone. Handing the
+     preset to bpy.ops.daz.import_daz_materials instead left a Genesis 9 body
+     with three of its seven material slots (measured 2026-09-21).
+ 10. Every build measures how each mesh sits against the body's evaluated
+     surface: how many of its vertices are inside it, how deep and the mean
+     gap. Garments should be outside; an eyeball is inside a head whatever
+     anyone does. --declip MM then pushes each worn mesh clear of the body by
+     that much, measuring on the evaluated mesh and moving the rest shape,
+     over up to four passes, which takes a pair of shorts authored for
+     another figure from 73.3% of its vertices inside to 0. A mesh above
+     --declip-max-verts is left alone, so a card hair keeps its shape, and a
+     posed figure is refused because the rest shape is what is edited.
 WHAT `scene` ADDS to that, in this order, each one a step that records its
 seconds, peak RSS and get_error_message() and carries on when it fails:
   1. --morphs runs one standard morph operator per set (import_units,
@@ -952,6 +968,191 @@ def layer_stack(tree, layers, x, y):
     return socket
 
 
+def body_of(rig, meshes):
+    """The figure's own mesh among the ones a rig deforms."""
+    if not meshes:
+        return None
+    named = [o for o in meshes if o.name == f"{rig.name} Mesh" or o.name.startswith(rig.name)]
+    return max(named or meshes,
+               key=lambda o: (len(o.data.shape_keys.key_blocks) if o.data.shape_keys else 0,
+                              len(o.data.vertices)))
+
+
+def declip(body, meshes, margin, max_verts, skip, passes=4):
+    """Push a garment's vertices out of the body it is worn on.
+
+    A garment is authored for one figure and worn by another, and no amount of
+    fitting stops a wider hip coming through a pair of shorts. Every vertex
+    that sits behind the body's surface is moved until it stands `margin`
+    clear of it.
+
+    The measuring is done on the evaluated mesh and the moving on the rest
+    shape, because that is the one a .blend keeps, and the two differ: a
+    character morph drives bones, so the figure is already deformed before any
+    pose is applied. The difference is taken out by repeating: each pass moves
+    a vertex by the gap it can still see, and the passes stop when nothing
+    moves. It edits the rest shape, so a posed figure is refused by the caller.
+
+    Meshes above `max_verts` are left alone, which is how a card hair, whose
+    shape is the style, keeps it.
+    """
+    from mathutils.bvhtree import BVHTree
+    targets = []
+    out = {}
+    for ob in meshes:
+        if ob is body or ob.name in skip:
+            continue
+        if len(ob.data.vertices) > max_verts:
+            out[ob.name] = {"skipped": f"{len(ob.data.vertices)} vertices, over the limit"}
+            continue
+        targets.append(ob)
+        out[ob.name] = {"vertices": len(ob.data.vertices), "moved": 0,
+                        "max_push_mm": 0.0, "passes": []}
+    for _ in range(max(1, passes)):
+        dg = bpy.context.evaluated_depsgraph_get()
+        tree = BVHTree.FromObject(body, dg)
+        moved_any = 0
+        for ob in targets:
+            evaluated = ob.evaluated_get(dg)
+            me = evaluated.to_mesh()
+            here = [ob.matrix_world @ v.co for v in me.vertices]
+            evaluated.to_mesh_clear()
+            if len(here) != len(ob.data.vertices):
+                out[ob.name]["skipped"] = "the evaluated mesh has another vertex count"
+                continue
+            rotate_back = ob.matrix_world.to_3x3().inverted()
+            keys = ob.data.shape_keys.key_blocks if ob.data.shape_keys else []
+            moved, worst = 0, 0.0
+            for i, point in enumerate(here):
+                hit, normal, index, dist = tree.find_nearest(point)
+                if hit is None:
+                    continue
+                signed = (point - hit).dot(normal)
+                if signed >= margin:
+                    continue
+                delta = rotate_back @ ((hit + normal * margin) - point)
+                ob.data.vertices[i].co = ob.data.vertices[i].co + delta
+                for block in keys:
+                    block.data[i].co = block.data[i].co + delta
+                moved += 1
+                worst = max(worst, margin - signed)
+            if moved:
+                ob.data.update()
+            out[ob.name]["passes"].append(moved)
+            out[ob.name]["moved"] = max(out[ob.name]["moved"], moved)
+            out[ob.name]["max_push_mm"] = max(out[ob.name]["max_push_mm"],
+                                              round(worst * 1000, 2))
+            moved_any += moved
+        bpy.context.view_layer.update()
+        if not moved_any:
+            break
+    for name, entry in out.items():
+        if "vertices" in entry:
+            entry["moved_pct"] = round(100.0 * entry["moved"] / max(1, entry["vertices"]), 2)
+    return {"margin_mm": round(margin * 1000, 2), "max_vertices": max_verts, "meshes": out}
+
+
+def fit_report(body, meshes, tolerance=0.0005):
+    """How each other mesh sits against the body, in millimetres.
+
+    Clipping is not a matter of taste: a garment vertex on the far side of the
+    body's surface is inside the body, and the render shows skin through cloth.
+    Every vertex is measured against the body's evaluated surface, and a
+    vertex counts as inside when it lies more than `tolerance` behind the
+    nearest face's normal.
+    """
+    from mathutils.bvhtree import BVHTree
+    dg = bpy.context.evaluated_depsgraph_get()
+    tree = BVHTree.FromObject(body, dg)
+    out = {}
+    for ob in meshes:
+        if ob is body:
+            continue
+        evaluated = ob.evaluated_get(dg)
+        me = evaluated.to_mesh()
+        inside, depths, gaps = 0, [], []
+        for v in me.vertices:
+            point = ob.matrix_world @ v.co
+            hit, normal, index, dist = tree.find_nearest(point)
+            if hit is None:
+                continue
+            signed = (point - hit).dot(normal)
+            gaps.append(signed)
+            if signed < -tolerance:
+                inside += 1
+                depths.append(-signed)
+        evaluated.to_mesh_clear()
+        n = len(gaps) or 1
+        out[ob.name] = {
+            "vertices": len(gaps), "inside": inside,
+            "inside_pct": round(100.0 * inside / n, 2),
+            "max_depth_mm": round(max(depths) * 1000, 2) if depths else 0.0,
+            "mean_depth_mm": round(sum(depths) / len(depths) * 1000, 2) if depths else 0.0,
+            "mean_gap_mm": round(sum(gaps) / n * 1000, 2),
+        }
+    return {"body": body.name, "tolerance_mm": tolerance * 1000, "meshes": out}
+
+
+def image_role(name):
+    """What a Daz map is for, from its file name: D, SSS, R, SO, NM, SLW."""
+    stem = str(name).rsplit("/", 1)[-1].rsplit(".", 1)[0]
+    for part in reversed(re.split(r"[_.]", stem)):
+        if part.upper() in cfg["role_tokens"]:
+            return part.upper()
+    return None
+
+
+def replace_mat_presets(specs):
+    """Swap the maps of a material that already has some, for a skin or a hair
+    colour, where every channel changes rather than the missing ones.
+
+    The graph is left exactly as the importer built it and only the image each
+    texture node points at changes, matched by what the file name says the map
+    is for. That is the difference between this and handing the preset to the
+    importer's own material loader, which rebuilt the materials and left a
+    Genesis 9 body with three of its seven material slots (measured
+    2026-09-21).
+    """
+    report = []
+    for spec in specs:
+        entry = {"file": spec["file"], "objects": spec["objects"] or "every mesh",
+                 "swapped": [], "left_alone": []}
+        for ob in bpy.data.objects:
+            if ob.type != "MESH" or (spec["objects"] and ob.name not in spec["objects"]):
+                continue
+            for slot in ob.material_slots:
+                mat = slot.material
+                if mat is None or mat.node_tree is None:
+                    continue
+                want = spec["materials"].get(base_material_name(mat.name))
+                if not want:
+                    continue
+                did = {"material": mat.name, "object": ob.name, "maps": {}}
+                images = want.get("images") or {}
+                for node in mat.node_tree.nodes:
+                    if node.type != "TEX_IMAGE" or node.image is None:
+                        continue
+                    rel = images.get(image_role(node.image.filepath or node.image.name))
+                    if not rel:
+                        continue
+                    new = preset_image(rel, node.image.colorspace_settings.name)
+                    if new is node.image:
+                        continue
+                    did["maps"][image_role(rel)] = [node.image.name, new.name]
+                    node.image = new
+                bsdf = principled_of(mat)
+                base = bsdf.inputs.get("Base Color") if bsdf is not None else None
+                if base is not None and not base.is_linked and want.get("colour"):
+                    base.default_value = tuple(want["colour"]) + (1.0,)
+                    did["colour"] = [round(c, 4) for c in want["colour"]]
+                if did["maps"] or "colour" in did:
+                    entry["swapped"].append(did)
+                else:
+                    entry["left_alone"].append(did)
+        report.append(entry)
+    return report
+
+
 def apply_mat_presets(specs):
     """Fill in what a material is missing from the Daz material presets.
 
@@ -1210,6 +1411,24 @@ BUILD_TAIL = r'''
         result["mat_presets"] = step(
             "apply %d Daz material preset(s)" % len(cfg["mat_presets"]),
             lambda: apply_mat_presets(cfg["mat_presets"]), fatal=False)
+
+    # After the fill, not before: the importer leaves a skin's Base Color with
+    # nothing linked into it, so the map a swap points elsewhere is one the
+    # fill pass has just added.
+    if cfg["mat_replaces"]:
+        result["mat_replaces"] = step(
+            "swap the textures of %d Daz material preset(s)" % len(cfg["mat_replaces"]),
+            lambda: replace_mat_presets(cfg["mat_replaces"]), fatal=False)
+
+    if cfg["fit_report"]:
+        def measure_fit():
+            meshes = [o for o in bpy.data.objects if o.type == "MESH"]
+            worn = body_of(rig, [o for o in meshes if o.find_armature() == rig]) or (
+                meshes[0] if meshes else None)
+            if worn is None:
+                raise RuntimeError("no mesh to measure against")
+            return fit_report(worn, meshes)
+        result["fit"] = step("measure how each mesh sits on the body", measure_fit, fatal=False)
 
     final = survey()
     result["survey"] = final
@@ -1496,6 +1715,7 @@ SCENE_TAIL = r'''
 
     # -------------------------------------------------------------- wearables
     result["wearables"] = {}
+    worn_meshes = set()
     for rel, absp in cfg["wear"]:
         name = os.path.splitext(os.path.basename(absp))[0]
 
@@ -1534,6 +1754,9 @@ SCENE_TAIL = r'''
                     entry["after_merge"][o.name] = {"deleted_by_the_importer": True}
             return entry
         result["wearables"][name] = step(f"easy_import_daz wearable {name}", wear, fatal=False)
+        entry = result["wearables"][name] or {}
+        worn_meshes.update(n for n, kind in entry.get("objects", []) if kind == "MESH")
+        result["worn_meshes"] = sorted(worn_meshes)
 
     # Before anything else is measured. Every later step reads the evaluated
     # mesh, so a wearable whose own Subsurf is still on would have its dial and
@@ -1581,6 +1804,24 @@ SCENE_TAIL = r'''
         result["dials"][f"{name}={value} dressed"] = step(
             f"set {name} = {value} with the outfit on", set_after, fatal=False)
 
+    if cfg["declip"] > 0 and worn_meshes:
+        def push_out():
+            meshes = [o for o in bpy.data.objects if o.type == "MESH"]
+            body_now = body_of(rig, [o for o in meshes if o.find_armature() == rig])
+            if body_now is None:
+                raise RuntimeError("no body mesh to push away from")
+            if cfg["pose"]:
+                raise RuntimeError("a pose is applied, and this edits the rest shape")
+            wearing = [o for o in meshes if o.name in worn_meshes]
+            before = fit_report(body_now, wearing)
+            done = declip(body_now, wearing, cfg["declip"] / 1000.0, cfg["declip_max_verts"],
+                          set(cfg["declip_skip"]))
+            done["inside_before"] = {k: v["inside_pct"] for k, v in before["meshes"].items()}
+            after = fit_report(body_now, wearing)
+            done["inside_after"] = {k: v["inside_pct"] for k, v in after["meshes"].items()}
+            return done
+        result["declip"] = step("push the worn meshes out of the body", push_out, fatal=False)
+
     # ------------------------------------------------------------------ pose
     if cfg["pose"]:
         def pose():
@@ -1618,6 +1859,24 @@ SCENE_TAIL = r'''
         result["mat_presets"] = step(
             "apply %d Daz material preset(s)" % len(cfg["mat_presets"]),
             lambda: apply_mat_presets(cfg["mat_presets"]), fatal=False)
+
+    # After the fill, not before: the importer leaves a skin's Base Color with
+    # nothing linked into it, so the map a swap points elsewhere is one the
+    # fill pass has just added.
+    if cfg["mat_replaces"]:
+        result["mat_replaces"] = step(
+            "swap the textures of %d Daz material preset(s)" % len(cfg["mat_replaces"]),
+            lambda: replace_mat_presets(cfg["mat_replaces"]), fatal=False)
+
+    if cfg["fit_report"]:
+        def measure_fit():
+            meshes = [o for o in bpy.data.objects if o.type == "MESH"]
+            worn = body_of(rig, [o for o in meshes if o.find_armature() == rig]) or (
+                meshes[0] if meshes else None)
+            if worn is None:
+                raise RuntimeError("no mesh to measure against")
+            return fit_report(worn, meshes)
+        result["fit"] = step("measure how each mesh sits on the body", measure_fit, fatal=False)
 
     final = survey()
     result["survey"] = final
@@ -2386,6 +2645,21 @@ def layered_image(doc: dict, ref: str, lib: Path) -> tuple[list, str]:
     return layers, ""
 
 
+# What a Daz map is for, read from its file name. Every Genesis 9 texture is
+# named <skin>_<part>_<role>_<udim>, and the role is the only part of that this
+# script needs: it says which image node in an already-built material a new
+# file replaces.
+ROLE_TOKENS = ("D", "SSS", "R", "SO", "NM", "B", "SLW", "TM", "OP")
+
+
+def map_role(name: str) -> str | None:
+    stem = str(name).rsplit("/", 1)[-1].rsplit(".", 1)[0]
+    for part in reversed(re.split(r"[_.]", stem)):
+        if part.upper() in ROLE_TOKENS:
+            return part.upper()
+    return None
+
+
 def channel_bits(chan: dict) -> dict:
     return {k: chan[k] for k in ("value", "image", "image_file") if k in chan}
 
@@ -2400,6 +2674,12 @@ def preset_materials(path: Path, lib: Path) -> dict:
     """
     doc = read_duf(path)
     raw: dict[str, dict] = {}
+    all_images: dict[str, list] = {}
+    roles: dict[str, dict] = {}
+
+    def note_image(material: str, ref) -> None:
+        if material and isinstance(ref, str):
+            all_images.setdefault(material, []).append(ref)
 
     def note(material: str, channel: str, bits: dict) -> None:
         if material and bits:
@@ -2410,11 +2690,15 @@ def preset_materials(path: Path, lib: Path) -> dict:
         diffuse = mat.get("diffuse")
         if isinstance(diffuse, dict) and isinstance(diffuse.get("channel"), dict):
             note(name, "diffuse", channel_bits(diffuse["channel"]))
+            note_image(name, diffuse["channel"].get("image_file"))
         for extra in mat.get("extra") or []:
             for entry in (extra or {}).get("channels") or []:
                 chan = entry.get("channel", entry)
-                if isinstance(chan, dict) and chan.get("id") in PRESET_CHANNELS:
+                if not isinstance(chan, dict):
+                    continue
+                if chan.get("id") in PRESET_CHANNELS:
                     note(name, chan["id"], channel_bits(chan))
+                note_image(name, chan.get("image_file"))
 
     for mat in doc.get("material_library") or []:
         from_struct(mat)
@@ -2433,14 +2717,28 @@ def preset_materials(path: Path, lib: Path) -> dict:
         channel, _, kind = tail.rpartition("/")
         channel = urllib.parse.unquote(channel)
         keys = anim.get("keys") or []
-        if (channel not in PRESET_CHANNELS or kind not in ("value", "image", "image_file")
-                or not keys or len(keys[0]) < 2):
+        if not keys or len(keys[0]) < 2:
+            continue
+        if kind == "image_file":
+            note_image(material, keys[0][1])
+        if channel not in PRESET_CHANNELS or kind not in ("value", "image", "image_file"):
             continue
         note(material, channel, {kind: keys[0][1]})
 
     materials, unresolved = {}, []
+    for name, channels in sorted(all_images.items()):
+        by_role = {}
+        for ref in channels:
+            rel = library_image(lib, ref)
+            role = map_role(ref)
+            if rel and role:
+                by_role.setdefault(role, rel)
+        if by_role:
+            roles.setdefault(name, {}).update(by_role)
     for name, channels in sorted(raw.items()):
         spec = {}
+        if name in roles:
+            spec["images"] = roles[name]
         for channel, image_key, value_key in (("Cutout Opacity", "alpha_image", "alpha_value"),
                                               ("diffuse", "colour_image", "colour"),
                                               ("Refraction Weight", None, "refraction"),
@@ -2521,6 +2819,19 @@ def mat_preset_specs(lib: Path, presets: list[tuple]) -> list[dict]:
         read = preset_materials(path, lib)
         specs.append({"file": rel, "objects": objects, **read})
     return specs
+
+
+def chosen_replaces(lib: Path, args) -> list[tuple]:
+    """The presets whose textures replace the ones already on a material."""
+    seen, unique = set(), []
+    for rel, objects in args.mat_replace:
+        if not (lib / rel).is_file():
+            raise SystemExit(f"  ! material preset not in the library: {lib / rel}")
+        key = (rel, tuple(objects))
+        if key not in seen:
+            seen.add(key)
+            unique.append((rel, objects))
+    return unique
 
 
 def chosen_presets(lib: Path, args, anatomy: list[str]) -> list[tuple]:
@@ -2669,6 +2980,9 @@ def cmd_build(args) -> int:
         "visemes": args.visemes,
         "facs": args.facs,
         "mat_presets": mat_preset_specs(lib, chosen_presets(lib, args, anatomy)),
+        "mat_replaces": mat_preset_specs(lib, chosen_replaces(lib, args)),
+        "role_tokens": list(ROLE_TOKENS),
+        "fit_report": args.fit_report,
         "no_textures": args.no_textures,
         "subdivision": args.subdivision,
         "prop_pattern": PROP_PATTERN,
@@ -2867,6 +3181,12 @@ def cmd_scene(args) -> int:
         "custom": custom,
         "facs": args.facs,
         "mat_presets": mat_preset_specs(lib, chosen_presets(lib, args, anatomy)),
+        "mat_replaces": mat_preset_specs(lib, chosen_replaces(lib, args)),
+        "role_tokens": list(ROLE_TOKENS),
+        "fit_report": args.fit_report,
+        "declip": args.declip,
+        "declip_max_verts": args.declip_max_verts,
+        "declip_skip": args.declip_skip,
         "set": args.set,
         "set_after": args.set_dressed,
         "wear": [[rel, f"{lib_c}/{rel}"] for rel in args.wear],
@@ -3466,6 +3786,16 @@ def main() -> int:
                         "material is missing: its cutout opacity map, its colour map or its flat "
                         "colour, and nothing it already has. @ names the meshes it may touch "
                         "(default every mesh). Repeatable, applied in order")
+    b.add_argument("--mat-replace", type=mat_preset_arg, action="append", default=[],
+                   metavar="FILE[@MESH,MESH]",
+                   help="a Daz material preset .duf whose maps replace the ones a material "
+                        "already has, matched by what each file name says the map is for: "
+                        "what a skin swap needs, where every channel changes rather than the "
+                        "missing ones. Applied after --mat-preset, because that is what puts "
+                        "a skin's colour map into Base Color. Repeatable")
+    b.add_argument("--fit-report", action=argparse.BooleanOptionalAction, default=True,
+                   help="measure how far each mesh sits inside or outside the body, which is "
+                        "what says whether an outfit clips (default on)")
     b.add_argument("--auto-materials", action=argparse.BooleanOptionalAction, default=True,
                    help="also apply the presets that sit beside the figure and beside each "
                         "anatomy file, after any --mat-preset, which is what gives eyelashes, "
@@ -3516,6 +3846,27 @@ def main() -> int:
                    help="a Daz material preset .duf in the library, to fill in what an imported "
                         "material is missing, as for build; repeatable, applied in order after "
                         "the wearables are on")
+    s.add_argument("--mat-replace", type=mat_preset_arg, action="append", default=[],
+                   metavar="FILE[@MESH,MESH]",
+                   help="a Daz material preset .duf whose maps replace the ones a material "
+                        "already has, matched by what each file name says the map is for: "
+                        "what a skin swap needs, where every channel changes rather than the "
+                        "missing ones. Applied after --mat-preset, because that is what puts "
+                        "a skin's colour map into Base Color. Repeatable")
+    s.add_argument("--declip", type=float, default=0.0, metavar="MM",
+                   help="push every worn mesh's vertices out of the body until they stand "
+                        "this many millimetres clear of it, which is what stops a hip "
+                        "coming through a pair of shorts authored for another figure. It "
+                        "edits the rest shape, so it refuses to run on a posed figure "
+                        "(default 0, off)")
+    s.add_argument("--declip-max-verts", type=int, default=100000, metavar="N",
+                   help="leave a mesh with more vertices than this alone, so a card hair "
+                        "keeps its shape (default 100000)")
+    s.add_argument("--declip-skip", type=csv_names, default=[],
+                   help="mesh names to leave alone, comma separated")
+    s.add_argument("--fit-report", action=argparse.BooleanOptionalAction, default=True,
+                   help="measure how far each mesh sits inside or outside the body, which is "
+                        "what says whether an outfit clips (default on)")
     s.add_argument("--auto-materials", action=argparse.BooleanOptionalAction, default=True,
                    help="also apply the presets beside the figure and beside each anatomy file, "
                         "after any --mat-preset (default on)")

@@ -495,9 +495,9 @@ python3 scripts/daz_characters.py make --count 12 --seed 20260921 --size 768
 - **Show the dry run first and get an answer.** It prints each character's
   base, hair, beard, outfit, weapon and pose, and builds nothing.
 - **Say the cost.** Measured on 2026-09-21 on twelve characters at 768 px:
-  10.3 to 25.4 s to build each one and 2.1 to 4.3 s to draw its two views,
-  227.7 s and 38.1 s over the twelve, and 8.0 MB kept once each `.blend` was
-  deleted.
+  10.3 to 25.5 s to build each one and 2.1 to 3.1 s to draw its two views,
+  230.9 s and 30.9 s over the twelve, and 8.1 MB kept once each `.blend` was
+  deleted. No garment was left inside a body.
 - Every slot comes from the library, one figure generation at a time, so a
   Genesis 8 hair is never put on a Genesis 9 figure. The same seed and library
   give the same twelve.
@@ -515,6 +515,16 @@ python3 scripts/daz_characters.py make --count 12 --seed 20260921 --size 768
   `--poses upright` or `--poses any` is asked for. The lights are brighter than
   a sprite sheet's, `--key 6.5 --ambient 1.3`, because Daz skin comes out at a
   mean of 0.248 of 1 under the sheet's own 1.6 and 0.22.
+- **No body dials, and each garment pushed clear of the body.** A dial reshapes
+  the figure and its clothes and face do not follow: with three of them set,
+  68.7% of a figure's trouser vertices sat inside its own legs and its eyes sat
+  14 mm inside its head. `--dials small` and `--dials any` roll them anyway.
+  `--declip`, 1.5 mm by default, then pushes each worn garment clear, which
+  took a pair of shorts from 73.3% inside to 0. Every character's JSON carries
+  the fit numbers, under `fit`, and the run prints the worst worn mesh.
+- **The skin and the hair colour are rolled.** One of the four base skins for
+  the figure's build, or the character's own, swapped map for map, and one of
+  the six hair colours the library ships, which the beard matches.
 - What it does not do: it never rolls a hair or clothing colour, because those
   materials already carry their maps and the material pass only fills in what
   is missing; a weapon arrives in the hand with the fingers open, because the

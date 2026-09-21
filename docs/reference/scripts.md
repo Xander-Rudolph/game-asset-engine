@@ -623,7 +623,8 @@ scripts/daz_import_probe.py fetch
 scripts/daz_import_probe.py build --out output/daz/NAME.blend [--facs] [--visemes]
                             [--subdivision {keep,off}] [--figure DUF]
                             [--anatomy auto|none|DUF,...] [--library DIR]
-                            [--mat-preset DUF[@MESH,...]] [--no-auto-materials]
+                            [--mat-preset DUF[@MESH,...]] [--mat-replace DUF[@MESH,...]]
+                            [--no-auto-materials] [--no-fit-report]
                             [--no-textures] [--material-method M] [--fit F]
                             [--content-dir DIR] [--no-dir-check] [--verbosity N]
                             [--timeout SECONDS] [--no-wait]
@@ -632,7 +633,9 @@ scripts/daz_import_probe.py scene --out output/daz/NAME.blend [--figure DUF]
                             [--morphs SET,...] [--custom-morphs DIR]
                             [--custom-files F,...] [--custom-category NAME]
                             [--custom-bodypart {Face,Body,Custom}] [--facs]
-                            [--mat-preset DUF[@MESH,...]] [--no-auto-materials]
+                            [--mat-preset DUF[@MESH,...]] [--mat-replace DUF[@MESH,...]]
+                            [--no-auto-materials] [--declip MM] [--declip-max-verts N]
+                            [--declip-skip NAME,...] [--no-fit-report]
                             [--set NAME=VALUE] [--wear DUF] [--no-transfer]
                             [--skip-transfer NAME,...] [--set-dressed NAME=VALUE]
                             [--pose DUF] [--pose-affects-morphs] [--no-verify]
@@ -671,6 +674,15 @@ from the figure's `.duf`, gzip-compressed or plain. Use `--facs`: on Genesis 9
 to 3 for render. It writes `NAME.blend`, `NAME_build.json`, which records the
 command line and every step, `NAME_blender.log` and `NAME_poses.json`.
 
+**Fit, and pushing a garment out.** Every build measures how each mesh sits
+against the body: how many of its vertices are inside it, how deep, and the
+mean gap. Garments should be outside; an eyeball is inside the head whatever
+you do. `scene --declip MM` pushes each worn mesh's vertices clear of the body
+by that much, which took a pair of shorts from 73.3% of their vertices inside
+to 0 (2026-09-21), leaves a mesh above `--declip-max-verts` alone so a card
+hair keeps its shape, and refuses a posed figure because it edits the rest
+shape. See [Daz figures](/guide/daz-figures#cloth-that-clips-measured-rather-than-judged).
+
 **Material presets.** A Genesis 9 eyelash, eye, mouth or eyebrow figure arrives
 with no map at all, and Daz Studio fills them in afterwards with a MAT preset.
 Both `build` and `scene` now do that: they read the presets beside the figure
@@ -678,7 +690,10 @@ and beside each anatomy file and wire the cutout opacity, the colour map or
 flat colour, and a plainly stacked layered colour image, filling in only what a
 material is missing. `--mat-preset FILE[@MESH,...]` names one, applied before
 those and winning over them; `--no-auto-materials` leaves the materials as the
-importer built them, which draws an eyelash card as an opaque fan. The report
+importer built them, which draws an eyelash card as an opaque fan.
+`--mat-replace FILE[@MESH,...]` is the other half: it swaps the maps a material
+already has, matched by what each file name says the map is for, which is what
+a skin swap needs. It runs after the fill. The report
 says, per preset, what was filled in, what was left alone, and what it could
 not resolve. Material merging is off in every import, because bare anatomy
 materials are identical and were merged into one slot. See
@@ -800,18 +815,19 @@ stage measured, and the two things that need Daz Studio, are in the
 ```sh
 scripts/daz_characters.py list [--library DIR] [--generation NAME]
 scripts/daz_characters.py make [--count N] [--seed N] [--size PX]
-                          [--poses {none,upright,any}] [--azimuths DEG,DEG]
-                          [--facings front,side] [--elevation DEG] [--span METRES]
-                          [--key N] [--ambient N] [--samples N]
-                          [--sheet-cell PX] [--sheet-columns N] [--any-brow-colour]
-                          [--library DIR] [--generation NAME] [--timeout SECONDS]
-                          [--keep-blend] [--dry-run]
+                          [--poses {none,upright,any}] [--dials {none,small,any}]
+                          [--declip MM] [--azimuths DEG,DEG] [--facings front,side]
+                          [--elevation DEG] [--span METRES] [--key N] [--ambient N]
+                          [--samples N] [--sheet-cell PX] [--sheet-columns N]
+                          [--any-brow-colour] [--library DIR] [--generation NAME]
+                          [--timeout SECONDS] [--keep-blend] [--dry-run]
 ```
 
 A roster of characters out of whatever the library holds. The character presets
-are dealt out, so twelve characters use all six twice; everything else is a
-draw: another character's shape dial or two or three proportion dials, an
-eyebrow colour, hair, a beard, an outfit and a weapon. The draw is seeded, so
+and the two kinds of outfit are dealt out, so twelve characters use all six
+presets twice and half of them wear the armour; everything else is a draw: one
+of the four base skins for that build or the character's own, a hair colour the
+beard matches, an eyebrow colour, which armour pieces, and a weapon. The draw is seeded, so
 the same seed and the same library give the same characters, and `--dry-run`
 prints the roll and builds nothing.
 
@@ -820,6 +836,13 @@ wants; `--poses upright` rolls a standing, walking, flexing, running or
 stretching one, and `--poses any` rolls from all 58. `--span` follows: 2.0 m in
 the rest pose, 2.4 m when a pose is rolled, because a stretching figure reaches
 higher than a standing one.
+
+**No body dials by default either**, because the clothes and the face do not
+follow one: with three proportion dials set, 68.7% of a figure's trouser
+vertices sat inside its own legs and its eyes sat 14 mm inside its head
+(2026-09-21). `--dials small` and `--dials any` roll them anyway. Each garment
+is pushed clear of the body with `--declip`, 1.5 mm by default, and each
+character's JSON keeps the fit numbers that proves it.
 
 **Lit brighter than a sprite sheet.** `--key 6.5 --ambient 1.3` rather than
 `render_sheet.py`'s 1.6 and 0.22, under which a Daz figure's lit pixels
@@ -852,10 +875,11 @@ views side by side on a flat grey under a line naming what it is made of, at
 is Daz content: gitignored, and never committed.
 
 **Measured on 2026-09-21**, twelve characters in the rest pose at 768 px,
-Cycles on the card at 128 samples, in `comfyui-packaged`: 10.3 to 25.4 s to
-build each one and 2.1 to 4.3 s to draw its two views, 227.7 s and 38.1 s over
-the twelve, every exit code 0, and 8.0 MB kept once the twelve `.blend` files,
-71 to 173 MB each, were deleted. The sheet is 4096 by 1629 px.
+Cycles on the card at 128 samples, in `comfyui-packaged`: 10.3 to 25.5 s to
+build each one and 2.1 to 3.1 s to draw its two views, 230.9 s and 30.9 s over
+the twelve, every exit code 0, no garment left inside a body, and 8.1 MB kept
+once the twelve `.blend` files, 71 to 179 MB each, were deleted. The sheet is
+4096 by 1629 px.
 
 ### `daz_inventory.py`
 
