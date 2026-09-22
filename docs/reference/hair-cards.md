@@ -1,9 +1,9 @@
 # Hair cards, grown rather than licensed
 
-::: tip Status: researched on 2026-09-22, with five experiments run the same day
+::: tip Status: researched on 2026-09-22, five experiments run the same day, and the hybrid design built the same day
 Nine research passes read the web on 2026-09-22: how production hair-card assets are built, how stylised games build hair, how cards are shaded, the published card generators and their licences, texture atlases, the scalp cap, free hair assets and their licences, what Blender 4.5 can do headlessly, and the geometry of a card layout as an algorithm. 240 claims came back; the duplicates were folded and every load-bearing or licence claim was then checked twice by independent readers told to refute it. Three redesigns of `scripts/make_hair.py` were written from the checked claims and scored by two judges, and a critic listed what is still missing. The register is [research/claims/hair-cards.json](https://github.com/Xander-Rudolph/game-asset-engine/blob/main/research/claims/hair-cards.json) on GitHub: 152 claims, 21 confirmed, 32 corrected to a narrower wording, 1 unsettled, 98 minor and unchecked.
 
-Run, not read: five experiments in the container's Blender 4.5.9 (Cycles on the RTX 4070 Ti SUPER) on hair `scripts/make_hair.py` wrote that day, driven by an ad hoc script kept at `output/hair/_exp/render_exp.py` on this machine, and two prototype probes the design passes left behind, copied to `output/hair_probe_hybrid/` and `output/hair_probe_blender/`. Every number below that carries no claim id was measured that way and says so. Nothing proposed under [What to build](#what-to-build) is built.
+Run, not read: five experiments in the container's Blender 4.5.9 (Cycles on the RTX 4070 Ti SUPER) on hair the old `scripts/make_hair.py` wrote that day, driven by an ad hoc script kept at `output/hair/_exp/render_exp.py` on this machine, and two prototype probes the design passes left behind, copied to `output/hair_probe_hybrid/` and `output/hair_probe_blender/`. Every number below that carries no claim id was measured that way and says so. The hybrid design under [What to build](#what-to-build) was then built the same day as `scripts/make_hair.py` and `scripts/bake_hair.py`; [What was built](#what-was-built) says which steps landed and what each measured, and the [script reference](/reference/scripts#make-hair-py) and the [guide](/guide/daz-figures#hair-that-is-not-a-daz-product) describe them.
 :::
 
 `scripts/make_hair.py` grows hair the repo owns, as ribbon cards with a diffuse and an opacity atlas, and `scripts/daz_import_probe.py scene --wear-obj` places the result on a Genesis 9 head ([the guide](/guide/daz-figures#hair-that-is-not-a-daz-product)). On 2026-09-22 the owner looked at six styles on the figure and kept one: a 5 cm crop, which "needs a scalp texture". The long styles read as stringy strips. This note is what was read and measured before touching the generator again.
@@ -124,6 +124,22 @@ The hybrid redesign, as scored by both judges. numpy keeps what it already does 
 9. **Judge by looking**, now that the owner allows it: the base layer alone must show no scalp from front, sides, top and back before the breakup layer goes on. <!-- HAIR-013 -->
 
 What each step costs and what it touches is in the three design records inside the workflow result; the hybrid one is a few hundred lines in `make_hair.py` and a new container-side `hair_bake.py` of about the same size, run the way `daz_import_probe.py` runs Blender.
+
+## What was built
+
+The same day, as `scripts/make_hair.py` (numpy, the layout) and `scripts/bake_hair.py` (Blender, the geometry and the atlas), against a written contract between the two. Measured on 2026-09-22, the default brown bob:
+
+1. **Winding fixed.** Every face's normal against the radial: cap +1.000, shells +0.917, cards +0.940, printed on every run.
+2. **Four layers over a cap.** 90 shells, 150 breakup cards in 50 tents, 40 hairline cards, 30 flyaways, 14 locks; 14,436 baked triangles.
+3. **The cap**, 1,296 triangles at 0.15 cm with a follicle diffuse and a rim-blurred opacity.
+4. **Poisson roots, a whorl, a parting, clusters.** Nearest-neighbour spacing 2.169 cm at a coefficient of variation of 0.162 against the Fibonacci spiral's 2.085 cm and 0.363.
+5. **Lens shells**, closed and manifold, 8-point profile at 0.12 of the width, all with positive signed volume.
+6. **A rendered atlas**: 127 Cycles strands in three passes of about 0.35 s, slot mean alphas 0.380 down to 0.009, colour dilated 32 px.
+7. **Normals**: shells split at the 60 degree crease and mixed half way to a dome's; corner normals survive the OBJ round trip at a dot of 0.9979 on the unsplit mesh.
+8. **Render side unchanged** but for the card material set to dithered.
+9. **Judged by looking**: six styles on Genesis 9 at three angles, `output/daz/hair_styles_sheet.png`.
+
+Four things the build found that the research had not said, each measured on the bob before it was changed: a flat shell colour reads as beige plastic, so shells wear the atlas's base slot; laying `u` straight round a closed profile puts only the slot's edge quarters on the outward face and every shell wore a dark band down each flank, checked by the outward face sitting 0.63 cm further from the head centre than the back; smooth shading across the lens crease smears it into a dark band at any dome mix; and a 12-point profile doubled the shell triangles (20,196 on the bob, 37,776 on the curls). The whole pipeline, six styles generated, baked, placed and rendered, took 73 s wall. What is still untested is in `research/untested.md`.
 
 ## Honest uncertainty
 

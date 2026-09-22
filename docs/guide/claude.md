@@ -60,7 +60,7 @@ Component inventory
   MCP servers (1)  meshy
 
 Projected token cost
-  Always-on:   ~1,273 tok   added to every session
+  Always-on:   ~1,277 tok   added to every session
 ```
 
 Skills are discovered from `skills/<name>/SKILL.md`. You do not list them in

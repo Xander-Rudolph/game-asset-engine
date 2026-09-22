@@ -27,7 +27,8 @@ Everything in `scripts/`. Each takes `--help`.
 | `simplify_concepts.sh` | Redraw existing art as simpler game ready versions. |
 | `asset_to_mesh.sh` | Concepts to shapes to textures to sheets to curated assets, correctly staged. |
 | `rig_units.sh` | Rig figures one at a time, with the settings that work. |
-| `make_hair.py` | Grow a hair-card mesh on a scalp dome and write it as an OBJ, an MTL, a diffuse map and an opacity map, plus a preview of the hair on a plain sphere. Styles and colours are presets over flags, and it prints how many cards deep the hair is. See [below](#make-hair-py). |
+| `make_hair.py` | Lay out a head of hair the repo owns: Poisson roots on a scalp cap, a whorl, a parting, cluster guides, and four layers of guide curves over a cap mesh with its own maps, written as an atlas plan, a numpy fallback OBJ and a preview, then handed to `bake_hair.py`. Styles, looks and colours are presets over flags. See [below](#make-hair-py). |
+| `bake_hair.py` | Sweep `make_hair.py`'s guides into closed lens shells and flat cards in the container's Blender, render the atlas from real strands, set the normals, and write one OBJ that `daz_import_probe.py scene --wear-obj` places. See [below](#bake-hair-py). |
 | `list_animations.py` | What animation clips are actually installed, read from the files. |
 | `bone_roles.py` | Name an articulationxl rig's `bone_N` bones by role (pelvis, chest, head, left thigh and so on) with `map`, then `compile` a role pose from `poses/roles/` into that rig's transforms file for `render_sheet.py`. `probe` says which way each part moved. See [below](#bone-roles-py). |
 | `generate_music.py` | Generate a folder of music prompts with ACE-Step 1.5. `--loop DIR` makes each take a seamless loop, and `--keep-best` keeps the take that loops best. Resumable: seeds already in `DIR/picks.json` are skipped, and `--reloop` loops the recorded takes again without generating. A take the server already made, for a run that died, is used rather than made again, and `--no-wait` queues the missing takes and exits. A track file can carry a section script as its lyrics, after a line of `---`. |
@@ -493,14 +494,11 @@ and never overwrites a timeline made from audio.
 scripts/make_hair.py --list
 scripts/make_hair.py [--style NAME] [--look {stylised,realistic}] [--colour NAME|R,G,B]
                      [--part centre|left|right|none|X] [--part-width DEG] [--part-flow F]
-                     [--name STEM] [--out DIR] [--strands N] [--segments N]
-                     [--length CM] [--variation CM] [--wave F] [--cap DEG]
-                     [--hairline DEG] [--head-radius CM] [--width-root CM]
-                     [--width-tip CM] [--sweep F] [--round DEG] [--cling CM]
-                     [--volume CM] [--texture PX] [--slots N] [--clumps N]
-                     [--jitter F] [--hairs N] [--core F] [--edge F] [--shade F]
-                     [--tip F] [--ends F] [--band F] [--ramp F] [--strays F]
-                     [--seed N] [--no-preview]
+                     [--name STEM] [--out DIR] [--layers NAME=N,...] [--length CM]
+                     [--variation CM] [--wave F] [--cap DEG] [--hairline DEG]
+                     [--head-radius CM] [--lift F] [--guide-distance CM] [--jitter F]
+                     [--sweep F] [--cling CM] [--volume CM] [--band F] [--ramp F]
+                     [--seed N] [--no-preview] [--no-bake]
 ```
 
 Hair the repo owns outright, because the two other routes to it both stop short.
@@ -509,148 +507,156 @@ for that product. A strand hair is not even that: the two in the library carry
 236,136 and 167,264 vertices and **no polygons**, so Cycles draws the cap and
 nothing else, which is why `daz_characters.py` leaves them out.
 
-It writes five files into `output/hair/`: the OBJ, the MTL, a diffuse map, an
-opacity map, a JSON of every setting and measurement, and, unless `--no-preview`,
-`<name>_preview.obj`, the same hair on a plain scalp sphere so it can be looked
-at with no figure anywhere near it.
+This is the numpy half of a two-script pipeline designed from the
+[hair cards research](/reference/hair-cards): it lays out the hair and grows
+guide curves in layers over a scalp cap, then hands them to
+[`bake_hair.py`](#bake-hair-py), which sweeps them into geometry in the
+container's Blender and renders the atlas. Everything below was measured on
+2026-09-22 on the host's `python3` unless it says otherwise.
 
-**Static geometry.** No rig, no fitting, no morphs, no physics. It is placed on a
-head rather than skinned to one, which `daz_import_probe.py scene --wear-obj`
+#### What it writes, all under `output/hair/`
+
+`<name>_guides.npz` (the guide polylines with a layer, a lock, a width, an atlas
+slot and a mirror flag per curve), `<name>_atlas.json` (the eight-slot sheet
+plan), `<name>_cap.obj` with `.mtl` and two 1024 px maps, `<name>_fallback.obj`
+with its own painted atlas (the numpy-only result, for a host with no
+container), `<name>_preview.obj` (the fallback and the cap on a plain scalp
+sphere, for `render_sheet.py`), and `<name>.json` with every setting and
+measurement. Then, unless `--no-bake`, it runs `bake_hair.py` as a child
+process and the baked `<name>.obj` is the one to use.
+
+**Static geometry.** No rig, no fitting, no morphs, no physics. It is placed on
+a head rather than skinned to one, which `daz_import_probe.py scene --wear-obj`
 does by measurement.
 
-#### How a strand is grown
+#### Layers, not a population
 
-`--strands` roots are spread over a polar cap of a sphere of `--head-radius` by
-the Fibonacci spiral, so there is no seam and no cluster at the pole. The cap is
-not the same depth all the way round: it reaches `--hairline` degrees from the
-crown at the front, where a face is, and `--cap` at the back. At the defaults
-that is 64.1 degrees at the front, 76.5 at the sides and 82.0 at the back
-(measured 2026-09-22).
+Every published card workflow builds hair as a stack over a cap, thick to thin
+outward <!-- HAIR-001, HAIR-044 -->, so the generator has a `LAYERS` table and
+grows each layer separately: 90 **shells** (the base, 2.4 cm wide tapering to
+0.35, roots 0.05 cm inside the scalp so their closed ends hide under the cap),
+150 **breakup** cards in 50 three-card tents <!-- HAIR-002 --> (1.4 to 0.5 cm,
+0.8 cm off the scalp), 40 **hairline** cards on a 12 degree band inside the
+hairline (1.0 to 0.4 cm, 0.6 of the style's length) and 30 **flyaways** (0.5 to
+0.2 cm, 1.5 cm off). Width is constant over the first 60 percent of a card then
+tapers <!-- HAIR-013 -->. `--layers shell=120,flyaway=0` overrides any count,
+and a style scales all of them (short 1.3, long 1.1). The counts and the
+offsets in centimetres are guesses; no source gives either.
 
-Each strand then leaves its root **downhill along the scalp**, not along the
-scalp normal, and turns towards straight down as it falls. Every point is held
-`--cling` clear of the scalp sphere, rising to `--volume` by the tip, so no
-strand passes through the head and none floats off it.
+#### Roots, flow, locks
 
-Growing along the normal, as the first draft did, sends every strand outwards at
-once: on a 9.5 cm scalp that made a 46.6 cm wide spray with the crown showing
-through it. The same 900 cards grown downhill and held to the scalp come out
-25.8 cm wide (both measured 2026-09-22).
+Roots are Bridson Poisson-disk samples on the sphere cap, with a density mask
+that thins the frontal region to 0.6 and a hairline that is 48 degrees from the
+crown at the front, 76 at the temples and 83 at the nape <!-- HAIR-118 -->.
+Against the old Fibonacci spiral at the same count, the shell roots' nearest
+neighbour distance is 2.169 cm with a coefficient of variation of 0.162 where
+the spiral gave 2.085 cm and 0.363: as even, with a third of the scatter.
 
-Hair rooted over the face is brushed out to the sides as it falls, by `--sweep`,
-which is why long hair frames a face rather than curtaining it. At `--sweep 0`
-the long styles hang flat over the nose and the declip then pushes them out onto
-it.
+Flow leaves a whorl 18 degrees behind the crown and 8 to one side
+<!-- HAIR-106 --> along the scalp, 0.85 away from the whorl and 0.15 down, tilted
+off the scalp by an exit angle of 12 degrees at the rim rising to 30 at the
+crown behind `--lift` (15 to 50 on the first bake fanned the crown out like a
+palm). A parting is a rejected strip closing to nothing at the nape, with the
+hair swept off it by `--part-flow`; 0.5 left a bare wedge, 0.35 leaves a line.
+Hair rooted over the face is brushed aside by `--sweep` as it falls.
 
-Each step is a ribbon cross-section two vertices wide, tapering from
-`--width-root` to `--width-tip`. The ribbon's frame comes from the scalp radial,
-so a card lies flat against the head with its face pointing outwards. Squared
-against world up instead, the cards on the sides of the head are edge on to the
-camera and the hair reads as wire.
+Cluster centres are a second Poisson set at `--guide-distance` (4.5 cm
+stylised, 2.5 realistic; on the default bob 14 centres, 20 cards each), every
+root takes its nearest centre as its lock, and each strand is pulled towards
+its lock's centre guide by 0.8 shaped linearly root to tip with a 0.3 cm tip
+spread, the semantics of Blender's Clump Hair Curves <!-- HAIR-117 -->. A
+card's width comes from its lock's spread <!-- HAIR-101 -->, clamped to its
+layer's bounds.
 
-#### The faces are wound into the head, and `--round` was a workaround
+#### The cap
 
-Measured 2026-09-22 with `output/hair/_exp/render_exp.py` and written up in the
-[hair cards note](/reference/hair-cards#what-was-measured-here-before-anything-was-read):
-`build()` emits each card's triangles as `(a, b, d), (a, d, c)` with `a` on the
-plus side, whose geometric normal is the opposite of the normal `ribbon()`
-writes. Blender's OBJ importer keeps the written normals as custom normals, and
-Cycles shades a backfacing hit with a flipped normal, so every card was lit as
-if from inside the head: the default bob rendered alone at **mean luma 30.5**,
-and the same file with every triangle's winding reversed at **167.9**, with no
-other change. An engine that culls back faces would draw nothing from the file
-as written.
+A dome at the scalp radius plus 0.15 cm bounded by the same hairline, 14 rings
+of 48 with one pole vertex (1,296 triangles), a top-down UV, and two maps: a
+diffuse of the root colour at 0.75 with 9,000 follicle strokes flowing away
+from the whorl and a slightly lighter parting line, and an opacity that is one
+inside the hairline, blurred over 40 px at the rim and 0.85 along the parting
+<!-- HAIR-047, HAIR-048 -->. The first bake's parting stripe, a fifth of the cap
+wide at 0.7, read as a bald wedge.
 
-`--round` tilts each card's two edge normals out about the strand so the card
-shades like a clump of round hairs. On the inverted mesh that turned part of
-each card back towards the light, which is where the **3.12 times** recorded on
-2026-09-22 (mean luma 16.5 flat against 51.7 tilted) came from. With the
-winding fixed the four normal schemes are within 7 percent of each other: flat
-167.9, tilted 156.4, dome 163.3, a 50/50 blend 164.0. The tilt stays as an
-option; it is no longer the thing that makes the hair visible.
+#### The atlas plan and the fallback
 
-#### Locks, and a parting
+`<name>_atlas.json` is a 2048 by 1024 sheet of eight 256 px slots with 16 px
+gaps, strands 48, 32, 20, 12, 8, 4, 2 and 1 per slot, banded base, breakup,
+sparse and flyaway <!-- HAIR-018, HAIR-062 -->. `bake_hair.py` renders it from
+real strands; the fallback OBJ paints the same ladder in numpy, root at the
+bottom row, RGBA opacity with the mask in all four channels (Blender's OBJ
+importer wires `map_d`'s image *Alpha* output into Principled Alpha, and a
+greyscale PNG has none). Its slot mean alphas measured 0.394 down to 0.010
+against the rendered sheet's 0.380 down to 0.009.
 
-`--clumps` gathers the cards into locks by where they sit round the head, by
-azimuth, and every card in a lock shares its wave and its length; `--jitter` is
-how far a card may stray from its lock. Seeded per card instead, 320 cards each
-go their own way and the hair reads as a mop. The Fibonacci spiral numbers its
-roots by the golden angle, so grouping by index would scatter a lock over the
-whole head and the grouping is by position.
+#### Winding
 
-`--part` is a bare line of scalp with the hair swept off it, `--part-width` wide
-at the forehead and closing to nothing at the nape. Carried all the way round at
-full width it is a bald stripe over the crown with a hard rectangular notch
-where the push saturates at the pole. `--part-flow` is how hard the hair is
-swept off it: too hard and the parting is a wedge of bare scalp rather than a
-line.
-
-#### The number that decides whether it reads as hair
-
-```
-  layers    3.2 cards deep: 4256 cm2 of card over 1334 cm2 of head
-```
-
-Card area over the area the hair covers, the scalp cap plus the skirt below it.
-**Three to five** is a budget, not a threshold. The 8.8 that 1,400 cards of
-0.9 cm gave was first recorded as rendering "as a black mass"; measured again
-on 2026-09-22 with the winding fixed it renders at mean luma 151.6 against the
-3.2-layer bob's 167.9, and at 8 transparent bounces against 64 the unfixed mesh
-gave 27.1 and 27.3. The black mass was the inverted faces. Density costs
-triangles and overdraw, and that is what the number guards.
-
-#### Two looks
-
-`--look stylised`, the default, gathers the cards into locks, draws three hard
-edged strands per card, keeps only half the root to tip colour range and lays a
-broad highlight band across the upper length. `--look realistic` leaves every
-card to itself, draws seven fine wispy strands, keeps the whole range and has no
-band. Every number either sets is also a flag.
-
-The per-slot tint is one number, not three. Three shifts each slot's hue and the
-head comes out streaked green, pink and yellow rather than one colour lit
-unevenly.
-
-#### The maps
-
-Both are an atlas of `--slots` vertical card slots. A card takes one whole slot
-and its UVs span exactly that slot, so the slot's own cosine edge falloff
-feathers across the card's width. `--hairs` narrow strands are drawn inside each
-slot, each ending at its own height, so a card's tip is wherever its strands run
-out. Drawn as one blob per card, as the first draft was, cards end in blunt
-rectangles and the hair reads as straw.
-
-V runs root at 0 to tip at 1 and the image is written bottom row first to match,
-because image V = 0 is the bottom row wherever the maps are read. Written the
-other way round every strand wears its tip colour at the scalp and fades out at
-the roots.
-
-**The opacity map is RGBA, not greyscale**, with the mask in all four channels.
-Blender's OBJ importer wires `map_d`'s image *Alpha* output into Principled
-Alpha, and a greyscale PNG has no alpha channel, so that output is 1.0
-everywhere: 320 solid cards with blunt square ends and not one transparent
-pixel (measured 2026-09-22).
-
-The MTL's `Ns 560` is not a taste. Blender's importer turns Ns into roughness as
-`1 - sqrt(Ns/1000)`: Ns 120 was measured arriving as roughness 0.654, too rough
-for a hair sheen, and by the same rule the 20 the first draft carried would
-arrive as 0.86. 560 arrives as 0.25.
-
-#### Styles and colours
-
-`--list` prints both with their numbers. The styles are `wavy`, `straight`,
-`curly`, `short` and `long`, and each is only a set of defaults for `--length`,
-`--variation`, `--wave`, `--cap` and `--segments`, so every one of them can be
-overridden on the same command. The colours are `black`, `brown`, `auburn`,
-`red`, `blond`, `grey` and `white`, or an sRGB `R,G,B` 0 to 255 that the tip and
-flyaway tints are derived from.
+`build()` emits each ribbon's triangles as `(a, d, b), (a, c, d)`, and the
+report prints the mean signed dot of every face's normal against the radial
+direction from the head centre: cap +1.000, shells +0.917, cards +0.940 on the
+default bob. The previous generator emitted `(a, b, d), (a, d, c)`, wound into
+the head, which is what made the hair render black ([the note](/reference/hair-cards#what-was-measured-here-before-anything-was-read)).
 
 #### Cost
 
-The defaults, 320 cards of 14 segments with 1024 px maps, took 0.27 s on the
-host's `python3` and wrote 9,600 vertices and 8,960 triangles. Rendering the
-preview at 3 angles of 560 px took 1.7 s wall on Cycles on the card (measured
-2026-09-22).
+The default bob took 0.99 to 1.33 s wall over three runs (grow 0.19 to 0.22,
+cap maps 0.51 to 0.89, write 0.18): 310 curves, 1,930 points, a 4,536-triangle
+fallback. The retired flags of the old generator (`--strands`, `--round`,
+`--hairs` and the rest) exit 2 with the name of what replaced them.
+
+### `bake_hair.py`
+
+```
+scripts/bake_hair.py NAME [--dir DIR] [--dome-mix F] [--card-mix F] [--thickness F]
+                     [--samples N] [--timeout S] [--no-wait]
+```
+
+The Blender half. It reads `<name>_guides.npz`, `<name>_atlas.json` and the cap
+files that `make_hair.py` wrote, runs one job in the container's Blender 4.5.9
+(the way `daz_import_probe.py` does, waiting for an empty ComfyUI queue first),
+and writes `<name>.obj`, `<name>.mtl`, `<name>_diffuse.png` (RGBA, alpha is
+the opacity), `<name>_opacity.png`, `<name>_pack.png` (root gradient, random
+id, spare) and `<name>_bake.json`. Measured 2026-09-22 on the default bob.
+
+- **Shells.** Layer 0 becomes closed lens shells: Curve to Mesh over an 8-point
+  circle scaled to `--thickness` 0.12 of the width, with end caps, on curves set
+  to POLY (a Catmull-Rom curve of 8 points made 84 quads), the radius
+  attribute feeding the 4.5 Scale input, and Set Curve Normal to the radial
+  direction so the lens lies flat on the scalp <!-- HAIR-133 -->. The report
+  checks which face is outward by radius (u = 0 sits 0.63 cm further from the
+  head centre than u = 0.5) and that every shell is manifold with a positive
+  signed volume. 90 shells are 11,160 triangles.
+- **Cards.** Layers 1 to 3 become flat ribbons from a line profile, each
+  corner's UV laid over its card's atlas slot, mirrored when the card is
+  flagged.
+- **Normals.** Shell corner normals are the shell's own, with edges sharper
+  than 60 degrees split so the lens crease does not smear into a dark band,
+  mixed half way to a smooth dome's by Data Transfer (`--dome-mix` 0.5; at 1.0
+  a shell on the side of the head faces away from a front camera)
+  <!-- HAIR-020, HAIR-066 -->. Cards blend their ribbon frame 0.6 of the way to
+  the radial, flyaways 0.3. After the OBJ round trip the corner normals match
+  to a dot of 0.9979 on the unsplit mesh.
+- **The atlas** is rendered from 127 Cycles hair curves as ribbons in three
+  passes (diffuse with alpha, root gradient, random id) at 64 samples, about
+  0.35 s each, then the colour is dilated 32 px under alpha 0 by a distance
+  transform <!-- HAIR-054 -->. Slot mean alphas 0.380, 0.286, 0.179, 0.122,
+  0.083, 0.041, 0.018, 0.009. The shells wear the base slot's colour along
+  their length, opaque: a flat colour read as beige plastic, and laying `u`
+  straight round the closed profile put only the slot's edge quarters on the
+  outward face and every shell wore a dark band down each flank. The outward
+  face now spans the whole slot and the back mirrors it.
+- **The file.** One `o hair`, faces inside to outside, `usemtl <name>_cap`,
+  `<name>_shell`, `<name>_card`, exported with normals and UVs on the axes
+  `--wear-obj` imports, re-imported to check: the cap block lands within
+  0.000001 cm of `<name>_cap.obj`.
+
+The default bob bakes in 2.1 to 2.6 s in Blender, 2.6 to 2.9 s wall: 8,853
+vertices and 14,436 triangles. Across the six styles the skill lists, baked
+triangles are bob 14,436, curtains 14,436, crop 18,378, curls 19,296, elder
+15,750 and bounce 14,436, all inside the 4k to 20k budget <!-- HAIR-016 -->; a
+12-point profile had put the bob at 20,196 and the curls at 37,776. The six,
+generated, baked, placed on Genesis 9 and rendered at three angles each, took
+73 s wall.
 
 ### `daz_library.py`
 

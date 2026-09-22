@@ -1485,23 +1485,34 @@ nothing else, and `daz_characters.py` leaves them out by reading the geometry
 rather than by a list of names. The card hairs that do draw are Daz 3D data, so
 they render but may not ship as 3D without an Interactive License.
 
-`scripts/make_hair.py` grows hair the repo owns outright: cards on a scalp dome,
-with a diffuse map and an opacity map, as OBJ, MTL and two PNGs. The reference
-has [how it works](/reference/scripts#make-hair-py); the short version is that
-it is static geometry, so it is placed on a head rather than fitted to one.
+Two scripts grow hair the repo owns outright, built on 2026-09-22 from the
+[hair cards research](/reference/hair-cards): `scripts/make_hair.py` lays out
+four layers of guide curves over a scalp cap with numpy, and
+`scripts/bake_hair.py` sweeps them into closed lens shells and flat cards in
+the container's Blender, renders the atlas from real strands and writes one
+OBJ. The reference has [how each works](/reference/scripts#make-hair-py); the
+short version is that the result is static geometry, so it is placed on a head
+rather than fitted to one.
 
-### Putting an OBJ on the figure
+### Putting the hair on the figure
 
 ```sh
-scripts/make_hair.py --style wavy --colour brown --name hair_style
-scripts/daz_import_probe.py scene --out output/daz/NAME.blend \
+scripts/make_hair.py --style wavy --colour brown --part centre --name bob
+scripts/daz_import_probe.py scene --out output/daz/h_bob.blend \
     --figure "People/Genesis 9/Genesis 9.duf" --subdivision off --declip 1.5 \
-    --wear-obj output/hair/hair_style.obj
+    --mat-preset "People/Genesis 9/Materials/Daz Originals/Base Materials/G9 Masculine Skin 01 MAT.duf" \
+    --wear-obj output/hair/bob.obj --obj-no-shadow
+scripts/render_sheet.py output/daz/h_bob.blend --azimuths 0,45,90 --elevation 6 \
+    --size 560 --span 0.46 --look-at 1.60 --key 5.5 --ambient 1.5 --out output/daz/h_bob_head.png
 ```
 
-`--wear-obj` takes no part in the Daz import. It reads the OBJ with Blender's
-own importer, places it against a measurement of the figure, and bone-parents
-it, so it follows a pose like a hat rather than like skin.
+The first command runs both halves and takes about four seconds: 1.0 to 1.3 s
+of numpy and 2.6 to 2.9 s wall for the Blender job (measured 2026-09-22 on the
+default bob). `--wear-obj` takes no part in the Daz import. It reads the OBJ
+with Blender's own importer, places it against a measurement of the figure, and
+bone-parents it, so it follows a pose like a hat rather than like skin. The
+file carries three materials, `bob_cap`, `bob_shell` and `bob_card`, and the
+probe reports each one's alpha and colour source as it wires them.
 
 The measurement is a sphere. The vertices the `head` bone owns, meaning its
 vertex group carries their largest weight, are collected, and a sphere is fitted
@@ -1514,7 +1525,16 @@ that radius: 0.008693 for a 9.5 cm scalp (measured 2026-09-22).
 
 Nothing about this is a guess, and the report prints every number it used, so
 `--obj-offset DX,DY,DZ` in millimetres and `--obj-yaw DEG` are there for what is
-left over rather than for the whole placement.
+left over rather than for the whole placement. The base Genesis 9 figure needs
+`--mat-preset` for its skin, not `--mat-replace`: its materials have no maps
+linked, so a swap finds nothing to swap and the face renders blown-out white.
+
+Six styles were built, placed and looked at this way on 2026-09-22, the
+commands in the `hair-mesh` skill: a brown centre-parted bob, a long blond
+side-parted style, a black 5 cm crop, auburn curls, a long white style and a
+red shoulder-length one. All six keep the face clear and stay inside the 4k to
+20k triangle budget the research gives (bob 14,436, crop 18,378, curls 19,296).
+The sheet is `output/daz/hair_styles_sheet.png` on this machine.
 
 ### The declip reaches an OBJ, and has to
 
@@ -1524,32 +1544,29 @@ because pushing a rigid prop's vertices towards a body bends it. A hair mesh is
 neither: it is a sheet modelled around a sphere, and bending it onto the head it
 rests on is the point.
 
-A skull is not a ball everywhere. Hair grown for a 9.5 cm scalp and scaled onto
-the fitted 8.26 cm sphere sat inside the body on **11.24% of its 9,600
-vertices**, mostly at the neck and the shoulders, where the hair hangs past the
-head entirely. `--declip 1.5` moved **1,830** of them out, by at most
-**8.38 mm**, and left **0.00%** inside.
+A skull is not a ball everywhere. On the default bob, 4.53 percent of the
+hair's vertices sat inside the body before the declip, at the neck and where
+the fitted sphere's 10.9 mm worst residual let a shell root sink in;
+`--declip 1.5` left **0.00 percent** inside (measured 2026-09-22).
 
-### Why hair on a figure rendered black: its faces are wound into the head
+### Why hair on a figure rendered black: its faces were wound into the head
 
-Two findings were recorded on 2026-09-22 with the same hair, the same maps and
-the same light: tilting each card's edge normals (`--round 62`) made the hair
-**3.12 times** as bright, mean luma 16.5 to 51.7, and `--obj-no-shadow` took it
-from 38.7 to 51.7. Both were real measurements of the wrong cause.
-
-Later the same day, with the owner's go to look at renders, the
-[hair cards research](/reference/hair-cards#what-was-measured-here-before-anything-was-read)
-found that `make_hair.py` writes every card's triangles wound the opposite way
-to the normal it writes for them, so Cycles lit each card as if from inside the
-head. The default bob rendered alone at mean luma **30.5** as written and
-**167.9** with the winding reversed and nothing else changed. With the winding
-fixed, flat and tilted normals are within 7 percent of each other and shadow
-casting costs 11 percent rather than a third. The tilt and the flag stay
-useful; the winding is the fix, and it is one line that has not been made yet.
+The generator that preceded these two scripts wrote every card's triangles
+wound the opposite way to the normal it wrote for them, so Cycles lit each card
+as if from inside the head. Two measurements were recorded against the wrong
+cause before that was found: tilting each card's edge normals made the hair
+3.12 times as bright, and `--obj-no-shadow` took it from luma 38.7 to 51.7.
+With the winding reversed and nothing else changed the same hair went from
+**30.5 to 167.9**, and the normal schemes fell within 7 percent of each other
+([the note](/reference/hair-cards#what-was-measured-here-before-anything-was-read)).
+`make_hair.py` now writes the winding outward and prints the mean signed dot of
+face normal against radial for every group, which must be positive:
+`+0.951` on the default bob. The flag stays, since cards three deep still
+shadow each other by about 11 percent.
 
 ### Framing the head to judge it
 
-`render_sheet.py --span 0.42 --look-at 1.60` frames Genesis 9's head and
+`render_sheet.py --span 0.46 --look-at 1.60` frames Genesis 9's head and
 shoulders. Without `--look-at` the camera aims at half the frame, so a small
 span on a standing figure gives its knees.
 
@@ -1557,8 +1574,8 @@ span on a standing figure gives its knees.
 
 Blender's OBJ importer wires `map_d`'s image **Alpha output** into Principled
 Alpha. A greyscale PNG has no alpha channel, so that output is 1.0 everywhere:
-320 opaque cards with blunt square ends, and not one transparent pixel. The maps
-`make_hair.py` writes are RGBA, with the mask in all four channels, so the same
+opaque cards with blunt square ends, and not one transparent pixel. The maps
+both scripts write are RGBA, with the mask in all four channels, so the same
 file reads right whether an importer takes Alpha or Colour. The probe then sets
 that image to Non-Color, because the importer leaves it in sRGB.
 

@@ -102,63 +102,52 @@ Where CLAUDE.md's Owner decisions line names one, update it too.
 
 ## Hair grown rather than licensed
 
-`scripts/make_hair.py` and `daz_import_probe.py scene --wear-obj`, both built
-2026-09-22.  All five styles and all seven colours were generated.  Six
-hairstyles were built onto Genesis 9 and rendered at three angles each, and
-looked at: bob, curtains, crop, curls, elder and bounce (`skills/hair-mesh`).
+`scripts/make_hair.py` (the numpy layout half) and `scripts/bake_hair.py` (the
+Blender half), rebuilt 2026-09-22 on the hybrid design in
+`docs/reference/hair-cards.md`, and `daz_import_probe.py scene --wear-obj`.
+Six styles were generated, baked, placed on Genesis 9 and looked at at three
+angles each (`output/daz/hair_styles_sheet.png`); every one keeps the face
+clear and stays inside 4k to 20k triangles.
 
-- **Only one figure, one bone and one OBJ.** `--wear-obj` has run on Genesis 9's
-  base figure, on the `head` bone, with one OBJ at a time and the default axes.
-  Never run: a second `--wear-obj` in the same command, `--obj-bone` naming
-  anything else, `--obj-offset`, `--obj-yaw`, `--obj-forward` or `--obj-up` away
-  from their defaults, an OBJ with several meshes or several materials, and an
-  OBJ with no MTL beside it.  Cost: minutes each.
-- **The hair has never been posed.** It is bone-parented to the head, so a head
-  turn should carry it, and no pose has been applied to a figure wearing it.
-  The declip edits the rest shape and refuses a posed figure, so the order is
-  wear, declip, then pose.  Cost: one run with `--pose`.
-- **Only one figure and one skin.** Every look at it has been on the base
-  Genesis 9 figure with `G9 Masculine Skin 01`, at one light, key 5.5 and
-  ambient 1.5, in one framing.  Against a dark skin, a bright costume or the
-  roster's own key of 6.5, nothing has been judged.  Cost: minutes.
-- **The winding bug is measured, not fixed.**  `build()` writes each card's
-  triangles wound against the normals it writes (bob alone: mean luma 30.5 as
-  written, 167.9 reversed, 2026-09-22, `output/hair/_exp/render_exp.py`).  The
-  3.12 times for `--round 62` and the third for `--obj-no-shadow` were measured
-  on the inverted mesh and shrink to 7 and 11 percent once it is fixed.  Every
-  render in `output/daz/hair_styles_sheet.png` is of the inverted mesh.  The
-  fix is one line in `build()` and is the first step of the redesign in
-  `docs/reference/hair-cards.md`.  Cost: minutes, then re-measure.
-- **Both lighting findings are Cycles on this card.**  EEVEE, which
-  `daz_import_probe.py render` pins, and whatever engine the assets are bound
-  for, were not run.  Cost: one render each.
-- **`--look realistic` has not been looked at since the locks went in.**  It
-  sets clumps 0 and jitter 1, so it is the old per-card behaviour, but the
-  parting, the sweep and the round normals apply to it too and no render of it
-  exists.  Cost: one preview.
-- **Where the sheen comes from is the MTL, and the MTL is only read by two
-  importers.** `Ns 560` arriving as roughness 0.25 was measured through
-  Blender's OBJ importer and nothing else.  Another engine reading the same file
-  may map Ns differently, and the two maps have never been loaded anywhere but
-  Blender.  Cost: an import into whatever engine the assets are bound for.
-- **The style presets are shapes, not a taxonomy.** `curly` curls the ends
-  rather than the length, `short` sits at 1.8 layers where the script asks for 3
-  to 5, and no style was compared against a reference photograph or against a
-  Daz hair product.  They are five sets of numbers that render as hair, nothing
-  more.  Cost: an afternoon and someone with an eye for hair.
-- **A parting is a plane, and a head is not.** `--part` moves roots off the
-  small circle x = the parting, which is a fair model for a straight parting
-  from forehead to crown and nothing else: no zigzag, no crown whorl, no
-  fringe swept to one side over a parting on the other.  Cost: code.
-- **`--look-at` on `render_sheet.py` has only framed a head.** It moves the
-  camera and its aim, and no sprite sheet, no `--check` row and no pose set has
-  been drawn with it set.  The default, half the frame, is unchanged and every
-  existing sheet uses it.  Cost: one sheet.
-- **Scaling by the fitted sphere assumes a skull is a ball.** On Genesis 9 the
-  fit is good, 4.6 mm mean and 10.9 mm worst over 636 vertices, and it has never
-  been run on a character with a dialled head shape, a child figure or a
-  non-human one, where the residual would be larger and the hair would sit
-  wrong before the declip touched it.  Cost: one run per shape.
+- **Long hair does not drape.** Nothing collides with the shoulders or the
+  back, so a 30 cm style splays outward from its exit angle rather than falling
+  down the neck; the research names a shoulder capsule (design record A) and
+  none was built.  The curtains and elder styles show it.  Cost: code, then a
+  look.
+- **Only one figure, one skin, one light.**  Every look at it has been on the
+  base Genesis 9 figure with `G9 Masculine Skin 01`, key 5.5 and ambient 1.5,
+  in one head framing, Cycles only.  EEVEE, which `daz_import_probe.py render`
+  pins and where blended surfaces sort per object, has never drawn it; the
+  card material is set to Dithered against that and nothing has checked it.
+  Cost: one render each.
+- **No engine but Blender has read the file.**  The OBJ's winding, custom
+  normals, three materials and RGBA alpha were verified through Blender's
+  importer only.  A glTF round trip with `alphaMode` MASK and a look in a game
+  engine are the missing checks.  Cost: an afternoon.
+- **`--look realistic` has not been rendered** since the rewrite; it sets a
+  2.5 cm guide distance and no highlight band, and nothing has looked at it.
+  Cost: one run.
+- **Every centimetre in `LAYERS`, the cap and the whorl is a guess** the
+  research could not source: layer counts, widths, offsets, the 60 degree
+  crease split, the 0.12 lens thickness, the 12 to 30 degree exit angles, the
+  0.35 parting sweep, the cap's 0.75 darkening and 40 px rim blur.  Each was
+  set by looking at the bob once.  Cost: an eye for hair and an afternoon.
+- **The hairline is thin.**  40 short cards on a 12 degree band; at the temples
+  the skin shows between them on every style.  Cost: minutes, then a look.
+- **Tents show at the parting.**  On the bob and the curls the breakup tents'
+  wings stack visibly at the crown as small steps.  Cost: minutes.
+- **A parting is a plane, and a head is not.** `--part` is a straight line from
+  forehead to crown and nothing else: no zigzag, no fringe swept across it.
+  Cost: code.
+- **The scalp cap sits on the repo's sphere, not the head.**  On Genesis 9 the
+  fitted sphere's worst residual is 10.9 mm, so parts of the cap start inside
+  the skull and the declip pushes them out; nothing measures how that reads at
+  the hairline.  A shrinkwrap to the Daz head would be Daz-shaped geometry and
+  is not done.  Cost: a look at the hairline close up.
+- **Scaling by the fitted sphere assumes a skull is a ball.**  Never run on a
+  dialled head, a child figure or a non-human one.  Cost: one run per shape.
+- **`--look-at` on `render_sheet.py` has only framed a head.**  No sprite
+  sheet, `--check` row or pose set has been drawn with it set.  Cost: one sheet.
 
 ## The MCP server
 
