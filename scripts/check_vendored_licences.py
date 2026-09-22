@@ -75,6 +75,17 @@ ALLOW = [
      "names Genesis 9 Starter Essentials (SKU 86958) as the one product its steps were "
      "measured on, the Genesis figure .duf paths it imports and the counts it measured; no "
      "Genesis data is in the file"),
+    ("skills/hair-mesh/SKILL.md", "Daz",
+     "grows hair the repo owns outright, and says why: it contrasts itself with a Daz hair "
+     "product, which may not ship as 3D, and gives the one command that places its OBJ on a "
+     "user's own Genesis figure; no Daz content is in the file"),
+    ("skills/hair-mesh/SKILL.md", "Genesis",
+     "names the Genesis 9 figure its placement was measured against and the library paths "
+     "of the preset it loads; no Genesis data is in the file"),
+    ("scripts/make_hair.py", "Daz",
+     "its docstring says why the script exists: a Daz hair product is licence-bound and the "
+     "strand hairs in the library have no polygons, so this writes hair the repo owns; it "
+     "reads no Daz file and holds no Daz content"),
     ("scripts/lipsync_cues.py", "Valve",
      "credits the 0.08 s window of Valve's phoneme filter as the source of the share "
      "frame rule, a number read in docs/reference/source-filmmaker.md, not SDK code"),

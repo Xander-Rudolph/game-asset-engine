@@ -1530,6 +1530,35 @@ vertices**, mostly at the neck and the shoulders, where the hair hangs past the
 head entirely. `--declip 1.5` moved **1,830** of them out, by at most
 **8.38 mm**, and left **0.00%** inside.
 
+### Why hair on a figure renders black, twice over
+
+Two findings, both measured on Genesis 9 with the same hair, the same maps and
+the same light on 2026-09-22, and both worth more than any amount of fiddling
+with the colour.
+
+**A card is not a sheet.** Give a card one flat normal and it shades like a
+piece of paper: a fringe hanging in front of a face is square to the camera, the
+key sun is overhead, and the card catches none of it, so the fringe renders
+black while the crown is lit. `make_hair.py --round 62` tilts each card's two
+edge normals out about the strand and lets smooth shading sweep between them, so
+the card shades like a clump of round hairs and always has an edge turned to the
+light. The same hair went from **mean luma 16.5 to 51.7** over 113,000 drawn
+pixels, **3.12 times as bright**.
+
+**Cards shadow each other.** At three layers deep, the hair is lit through two
+layers of its own shadow. `--obj-no-shadow` stops the OBJ casting, and the same
+hair measured **38.7 casting and 51.7 not**.
+
+Neither is a lighting problem. Both were checked against a flat single-colour
+diffuse map, and against a key sun and a world light on their own, and the
+two-tone stayed put through all of it.
+
+### Framing the head to judge it
+
+`render_sheet.py --span 0.42 --look-at 1.60` frames Genesis 9's head and
+shoulders. Without `--look-at` the camera aims at half the frame, so a small
+span on a standing figure gives its knees.
+
 ### Hair the OBJ importer renders as solid cards
 
 Blender's OBJ importer wires `map_d`'s image **Alpha output** into Principled
@@ -1624,10 +1653,12 @@ that image to Non-Color, because the importer leaves it in sRGB.
 - **Lip sync's Genesis column** ([the mapping](/reference/lip-sync#the-mapping-to-adopt))
   on this figure.
 - **Whether reading a Daz render into a Claude conversation** counts under the
-  EULA's AI clause, whose examples name chatGPT. The research note leaves it
-  open ([Honest uncertainty](/reference/daz-genesis#honest-uncertainty)). The
-  by-eye reading above was made that way; until the owner decides, the skill
-  reads no render into the conversation.
+  EULA's AI clause, whose examples name chatGPT, is not settled as a reading of
+  the EULA; the research note still leaves it open
+  ([Honest uncertainty](/reference/daz-genesis#honest-uncertainty)). What is
+  settled is the owner's instruction, on 2026-09-22, that Claude may read a
+  render out of `output/daz/` and say what it looks like. Nothing else changed:
+  none of it is committed and none of it reaches an AI stage.
 - **Peak VRAM**, since both render stages here rasterise with EEVEE on the CPU:
   the probe's own renderer has no other engine, and its `render_sheet.py` stage
   is pinned to `--engine eevee`. A Genesis sheet on the card, through

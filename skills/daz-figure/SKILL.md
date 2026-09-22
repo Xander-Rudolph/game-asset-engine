@@ -116,13 +116,14 @@ EULA carries no version and Daz may change it.
 - **Never put Daz content in the repo**, a commit or the image.
 - **Never script the Daz website.**
 
-**No Daz render comes into this conversation.** The AI clause's examples name
-chatGPT, a chat model like you, and the research note does not say whether a
-render counts. So never read an image from `output/daz/` back: the user opens
-each labelled sheet and says what they see, and you give the pixel counts from
-its `_render.json`. If the user asks you to look yourself, say in one line that
-this is open until Daz answers in writing, and read a sheet only if they then
-decide it is allowed.
+**You may look at a render, and should.** The owner allowed it on 2026-09-22.
+Open the labelled sheet from `output/daz/`, say what you see, and give the pixel
+counts from its `_render.json` beside it; ask the user what they see as well,
+because the call on whether a character reads is theirs. A render is the only
+Daz thing you open: the `.blend` and the figure stay where they are, nothing
+from `output/daz/` is committed, and no Daz render goes near an AI stage. The
+EULA's AI clause still names chatGPT and the research note still leaves the
+reading open, so if anything is to be relied on outside this repo, say so.
 
 Ask whether they have read the EULA (<https://www.daz3d.com/eula>) and on what
 date, and whether they hold an Interactive License for this product. Then ask:
@@ -437,8 +438,8 @@ It writes `g9_cage_AA_128_face_s16_render.json`, `_render_sheet_128.png`,
 `_sheet_128.png` and `_sheet_128_labelled.png` in `output/daz/`. The label in
 the name keeps a short run from overwriting a full one.
 
-**Have the user open `output/daz/g9_cage_AA_128_face_s16_sheet_128_labelled.png`**,
-and do not read it yourself (step 1). Ask: is the face in frame, and does the
+**Open `output/daz/g9_cage_AA_128_face_s16_sheet_128_labelled.png` and look**,
+and have the user open it too. Ask: is the face in frame, and does the
 AA row differ from the neutral row? Beside their answer, give the counts from
 `g9_cage_AA_128_face_s16_render.json`: the probe's under
 `probe_render.sizes["128"].face.visemes.AA.changed_px`, and `render_sheet.py`'s
@@ -469,9 +470,8 @@ python3 scripts/daz_import_probe.py render --blend output/daz/g9_cage.blend
   and 16 samples took 81.9 s and 6312 MiB, container up to 10.63 GiB, and
   27.7 s and 2836 MiB from a `--no-textures` build.
 
-**Have the user open `output/daz/g9_cage_sheet_340_labelled.png`** and say,
-viseme by viseme, which read as their sound and which look alike; do not read it
-yourself (step 1). Give each viseme's count from `g9_cage_render.json`, under
+**Open `output/daz/g9_cage_sheet_340_labelled.png` and look**, and have the
+user say, viseme by viseme, which read as their sound and which look alike. Give each viseme's count from `g9_cage_render.json`, under
 `probe_render.sizes["340"].face.visemes`, fewest to most. For comparison, an
 earlier reading of the measured cage, made by Claude on a crop of the 340 px
 face column: OW and UW read as rounded mouths, EH and ER open with teeth, EE and
@@ -512,10 +512,10 @@ python3 scripts/daz_characters.py make --count 12 --seed 20260921 --size 768
   `<slug>_scene.json`, and two logs. `characters.json` indexes the run and
   `contact_sheet.png` puts every front view on one page. The `.blend` is
   deleted unless `--keep-blend`.
-- **Have the user open `output/daz/characters/roster_sheet.png`**, which holds
-  every character's views on one page; do not read it yourself (step 1). Ask
+- **Open `output/daz/characters/roster_sheet.png` and look**, which holds
+  every character's views on one page, and have the user open it too. Say
   whether the armour clips, whether the hair reads as hair and whether a weapon
-  sits in the hand. Beside their answer, give the `drawn_px` of each view from
+  sits in the hand, and ask whether they agree. Beside their answer, give the `drawn_px` of each view from
   its JSON.
 - **Every figure stands in the rest pose**, which is Genesis 9's A pose, unless
   `--poses upright` or `--poses any` is asked for. The lights are brighter than

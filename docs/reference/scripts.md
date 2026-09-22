@@ -36,7 +36,7 @@ Everything in `scripts/`. Each takes `--help`.
 
 | Script | Does |
 |---|---|
-| `render_sheet.py` | Render a model to a sprite sheet. Angles across, poses down. |
+| `render_sheet.py` | Render a model to a sprite sheet. Angles across, poses down. `--span` and `--look-at` frame a fixed world box at a fixed height, for a set that must share a scale or for a head rather than a whole figure. |
 | `decimation_report.py` | Measure what each face budget costs, three ways, or bisect for an answer. |
 | `sheet_check.py` | Check a sprite sheet for the faults that are arithmetic. Exits non-zero on a fault. |
 | `transfer_weights.py` | Move a skeleton from a decimated proxy onto the original mesh. |
@@ -91,7 +91,7 @@ Run both before a commit, with `npm run docs:build`.
 scripts/render_sheet.py MODEL [--poses SPEC] [--angles N] [--azimuth-start DEG]
                         [--azimuths DEG,DEG] [--elevation DEG] [--size PX]
                         [--zoom N] [--persp]
-                        [--span UNITS] [--key N] [--ambient N]
+                        [--span UNITS] [--look-at UNITS] [--key N] [--ambient N]
                         [--engine {cycles,eevee}] [--samples N] [--denoise]
                         [--clay] [--clay-color R,G,B] [--flat] [--out PATH]
                         [--check] [--keep-frames] [--timeout SECONDS]
@@ -266,6 +266,14 @@ where `<file>` is the pose file's path.
 The role files in `poses/roles/` carry `_note` strings, which this check refuses
 (`bone '_note' holds a string`), so compile them with
 [`bone_roles.py`](#bone-roles-py) rather than pass them to `--poses`.
+
+#### Framing a head rather than a whole figure
+
+`--span` fixes the frame's height in world units and `--look-at` fixes what it
+points at, as a height above the model's own floor. Without the second, the
+camera aims at half the frame: ask for a 0.42 m span on a 1.75 m figure and it
+frames the knees. `--span 0.42 --look-at 1.60` is a head and shoulders on
+Genesis 9 (measured 2026-09-22).
 
 ### `bone_roles.py`
 
@@ -483,11 +491,15 @@ and never overwrites a timeline made from audio.
 
 ```
 scripts/make_hair.py --list
-scripts/make_hair.py [--style NAME] [--colour NAME|R,G,B] [--name STEM] [--out DIR]
-                     [--strands N] [--segments N] [--length CM] [--variation CM]
-                     [--wave F] [--cap DEG] [--hairline DEG] [--head-radius CM]
-                     [--width-root CM] [--width-tip CM] [--cling CM] [--volume CM]
-                     [--texture PX] [--slots N] [--hairs N] [--strays F]
+scripts/make_hair.py [--style NAME] [--look {stylised,realistic}] [--colour NAME|R,G,B]
+                     [--part centre|left|right|none|X] [--part-width DEG] [--part-flow F]
+                     [--name STEM] [--out DIR] [--strands N] [--segments N]
+                     [--length CM] [--variation CM] [--wave F] [--cap DEG]
+                     [--hairline DEG] [--head-radius CM] [--width-root CM]
+                     [--width-tip CM] [--sweep F] [--round DEG] [--cling CM]
+                     [--volume CM] [--texture PX] [--slots N] [--clumps N]
+                     [--jitter F] [--hairs N] [--core F] [--edge F] [--shade F]
+                     [--tip F] [--ends F] [--band F] [--ramp F] [--strays F]
                      [--seed N] [--no-preview]
 ```
 
@@ -525,11 +537,46 @@ once: on a 9.5 cm scalp that made a 46.6 cm wide spray with the crown showing
 through it. The same 900 cards grown downhill and held to the scalp come out
 25.8 cm wide (both measured 2026-09-22).
 
+Hair rooted over the face is brushed out to the sides as it falls, by `--sweep`,
+which is why long hair frames a face rather than curtaining it. At `--sweep 0`
+the long styles hang flat over the nose and the declip then pushes them out onto
+it.
+
 Each step is a ribbon cross-section two vertices wide, tapering from
 `--width-root` to `--width-tip`. The ribbon's frame comes from the scalp radial,
 so a card lies flat against the head with its face pointing outwards. Squared
 against world up instead, the cards on the sides of the head are edge on to the
 camera and the hair reads as wire.
+
+#### The single biggest thing: a card is not a sheet
+
+A card's two edges carry normals tilted out by `--round` degrees about the
+strand, and smooth shading sweeps between them, so the card shades like a clump
+of round hairs. This is worth more than every other setting here put together.
+
+With flat sheet normals the same hair, the same maps and the same light came out
+at **mean luma 16.5** over 113,332 drawn pixels. At `--round 62` it is **51.7**
+over 113,375: **3.12 times as bright**, and the difference is not spread evenly,
+it is the whole front of the head. A flat card hanging in front of a face is
+square to the camera and an overhead key misses it completely, so a fringe
+renders black while the crown is lit. Tilted, the same card always has an edge
+turned towards the light.
+
+#### Locks, and a parting
+
+`--clumps` gathers the cards into locks by where they sit round the head, by
+azimuth, and every card in a lock shares its wave and its length; `--jitter` is
+how far a card may stray from its lock. Seeded per card instead, 320 cards each
+go their own way and the hair reads as a mop. The Fibonacci spiral numbers its
+roots by the golden angle, so grouping by index would scatter a lock over the
+whole head and the grouping is by position.
+
+`--part` is a bare line of scalp with the hair swept off it, `--part-width` wide
+at the forehead and closing to nothing at the nape. Carried all the way round at
+full width it is a bald stripe over the crown with a hard rectangular notch
+where the push saturates at the pole. `--part-flow` is how hard the hair is
+swept off it: too hard and the parting is a wedge of bare scalp rather than a
+line.
 
 #### The number that decides whether it reads as hair
 
@@ -541,6 +588,18 @@ Card area over the area the hair covers, the scalp cap plus the skirt below it.
 **Three to five** is the range that reads as hair. At 8.8, which 1,400 cards of
 0.9 cm gave, a ray crosses nine dark cards, almost none of the light gets out
 and the hair renders as a black mass with a hard silhouette.
+
+#### Two looks
+
+`--look stylised`, the default, gathers the cards into locks, draws three hard
+edged strands per card, keeps only half the root to tip colour range and lays a
+broad highlight band across the upper length. `--look realistic` leaves every
+card to itself, draws seven fine wispy strands, keeps the whole range and has no
+band. Every number either sets is also a flag.
+
+The per-slot tint is one number, not three. Three shifts each slot's hue and the
+head comes out streaked green, pink and yellow rather than one colour lit
+unevenly.
 
 #### The maps
 
@@ -760,7 +819,7 @@ scripts/daz_import_probe.py scene --out output/daz/NAME.blend [--figure DUF]
                             [--set NAME=VALUE] [--wear DUF] [--no-transfer]
                             [--wear-obj PATH] [--obj-bone NAME] [--obj-scale S|auto]
                             [--obj-offset DX,DY,DZ] [--obj-yaw DEG] [--obj-radius CM]
-                            [--obj-forward AXIS] [--obj-up AXIS]
+                            [--obj-no-shadow] [--obj-forward AXIS] [--obj-up AXIS]
                             [--skip-transfer NAME,...] [--set-dressed NAME=VALUE]
                             [--pose DUF] [--pose-affects-morphs] [--no-verify]
                             [--subdivision {keep,off}] [--material-method M]
@@ -981,6 +1040,12 @@ against is the point. A skull is not a ball everywhere, and hair grown for a
 where it hangs past the head onto the neck and shoulders. `--declip 1.5` moved
 **1,830** of them out, by at most **8.38 mm**, and left **0.00%** inside
 (measured 2026-09-22).
+
+**`--obj-no-shadow` for hair.** Cards stacked several deep shadow each other,
+and dark hair lit through three layers of its own shadow comes out black
+whatever its maps say. The same hair, alone in frame under the same light,
+measured **mean luma 38.7 casting shadows and 51.7 not**, a third as much light
+again for one flag (2026-09-22).
 
 The material comes from the OBJ's own MTL, and the probe then sets the map
 feeding Alpha to Non-Color and switches off backface culling, because the

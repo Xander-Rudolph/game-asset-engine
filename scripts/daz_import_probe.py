@@ -1141,6 +1141,12 @@ def wear_objs(specs, rig, body):
                 ob.parent_bone = spec["bone"]
                 ob.matrix_world = keep
                 entry["parented_to"] = f"{rig.name}:{spec['bone']}"
+            if spec["no_shadow"]:
+                # Cards stacked several deep shadow each other, and a dark hair
+                # lit through three layers of its own shadow comes out black
+                # whatever its maps say.  Stylised hair is drawn without that.
+                ob.visible_shadow = False
+                entry["casts_shadow"] = False
             for slot in ob.material_slots:
                 if slot.material:
                     entry.setdefault("alpha", {})[slot.material.name] = wire_cutout(slot.material)
@@ -3634,6 +3640,7 @@ def cmd_scene(args) -> int:
         "wear_objs": [{"path": c_path(p), "host": str(p), "bone": args.obj_bone,
                        "scale": args.obj_scale, "offset": args.obj_offset,
                        "yaw": args.obj_yaw, "radius_cm": args.obj_radius,
+                       "no_shadow": args.obj_no_shadow,
                        "forward": args.obj_forward, "up": args.obj_up}
                       for p in args.wear_obj],
         "transfer": not args.no_transfer,
@@ -4400,6 +4407,10 @@ def main() -> int:
     s.add_argument("--obj-offset", type=offset_arg_mm, default=[0.0, 0.0, 0.0],
                    metavar="DX,DY,DZ",
                    help="move each OBJ this far in millimetres after it is placed")
+    s.add_argument("--obj-no-shadow", action="store_true",
+                   help="stop each OBJ casting shadows. Hair cards stacked several deep "
+                        "shadow each other, and dark hair lit through its own shadow "
+                        "renders black whatever its maps say")
     s.add_argument("--obj-yaw", type=float, default=0.0, metavar="DEG",
                    help="turn each OBJ about the up axis before it is placed (default 0)")
     s.add_argument("--obj-radius", type=float, default=9.5, metavar="CM",

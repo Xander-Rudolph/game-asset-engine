@@ -389,7 +389,10 @@ scene.camera = cam
 
 elev = math.radians(cfg["elevation"])
 dist = size * 3.0
-cam.location = (0.0, -dist * math.cos(elev), size * 0.5 + dist * math.sin(elev))
+# Half the frame up from the floor, unless --look-at names a height: framing a
+# 0.4 m span on a 1.75 m figure otherwise points the camera at its knees.
+aim = float(cfg["look_at"]) if cfg.get("look_at") else size * 0.5
+cam.location = (0.0, -dist * math.cos(elev), aim + dist * math.sin(elev))
 cam.rotation_euler = Euler((math.radians(90.0) - elev, 0.0, 0.0), "XYZ")
 
 # --- light: flat and even, so the sheet has no directional bias -------------
@@ -832,6 +835,10 @@ def main() -> int:
                     help="perspective camera. The default is orthographic, "
                          "which keeps one asset the same size across angles "
                          "and frames -- NOT across assets, see --span")
+    ap.add_argument("--look-at", type=float, default=0.0, metavar="UNITS",
+                    help="height above the model's own floor to point the camera at. The "
+                         "default is half the frame, which is the middle of a whole "
+                         "subject; a head needs this as well as a small --span")
     ap.add_argument("--span", type=float, default=0.0, metavar="UNITS",
                     help="frame against this fixed world height instead of "
                          "the subject's own extent, so a set of assets shares "
@@ -927,6 +934,7 @@ def main() -> int:
         "size": args.size,
         "zoom": args.zoom,
         "span": args.span,
+        "look_at": args.look_at,
         "ortho": not args.persp,
         "key": args.key,
         "ambient": args.ambient,

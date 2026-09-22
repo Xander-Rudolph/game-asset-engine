@@ -62,19 +62,37 @@ STYLES = {
     "long":     {"length": 26.0, "variation": 4.0, "wave": 1.2, "cap": 80.0, "segments": 20},
 }
 
+# How the cards are grouped and drawn, which is what decides whether the hair
+# reads as a stylised head of locks or as a photographic mop.  `clumps` is how
+# many locks the cards are gathered into by azimuth, `jitter` how far a card may
+# stray from its lock, `hairs` how many strands are drawn in a card's slot in
+# the maps, `core` and `edge` how hard the strand and the card's own edges are,
+# `shade` how much per-row noise the colour carries, `tip` how sharply a strand
+# ends and `ends` the earliest a strand may end, and `band` a lighter sweep
+# across the upper length, the graphic highlight stylised hair is drawn with.
+LOOKS = {
+    "stylised": {"clumps": 34, "jitter": 0.3, "hairs": 3, "core": 0.4, "edge": 0.3,
+                 "shade": 0.02, "tip": 0.1, "ends": 0.82, "band": 0.3, "ramp": 0.5,
+                 "strays": 0.04},
+    "realistic": {"clumps": 0, "jitter": 1.0, "hairs": 7, "core": 0.9, "edge": 0.6,
+                  "shade": 0.06, "tip": 0.22, "ends": 0.55, "band": 0.0, "ramp": 1.0,
+                  "strays": 0.08},
+}
+
 # sRGB 0-255, root then tip then the tint of the occasional lighter flyaway.
 COLOURS = {
-    "black":  ((34, 30, 28), (78, 68, 60), (104, 92, 80)),
-    "brown":  ((66, 44, 30), (146, 104, 68), (178, 138, 94)),
-    "auburn": ((84, 38, 22), (170, 88, 46), (196, 118, 64)),
-    "red":    ((112, 44, 18), (196, 96, 42), (222, 138, 68)),
-    "blond":  ((132, 100, 54), (222, 186, 122), (240, 218, 166)),
-    "grey":   ((104, 102, 100), (168, 166, 164), (196, 194, 192)),
-    "white":  ((166, 164, 162), (226, 224, 222), (244, 242, 240)),
+    "black":  ((48, 42, 38), (92, 80, 70), (116, 102, 90)),
+    "brown":  ((96, 66, 44), (172, 126, 86), (200, 158, 112)),
+    "auburn": ((118, 56, 32), (196, 108, 58), (218, 136, 78)),
+    "red":    ((150, 64, 28), (220, 118, 56), (238, 156, 86)),
+    "blond":  ((168, 130, 76), (238, 206, 150), (248, 228, 186)),
+    "grey":   ((132, 130, 128), (190, 188, 186), (212, 210, 208)),
+    "white":  ((196, 194, 192), (240, 238, 236), (250, 248, 246)),
 }
 
 
-def scalp_roots(n: int, cap_degrees: float, hairline_degrees: float) -> np.ndarray:
+def scalp_roots(n: int, cap_degrees: float, hairline_degrees: float,
+                part: float | None, part_width: float) -> np.ndarray:
     """Unit directions spread over the polar cap of a sphere, +Y at the crown.
 
     The Fibonacci spiral, so the roots are even and there is no seam and no
@@ -86,6 +104,9 @@ def scalp_roots(n: int, cap_degrees: float, hairline_degrees: float) -> np.ndarr
     round: it reaches `hairline_degrees` from the crown at the front, +Z, and
     `cap_degrees` at the back, and a root that falls outside it is pulled up to
     it rather than dropped, so the count asked for is the count returned.
+
+    `part` is where the parting sits, as an x between -1 and 1, or None for no
+    parting; `part_width` is how wide the bare line is, in degrees of arc.
     """
     cap, hairline = np.radians(cap_degrees), np.radians(hairline_degrees)
     i = np.arange(n, dtype=np.float64) + 0.5
@@ -98,12 +119,30 @@ def scalp_roots(n: int, cap_degrees: float, hairline_degrees: float) -> np.ndarr
     limit = np.cos(hairline + (cap - hairline) * (1 - forward) / 2)
     y = np.maximum(y, limit)
     r = np.sqrt(np.maximum(0.0, 1.0 - y * y))
-    return np.column_stack((r * np.cos(phi), y, r * np.sin(phi)))
+    x, z = r * np.cos(phi), r * np.sin(phi)
+
+    if part is not None:
+        # A parting is a bare line of scalp with the hair swept off it either
+        # way.  Every root inside the line is moved out to its edge along its
+        # own latitude circle, so it stays on the sphere and at the same height.
+        #
+        # It runs from the forehead to the crown and stops, so the gap closes
+        # towards the nape: carried all the way round at full width it is a bald
+        # stripe over the crown and down the back of the head, with a hard
+        # rectangular notch where the push saturates at the pole.
+        forward = np.divide(z, np.maximum(r, 1e-9))
+        gap = np.sin(np.radians(part_width)) * np.clip((forward + 0.35) / 1.1, 0.0, 1.0)
+        side = np.where(x - part >= 0, 1.0, -1.0)
+        wanted = part + side * np.maximum(np.abs(x - part), gap)
+        x = np.clip(wanted, -r, r)
+        z = np.sign(z) * np.sqrt(np.maximum(0.0, r * r - x * x))
+    return np.column_stack((x, y, z))
 
 
 def strand_path(direction: np.ndarray, radius: float, cling: float, length: float,
-                segments: int, wave: float, volume: float,
-                rng: np.random.RandomState) -> np.ndarray:
+                segments: int, wave: float, volume: float, sweep: np.ndarray,
+                aside: np.ndarray, lock: np.random.RandomState,
+                card: np.random.RandomState, jitter: float) -> np.ndarray:
     """One strand: over the scalp first, then falling free, never through the head.
 
     A strand does not leave the head along the scalp normal.  It leaves downhill
@@ -123,12 +162,24 @@ def strand_path(direction: np.ndarray, radius: float, cling: float, length: floa
         tangent = np.array([direction[2], 0.0, -direction[0]])
         norm = np.linalg.norm(tangent) or 1.0
     tangent = tangent / norm
+    # Swept off the parting: the strand leaves along the scalp and away from the
+    # line, which is what makes a parting read as one rather than as a bald
+    # stripe.  The sweep is already tangent to the sphere at the root.
+    tangent = tangent + sweep
+    tangent = tangent / (np.linalg.norm(tangent) or 1.0)
 
-    freq1, freq2 = rng.uniform(1.5, 2.5), rng.uniform(3.0, 5.0)
-    amp1, amp2 = rng.uniform(0.6, 1.3) * wave, rng.uniform(0.15, 0.4) * wave
-    phase = rng.uniform(0, 2 * np.pi)
-    twist = rng.normal(size=3)
-    twist /= np.linalg.norm(twist)
+    # The lock decides the shape and the card only strays from it, so the cards
+    # in a lock move together.  Seeded per card instead, as the first draft was,
+    # 320 cards each go their own way and the hair reads as a mop.
+    def strayed(low, high, spread):
+        return lock.uniform(low, high) * (1.0 + jitter * card.uniform(-spread, spread))
+
+    freq1, freq2 = strayed(1.5, 2.5, 0.25), strayed(3.0, 5.0, 0.25)
+    amp1 = strayed(0.6, 1.3, 0.3) * wave
+    amp2 = strayed(0.15, 0.4, 0.3) * wave
+    phase = lock.uniform(0, 2 * np.pi) + jitter * card.uniform(-0.6, 0.6)
+    twist = lock.normal(size=3) + jitter * 0.5 * card.normal(size=3)
+    twist /= np.linalg.norm(twist) or 1.0
     keep_out = radius + cling
 
     # The centreline first, then the wave as a displacement from it.  Added to
@@ -136,11 +187,15 @@ def strand_path(direction: np.ndarray, radius: float, cling: float, length: floa
     # lands on top of the last and the wave integrates into a drift: at
     # --wave 2.2 the curly style wandered into a 42.8 cm wide nest round the
     # head rather than curling (measured 2026-09-22).
+    # Hair rooted over the face is brushed out to the sides as it falls, which
+    # is why long hair frames a face rather than curtaining it.  Left to fall
+    # straight down, the long styles hung flat over the nose and the declip then
+    # pushed them out onto it.
     step = length / segments
     spine, headings = [direction * keep_out], []
     for i in range(1, segments + 1):
         t = i / segments
-        heading = (1 - t) * tangent + t * down
+        heading = (1 - t) * tangent + t * down + aside * t
         norm = np.linalg.norm(heading)
         heading = heading / norm if norm > 1e-6 else down.copy()
         headings.append(heading)
@@ -168,7 +223,7 @@ def strand_path(direction: np.ndarray, radius: float, cling: float, length: floa
 
 
 def ribbon(path: np.ndarray, width_root: float, width_tip: float,
-           slot: int, slots: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+           slot: int, slots: int, round_degrees: float) -> tuple:
     """A strand path widened into a two-vertex-wide ribbon with UVs and normals.
 
     The two UV columns are the inside edges of one texture slot, so the slot's
@@ -204,7 +259,19 @@ def ribbon(path: np.ndarray, width_root: float, width_tip: float,
     verts = np.empty((2 * n, 3))
     verts[0::2] = path + sides * half
     verts[1::2] = path - sides * half
-    vnorms = np.repeat(normals, 2, axis=0)
+
+    # A card is a clump of round hairs, not a sheet of paper, so its two edges
+    # carry normals tilted out by `round_degrees` about the strand and smooth
+    # shading sweeps between them.  A flat sheet normal is why the fringe went
+    # black: it faces the camera, the key sun is overhead, and a flat card
+    # square to the camera catches none of it.  Tilted, the same card has an
+    # edge turned up to the sun wherever it hangs.
+    angle = np.radians(round_degrees)
+    cos_a, sin_a = np.cos(angle), np.sin(angle)
+    vnorms = np.empty((2 * n, 3))
+    vnorms[0::2] = normals * cos_a + sides * sin_a
+    vnorms[1::2] = normals * cos_a - sides * sin_a
+    vnorms /= np.maximum(np.linalg.norm(vnorms, axis=1, keepdims=True), 1e-9)
     left, right = (slot + 0.02) / slots, (slot + 0.98) / slots
     uvs = np.empty((2 * n, 2))
     uvs[0::2] = np.column_stack((np.full(n, left), t))
@@ -212,17 +279,49 @@ def ribbon(path: np.ndarray, width_root: float, width_tip: float,
     return verts, uvs, vnorms
 
 
+def locks_of(directions: np.ndarray, clumps: int) -> np.ndarray:
+    """Which lock each root belongs to, by where it sits round the head.
+
+    Azimuth wedges, so a lock is a column of cards running from the crown down
+    one part of the scalp, which is the shape hair actually falls in.  The
+    Fibonacci spiral numbers its roots by the golden angle, so consecutive
+    indices are nowhere near each other and grouping by index would scatter a
+    lock over the whole head.
+    """
+    if clumps < 1:
+        return np.arange(len(directions))
+    azimuth = np.arctan2(directions[:, 0], directions[:, 2])
+    return (((azimuth + np.pi) / (2 * np.pi) * clumps).astype(int)) % clumps
+
+
 def build(args) -> dict:
     rng = np.random.RandomState(args.seed)
-    directions = scalp_roots(args.strands, args.cap, args.hairline)
+    directions = scalp_roots(args.strands, args.cap, args.hairline,
+                             args.part, args.part_width)
+    locks = locks_of(directions, args.clumps)
     verts, uvs, normals, faces = [], [], [], []
     for index, direction in enumerate(directions):
-        length = args.length + rng.uniform(-args.variation, args.variation)
+        lock = np.random.RandomState(args.seed + 9973 * int(locks[index]))
+        card = np.random.RandomState(args.seed + 31 + index)
+        length = args.length + lock.uniform(-args.variation, args.variation) \
+            + args.jitter * card.uniform(-args.variation, args.variation) / 2
+        sweep = np.zeros(3)
+        if args.part is not None and args.part_flow:
+            # strongest at the crown, gone by the hairline
+            top = np.clip((direction[1] - np.cos(np.radians(args.cap)))
+                          / max(1.0 - np.cos(np.radians(args.cap)), 1e-9), 0.0, 1.0)
+            away = np.array([1.0 if direction[0] >= args.part else -1.0, 0.0, 0.0])
+            sweep = away - np.dot(away, direction) * direction
+            sweep = sweep * args.part_flow * top
+        forward = direction[2] / max(np.hypot(direction[0], direction[2]), 1e-9)
+        aside = np.array([1.0 if direction[0] >= 0 else -1.0, 0.0, 0.0]) \
+            * args.sweep * max(0.0, forward)
         path = strand_path(direction, args.head_radius, args.cling, max(length, 0.5),
-                           args.segments, args.wave, args.volume,
-                           np.random.RandomState(args.seed + index))
-        slot = rng.randint(0, args.slots)
-        v, t, n = ribbon(path, args.width_root, args.width_tip, slot, args.slots)
+                           args.segments, args.wave, args.volume, sweep, aside,
+                           lock, card, args.jitter)
+        slot = int(locks[index] * 7 + card.randint(0, 3)) % args.slots
+        v, t, n = ribbon(path, args.width_root, args.width_tip, slot, args.slots,
+                         args.round)
         first = len(verts) + 1
         verts.extend(v)
         uvs.extend(t)
@@ -258,26 +357,37 @@ def textures(args, root_rgb, tip_rgb, stray_rgb) -> tuple:
 
     v = 1.0 - np.arange(size) / (size - 1)          # bottom row is the root
     ramp = root_rgb[None, :] * (1 - v)[:, None] + tip_rgb[None, :] * v[:, None]
+    # Stylised hair carries less range along a strand than a photograph does and
+    # puts the contrast in a highlight instead, so --ramp pulls the root and the
+    # tip towards their mean and --band lays one broad lighter sweep across the
+    # upper length.  At full range and a strong band the crown reads as a
+    # bleached patch over black hair rather than as a sheen.
+    ramp = ramp.mean(axis=0)[None, :] + (ramp - ramp.mean(axis=0)[None, :]) * args.ramp
+    sweep = 1.0 + args.band * np.exp(-(((v - 0.34) / 0.2) ** 2))
 
     for slot in range(slots):
         x0, x1 = int(slot * size / slots), int((slot + 1) * size / slots)
         width = x1 - x0
         if width <= 0:
             continue
-        tint = rng.uniform(0.85, 1.15, size=3)
+        # One number, not three: a per-channel tint shifts each slot's hue and
+        # the head comes out streaked green, pink and yellow rather than one
+        # colour lit unevenly.
+        tint = rng.uniform(0.85, 1.15)
         colour = (ramp + stray_rgb[None, :]) / 2.0 if rng.rand() < args.strays else ramp
-        shade = 1.0 + rng.uniform(-0.06, 0.06, size=size)[:, None]
-        diffuse[:, x0:x1, :] = np.clip(colour * tint[None, :] * shade, 0, 1)[:, None, :]
+        shade = 1.0 + rng.uniform(-args.shade, args.shade, size=size)[:, None]
+        diffuse[:, x0:x1, :] = np.clip(colour * tint * shade * sweep[:, None],
+                                       0, 1)[:, None, :]
 
         across = np.linspace(0.0, 1.0, width)
-        card = np.clip(np.cos((across - 0.5) * np.pi) ** 0.6, 0, 1)   # the card's own edges
+        card = np.clip(np.cos((across - 0.5) * np.pi) ** args.edge, 0, 1)
         alpha = np.zeros((size, width), dtype=np.float32)
         for _ in range(args.hairs):
             centre = rng.uniform(0.08, 0.92)
             half = rng.uniform(0.6, 1.8) / args.hairs
-            ends = rng.uniform(0.55, 1.0)
-            profile = np.clip(1.0 - np.abs(across - centre) / half, 0, 1) ** 0.7
-            fade = np.clip((ends - v) / 0.22, 0, 1)[:, None]
+            ends = rng.uniform(args.ends, 1.0)
+            profile = np.clip(1.0 - np.abs(across - centre) / half, 0, 1) ** args.core
+            fade = np.clip((ends - v) / args.tip, 0, 1)[:, None]
             alpha = np.maximum(alpha, profile[None, :] * fade)
         opacity[:, x0:x1] = alpha * card[None, :]
 
@@ -363,7 +473,7 @@ def write_mtl(path: Path, material: str, diffuse: str, opacity: str) -> None:
         "Ka 1.000 1.000 1.000\n"
         "Kd 1.000 1.000 1.000\n"
         "Ks 0.350 0.350 0.350\n"
-        "Ns 560.0\n"
+        "Ns 430.0\n"
         "illum 2\n"
         "d 1.0\n"
         f"map_Kd {diffuse}\n"
@@ -375,6 +485,24 @@ def write_mtl(path: Path, material: str, diffuse: str, opacity: str) -> None:
         "Ns 8.0\n"
         "illum 2\n"
         "d 1.0\n")
+
+
+PARTS = {"centre": 0.0, "center": 0.0, "left": -0.34, "right": 0.34, "none": None}
+
+
+def part_arg(text: str):
+    """Where the parting sits: a side, none, or an x between -1 and 1."""
+    key = text.strip().lower()
+    if key in PARTS:
+        return PARTS[key]
+    try:
+        value = float(text)
+    except ValueError:
+        raise argparse.ArgumentTypeError(
+            f"expected one of {', '.join(PARTS)} or an x from -1 to 1, got {text!r}")
+    if not -1.0 <= value <= 1.0:
+        raise argparse.ArgumentTypeError(f"expected an x from -1 to 1, got {text!r}")
+    return value
 
 
 def colour_arg(text: str) -> tuple:
@@ -403,6 +531,20 @@ def main() -> int:
                     help="print the styles and colours with their numbers, and exit")
     ap.add_argument("--style", choices=sorted(STYLES), default="wavy",
                     help="the shape to start from (default wavy); every number below overrides it")
+    ap.add_argument("--look", choices=sorted(LOOKS), default="stylised",
+                    help="how the cards are grouped and drawn: stylised gathers them into "
+                         "locks with hard edges and a highlight band, realistic leaves each "
+                         "card to itself with fine wispy strands (default stylised)")
+    ap.add_argument("--part", type=part_arg, default="centre",
+                    metavar="centre|left|right|none|X",
+                    help="where the parting sits, as a side or an x from -1 to 1 "
+                         "(default centre)")
+    ap.add_argument("--part-width", type=float, default=1.5, metavar="DEG",
+                    help="how wide the bare line of the parting is at the forehead, "
+                         "closing to nothing at the nape (default 1.5)")
+    ap.add_argument("--part-flow", type=float, default=0.5,
+                    help="how hard the hair is swept off the parting (default 0.5). Too "
+                         "hard and the parting is a bare wedge of scalp rather than a line")
     ap.add_argument("--colour", type=colour_arg, default="brown",
                     metavar="NAME|R,G,B", help="a named colour or an sRGB root colour 0 to 255")
     ap.add_argument("--name", default=None,
@@ -422,7 +564,7 @@ def main() -> int:
     ap.add_argument("--cap", type=float, default=None, metavar="DEG",
                     help="how far down the scalp roots reach at the back, from the crown "
                          "(default from --style)")
-    ap.add_argument("--hairline", type=float, default=58.0, metavar="DEG",
+    ap.add_argument("--hairline", type=float, default=48.0, metavar="DEG",
                     help="how far down they reach at the front, where a face is "
                          "(default 58)")
     ap.add_argument("--head-radius", type=float, default=9.5, metavar="CM",
@@ -432,6 +574,13 @@ def main() -> int:
                          "not one hair)")
     ap.add_argument("--width-tip", type=float, default=0.5, metavar="CM",
                     help="card width at the tip (default 0.5)")
+    ap.add_argument("--sweep", type=float, default=0.55,
+                    help="how far hair rooted over the face is brushed out to the sides as "
+                         "it falls (default 0.55; 0 lets it hang straight over the face)")
+    ap.add_argument("--round", type=float, default=62.0, metavar="DEG",
+                    help="how far a card's edge normals are tilted out, so it shades like "
+                         "a clump of round hairs rather than a flat sheet (default 62; "
+                         "0 is a flat card)")
     ap.add_argument("--cling", type=float, default=0.25, metavar="CM",
                     help="how far clear of the scalp a strand is held (default 0.25)")
     ap.add_argument("--volume", type=float, default=1.2, metavar="CM",
@@ -441,10 +590,20 @@ def main() -> int:
                     help="square map size (default 1024)")
     ap.add_argument("--slots", type=int, default=64,
                     help="card slots across the maps (default 64)")
-    ap.add_argument("--hairs", type=int, default=7,
-                    help="strands drawn inside each card's slot (default 7)")
-    ap.add_argument("--strays", type=float, default=0.08, metavar="F",
-                    help="fraction of slots tinted as lighter flyaways (default 0.08)")
+    for name, help_text in (
+            ("clumps", "locks the cards are gathered into round the head"),
+            ("jitter", "how far a card may stray from its lock, 0 to 1"),
+            ("hairs", "strands drawn inside each card's slot in the maps"),
+            ("core", "strand profile exponent: below 1 is a fatter, harder strand"),
+            ("edge", "the card's own edge falloff exponent"),
+            ("shade", "per-row colour noise, 0 for none"),
+            ("tip", "how sharply a strand ends, as a fraction of its length"),
+            ("ends", "the earliest along a card a strand may end, 0 to 1"),
+                    ("band", "strength of the lighter highlight sweep, 0 for none"),
+            ("ramp", "how much of the root-to-tip colour range to keep, 0 to 1"),
+            ("strays", "fraction of slots tinted as lighter flyaways")):
+        ap.add_argument(f"--{name}", type=int if name in ("clumps", "hairs") else float,
+                        default=None, help=f"{help_text} (default from --look)")
     ap.add_argument("--seed", type=int, default=7, help="random seed (default 7)")
     ap.add_argument("--preview", action=argparse.BooleanOptionalAction, default=True,
                     help="also write <name>_preview.obj, the hair on a plain scalp sphere, "
@@ -465,6 +624,11 @@ def main() -> int:
     for key in ("length", "variation", "wave", "cap", "segments"):
         if getattr(args, key) is None:
             setattr(args, key, style[key])
+    for key, value in LOOKS[args.look].items():
+        if getattr(args, key) is None:
+            setattr(args, key, value)
+    if isinstance(args.part, str):
+        args.part = part_arg(args.part)
     if isinstance(args.colour, str):
         args.colour = colour_arg(args.colour)
     root_rgb, tip_rgb, stray_rgb = args.colour
@@ -527,7 +691,8 @@ def main() -> int:
         "cap_degrees": args.cap, "hairline_degrees": args.hairline,
         "head_radius_cm": args.head_radius,
         "width_root_cm": args.width_root, "width_tip_cm": args.width_tip,
-        "cling_cm": args.cling, "volume_cm": args.volume,
+        "cling_cm": args.cling, "volume_cm": args.volume, "round_degrees": args.round,
+        "sweep": args.sweep,
         "texture_px": args.texture, "slots": args.slots, "hairs": args.hairs,
         "strays": args.strays,
         "vertices": len(v), "triangles": len(mesh["faces"]), "uvs": len(mesh["uvs"]),

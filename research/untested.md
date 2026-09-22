@@ -13,7 +13,7 @@ Where CLAUDE.md's Owner decisions line names one, update it too.
 | Port 8188 bind | Every interface, or `127.0.0.1` | `docker-compose.yml:14`, `:88`. Anyone on the network can queue jobs and change node packs |
 | ImageDream `commercial` flag | `yes` or `conditional (...)` | No OpenRAIL text found, and the SD 2.1 base page gave HTTP 401 |
 | Daz EULA read date | The owner reads and records it | `86958.json` has `eula_read` null. `scripts/daz_library.py licence 86958 --eula-read YYYY-MM-DD` |
-| Claude reading a Daz render | Allow, or keep refusing | The EULA's AI clause names chat models. `daz-genesis.md:451`, daz-figure steps 8 and 9, `daz_import_probe.py:341`. The 2026-09-18 sheets were deleted in that day's cleanup, so judging them needs a rebuild first |
+| Claude reading a Daz render | Settled 2026-09-22: allowed. The owner said to read `output/daz/` and look. Nothing else changed: none of it is committed and none of it reaches an AI stage | The EULA's AI clause names chat models; the reading is that looking at a render in a conversation is not training or generation. `daz-genesis.md:451` |
 | What `cleanup.py` protects | Settled 2026-09-18: music, icons, scenery, ground, lipsync and mpfb are protected; `output/daz`, `face_rig`, `mesh` and the `_` folders are not, and were deleted in that cleanup | `scripts/cleanup.py` lists both sets |
 | Ground texture size | 1024 or 512 | `skills/ground-texture/SKILL.md:21` and `:31` |
 | AGPL for a hosted image | Analyse it, or keep the warning | `docs/guide/redistributing.md` |
@@ -103,9 +103,9 @@ Where CLAUDE.md's Owner decisions line names one, update it too.
 ## Hair grown rather than licensed
 
 `scripts/make_hair.py` and `daz_import_probe.py scene --wear-obj`, both built
-2026-09-22.  All five styles and all seven colours were generated, and wavy,
-long, short, curly and straight were rendered on the preview sphere and looked
-at.  The wavy brown default was put on Genesis 9 and rendered at three angles.
+2026-09-22.  All five styles and all seven colours were generated.  Six
+hairstyles were built onto Genesis 9 and rendered at three angles each, and
+looked at: bob, curtains, crop, curls, elder and bounce (`skills/hair-mesh`).
 
 - **Only one figure, one bone and one OBJ.** `--wear-obj` has run on Genesis 9's
   base figure, on the `head` bone, with one OBJ at a time and the default axes.
@@ -117,21 +117,36 @@ at.  The wavy brown default was put on Genesis 9 and rendered at three angles.
   turn should carry it, and no pose has been applied to a figure wearing it.
   The declip edits the rest shape and refuses a posed figure, so the order is
   wear, declip, then pose.  Cost: one run with `--pose`.
-- **Nobody has looked at it on a figure.** The owner has not yet decided whether
-  Claude may read a render out of `output/daz/`, so the hair on Genesis 9 was
-  judged by numbers alone: 0.00% of its vertices inside the body after the
-  declip, its box 5.5 mm above the top of the head's skin and 3.1 cm wider each
-  side.  Only the preview sphere, which holds no Daz content, was looked at.
+- **Only one figure and one skin.** Every look at it has been on the base
+  Genesis 9 figure with `G9 Masculine Skin 01`, at one light, key 5.5 and
+  ambient 1.5, in one framing.  Against a dark skin, a bright costume or the
+  roster's own key of 6.5, nothing has been judged.  Cost: minutes.
+- **The two lighting findings are Cycles on this card.**  Cylindrical normals
+  worth 3.12 times the brightness, and no self-shadow worth another third, were
+  both measured on Cycles.  EEVEE, which `daz_import_probe.py render` pins, and
+  whatever engine the assets are bound for, were not.  Cost: one render each.
+- **`--look realistic` has not been looked at since the locks went in.**  It
+  sets clumps 0 and jitter 1, so it is the old per-card behaviour, but the
+  parting, the sweep and the round normals apply to it too and no render of it
+  exists.  Cost: one preview.
 - **Where the sheen comes from is the MTL, and the MTL is only read by two
   importers.** `Ns 560` arriving as roughness 0.25 was measured through
   Blender's OBJ importer and nothing else.  Another engine reading the same file
   may map Ns differently, and the two maps have never been loaded anywhere but
   Blender.  Cost: an import into whatever engine the assets are bound for.
 - **The style presets are shapes, not a taxonomy.** `curly` curls the ends
-  rather than the length, `short` sits at 2.0 layers where the script asks for 3
+  rather than the length, `short` sits at 1.8 layers where the script asks for 3
   to 5, and no style was compared against a reference photograph or against a
   Daz hair product.  They are five sets of numbers that render as hair, nothing
   more.  Cost: an afternoon and someone with an eye for hair.
+- **A parting is a plane, and a head is not.** `--part` moves roots off the
+  small circle x = the parting, which is a fair model for a straight parting
+  from forehead to crown and nothing else: no zigzag, no crown whorl, no
+  fringe swept to one side over a parting on the other.  Cost: code.
+- **`--look-at` on `render_sheet.py` has only framed a head.** It moves the
+  camera and its aim, and no sprite sheet, no `--check` row and no pose set has
+  been drawn with it set.  The default, half the frame, is unchanged and every
+  existing sheet uses it.  Cost: one sheet.
 - **Scaling by the fitted sphere assumes a skull is a ball.** On Genesis 9 the
   fit is good, 4.6 mm mean and 10.9 mm worst over 636 vertices, and it has never
   been run on a character with a dialled head shape, a child figure or a
