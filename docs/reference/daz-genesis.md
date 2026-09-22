@@ -8,7 +8,7 @@ The research itself was read, not run: Daz's licence, product and file-list page
 
 Characters in this pipeline start as a Qwen-Image painting. That painting becomes a TRELLIS or Hunyuan3D mesh, and UniRig rigs it with bones named `bone_0` to `bone_N` and no face at all ([rigging](/guide/rigging#bone-names-are-not-human-readable)). Daz 3D's Genesis figures are the opposite: a fixed, posable human with named bones, joint correctives and a face rig. <!-- DAZ-072, DAZ-079, DAZ-080, DAZ-083 --> Could Genesis be the human base for the sprite pipeline? Can it run on a Linux box with no desktop session? And what may a game sold worldwide ship?
 
-Source Filmmaker has [its own note](/reference/source-filmmaker). Phonemes, visemes and facial rigs for generated meshes are covered in [lip sync](/reference/lip-sync).
+Source Filmmaker has [its own note](/reference/source-filmmaker). Phonemes, visemes and facial rigs for generated meshes are covered in [lip sync](/reference/lip-sync). Hair the repo can own outright, rather than license from Daz, is in [hair cards](/reference/hair-cards).
 
 ## The answer in brief
 

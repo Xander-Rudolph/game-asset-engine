@@ -120,6 +120,7 @@ export default defineConfig({
             { text: 'Source Filmmaker', link: '/reference/source-filmmaker' },
             { text: 'Lip sync and talking portraits', link: '/reference/lip-sync' },
             { text: 'DAZ Genesis', link: '/reference/daz-genesis' },
+            { text: 'Hair cards', link: '/reference/hair-cards' },
           ],
         },
       ],

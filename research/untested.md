@@ -121,10 +121,17 @@ looked at: bob, curtains, crop, curls, elder and bounce (`skills/hair-mesh`).
   Genesis 9 figure with `G9 Masculine Skin 01`, at one light, key 5.5 and
   ambient 1.5, in one framing.  Against a dark skin, a bright costume or the
   roster's own key of 6.5, nothing has been judged.  Cost: minutes.
-- **The two lighting findings are Cycles on this card.**  Cylindrical normals
-  worth 3.12 times the brightness, and no self-shadow worth another third, were
-  both measured on Cycles.  EEVEE, which `daz_import_probe.py render` pins, and
-  whatever engine the assets are bound for, were not.  Cost: one render each.
+- **The winding bug is measured, not fixed.**  `build()` writes each card's
+  triangles wound against the normals it writes (bob alone: mean luma 30.5 as
+  written, 167.9 reversed, 2026-09-22, `output/hair/_exp/render_exp.py`).  The
+  3.12 times for `--round 62` and the third for `--obj-no-shadow` were measured
+  on the inverted mesh and shrink to 7 and 11 percent once it is fixed.  Every
+  render in `output/daz/hair_styles_sheet.png` is of the inverted mesh.  The
+  fix is one line in `build()` and is the first step of the redesign in
+  `docs/reference/hair-cards.md`.  Cost: minutes, then re-measure.
+- **Both lighting findings are Cycles on this card.**  EEVEE, which
+  `daz_import_probe.py render` pins, and whatever engine the assets are bound
+  for, were not run.  Cost: one render each.
 - **`--look realistic` has not been looked at since the locks went in.**  It
   sets clumps 0 and jitter 1, so it is the old per-card behaviour, but the
   parting, the sweep and the round normals apply to it too and no render of it

@@ -78,13 +78,15 @@ cells at 560 px took 1.7 s wall on Cycles on the card.
 
 ## The two things that decide whether it reads as hair
 
-**Cylindrical card normals, `--round`.** This is worth more than everything else
-here put together. A card with one flat normal shades like paper: a fringe in
-front of a face is square to the camera, the key sun is overhead, and the card
-catches none of it, so the fringe renders black while the crown is lit. At
-`--round 62` each card's two edges carry normals tilted out about the strand and
-the card shades like a clump of round hairs. Same hair, same maps, same light:
-**mean luma 16.5 flat against 51.7 round, 3.12 times as bright.**
+**The face winding, which is wrong as of commit `1fdbb72`.** `build()` writes
+each card's triangles wound the opposite way to the normals it writes, so Cycles
+lit every card from inside the head and an engine that culls back faces would
+draw nothing. Measured 2026-09-22: the bob alone at mean luma **30.5** as
+written and **167.9** with the winding reversed. Until that fix lands, the
+`--round 62` tilt (3.12 times as bright on the inverted mesh) is a workaround,
+not the cause; with the winding fixed the normal schemes are within 7 percent
+of each other. Read `docs/reference/hair-cards.md` before changing the
+generator.
 
 **Card density, which the script prints.**
 
@@ -92,9 +94,10 @@ the card shades like a clump of round hairs. Same hair, same maps, same light:
   layers    3.2 cards deep: 4256 cm2 of card over 1334 cm2 of head
 ```
 
-**Aim for 3 to 5.** At 8.8, which 1,400 cards of 0.9 cm gave, a ray crosses nine
-dark cards, almost none of the light gets out and the hair renders as a black
-mass. Raise or lower it with `--strands` or `--width-root`.
+**3 to 5 is a budget, not a threshold.** 8.8 layers rendered as a black mass
+only while the faces were inverted; with the winding fixed it renders at 151.6
+against the bob's 167.9. Raise or lower it with `--strands` or `--width-root`
+for triangle count and overdraw, not for brightness.
 
 ## Putting it on a Genesis figure
 
@@ -114,7 +117,8 @@ scripts/render_sheet.py output/daz/NAME.blend --azimuths 0,45,90 --elevation 6 \
   vertices sit within 4.6 mm of it. `--obj-offset DX,DY,DZ` in millimetres and
   `--obj-yaw DEG` are there if the report says they are needed.
 - **`--obj-no-shadow`.** Cards three layers deep shadow each other. Same hair,
-  same light: **mean luma 38.7 casting, 51.7 not.**
+  same light: 38.7 casting, 51.7 not on the inverted mesh; 149.0 against 167.9
+  with the winding fixed, about 11 percent.
 - **`--declip 1.5`.** Without it 11.24% of the hair's vertices sat inside the
   body at the neck; with it, 0.00%.
 - **`--mat-preset`, not `--mat-replace`, for the base figure.** The base

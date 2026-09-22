@@ -548,19 +548,26 @@ so a card lies flat against the head with its face pointing outwards. Squared
 against world up instead, the cards on the sides of the head are edge on to the
 camera and the hair reads as wire.
 
-#### The single biggest thing: a card is not a sheet
+#### The faces are wound into the head, and `--round` was a workaround
 
-A card's two edges carry normals tilted out by `--round` degrees about the
-strand, and smooth shading sweeps between them, so the card shades like a clump
-of round hairs. This is worth more than every other setting here put together.
+Measured 2026-09-22 with `output/hair/_exp/render_exp.py` and written up in the
+[hair cards note](/reference/hair-cards#what-was-measured-here-before-anything-was-read):
+`build()` emits each card's triangles as `(a, b, d), (a, d, c)` with `a` on the
+plus side, whose geometric normal is the opposite of the normal `ribbon()`
+writes. Blender's OBJ importer keeps the written normals as custom normals, and
+Cycles shades a backfacing hit with a flipped normal, so every card was lit as
+if from inside the head: the default bob rendered alone at **mean luma 30.5**,
+and the same file with every triangle's winding reversed at **167.9**, with no
+other change. An engine that culls back faces would draw nothing from the file
+as written.
 
-With flat sheet normals the same hair, the same maps and the same light came out
-at **mean luma 16.5** over 113,332 drawn pixels. At `--round 62` it is **51.7**
-over 113,375: **3.12 times as bright**, and the difference is not spread evenly,
-it is the whole front of the head. A flat card hanging in front of a face is
-square to the camera and an overhead key misses it completely, so a fringe
-renders black while the crown is lit. Tilted, the same card always has an edge
-turned towards the light.
+`--round` tilts each card's two edge normals out about the strand so the card
+shades like a clump of round hairs. On the inverted mesh that turned part of
+each card back towards the light, which is where the **3.12 times** recorded on
+2026-09-22 (mean luma 16.5 flat against 51.7 tilted) came from. With the
+winding fixed the four normal schemes are within 7 percent of each other: flat
+167.9, tilted 156.4, dome 163.3, a 50/50 blend 164.0. The tilt stays as an
+option; it is no longer the thing that makes the hair visible.
 
 #### Locks, and a parting
 
@@ -585,9 +592,12 @@ line.
 ```
 
 Card area over the area the hair covers, the scalp cap plus the skirt below it.
-**Three to five** is the range that reads as hair. At 8.8, which 1,400 cards of
-0.9 cm gave, a ray crosses nine dark cards, almost none of the light gets out
-and the hair renders as a black mass with a hard silhouette.
+**Three to five** is a budget, not a threshold. The 8.8 that 1,400 cards of
+0.9 cm gave was first recorded as rendering "as a black mass"; measured again
+on 2026-09-22 with the winding fixed it renders at mean luma 151.6 against the
+3.2-layer bob's 167.9, and at 8 transparent bounces against 64 the unfixed mesh
+gave 27.1 and 27.3. The black mass was the inverted faces. Density costs
+triangles and overdraw, and that is what the number guards.
 
 #### Two looks
 
@@ -1041,11 +1051,12 @@ where it hangs past the head onto the neck and shoulders. `--declip 1.5` moved
 **1,830** of them out, by at most **8.38 mm**, and left **0.00%** inside
 (measured 2026-09-22).
 
-**`--obj-no-shadow` for hair.** Cards stacked several deep shadow each other,
-and dark hair lit through three layers of its own shadow comes out black
-whatever its maps say. The same hair, alone in frame under the same light,
-measured **mean luma 38.7 casting shadows and 51.7 not**, a third as much light
-again for one flag (2026-09-22).
+**`--obj-no-shadow` for hair.** Cards stacked several deep shadow each other.
+The same hair, alone in frame under the same light, measured **mean luma 38.7
+casting shadows and 51.7 not** on 2026-09-22; measured again the same day with
+the mesh's winding fixed ([hair cards](/reference/hair-cards)), the cost of
+shadows is 149.0 against 167.9, about 11 percent. Still worth the flag for
+stylised hair, no longer the difference between black and brown.
 
 The material comes from the OBJ's own MTL, and the probe then sets the map
 feeding Alpha to Non-Color and switches off backface culling, because the

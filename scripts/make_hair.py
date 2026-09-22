@@ -262,10 +262,10 @@ def ribbon(path: np.ndarray, width_root: float, width_tip: float,
 
     # A card is a clump of round hairs, not a sheet of paper, so its two edges
     # carry normals tilted out by `round_degrees` about the strand and smooth
-    # shading sweeps between them.  A flat sheet normal is why the fringe went
-    # black: it faces the camera, the key sun is overhead, and a flat card
-    # square to the camera catches none of it.  Tilted, the same card has an
-    # edge turned up to the sun wherever it hangs.
+    # shading sweeps between them.  This was first credited with curing a black
+    # fringe; the cause was the face winding below, which opposes these normals
+    # (docs/reference/hair-cards.md, measured 2026-09-22), and the tilt only
+    # turned part of each inverted card back to the light.  Kept as a look.
     angle = np.radians(round_degrees)
     cos_a, sin_a = np.cos(angle), np.sin(angle)
     vnorms = np.empty((2 * n, 3))
@@ -668,9 +668,12 @@ def main() -> int:
     v = mesh["verts"]
     roots = v[::2 * (args.segments + 1)]
     low, high = v.min(axis=0), v.max(axis=0)
-    # How many cards a ray through the hair crosses on average, which is what
-    # decides whether it reads as hair or as a black mass.  Card area over the
-    # area the hair covers: the scalp cap plus the skirt that hangs below it.
+    # How many cards a ray through the hair crosses on average: card area over
+    # the area the hair covers, the scalp cap plus the skirt that hangs below
+    # it.  A budget for triangles and overdraw.  It was first read as the cause
+    # of a black render at 8.8; that was the face winding (see
+    # docs/reference/hair-cards.md), and 8.8 renders as bright as 3.2 once the
+    # winding is right.
     cap = np.radians(args.cap)
     covered = (2 * np.pi * args.head_radius ** 2 * (1 - np.cos(cap))
                + 2 * np.pi * args.head_radius * min(args.length, 2 * args.head_radius))
@@ -721,8 +724,7 @@ def main() -> int:
           f"{facts['bounding_box_cm']['span'][1]} x {facts['bounding_box_cm']['span'][2]} cm, "
           f"roots on a {facts['root_radius_cm']} cm sphere about the origin")
     print(f"  layers    {facts['layers']} cards deep: {facts['card_area_cm2']} cm2 of card "
-          f"over {facts['covered_area_cm2']} cm2 of head. Past about 8 it renders as a "
-          f"black mass")
+          f"over {facts['covered_area_cm2']} cm2 of head; 3 to 5 is the budget")
     print(f"  maps      {args.texture} px, {args.slots} slots of {args.hairs} strands, "
           f"{facts['bytes']['diffuse'] // 1024} KiB diffuse, "
           f"{facts['bytes']['opacity'] // 1024} KiB opacity")

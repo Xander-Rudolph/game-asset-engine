@@ -1530,28 +1530,22 @@ vertices**, mostly at the neck and the shoulders, where the hair hangs past the
 head entirely. `--declip 1.5` moved **1,830** of them out, by at most
 **8.38 mm**, and left **0.00%** inside.
 
-### Why hair on a figure renders black, twice over
+### Why hair on a figure rendered black: its faces are wound into the head
 
-Two findings, both measured on Genesis 9 with the same hair, the same maps and
-the same light on 2026-09-22, and both worth more than any amount of fiddling
-with the colour.
+Two findings were recorded on 2026-09-22 with the same hair, the same maps and
+the same light: tilting each card's edge normals (`--round 62`) made the hair
+**3.12 times** as bright, mean luma 16.5 to 51.7, and `--obj-no-shadow` took it
+from 38.7 to 51.7. Both were real measurements of the wrong cause.
 
-**A card is not a sheet.** Give a card one flat normal and it shades like a
-piece of paper: a fringe hanging in front of a face is square to the camera, the
-key sun is overhead, and the card catches none of it, so the fringe renders
-black while the crown is lit. `make_hair.py --round 62` tilts each card's two
-edge normals out about the strand and lets smooth shading sweep between them, so
-the card shades like a clump of round hairs and always has an edge turned to the
-light. The same hair went from **mean luma 16.5 to 51.7** over 113,000 drawn
-pixels, **3.12 times as bright**.
-
-**Cards shadow each other.** At three layers deep, the hair is lit through two
-layers of its own shadow. `--obj-no-shadow` stops the OBJ casting, and the same
-hair measured **38.7 casting and 51.7 not**.
-
-Neither is a lighting problem. Both were checked against a flat single-colour
-diffuse map, and against a key sun and a world light on their own, and the
-two-tone stayed put through all of it.
+Later the same day, with the owner's go to look at renders, the
+[hair cards research](/reference/hair-cards#what-was-measured-here-before-anything-was-read)
+found that `make_hair.py` writes every card's triangles wound the opposite way
+to the normal it writes for them, so Cycles lit each card as if from inside the
+head. The default bob rendered alone at mean luma **30.5** as written and
+**167.9** with the winding reversed and nothing else changed. With the winding
+fixed, flat and tilted normals are within 7 percent of each other and shadow
+casting costs 11 percent rather than a third. The tilt and the flag stay
+useful; the winding is the fix, and it is one line that has not been made yet.
 
 ### Framing the head to judge it
 

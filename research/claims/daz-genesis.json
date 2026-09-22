@@ -1,7 +1,7 @@
 {
  "note": "docs/reference/daz-genesis.md",
  "researched": "2026-09-15",
- "checked": "2026-09-15 to 2026-09-16",
+ "checked": "2026-09-15 to 2026-09-16, DAZ-119 re-read 2026-09-22",
  "statuses": {
   "confirmed": 41,
   "corrected": 36,
@@ -2291,6 +2291,13 @@
      "read": "https://quaternius.com/license.html",
      "evidence": "Licence page https://quaternius.com/license.html: \"Quaternius Asset License (QAL) v1.0 / Last updated: 8/28/2026 ... You can use these assets, free of charge, in personal, educational, and commercial games and other projects, with no credit required. You just can't resell or redistribute the assets themselves as assets.\" Section 3a: \"You may not extract, repackage, sublicense, sell, or otherwise redistribute the Assets (in original or modified form) as a standalone asset, asset pack ... This restriction applies regardless of how much the Assets have been modified.\" Section 7: \"We may publish updated versions of this License for future Asset releases. Changes will not apply retroactively...\"\n...",
      "notes": "What is refuted is the opening blanket statement, \"Quaternius states all its models are CC0\". The FAQ still says it word for word, but it is out of date: Quaternius's own licence page and newest pack (Bestiary, published about 2026-08-29, v1.1 dated 29/8/2026) now use QAL. QAL is not an open licence. It bans redistributing the assets as assets, even modified, which matters for asset stores, template or starter-kit products, and possibly mod SDKs that ship raw meshes. Shipping a finished game is explicitly allowed. The part about Universal Base Characters still holds today.\n\nNuances:\n(1) QAL section 7 says a change applies only to future releases, and CC0 cannot be revoked for copies already ..."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "https://quaternius.com/license.html; https://quaternius.com/packs/universalbasecharacters.html; https://quaternius.itch.io/universal-base-characters",
+     "evidence": "Re-read 2026-09-22 for research/claims/hair-cards.json (HAIR-146): the licence page still shows 'Quaternius Asset License (QAL) v1.0, Last updated: 8/28/2026' and the Universal Base Characters pack page and itch.io page still state CC0.",
+     "notes": "No drift since 2026-09-15; the corrected wording stands. Status unchanged."
     }
    ]
   },
