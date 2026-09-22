@@ -704,7 +704,7 @@ def cmd_fetch(args) -> int:
 # ------------------------------------------------------------------ Blender side
 
 PRELUDE = r'''
-import json, os, re, resource, signal, sys, time, traceback
+import json, math, os, re, resource, signal, sys, time, traceback
 cfg = json.loads(sys.argv[-1])
 # The host's timeout only stops docker exec; SIGALRM's default action ends
 # this process even inside C code or a hang at exit.
@@ -1005,6 +1005,189 @@ def offset_meshes(moves):
         out[name] = {"moved_mm": [dx, dy, dz], "vertices": len(ob.data.vertices),
                      "shape_keys": len(keys)}
     return out
+
+
+def owned_vertices(ob, group_name, dg):
+    """World-space positions of the evaluated vertices one vertex group owns.
+
+    Owns means that group carries the vertex's largest weight, so the head bone's
+    share of Genesis 9 is the skull and the face rather than every vertex the
+    head pulls on a little.
+    """
+    group = ob.vertex_groups.get(group_name)
+    if group is None:
+        return []
+    index, mw = group.index, ob.matrix_world
+    evaluated = ob.evaluated_get(dg)
+    me = evaluated.to_mesh()
+    out = []
+    for v in me.vertices:
+        best = None
+        for g in v.groups:
+            if best is None or g.weight > best.weight:
+                best = g
+        if best is not None and best.group == index:
+            out.append(mw @ v.co)
+    evaluated.to_mesh_clear()
+    return out
+
+
+def fitted_sphere(points):
+    """Centre and radius of the sphere closest to a cloud, by least squares.
+
+    The algebraic fit: |p - c|^2 = r^2 is linear in (c, r^2 - |c|^2), so one
+    lstsq on [2x 2y 2z 1] against x^2 + y^2 + z^2 gives both with no iteration.
+    A scalp is what this is for, and a scalp is the top of a head, so the caller
+    hands in the upper part of a bone's skin and not the jaw and the nose.
+    """
+    import numpy as np
+    a = np.array([[p.x, p.y, p.z] for p in points], dtype=np.float64)
+    lhs = np.column_stack((2 * a, np.ones(len(a))))
+    rhs = (a ** 2).sum(axis=1)
+    sol, *_ = np.linalg.lstsq(lhs, rhs, rcond=None)
+    centre = sol[:3]
+    radius = float(np.sqrt(max(sol[3] + (centre ** 2).sum(), 0.0)))
+    residual = np.abs(np.linalg.norm(a - centre, axis=1) - radius)
+    return {"centre": [float(c) for c in centre], "radius_m": radius,
+            "points": len(a),
+            "residual_mean_mm": float(residual.mean() * 1000),
+            "residual_max_mm": float(residual.max() * 1000)}
+
+
+def wear_objs(specs, rig, body):
+    """Import a Wavefront OBJ, put it where a bone's skin says, and hang it there.
+
+    For geometry that is nobody's Daz product: a hair mesh this repo grew with
+    scripts/make_hair.py is static, unrigged and modelled around its own origin
+    on a scalp sphere, so it is placed rather than fitted.  The anchor is
+    measured, not guessed: a sphere is fitted to the upper half of the bone's
+    own skin and the object's origin goes to that sphere's centre.  The object
+    is then bone-parented, so it follows a pose like a hat and not like skin.
+    """
+    from mathutils import Matrix, Vector
+    dg = bpy.context.evaluated_depsgraph_get()
+    out = {}
+    for spec in specs:
+        name = os.path.splitext(os.path.basename(spec["path"]))[0]
+        before = set(bpy.data.objects)
+        ret = bpy.ops.wm.obj_import(filepath=spec["path"], forward_axis=spec["forward"],
+                                    up_axis=spec["up"], use_split_objects=False)
+        added = [o for o in bpy.data.objects if o not in before]
+        meshes = [o for o in added if o.type == "MESH"]
+        entry = {"file": os.path.basename(spec["path"]), "returned": sorted(ret),
+                 "objects": [[o.name, o.type] for o in added],
+                 "vertices": sum(len(o.data.vertices) for o in meshes),
+                 "faces": sum(len(o.data.polygons) for o in meshes),
+                 "uv_layers": sorted({l.name for o in meshes for l in o.data.uv_layers}),
+                 "materials": sorted({s.material.name for o in meshes
+                                      for s in o.material_slots if s.material})}
+        if not meshes:
+            out[name] = dict(entry, skipped="the file imported no mesh")
+            continue
+        if not entry["faces"]:
+            out[name] = dict(entry, skipped="the file has no polygons, so nothing would draw")
+            continue
+
+        box = [Vector(c) for o in meshes for c in o.bound_box]
+        entry["box_before_m"] = {ax: [round(min(v[i] for v in box), 4),
+                                      round(max(v[i] for v in box), 4)]
+                                 for i, ax in enumerate("xyz")}
+        anchor = Vector((0.0, 0.0, 0.0))
+        if spec["bone"]:
+            if body is None:
+                out[name] = dict(entry, skipped="no body mesh to measure the bone's skin on")
+                continue
+            skin = owned_vertices(body, spec["bone"], dg)
+            if len(skin) < 16:
+                out[name] = dict(entry, skipped=f"{len(skin)} vertices are owned by vertex "
+                                 f"group {spec['bone']!r}, too few to fit a sphere to")
+                continue
+            mid = (min(p.z for p in skin) + max(p.z for p in skin)) / 2
+            upper = [p for p in skin if p.z >= mid]
+            sphere = fitted_sphere(upper)
+            entry["bone"] = spec["bone"]
+            entry["skin_vertices"] = len(skin)
+            entry["skull_sphere"] = sphere
+            entry["skull_box_m"] = {ax: [round(min(p[i] for p in skin), 4),
+                                         round(max(p[i] for p in skin), 4)]
+                                    for i, ax in enumerate("xyz")}
+            anchor = Vector(sphere["centre"])
+            # The OBJ is in its own units and its roots sit `radius_cm` from its
+            # own origin, so this is the scale that lands them on the skull.
+            entry["scale_that_matches_the_sphere"] = round(
+                sphere["radius_m"] / spec["radius_cm"], 6)
+        anchor = anchor + Vector([v / 1000.0 for v in spec["offset"]])
+        scale = spec["scale"]
+        if scale is None:
+            scale = entry.get("scale_that_matches_the_sphere", 0.01)
+            entry["scale_chosen"] = "from the fitted sphere" if "scale_that_matches_the_sphere" \
+                in entry else "0.01, centimetres to metres, with no bone to measure"
+        spec = dict(spec, scale=scale)
+        entry["scale"] = scale
+        entry["yaw_degrees"] = spec["yaw"]
+        entry["placed_at_m"] = [round(v, 4) for v in anchor]
+
+        for ob in meshes:
+            ob.matrix_world = (Matrix.Translation(anchor)
+                               @ Matrix.Rotation(math.radians(spec["yaw"]), 4, "Z")
+                               @ Matrix.Diagonal((spec["scale"],) * 3).to_4x4()
+                               @ ob.matrix_world)
+            for poly in ob.data.polygons:
+                poly.use_smooth = True
+            if spec["bone"] and rig is not None and spec["bone"] in rig.data.bones:
+                keep = ob.matrix_world.copy()
+                ob.parent = rig
+                ob.parent_type = "BONE"
+                ob.parent_bone = spec["bone"]
+                ob.matrix_world = keep
+                entry["parented_to"] = f"{rig.name}:{spec['bone']}"
+            for slot in ob.material_slots:
+                if slot.material:
+                    entry.setdefault("alpha", {})[slot.material.name] = wire_cutout(slot.material)
+        bpy.context.view_layer.update()
+        box = [ob.matrix_world @ Vector(c) for ob in meshes for c in ob.bound_box]
+        entry["box_after_m"] = {ax: [round(min(v[i] for v in box), 4),
+                                     round(max(v[i] for v in box), 4)]
+                                for i, ax in enumerate("xyz")}
+        out[name] = entry
+    return out
+
+
+def wire_cutout(mat):
+    """Make an OBJ material's alpha map cut the surface out rather than tint it.
+
+    The OBJ importer reads map_d into Alpha but leaves the image in sRGB, which
+    lightens every alpha value it reads, and leaves EEVEE rendering the surface
+    opaque.  Cycles needs only the first of those fixed; both are set here so
+    the same .blend draws the same either way.
+    """
+    node = principled_of(mat)
+    done = {"material": mat.name, "alpha_linked": False}
+    if node is None:
+        return done
+    link = node.inputs["Alpha"].links
+    if link:
+        source = link[0].from_node
+        done["alpha_linked"] = True
+        done["alpha_from"] = source.bl_idname
+        if source.bl_idname == "ShaderNodeTexImage" and source.image:
+            source.image.colorspace_settings.name = "Non-Color"
+            done["alpha_image"] = source.image.name
+            done["alpha_colorspace"] = "Non-Color"
+    else:
+        done["alpha_value"] = round(node.inputs["Alpha"].default_value, 3)
+    base = node.inputs["Base Color"].links
+    if base and base[0].from_node.bl_idname == "ShaderNodeTexImage" and base[0].from_node.image:
+        done["base_colour_image"] = base[0].from_node.image.name
+    mat.use_backface_culling = False
+    for attr, value in (("blend_method", "BLENDED"), ("surface_render_method", "BLENDED"),
+                        ("shadow_method", "CLIP")):
+        try:
+            setattr(mat, attr, value)
+            done[attr] = value
+        except (AttributeError, TypeError):
+            pass
+    return done
 
 
 def declip(body, meshes, margin, max_verts, skip, max_push=0.0, passes=4):
@@ -1881,6 +2064,16 @@ SCENE_TAIL = r'''
                     "get_error_message": daz.get_error_message()}
         result["transfer_shapekeys"] = step("bpy.ops.daz.transfer_shapekeys()", transfer, fatal=False)
 
+    obj_meshes = set()
+    if cfg["wear_objs"]:
+        result["wear_objs"] = step(
+            "import %d Wavefront OBJ(s)" % len(cfg["wear_objs"]),
+            lambda: wear_objs(cfg["wear_objs"], rig, body), fatal=False)
+        for entry in (result["wear_objs"] or {}).values():
+            if not entry.get("skipped"):
+                obj_meshes.update(n for n, kind in entry.get("objects", []) if kind == "MESH")
+        result["obj_meshes"] = sorted(obj_meshes)
+
     # a dial set after the clothes are on: does the outfit follow the shape?
     for name, value in cfg["set_after"]:
         def set_after(name=name, value=value):
@@ -1907,7 +2100,7 @@ SCENE_TAIL = r'''
         result["offsets"] = step("move %d worn mesh(es)" % len(cfg["offsets"]),
                                  move_them, fatal=False)
 
-    if cfg["declip"] > 0 and worn_meshes:
+    if cfg["declip"] > 0 and (worn_meshes or obj_meshes):
         def push_out():
             meshes = [o for o in bpy.data.objects if o.type == "MESH"]
             body_now = body_of(rig, [o for o in meshes if o.find_armature() == rig])
@@ -1919,8 +2112,14 @@ SCENE_TAIL = r'''
             # brooch, is placed rather than fitted, and pushing its vertices
             # to the body would bend it: the Wise Wizard's brooch had all
             # 4,560 of them moved before this rule (2026-09-21).
+            # An imported OBJ is in too: it is not a rigid prop but a sheet of
+            # hair or cloth modelled around a sphere, and bending it onto the
+            # body it sits against is the whole point.  On Genesis 9 the hair
+            # grown for a 9.5 cm scalp sank 18.04 mm into the neck before this
+            # (2026-09-22).
             wearing = [o for o in meshes
-                       if o.name in worn_meshes and o.find_armature() == rig]
+                       if (o.name in worn_meshes and o.find_armature() == rig)
+                       or o.name in obj_meshes]
             before = fit_report(body_now, wearing)
             done = declip(body_now, wearing, cfg["declip"] / 1000.0, cfg["declip_max_verts"],
                           set(cfg["declip_skip"]), cfg["declip_max_push"] / 1000.0)
@@ -3033,6 +3232,27 @@ def offset_arg(text: str) -> tuple:
     return name.strip(), values
 
 
+def obj_scale_arg(text: str):
+    """A uniform scale for --wear-obj, or auto to take it from the fitted sphere."""
+    if text.strip().lower() == "auto":
+        return None
+    try:
+        return float(text)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"expected a number or auto, got {text!r}")
+
+
+def offset_arg_mm(text: str) -> list:
+    """Three millimetres along the world axes: DX,DY,DZ."""
+    try:
+        values = [float(v) for v in text.split(",")]
+    except ValueError:
+        values = []
+    if len(values) != 3:
+        raise argparse.ArgumentTypeError(f"expected DX,DY,DZ in millimetres, got {text!r}")
+    return values
+
+
 def mat_preset_arg(text: str) -> tuple:
     """A library-relative preset, optionally @ the meshes it applies to."""
     file, at, objects = text.partition("@")
@@ -3092,6 +3312,18 @@ def out_path(text: str) -> Path:
         raise argparse.ArgumentTypeError(f"--out must be under {OUT.relative_to(ROOT)}/, got {text!r}")
     if p.suffix != ".blend":
         raise argparse.ArgumentTypeError(f"--out must end in .blend, got {text!r}")
+    return p
+
+
+def obj_path(text: str) -> Path:
+    """A Wavefront OBJ on the host, which the container has to be able to see."""
+    p = Path(text)
+    p = (ROOT / p) if not p.is_absolute() else p
+    p = p.resolve()
+    if p.suffix.lower() != ".obj":
+        raise argparse.ArgumentTypeError(f"--wear-obj takes a .obj file, got {text!r}")
+    if not p.is_file():
+        raise argparse.ArgumentTypeError(f"no such file: {p}")
     return p
 
 
@@ -3399,6 +3631,11 @@ def cmd_scene(args) -> int:
         "set": args.set,
         "set_after": args.set_dressed,
         "wear": [[rel, f"{lib_c}/{rel}"] for rel in args.wear],
+        "wear_objs": [{"path": c_path(p), "host": str(p), "bone": args.obj_bone,
+                       "scale": args.obj_scale, "offset": args.obj_offset,
+                       "yaw": args.obj_yaw, "radius_cm": args.obj_radius,
+                       "forward": args.obj_forward, "up": args.obj_up}
+                      for p in args.wear_obj],
         "transfer": not args.no_transfer,
         "skip_transfer": args.skip_transfer,
         "pose": f"{lib_c}/{args.pose}" if args.pose else "",
@@ -3418,6 +3655,11 @@ def cmd_scene(args) -> int:
           f"{'; FACS' if args.facs else ''}"
           f"{'; custom ' + str(len(custom['files'])) + ' file(s) from ' + args.custom_morphs if custom else ''}")
     print(f"  wear      {len(args.wear)} file(s); pose {args.pose or 'none'}")
+    for spec in cfg["wear_objs"]:
+        print(f"  obj       {Path(spec['host']).name} at scale "
+              f"{spec['scale'] if spec['scale'] is not None else 'auto'}, "
+              f"on bone {spec['bone'] or 'none'}, offset {spec['offset']} mm, "
+              f"yaw {spec['yaw']} deg")
     print(f"  anatomy   {len(anatomy)} post-load figure file(s)" if anatomy else "  anatomy   none")
     for asked, found in recased:
         print(f"            re-cased: {asked} is on disk as {found}")
@@ -3505,6 +3747,30 @@ def summarise_scene(res: dict, args, name: str) -> int:
             print(f"  wearable  {wname}: {mesh} {f.get('vertices')} vertices, parent "
                   f"{f.get('parent')} ({f.get('parent_type')}), armature "
                   f"{f.get('armature_modifiers')}, follows the rig: {f.get('follows_rig')}")
+    for oname, obj in (res.get("wear_objs") or {}).items():
+        if obj.get("skipped"):
+            print(f"  obj       {oname}: {obj['skipped']}")
+            continue
+        print(f"  obj       {oname}: {obj['vertices']} vertices, {obj['faces']} triangles, "
+              f"{len(obj['uv_layers'])} UV layer(s), material(s) "
+              f"{', '.join(obj['materials']) or '-'}")
+        sphere = obj.get("skull_sphere")
+        if sphere:
+            centre = ", ".join(f"{v * 100:.1f}" for v in sphere["centre"])
+            print(f"            {obj['bone']} skin {obj['skin_vertices']} vertices; sphere "
+                  f"r {sphere['radius_m'] * 100:.2f} cm at ({centre}) cm, fitted to "
+                  f"{sphere['points']} of them within {sphere['residual_mean_mm']:.1f} mm mean, "
+                  f"{sphere['residual_max_mm']:.1f} mm worst")
+            chosen = obj.get("scale_chosen", "given")
+            print(f"            scale {obj['scale']} ({chosen}); "
+                  f"{obj['scale_that_matches_the_sphere']} puts the roots on that sphere")
+        if obj.get("parented_to"):
+            print(f"            parented to {obj['parented_to']}")
+        for mat, alpha in (obj.get("alpha") or {}).items():
+            source = ("from " + alpha.get("alpha_image", "a node")) if alpha["alpha_linked"] \
+                else str(alpha.get("alpha_value"))
+            print(f"            {mat}: alpha {source}, base colour "
+                  f"{alpha.get('base_colour_image', 'not from a map')}")
     p = res.get("pose")
     if p:
         print(f"  pose      {p['file']}: {p['bones_moved']} of {p['bones']} pose bones moved, "
@@ -4118,6 +4384,33 @@ def main() -> int:
     s.add_argument("--wear", type=library_relative, action="append", default=[],
                    help="a clothing or hair .duf to import onto the figure already in the scene, "
                         "then merge into its rig; repeatable, in the order given")
+    s.add_argument("--wear-obj", type=obj_path, action="append", default=[],
+                   metavar="PATH",
+                   help="a Wavefront OBJ to place on the figure and bone-parent, repeatable; "
+                        "its .mtl and maps are read from beside it. scripts/make_hair.py "
+                        "writes one")
+    s.add_argument("--obj-bone", default="head", metavar="NAME",
+                   help="fit a sphere to the upper half of this bone's skin and put each "
+                        "OBJ's own origin at its centre, then parent to it (default head; "
+                        "empty places at the world origin and parents to nothing)")
+    s.add_argument("--obj-scale", type=obj_scale_arg, default=None, metavar="S|auto",
+                   help="uniform scale for each OBJ. The default, auto, is the scale that "
+                        "lands the OBJ's own roots on the sphere fitted to --obj-bone, or "
+                        "0.01 for centimetres to metres when there is no bone")
+    s.add_argument("--obj-offset", type=offset_arg_mm, default=[0.0, 0.0, 0.0],
+                   metavar="DX,DY,DZ",
+                   help="move each OBJ this far in millimetres after it is placed")
+    s.add_argument("--obj-yaw", type=float, default=0.0, metavar="DEG",
+                   help="turn each OBJ about the up axis before it is placed (default 0)")
+    s.add_argument("--obj-radius", type=float, default=9.5, metavar="CM",
+                   help="the scalp radius the OBJ was modelled on, reported against the "
+                        "measured skull so --obj-scale can be set from it (default 9.5)")
+    s.add_argument("--obj-forward", default="NEGATIVE_Z",
+                   choices=("X", "Y", "Z", "NEGATIVE_X", "NEGATIVE_Y", "NEGATIVE_Z"),
+                   help="which axis the OBJ's forward becomes (default NEGATIVE_Z)")
+    s.add_argument("--obj-up", default="Y", choices=("X", "Y", "Z",
+                                                     "NEGATIVE_X", "NEGATIVE_Y", "NEGATIVE_Z"),
+                   help="which axis the OBJ's up becomes (default Y)")
     s.add_argument("--no-transfer", action="store_true",
                    help="do not run bpy.ops.daz.transfer_shapekeys() from the body to the wearables")
     s.add_argument("--skip-transfer", type=csv_names, default=[],

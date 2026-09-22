@@ -100,6 +100,44 @@ Where CLAUDE.md's Owner decisions line names one, update it too.
 
 - **The two marketplace licences have no claim register.** RenderHub's and Renderosity's terms were read once each, on 2026-09-21, by research agents, and written into `docs/guide/licensing.md` with their URLs. Nothing has re-checked them, no id in `research/claims/` backs them, and three phrases in Renderosity's Extended License, "encryption protection", "uses modifications of the original Product file(s)" and a bar on "convert" beside a permission to embed, are undefined on the page. Before anything bought from either site ships, those want a written answer from the vendor and a register of their own. Cost: an afternoon, plus two emails.
 
+## Hair grown rather than licensed
+
+`scripts/make_hair.py` and `daz_import_probe.py scene --wear-obj`, both built
+2026-09-22.  All five styles and all seven colours were generated, and wavy,
+long, short, curly and straight were rendered on the preview sphere and looked
+at.  The wavy brown default was put on Genesis 9 and rendered at three angles.
+
+- **Only one figure, one bone and one OBJ.** `--wear-obj` has run on Genesis 9's
+  base figure, on the `head` bone, with one OBJ at a time and the default axes.
+  Never run: a second `--wear-obj` in the same command, `--obj-bone` naming
+  anything else, `--obj-offset`, `--obj-yaw`, `--obj-forward` or `--obj-up` away
+  from their defaults, an OBJ with several meshes or several materials, and an
+  OBJ with no MTL beside it.  Cost: minutes each.
+- **The hair has never been posed.** It is bone-parented to the head, so a head
+  turn should carry it, and no pose has been applied to a figure wearing it.
+  The declip edits the rest shape and refuses a posed figure, so the order is
+  wear, declip, then pose.  Cost: one run with `--pose`.
+- **Nobody has looked at it on a figure.** The owner has not yet decided whether
+  Claude may read a render out of `output/daz/`, so the hair on Genesis 9 was
+  judged by numbers alone: 0.00% of its vertices inside the body after the
+  declip, its box 5.5 mm above the top of the head's skin and 3.1 cm wider each
+  side.  Only the preview sphere, which holds no Daz content, was looked at.
+- **Where the sheen comes from is the MTL, and the MTL is only read by two
+  importers.** `Ns 560` arriving as roughness 0.25 was measured through
+  Blender's OBJ importer and nothing else.  Another engine reading the same file
+  may map Ns differently, and the two maps have never been loaded anywhere but
+  Blender.  Cost: an import into whatever engine the assets are bound for.
+- **The style presets are shapes, not a taxonomy.** `curly` curls the ends
+  rather than the length, `short` sits at 2.0 layers where the script asks for 3
+  to 5, and no style was compared against a reference photograph or against a
+  Daz hair product.  They are five sets of numbers that render as hair, nothing
+  more.  Cost: an afternoon and someone with an eye for hair.
+- **Scaling by the fitted sphere assumes a skull is a ball.** On Genesis 9 the
+  fit is good, 4.6 mm mean and 10.9 mm worst over 636 vertices, and it has never
+  been run on a character with a dialled head shape, a child figure or a
+  non-human one, where the residual would be larger and the hair would sit
+  wrong before the declip touched it.  Cost: one run per shape.
+
 ## The MCP server
 
 Built 2026-09-19 in `mcp/`: 23 tools over the protocol, 24 self-test checks, and Claude Code CLI 2.1.278 connected, called tools and shut it down cleanly.

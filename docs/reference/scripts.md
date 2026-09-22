@@ -27,6 +27,7 @@ Everything in `scripts/`. Each takes `--help`.
 | `simplify_concepts.sh` | Redraw existing art as simpler game ready versions. |
 | `asset_to_mesh.sh` | Concepts to shapes to textures to sheets to curated assets, correctly staged. |
 | `rig_units.sh` | Rig figures one at a time, with the settings that work. |
+| `make_hair.py` | Grow a hair-card mesh on a scalp dome and write it as an OBJ, an MTL, a diffuse map and an opacity map, plus a preview of the hair on a plain sphere. Styles and colours are presets over flags, and it prints how many cards deep the hair is. See [below](#make-hair-py). |
 | `list_animations.py` | What animation clips are actually installed, read from the files. |
 | `bone_roles.py` | Name an articulationxl rig's `bone_N` bones by role (pelvis, chest, head, left thigh and so on) with `map`, then `compile` a role pose from `poses/roles/` into that rig's transforms file for `render_sheet.py`. `probe` says which way each part moved. See [below](#bone-roles-py). |
 | `generate_music.py` | Generate a folder of music prompts with ACE-Step 1.5. `--loop DIR` makes each take a seamless loop, and `--keep-best` keeps the take that loops best. Resumable: seeds already in `DIR/picks.json` are skipped, and `--reloop` loops the recorded takes again without generating. A take the server already made, for a run that died, is used rather than made again, and `--no-wait` queues the missing takes and exits. A track file can carry a section script as its lyrics, after a line of `---`. |
@@ -478,6 +479,110 @@ overlaps, and `share`, adapted from the 0.08 s window of
 None has been judged on a portrait. `--text-only` writes a placeholder flap to `output/lipsync/text-only/`
 and never overwrites a timeline made from audio.
 
+### `make_hair.py`
+
+```
+scripts/make_hair.py --list
+scripts/make_hair.py [--style NAME] [--colour NAME|R,G,B] [--name STEM] [--out DIR]
+                     [--strands N] [--segments N] [--length CM] [--variation CM]
+                     [--wave F] [--cap DEG] [--hairline DEG] [--head-radius CM]
+                     [--width-root CM] [--width-tip CM] [--cling CM] [--volume CM]
+                     [--texture PX] [--slots N] [--hairs N] [--strays F]
+                     [--seed N] [--no-preview]
+```
+
+Hair the repo owns outright, because the two other routes to it both stop short.
+A Daz hair product renders but may not ship as 3D without an Interactive License
+for that product. A strand hair is not even that: the two in the library carry
+236,136 and 167,264 vertices and **no polygons**, so Cycles draws the cap and
+nothing else, which is why `daz_characters.py` leaves them out.
+
+It writes five files into `output/hair/`: the OBJ, the MTL, a diffuse map, an
+opacity map, a JSON of every setting and measurement, and, unless `--no-preview`,
+`<name>_preview.obj`, the same hair on a plain scalp sphere so it can be looked
+at with no figure anywhere near it.
+
+**Static geometry.** No rig, no fitting, no morphs, no physics. It is placed on a
+head rather than skinned to one, which `daz_import_probe.py scene --wear-obj`
+does by measurement.
+
+#### How a strand is grown
+
+`--strands` roots are spread over a polar cap of a sphere of `--head-radius` by
+the Fibonacci spiral, so there is no seam and no cluster at the pole. The cap is
+not the same depth all the way round: it reaches `--hairline` degrees from the
+crown at the front, where a face is, and `--cap` at the back. At the defaults
+that is 64.1 degrees at the front, 76.5 at the sides and 82.0 at the back
+(measured 2026-09-22).
+
+Each strand then leaves its root **downhill along the scalp**, not along the
+scalp normal, and turns towards straight down as it falls. Every point is held
+`--cling` clear of the scalp sphere, rising to `--volume` by the tip, so no
+strand passes through the head and none floats off it.
+
+Growing along the normal, as the first draft did, sends every strand outwards at
+once: on a 9.5 cm scalp that made a 46.6 cm wide spray with the crown showing
+through it. The same 900 cards grown downhill and held to the scalp come out
+25.8 cm wide (both measured 2026-09-22).
+
+Each step is a ribbon cross-section two vertices wide, tapering from
+`--width-root` to `--width-tip`. The ribbon's frame comes from the scalp radial,
+so a card lies flat against the head with its face pointing outwards. Squared
+against world up instead, the cards on the sides of the head are edge on to the
+camera and the hair reads as wire.
+
+#### The number that decides whether it reads as hair
+
+```
+  layers    3.2 cards deep: 4256 cm2 of card over 1334 cm2 of head
+```
+
+Card area over the area the hair covers, the scalp cap plus the skirt below it.
+**Three to five** is the range that reads as hair. At 8.8, which 1,400 cards of
+0.9 cm gave, a ray crosses nine dark cards, almost none of the light gets out
+and the hair renders as a black mass with a hard silhouette.
+
+#### The maps
+
+Both are an atlas of `--slots` vertical card slots. A card takes one whole slot
+and its UVs span exactly that slot, so the slot's own cosine edge falloff
+feathers across the card's width. `--hairs` narrow strands are drawn inside each
+slot, each ending at its own height, so a card's tip is wherever its strands run
+out. Drawn as one blob per card, as the first draft was, cards end in blunt
+rectangles and the hair reads as straw.
+
+V runs root at 0 to tip at 1 and the image is written bottom row first to match,
+because image V = 0 is the bottom row wherever the maps are read. Written the
+other way round every strand wears its tip colour at the scalp and fades out at
+the roots.
+
+**The opacity map is RGBA, not greyscale**, with the mask in all four channels.
+Blender's OBJ importer wires `map_d`'s image *Alpha* output into Principled
+Alpha, and a greyscale PNG has no alpha channel, so that output is 1.0
+everywhere: 320 solid cards with blunt square ends and not one transparent
+pixel (measured 2026-09-22).
+
+The MTL's `Ns 560` is not a taste. Blender's importer turns Ns into roughness as
+`1 - sqrt(Ns/1000)`: Ns 120 was measured arriving as roughness 0.654, too rough
+for a hair sheen, and by the same rule the 20 the first draft carried would
+arrive as 0.86. 560 arrives as 0.25.
+
+#### Styles and colours
+
+`--list` prints both with their numbers. The styles are `wavy`, `straight`,
+`curly`, `short` and `long`, and each is only a set of defaults for `--length`,
+`--variation`, `--wave`, `--cap` and `--segments`, so every one of them can be
+overridden on the same command. The colours are `black`, `brown`, `auburn`,
+`red`, `blond`, `grey` and `white`, or an sRGB `R,G,B` 0 to 255 that the tip and
+flyaway tints are derived from.
+
+#### Cost
+
+The defaults, 320 cards of 14 segments with 1024 px maps, took 0.27 s on the
+host's `python3` and wrote 9,600 vertices and 8,960 triangles. Rendering the
+preview at 3 angles of 560 px took 1.7 s wall on Cycles on the card (measured
+2026-09-22).
+
 ### `daz_library.py`
 
 ```sh
@@ -653,6 +758,9 @@ scripts/daz_import_probe.py scene --out output/daz/NAME.blend [--figure DUF]
                             [--declip MM] [--declip-max-push MM] [--declip-max-verts N]
                             [--declip-skip NAME,...] [--no-fit-report]
                             [--set NAME=VALUE] [--wear DUF] [--no-transfer]
+                            [--wear-obj PATH] [--obj-bone NAME] [--obj-scale S|auto]
+                            [--obj-offset DX,DY,DZ] [--obj-yaw DEG] [--obj-radius CM]
+                            [--obj-forward AXIS] [--obj-up AXIS]
                             [--skip-transfer NAME,...] [--set-dressed NAME=VALUE]
                             [--pose DUF] [--pose-affects-morphs] [--no-verify]
                             [--subdivision {keep,off}] [--material-method M]
@@ -840,6 +948,43 @@ peak of 578.5 MB. `render --blend output/daz/g9_dressed.blend --only AA --sizes
 128 --columns face --samples 16 --no-sheet` drew 2 cells in 20.0 s. What each
 stage measured, and the two things that need Daz Studio, are in the
 [guide](/guide/daz-figures#a-dressed-posed-character-headless).
+
+#### Wearing something that is not a Daz product
+
+`--wear-obj PATH` puts a Wavefront OBJ on the figure. It is for geometry the
+repo owns, `scripts/make_hair.py` being the one that writes it, and it takes a
+different route from `--wear`, which loads a fitted Daz wearable.
+
+The OBJ is placed by measurement, not by guesswork. The body vertices that
+`--obj-bone` owns, meaning that bone's vertex group carries their largest
+weight, are collected; a sphere is fitted by least squares to the upper half of
+them; the OBJ's own origin goes to that sphere's centre; and `--obj-scale auto`,
+the default, is the scale that lands the OBJ's roots, `--obj-radius` from its
+origin, on that sphere.
+
+On Genesis 9 the `head` bone owns **2,471** body vertices, and a sphere fitted
+to the upper **636** of them has a radius of **8.26 cm**, centred 162.1 cm up,
+which every one of those 636 sits within **4.6 mm** of on average and 10.9 mm at
+worst. A 9.5 cm scalp therefore arrives at scale 0.008693 (measured
+2026-09-22).
+
+The object is then bone-parented rather than skinned, so it follows a pose like
+a hat rather than like skin, and `--obj-offset DX,DY,DZ` in millimetres and
+`--obj-yaw DEG` are there for what the report says is still wrong. The OBJ
+importer's axes are `--obj-forward NEGATIVE_Z` and `--obj-up Y` by default,
+which turns a +Y up OBJ into Blender's +Z up with its +Z at the figure's front.
+
+**The declip reaches it.** An imported OBJ is not a rigid prop: it is a sheet of
+hair or cloth modelled around a sphere, and bending it onto the body it rests
+against is the point. A skull is not a ball everywhere, and hair grown for a
+9.5 cm scalp sat inside the body on **11.24% of its 9,600 vertices**, mostly
+where it hangs past the head onto the neck and shoulders. `--declip 1.5` moved
+**1,830** of them out, by at most **8.38 mm**, and left **0.00%** inside
+(measured 2026-09-22).
+
+The material comes from the OBJ's own MTL, and the probe then sets the map
+feeding Alpha to Non-Color and switches off backface culling, because the
+importer leaves the alpha map in sRGB.
 
 ### `daz_characters.py`
 

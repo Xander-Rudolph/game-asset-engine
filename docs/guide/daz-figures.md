@@ -1477,6 +1477,68 @@ silhouette went from about 57,000 pixels for the same character in a shirt to
   as hair and whether the weapon sits in the hand rather than through it is for
   a person looking at the contact sheet.
 
+## Hair that is not a Daz product
+
+The library's two strand hairs cannot be used at all: their largest meshes carry
+236,136 and 167,264 vertices and **no polygons**, so Cycles draws the cap and
+nothing else, and `daz_characters.py` leaves them out by reading the geometry
+rather than by a list of names. The card hairs that do draw are Daz 3D data, so
+they render but may not ship as 3D without an Interactive License.
+
+`scripts/make_hair.py` grows hair the repo owns outright: cards on a scalp dome,
+with a diffuse map and an opacity map, as OBJ, MTL and two PNGs. The reference
+has [how it works](/reference/scripts#make-hair-py); the short version is that
+it is static geometry, so it is placed on a head rather than fitted to one.
+
+### Putting an OBJ on the figure
+
+```sh
+scripts/make_hair.py --style wavy --colour brown --name hair_style
+scripts/daz_import_probe.py scene --out output/daz/NAME.blend \
+    --figure "People/Genesis 9/Genesis 9.duf" --subdivision off --declip 1.5 \
+    --wear-obj output/hair/hair_style.obj
+```
+
+`--wear-obj` takes no part in the Daz import. It reads the OBJ with Blender's
+own importer, places it against a measurement of the figure, and bone-parents
+it, so it follows a pose like a hat rather than like skin.
+
+The measurement is a sphere. The vertices the `head` bone owns, meaning its
+vertex group carries their largest weight, are collected, and a sphere is fitted
+by least squares to the upper half of them. On Genesis 9 that is **2,471
+vertices, of which the upper 636 fit a sphere of radius 8.26 cm centred 162.1 cm
+up, to within 4.6 mm on average and 10.9 mm at worst**. A skull is close enough
+to a ball to place hair by, and the hair is grown on a ball, so the OBJ's origin
+goes to that centre and `--obj-scale auto` is the scale that lands its roots on
+that radius: 0.008693 for a 9.5 cm scalp (measured 2026-09-22).
+
+Nothing about this is a guess, and the report prints every number it used, so
+`--obj-offset DX,DY,DZ` in millimetres and `--obj-yaw DEG` are there for what is
+left over rather than for the whole placement.
+
+### The declip reaches an OBJ, and has to
+
+A garment is fitted to the body and a prop is placed on a bone, and
+[the declip](#pushing-a-garment-out-of-the-body) only ever touched the first,
+because pushing a rigid prop's vertices towards a body bends it. A hair mesh is
+neither: it is a sheet modelled around a sphere, and bending it onto the head it
+rests on is the point.
+
+A skull is not a ball everywhere. Hair grown for a 9.5 cm scalp and scaled onto
+the fitted 8.26 cm sphere sat inside the body on **11.24% of its 9,600
+vertices**, mostly at the neck and the shoulders, where the hair hangs past the
+head entirely. `--declip 1.5` moved **1,830** of them out, by at most
+**8.38 mm**, and left **0.00%** inside.
+
+### Hair the OBJ importer renders as solid cards
+
+Blender's OBJ importer wires `map_d`'s image **Alpha output** into Principled
+Alpha. A greyscale PNG has no alpha channel, so that output is 1.0 everywhere:
+320 opaque cards with blunt square ends, and not one transparent pixel. The maps
+`make_hair.py` writes are RGBA, with the mask in all four channels, so the same
+file reads right whether an importer takes Alpha or Colour. The probe then sets
+that image to Non-Color, because the importer leaves it in sRGB.
+
 ## Keeping Daz content where it belongs
 
 - **`output/daz/` is Daz content**, and gitignored. The `.blend`, logs, reports

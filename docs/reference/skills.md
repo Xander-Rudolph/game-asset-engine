@@ -26,6 +26,7 @@ Full detail, including the second manifest that GitHub installation needs, is in
 | `game-music` | Licence-clear instrumental music, looped seamlessly at a set loudness |
 | `lip-sync` | Talking portraits: a portrait, its mouth shapes, and cues timed to voice lines |
 | `daz-figure` | A Daz Genesis figure you downloaded: installed outside the repo, imported into Blender, and its visemes rendered, with the licence stated first |
+| `hair-mesh` | Hair cards grown on a scalp, with a diffuse and an opacity map, placed on a figure; the repo owns them, so they may ship |
 
 Each one starts by running `scripts/doctor.py`, so a session never begins by
 guessing whether ComfyUI is up. If it is not, the skill walks the user through
