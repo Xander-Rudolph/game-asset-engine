@@ -66,6 +66,10 @@ ALLOW = [
     (".claude-plugin/marketplace.json", "Daz",
      "the marketplace description and keywords name Daz Genesis figures as the subject of "
      "the daz-figure skill, which routes to the licence first; no Daz content is in the file"),
+    ("skills/character-source/SKILL.md", "Daz",
+     "the end-user skill for characters from commercial tools: it names Daz only to point to the daz-figure skill and docs/reference/daz-genesis.md, to say Claude may read a Daz or Reallusion render, and to say cleanup.py keep guards Daz files; it holds no Daz content"),
+    (".claude/skills/terms-recheck/SKILL.md", "Daz",
+     "the maintainer skill that re-reads licence pages: it names daz3d.com to forbid fetching it with any tool, and cites the DAZ-105 claim id; it holds no Daz content"),
     ("skills/daz-figure/SKILL.md", "Daz",
      "the end-user skill for a Daz product the user downloaded by hand: it states the "
      "licence from docs/reference/daz-genesis.md before each stage, installs into a library "
