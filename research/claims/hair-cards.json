@@ -1,15 +1,15 @@
 {
  "note": "docs/reference/hair-cards.md",
- "researched": "2026-09-22",
- "checked": "2026-09-22",
+ "researched": "2026-09-22, and 2026-09-23 for HAIR-153 to HAIR-171",
+ "checked": "2026-09-22, and 2026-09-23 for HAIR-160 to HAIR-168 and HAIR-170",
  "statuses": {
   "corrected": 32,
-  "unchecked": 98,
-  "confirmed": 21,
+  "unchecked": 107,
+  "confirmed": 31,
   "unsettled": 1
  },
  "conflicts_found": [],
- "how_checked": "Nine research lenses read the web on 2026-09-22 and returned 240 claims; each lens was tidied to at most 22, duplicates were folded across lenses (39), and every load-bearing or licence claim was checked twice by independent agents told to refute it: fact and drift for facts and capabilities, text and drift for licences. A non-licence claim that any check refuted in part carries the checker's narrower wording and the status corrected; a licence claim whose two checks disagreed is unsettled. Minor claims stayed unchecked.",
+ "how_checked": "Nine research lenses read the web on 2026-09-22 and returned 240 claims; each lens was tidied to at most 22, duplicates were folded across lenses (39), and every load-bearing or licence claim was checked twice by independent agents told to refute it: fact and drift for facts and capabilities, text and drift for licences. A non-licence claim that any check refuted in part carries the checker's narrower wording and the status corrected; a licence claim whose two checks disagreed is unsettled. Minor claims stayed unchecked. HAIR-160 to HAIR-171 were researched on 2026-09-23 in a separate study of a commercial strand-hair format; its measured facts, HAIR-160 to HAIR-168 and HAIR-170, were each checked once through the fact lens that day, and its two recommendations, HAIR-169 and HAIR-171, stayed unchecked. They were carried into this register on 2026-10-04, in neutral words, with their dates, statuses and checks, when that study's own register left the repo.",
  "claims": [
   {
    "id": "HAIR-001",
@@ -2824,6 +2824,336 @@
     "https://api.sketchfab.com/v3/search?type=models&q=hair%20cards&downloadable=true&license=cc0&count=24",
     "https://sketchfab.com/3d-models/hair-cards-fbx-ad1ac6f162ff43a3ae175982bf770c3e",
     "https://sketchfab.com/3d-models/hair-cards-parts-1dac45f5ada946e1a16a5d069fde2474"
+   ],
+   "topic": "assets"
+  },
+  {
+   "id": "HAIR-153",
+   "status": "unchecked",
+   "kind": "recommendation",
+   "load_bearing": false,
+   "claim": "On 2026-09-23 the owner called off the procedural hair generator as the route for hair and beards, after looking at the settled generator on the figure beside a third-party strand groom on the same figure at the same framing. The owner's words: the procedural results \"still look terrible\", and the route is now \"hair objs instead. same with beards\". This is the owner's decision and not a measurement. The generator is not deleted and scripts/make_hair.py still runs.",
+   "sources": [
+    "the owner, in conversation on 2026-09-23",
+    "output/daz/h_cards_vs_strands.png"
+   ],
+   "topic": "procedural"
+  },
+  {
+   "id": "HAIR-154",
+   "status": "unchecked",
+   "kind": "capability",
+   "load_bearing": false,
+   "claim": "Probed per node on 2026-09-23 in Blender 4.5.9 in the comfyui-packaged container: Shrinkwrap Hair Curves is a projection, not a collision. It wrapped a straight 17 cm strand down to a median of 2.72 cm on the first pass, and a Restore Curve Segment Length after it re-extended a crumpled strand, so the turning angle climbed 4 to 12 to 38 degrees over successive passes and the reach over length fell to 0.44. A strand groom built on the bundled CC0 hair node groups was rejected on that measurement.",
+   "sources": [
+    "file:///usr/local/lib/python3.11/dist-packages/bpy/4.5/datafiles/assets/geometry_nodes/procedural_hair_node_assets.blend",
+    "the per-node probe run on 2026-09-23 in the comfyui-packaged container's Blender 4.5.9"
+   ],
+   "topic": "blender"
+  },
+  {
+   "id": "HAIR-155",
+   "status": "unchecked",
+   "kind": "recommendation",
+   "load_bearing": false,
+   "claim": "The comb is the styled pose, not the gravity: a solver refines an authored pose and does not replace the authoring, the way the creator of a third-party strand groom combs the guides and the runtime's solver only refines them (HAIR-160). Measured on the bob on 2026-09-23 by running all three combinations: comb only, the behaviour before that session, spans 27.58 x 23.18 x 25.03 cm; comb then settle spans 26.42 x 23.78 x 24.07 cm at 13.8 degrees of turn; settle alone with the comb removed spans 31.00 x 23.92 x 28.15 cm at 23.9 degrees, which failed the generator's own acceptance test because the bounding box grew. Dropping main rigidity to 0.10 brought the span under the baseline but took the turning angle to 10.1 degrees, which is the wave ironed flat.",
+   "sources": [
+    "scripts/make_hair.py, run on the host python3 with numpy 2.3.5 on 2026-09-23",
+    "the experimental package reader and read-only probes under output/hair/_exp/, run 2026-09-23 on the host python3 on six third-party strand-hair packages the owner downloaded by hand; no package, and nothing extracted from one, is in the repo"
+   ],
+   "topic": "procedural"
+  },
+  {
+   "id": "HAIR-156",
+   "status": "unchecked",
+   "kind": "recommendation",
+   "load_bearing": false,
+   "claim": "A solver cannot fix a representation problem. At the same camera and framing on 2026-09-23 the settled procedural hair is 310 cards and the settled procedural beard 160 cards, against a third-party strand hair of 4,005 curves from 267 guides and a third-party strand beard of 12,969 curves from 1,179 guides (HAIR-163), so every silhouette edge is a card edge and a card is centimetres wide on an 18 cm head.",
+   "sources": [
+    "output/daz/h_cards_vs_strands.png",
+    "output/hair/_exp/groom2.py, run 2026-09-23 in the container's Blender 4.5.9 with numpy and scipy 1.15.0"
+   ],
+   "topic": "procedural"
+  },
+  {
+   "id": "HAIR-157",
+   "status": "unchecked",
+   "kind": "recommendation",
+   "load_bearing": false,
+   "claim": "Judge hair by looking at it on the figure, not by its numbers: every acceptance test passed on the run the owner rejected on 2026-09-23.",
+   "sources": [
+    "the owner, in conversation on 2026-09-23",
+    "output/daz/h_cards_vs_strands.png"
+   ],
+   "topic": "procedural"
+  },
+  {
+   "id": "HAIR-158",
+   "status": "unchecked",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "The MakeHuman system assets pack, CC0 by HAIR-137, is extracted to input/_devtools/makehuman/hair/ on this machine, which is gitignored and not in the repo: ten styles, each an .obj with an .mhclo, an .mhmat and an RGBA diffuse, named afro01, bob01, bob02, braid01, long01, ponytail01, short01, short02, short03 and short04.",
+   "sources": [
+    "input/_devtools/makehuman/hair/ on this machine, read on 2026-09-23"
+   ],
+   "topic": "assets"
+  },
+  {
+   "id": "HAIR-159",
+   "status": "unchecked",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "Learned while fitting a MakeHuman hair OBJ to a Genesis 9 figure on 2026-09-23 and not re-measured since: the OBJ is not in the body's frame and needs its .mhclo weights and offsets applied, which moved bob02 up 5.2 cm; MakeHuman helper geometry skews a sphere fit, so the fit is taken on the g body faces only; and the fitted bob02's fringe intersected the Genesis 9 forehead, which --declip-skip hid but did not fix. The proper fix, a shrinkwrapped donor head with weights, was never built.",
+   "sources": [
+    "input/_devtools/makehuman/hair/ on this machine, fitted on 2026-09-23"
+   ],
+   "topic": "assets"
+  },
+  {
+   "id": "HAIR-160",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "A commercial strand-hair format stores the styled state of a groom and its runtime simulates from it, so guides read out of its packages stand where the creator left them and do not drape until a solver runs. The stored pose was measured; that the runtime simulates from it was read and not run.",
+   "sources": [
+    "the experimental package reader and read-only probes under output/hair/_exp/, run 2026-09-23 on the host python3 on six third-party strand-hair packages the owner downloaded by hand; no package, and nothing extracted from one, is in the repo",
+    "a third-party reimplementation of the format's hair code, MIT or Apache-2.0, read and not run on 2026-09-23; no code was copied"
+   ],
+   "topic": "procedural",
+   "as_first_reported": "The format's hair files hold the styled pose, not a settled one.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the guide positions read from the six packages, and the simulationEnabled flags of HAIR-161",
+     "evidence": "Guides read out in a styled standing pose rather than a draped one; each part carries a full physics parameter set, so the stored pose is the input to a solver and not its output."
+    }
+   ]
+  },
+  {
+   "id": "HAIR-161",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "The hair parts read from six third-party strand-hair packages on 2026-09-23 each carry a simulation block, in a JSON file beside their guide curves, whose ids are the runtime's own hair physics parameters. Measured, read verbatim from three parts: a short-hair side part rootRigidity 0.2, mainRigidity 0.01, tipRigidity 0, rigidityRolloffPower 8, drag 0.1, gravityMultiplier 1, weight 1.5, iterations 2, cling 0.5, clingRolloff 1, snap 0.2, bendResistance 0.2, collisionRadius 0.001, collisionRadiusRoot 0.001, friction 0.2, simulationEnabled false, collisionEnabled false, usePaintedRigidity true; a hair top part rootRigidity 0.2, mainRigidity 0.6, tipRigidity 0.0797, rigidityRolloffPower 8, simulationEnabled true; a beard chin part rootRigidity 0.4997, mainRigidity 0.5003, tipRigidity 0.5.",
+   "sources": [
+    "the experimental package reader and read-only probes under output/hair/_exp/, run 2026-09-23 on the host python3 on six third-party strand-hair packages the owner downloaded by hand; no package, and nothing extracted from one, is in the repo"
+   ],
+   "topic": "procedural",
+   "as_first_reported": "The format's JSON file holds the runtime's hair physics parameters.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the JSON files of the short-hair side part, the hair top part and the beard chin part",
+     "evidence": "Values read verbatim from the simulation block in each file.",
+     "notes": "What the runtime's solver does with each parameter was not read; only the stored values are claimed."
+    }
+   ]
+  },
+  {
+   "id": "HAIR-162",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Run: running the repo's position-based settle from the authored pose of an imported third-party hair part, with that part's own stored parameters, makes it fall: the stored rigidityRolloffPower of 8 leaves only the first three points of a 24-point strand rigid, and 200 frames of gravity flattened the top, while rolloff 2 with mainRigidity 0.75 keeps the crown and lets the ends drape.",
+   "sources": [
+    "output/hair/_exp/groom2.py, run 2026-09-23 in the container's Blender 4.5.9 with numpy and scipy 1.15.0"
+   ],
+   "topic": "procedural",
+   "as_first_reported": "The packaged physics parameters can be used as settle parameters unchanged.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the settle run on an imported part with its own stored parameters, and again at rolloff 2 with mainRigidity 0.75",
+     "evidence": "At rolloff 8 only the first three points of a 24-point strand stay rigid and 200 frames of gravity flattened the top; at rolloff 2 with mainRigidity 0.75 the crown survives and the ends drape."
+    }
+   ]
+  },
+  {
+   "id": "HAIR-163",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "Fitted to the Genesis 9 figure and grown in the container's Blender on 2026-09-23 (run), a third-party strand hair groom gave 4,005 curves, and a third-party beard's chin and moustache parts, 947 and 232 guides (measured), 1,179 between them, shifted 4 mm forward, gave 12,969 curves with 9.2% of strand points inside the skin after the declip pass. The scenes stayed in the gitignored output/daz/ and none was committed.",
+   "sources": [
+    "output/hair/_exp/groom2.py, run 2026-09-23 in the container's Blender 4.5.9 with numpy and scipy 1.15.0",
+    "the experimental package reader and read-only probes under output/hair/_exp/, run 2026-09-23 on the host python3 on six third-party strand-hair packages the owner downloaded by hand; no package, and nothing extracted from one, is in the repo"
+   ],
+   "topic": "procedural",
+   "as_first_reported": "Third-party grooms fitted to the figure were kept as reference scenes.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the scenes in output/daz/, generated and viewed on 2026-09-23, and the beard package parsed with the experimental reader",
+     "evidence": "Curve counts and the share inside, at the 4 mm shift, as listed; the chin and moustache parts are 947 and 232 guides."
+    }
+   ]
+  },
+  {
+   "id": "HAIR-164",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Two ways of fitting a groom authored on another figure to the Genesis 9 figure were tried on 2026-09-23 and discarded on measurement. A sphere through the hair roots of one third-party package fits at radius 10.39 cm against the figure's 8.26 cm skull sphere (measured 2026-09-22, not re-measured), so scale 0.795: it fits the hair, not the head, and shrank everything by 20% about the wrong centre. ICP of the package's embedded scalp mesh to the skin, as a free similarity, converged to a 4.7 mm mean surface residual but slid 7.7 cm up the forehead and put the beard over the eyes; constrained to scale and offset only, on head skin only, with the closest 70% of correspondences kept, it still left the moustache 6.06 cm too high. A smooth cranium gives a low residual almost anywhere, so the fit is not determined.",
+   "sources": [
+    "output/hair/_exp/groom2.py, run 2026-09-23 in the container's Blender 4.5.9 with numpy and scipy 1.15.0",
+    "output/hair/_exp/fit_probe.py",
+    "scripts/daz_import_probe.py scene --wear-obj, the skull sphere measured 2026-09-22"
+   ],
+   "topic": "assets",
+   "as_first_reported": "A sphere through the roots gives the scale; ICP of the embedded scalp onto the skin gives the transform.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the root-sphere fit run on one third-party package against the Genesis 9 skull sphere",
+     "evidence": "Fitted radius 10.39 cm against 8.26 cm, so scale 0.795; the result was judged wrong by looking as well as by the number."
+    },
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the ICP runs of the package's embedded scalp mesh against the Genesis 9 skin",
+     "evidence": "Free similarity: 4.7 mm mean surface residual, 7.7 cm slide up the forehead. Constrained variant, head skin only, closest 70% of correspondences: moustache 6.06 cm too high."
+    }
+   ]
+  },
+  {
+   "id": "HAIR-165",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "A landmark fit is what works, on skin landmarks that span the whole head. Two cautions were measured on the way: bone joint positions are the wrong landmarks, because they sit inside the skull about 1.5 cm behind the skin and fitting to them parks roots at bone depth; and a lip-and-chin pair alone is a 3.2 cm baseline, which swung the fitted scale from 0.678 to 1.148 depending on which other landmark was added. The working set: the moustache root centroid to the lip skin, the beard roots' left and right deciles to the two ear regions, and the hair part's top decile to the crown. Fitted on one third-party package on 2026-09-23 it gives scale 0.9899 and offset (0, -0.30, -6.92) cm, with residuals 1.68, 2.03, 1.97 and 2.23 cm over the four landmarks, and the fitted hair roots top out at 170.9 cm against the Genesis 9 crown at 169.9 cm. Read physically, the authoring figure's head is the same size as Genesis 9's and sits about 7 cm higher.",
+   "sources": [
+    "output/hair/_exp/groom2.py, run 2026-09-23 in the container's Blender 4.5.9 with numpy and scipy 1.15.0",
+    "output/hair/_exp/face_landmarks.py",
+    "output/hair/_exp/fit_probe.py"
+   ],
+   "topic": "assets",
+   "as_first_reported": "Landmark choice matters; short baselines and bone joints mislead the fit. A whole-head landmark fit puts the authoring figure's hair on Genesis 9.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the bone head and skin surface positions measured on output/daz/s_base2.blend, and the landmark fits run on one third-party package",
+     "evidence": "Bone heads sit about 1.5 cm behind the corresponding skin points; a lip-and-chin baseline of 3.2 cm gave fitted scales between 0.678 and 1.148."
+    },
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the landmark fit run on one third-party package against the Genesis 9 skin landmarks",
+     "evidence": "scale 0.9899, offset (0, -0.30, -6.92) cm, residuals 1.68, 2.03, 1.97 and 2.23 cm; fitted hair roots at 170.9 cm against a crown at 169.9 cm.",
+     "notes": "Fitted on one package. Checked against four others only through the root centroid agreement in HAIR-166."
+    }
+   ]
+  },
+  {
+   "id": "HAIR-166",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "The fitting transform belongs to the creator's authoring figure, not to the package. The moustache root centroids of four third-party packages by one creator, 162.37, 162.41, 162.60 and 162.44 cm in Blender z, agree within 4 mm, so one transform serves all five of that creator's packages read.",
+   "sources": [
+    "the experimental package reader and read-only probes under output/hair/_exp/, run 2026-09-23 on the host python3 on six third-party strand-hair packages the owner downloaded by hand; no package, and nothing extracted from one, is in the repo"
+   ],
+   "topic": "assets",
+   "as_first_reported": "One transform serves every package by the same creator.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the moustache root centroids of the four packages by that creator that have one",
+     "evidence": "162.37, 162.41, 162.60 and 162.44 cm in Blender z, a spread of 4 mm.",
+     "notes": "All five packages are by one creator, so this is evidence of one authoring figure, not of a general transform from that figure to Genesis 9."
+    }
+   ]
+  },
+  {
+   "id": "HAIR-167",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "After the landmark fit, one third-party beard's moustache roots sit 1.56 cm behind the lip surface and 0.62 cm above it, and its chin roots 1.44 cm behind theirs and 0.93 cm below. The vertical corrections are in opposite directions, so a single uniform nudge cannot fix both.",
+   "sources": [
+    "output/hair/_exp/groom2.py, run 2026-09-23 in the container's Blender 4.5.9 with numpy and scipy 1.15.0",
+    "output/hair/_exp/mouth_probe.py"
+   ],
+   "topic": "assets",
+   "as_first_reported": "The beard parts need different offsets.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the beard's moustache and chin root positions against the Genesis 9 skin",
+     "evidence": "moustache 1.56 cm behind and 0.62 cm above; chin 1.44 cm behind and 0.93 cm below."
+    }
+   ]
+  },
+  {
+   "id": "HAIR-168",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "A translation of a beard part only sticks when the root snap is turned off, because snapping pulls every root back to the nearest skin point and cancels it.",
+   "sources": [
+    "output/hair/_exp/groom2.py, run 2026-09-23 in the container's Blender 4.5.9 with numpy and scipy 1.15.0"
+   ],
+   "topic": "assets",
+   "as_first_reported": "Root snapping cancels a translation.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the forward-shift runs on a third-party beard, with and without the root snap",
+     "evidence": "With the snap on, a translated part returned to its snapped roots and the measured share inside did not change."
+    }
+   ]
+  },
+  {
+   "id": "HAIR-169",
+   "status": "unchecked",
+   "kind": "recommendation",
+   "load_bearing": false,
+   "claim": "A beard authored to wrap tightly round the mouth cannot be rescued by a transform: pick a looser beard. The conclusion the owner drew on 2026-09-23 from eight fixes measured that day on a fitted third-party beard that wraps the mouth, with \"inside\" the share of strand points inside the skin after the declip pass: a uniform nudge about the lip at scale 1.03 and 3 mm, 10.2% inside, whose look the owner preferred; the same at 1.06 and 6 mm, 7.5%; the same at 1.10 and 10 mm, 3.3%, which cleared the lip but the owner preferred the smaller one; per-part offsets each to its own landmark, moustache 0.1%, chin 3.7%, cheek 4.7%, rejected because it closed the mouth; forward-only per part at moustache 15.6 mm, chin 14.4 mm, cheek 8 mm, moustache 0.5% and chin 2.2%, rejected because the owner still preferred the uniform nudge; rotating every in-pointing strand to a minimum exit angle of 12, 20 and 28 degrees, which rotated 25.2%, 34.2% and 41.4% of strands for a whole beard at 8.5%, 8.0% and 7.4% inside, rejected because it breaks the combing and reads scruffy; a local ellipsoidal flex at the mouth, centre (0, -10.2, 152.15) cm, radii 4.8 by 3.8 by 3.2 cm, pushed along the skin normal weighted by a smoothstep, which moved 6,122 points or 20.4% of the beard and took mouth-region clipping from 6.69% to 5.42% at a 7 mm push, rejected by the owner; and choosing a beard that does not wrap the mouth, at 0 mm 12.2% inside, 4 mm 9.2% and 8 mm 7.1%, accepted. The percentages were measured; the acceptances and rejections are the owner's, judged by the share inside and by looking, with no engine-side test.",
+   "sources": [
+    "output/hair/_exp/groom2.py, run 2026-09-23 in the container's Blender 4.5.9 with numpy and scipy 1.15.0",
+    "output/hair/_exp/exit_probe.py",
+    "the owner, in conversation on 2026-09-23"
+   ],
+   "topic": "assets"
+  },
+  {
+   "id": "HAIR-170",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Run: imported guide curves must skip clumping. They have no surface_uv_coordinate attribute, so Create Guide Index Map puts every curve at UV (0, 0) and Clump Hair Curves pulls the whole head into a single spike.",
+   "sources": [
+    "output/hair/_exp/groom2.py, run 2026-09-23 in the container's Blender 4.5.9 with numpy and scipy 1.15.0"
+   ],
+   "topic": "blender",
+   "as_first_reported": "Imported guides can go through the same node chain as grown ones.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the Blender essentials hair nodes run on imported guides in the container's Blender 4.5.9",
+     "evidence": "With no surface_uv_coordinate attribute, Create Guide Index Map assigns UV (0, 0) to every curve and Clump Hair Curves collapses the head into one spike."
+    }
+   ]
+  },
+  {
+   "id": "HAIR-171",
+   "status": "unchecked",
+   "kind": "recommendation",
+   "load_bearing": false,
+   "claim": "Treat a groom taken from a third-party strand-hair package as not shippable as 3D data on the creator's licence alone. The creator's licence covers the strand shapes that creator authored, not the scalp the roots index into: neither the runtime's own built-in scalps nor a scalp mesh embedded in the package, which in the packages read is reported, and was not checked, to be derived from a commercial base figure's geometry. The conclusion does not rest on that attribution, only on the scalp not being the creator's authored strands. Renders are a separate question and are governed by the repo's existing Daz rules. The conservative conclusion drawn on 2026-09-23 from the packages' own licence declarations and the embedded scalp read out of them.",
+   "sources": [
+    "the experimental package reader and read-only probes under output/hair/_exp/, run 2026-09-23 on the host python3 on six third-party strand-hair packages the owner downloaded by hand; no package, and nothing extracted from one, is in the repo",
+    "docs/reference/daz-genesis.md",
+    "CLAUDE.md"
    ],
    "topic": "assets"
   }

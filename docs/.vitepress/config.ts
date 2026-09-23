@@ -121,6 +121,8 @@ export default defineConfig({
             { text: 'Lip sync and talking portraits', link: '/reference/lip-sync' },
             { text: 'DAZ Genesis', link: '/reference/daz-genesis' },
             { text: 'Hair cards', link: '/reference/hair-cards' },
+            { text: 'Commercial character tools', link: '/reference/character-tools' },
+            { text: 'Character asset costs', link: '/reference/character-assets' },
           ],
         },
       ],

@@ -75,13 +75,6 @@ ALLOW = [
      "names Genesis 9 Starter Essentials (SKU 86958) as the one product its steps were "
      "measured on, the Genesis figure .duf paths it imports and the counts it measured; no "
      "Genesis data is in the file"),
-    ("skills/hair-mesh/SKILL.md", "Daz",
-     "grows hair the repo owns outright, and says why: it contrasts itself with a Daz hair "
-     "product, which may not ship as 3D, and gives the one command that places its OBJ on a "
-     "user's own Genesis figure; no Daz content is in the file"),
-    ("skills/hair-mesh/SKILL.md", "Genesis",
-     "names the Genesis 9 figure its placement was measured against and the library paths "
-     "of the preset it loads; no Genesis data is in the file"),
     ("scripts/make_hair.py", "Genesis",
      "names Genesis 9 as the figure its five body capsules were measured on, by height "
      "band below the fitted skull centre, and in the help of the flag that switches them "
