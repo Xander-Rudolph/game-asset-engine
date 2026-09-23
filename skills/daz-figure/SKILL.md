@@ -44,6 +44,9 @@ Ask what the user wants to end up with.
   stages 4 to 7. No Daz Studio is needed for any of it, but two things do not
   work on this host: the `.dbz` fitting route, and clothes taking a character's
   shape (step 6).
+- **Several characters at once, as reference or as sprites.** Step 9b:
+  `scripts/daz_characters.py` rolls a roster out of the library and renders each
+  one front and side.
 - **A talking dialogue portrait from a Genesis render.** Not through the
   `lip-sync` skill: its portrait and mouths are Qwen-Image edits, an AI stage
   a Daz render must stay out of (step 1).
@@ -113,13 +116,14 @@ EULA carries no version and Daz may change it.
 - **Never put Daz content in the repo**, a commit or the image.
 - **Never script the Daz website.**
 
-**No Daz render comes into this conversation.** The AI clause's examples name
-chatGPT, a chat model like you, and the research note does not say whether a
-render counts. So never read an image from `output/daz/` back: the user opens
-each labelled sheet and says what they see, and you give the pixel counts from
-its `_render.json`. If the user asks you to look yourself, say in one line that
-this is open until Daz answers in writing, and read a sheet only if they then
-decide it is allowed.
+**You may look at a render, and should.** The owner allowed it on 2026-09-22.
+Open the labelled sheet from `output/daz/`, say what you see, and give the pixel
+counts from its `_render.json` beside it; ask the user what they see as well,
+because the call on whether a character reads is theirs. A render is the only
+Daz thing you open: the `.blend` and the figure stay where they are, nothing
+from `output/daz/` is committed, and no Daz render goes near an AI stage. The
+EULA's AI clause still names chatGPT and the research note still leaves the
+reading open, so if anything is to be relied on outside this repo, say so.
 
 Ask whether they have read the EULA (<https://www.daz3d.com/eula>) and on what
 date, and whether they hold an Interactive License for this product. Then ask:
@@ -137,6 +141,12 @@ python3 scripts/daz_library.py verify 86958 --crc
 python3 scripts/daz_library.py licence 86958
 ```
 
+- **Content that is not a Daz package** installs the same way with
+  `--vendor NAME`, such as `--vendor Renderosity`: the record is named after
+  the file, the content root is found by looking, and this script states none
+  of that vendor's terms. It names the terms files the package shipped and
+  leaves the reading to the user. Until they record having read them, treat
+  that content exactly as Daz content.
 - **`--eula-read` only with the date the user gave.** Never invent one; without
   it `list` shows `EULA last read: not recorded`. Add it later with
   `licence 86958 --eula-read YYYY-MM-DD`.
@@ -193,6 +203,17 @@ python3 scripts/daz_import_probe.py render --blend output/daz/g9_cage.blend --mo
 - `--figure` takes another `.duf` relative to the library, with no `..` part,
   such as `"People/Genesis 9/Characters/Kat for Genesis 9.duf"`, and
   `--no-textures` removes its images before saving.
+- **The build fills in the anatomy materials, and says what it filled in.** A
+  Genesis 9 eyelash, eye, mouth or eyebrow figure arrives with no map at all,
+  and without this an eyelash card renders as an opaque fan across the eyelid.
+  `build` and `scene` apply the MAT presets that sit beside the figure and
+  beside each anatomy file, and only fill in what a material is missing. On Kat
+  that is 16 of 16 materials and 18 images becoming 29. `--mat-preset FILE`
+  names one, such as an eyebrow colour, and wins over the ones found by
+  looking; `--no-auto-materials` goes back to bare materials. Measured on
+  2026-09-21 on one mesh at 512 px in Cycles: the eyelashes went from 11,801
+  opaque pixels to 1,848, the eyebrow cards from 9,981 to 4,664
+  (docs/guide/daz-figures.md).
 - `--motion-only` renders nothing: 0.6 s in Blender, 3.8 s for the command. It
   opens the `.blend` with no DAZ add-on and auto-run scripts off, and writes
   `g9_cage_motion.json`.
@@ -280,7 +301,9 @@ The product ships six presets under `People/Genesis 9/Characters`. Measured on
 way: 4.7 s wall against 1.4 s, 158
 bones against 157, 47 + 64 properties against 2 + 4, 90 drivers against 23, the
 same 25,182 body vertices but with 40 shape keys against none, and 18 images
-against 2.
+against 2. Those were measured before the build filled in the anatomy
+materials: the same Kat build on 2026-09-21 took 4.2 s and saved 29 images,
+because the eyelash, eyebrow, eye and mouth maps are now loaded (step 3).
 
 - **The six shape dials in `Base Characters 9` are not in any preset's set.**
   They load only through `scene --custom-morphs "data/Daz 3D/Genesis 9/Base/
@@ -415,8 +438,8 @@ It writes `g9_cage_AA_128_face_s16_render.json`, `_render_sheet_128.png`,
 `_sheet_128.png` and `_sheet_128_labelled.png` in `output/daz/`. The label in
 the name keeps a short run from overwriting a full one.
 
-**Have the user open `output/daz/g9_cage_AA_128_face_s16_sheet_128_labelled.png`**,
-and do not read it yourself (step 1). Ask: is the face in frame, and does the
+**Open `output/daz/g9_cage_AA_128_face_s16_sheet_128_labelled.png` and look**,
+and have the user open it too. Ask: is the face in frame, and does the
 AA row differ from the neutral row? Beside their answer, give the counts from
 `g9_cage_AA_128_face_s16_render.json`: the probe's under
 `probe_render.sizes["128"].face.visemes.AA.changed_px`, and `render_sheet.py`'s
@@ -447,9 +470,8 @@ python3 scripts/daz_import_probe.py render --blend output/daz/g9_cage.blend
   and 16 samples took 81.9 s and 6312 MiB, container up to 10.63 GiB, and
   27.7 s and 2836 MiB from a `--no-textures` build.
 
-**Have the user open `output/daz/g9_cage_sheet_340_labelled.png`** and say,
-viseme by viseme, which read as their sound and which look alike; do not read it
-yourself (step 1). Give each viseme's count from `g9_cage_render.json`, under
+**Open `output/daz/g9_cage_sheet_340_labelled.png` and look**, and have the
+user say, viseme by viseme, which read as their sound and which look alike. Give each viseme's count from `g9_cage_render.json`, under
 `probe_render.sizes["340"].face.visemes`, fewest to most. For comparison, an
 earlier reading of the measured cage, made by Claude on a crop of the 340 px
 face column: OW and UW read as rounded mouths, EH and ER open with teeth, EE and
@@ -465,6 +487,64 @@ changed against the neutral row on that run, fewest to most:
 
 Ask: **keep a sheet**, **render another figure or framing**, or **done**.
 
+## 9b. A roster of characters, front and side
+
+When the user wants several characters rather than one figure, this does the
+whole loop per character: roll, build, render, write it down.
+
+```sh
+python3 scripts/daz_characters.py list                      # what the library offers
+python3 scripts/daz_characters.py make --count 12 --seed 20260921 --dry-run
+python3 scripts/daz_characters.py make --count 12 --seed 20260921 --size 768
+```
+
+- **Show the dry run first and get an answer.** It prints each character's
+  base, hair, beard, outfit, weapon and pose, and builds nothing.
+- **Say the cost.** Measured on 2026-09-21 on twelve characters at 768 px:
+  10.3 to 25.5 s to build each one and 2.1 to 3.1 s to draw its two views,
+  230.9 s and 30.9 s over the twelve, and 8.1 MB kept once each `.blend` was
+  deleted. No garment was left inside a body.
+- Every slot comes from the library, one figure generation at a time, so a
+  Genesis 8 hair is never put on a Genesis 9 figure. The same seed and library
+  give the same twelve.
+- Each character keeps `<slug>_front.png`, `<slug>_side.png`, `<slug>.json`
+  with the roll and the two commands that rebuild it, the probe's
+  `<slug>_scene.json`, and two logs. `characters.json` indexes the run and
+  `contact_sheet.png` puts every front view on one page. The `.blend` is
+  deleted unless `--keep-blend`.
+- **Open `output/daz/characters/roster_sheet.png` and look**, which holds
+  every character's views on one page, and have the user open it too. Say
+  whether the armour clips, whether the hair reads as hair and whether a weapon
+  sits in the hand, and ask whether they agree. Beside their answer, give the `drawn_px` of each view from
+  its JSON.
+- **Every figure stands in the rest pose**, which is Genesis 9's A pose, unless
+  `--poses upright` or `--poses any` is asked for. The lights are brighter than
+  a sprite sheet's, `--key 6.5 --ambient 1.3`, because Daz skin comes out at a
+  mean of 0.248 of 1 under the sheet's own 1.6 and 0.22.
+- **No body dials, and each garment pushed clear of the body.** A dial reshapes
+  the figure and its clothes and face do not follow: with three of them set,
+  68.7% of a figure's trouser vertices sat inside its own legs and its eyes sat
+  14 mm inside its head. `--dials small` and `--dials any` roll them anyway.
+  `--declip`, 1.5 mm by default, then pushes each worn garment clear, which
+  took a pair of shorts from 73.3% inside to 0. Every character's JSON carries
+  the fit numbers, under `fit`, and the run prints the worst worn mesh.
+- **A costume can replace the figure.** `scene --hide-figure` keeps the body,
+  eyes, mouth, lashes and eyebrows out of the render and leaves what the figure
+  is wearing, which is how a Dark Sovereign set renders as a skull in a hood.
+  In a roster file a character carries it as `"hide_figure": true`.
+- **The skin and the hair colour are rolled.** One of the four base skins for
+  the figure's build, or the character's own, swapped map for map, and one of
+  the six hair colours the library ships, which the beard matches.
+- **When they say which ones to keep**, do not re-roll: `daz_characters.py keep
+  1,3,4,12` writes those recipes to `output/daz/characters/roster.json`, editing
+  that file is how one of them changes its clothes or its hair, and
+  `make --from output/daz/characters/roster.json --prune` builds exactly those
+  and deletes the rest.
+- What it does not do: it never rolls a clothing colour, because those
+  materials already carry their maps and the material pass only fills in what
+  is missing; a weapon arrives in the hand with the fingers open, because the
+  grip pose is a second pose file and only one pose is applied.
+
 ## 10. Where things are, and what may leave
 
 ```
@@ -472,6 +552,11 @@ MODELS_DIR/daz_library/              the content library, outside the repo
   .daz_library/86958.json            what was installed, and the licence held
 input/_devtools/import_daz/          the importer, gitignored
 output/daz/                          Daz content: gitignored, never committed
+  characters/<slug>/                 a rolled character: two views, its JSON,
+                                     its scene report and two logs
+  characters/characters.json         the run's index
+  characters/roster.json             the recipes of the ones kept, to build again
+  characters/roster_sheet.png        every character's views on one page
   g9_cage.blend                      70928008 bytes
   g9_cage_build.json, _blender.log, _poses.json, _motion.json
   g9_cage[_<label>]_render.json, _render_sheet_128.png,

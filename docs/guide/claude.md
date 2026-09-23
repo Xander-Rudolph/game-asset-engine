@@ -1,6 +1,6 @@
 # Installing it for Claude
 
-This repo is a Claude Code plugin. It ships nine skills that drive the pipeline
+This repo is a Claude Code plugin. It ships ten skills that drive the pipeline
 and the MCP server definitions that go with them.
 
 ## Install
@@ -56,11 +56,11 @@ The second prints the component inventory and what each skill costs in tokens:
 
 ```
 Component inventory
-  Skills (9)  asset-cleanup, asset-pipeline, concept-edit, daz-figure, game-music, ground-texture, lip-sync, mesh-budget, pose-sheet
+  Skills (10)  asset-cleanup, asset-pipeline, character-source, concept-edit, daz-figure, game-music, ground-texture, lip-sync, mesh-budget, pose-sheet
   MCP servers (1)  meshy
 
 Projected token cost
-  Always-on:   ~1,136 tok   added to every session
+  Always-on:   ~1,265 tok   added to every session
 ```
 
 Skills are discovered from `skills/<name>/SKILL.md`. You do not list them in
@@ -104,6 +104,7 @@ you want in ordinary language and the right one is chosen.
 | "I downloaded Genesis 9 from Daz", "render a Genesis character's visemes" | `daz-figure` |
 | "how many faces should this be", "rig this 600k mesh" | `mesh-budget` |
 | "tidy up, I'm done with this asset" | `asset-cleanup` |
+| "can I use my Character Creator character in my game", "is Character Generator output mine" | `character-source` |
 
 That is why the descriptions are written from your side rather than the
 implementation's. If you add a skill, write its description as the words someone
@@ -210,6 +211,7 @@ and the 0.5.1 package:
 | `game-music` | Licence-clear instrumental music, looped without a seam |
 | `lip-sync` | Talking portraits: mouth shapes timed to voice lines, with a preview |
 | `daz-figure` | Daz Genesis figures: installed outside the repo, imported into Blender and their visemes rendered; only the renders may ship |
+| `character-source` | Characters from commercial tools: what may ship, stated before any file is touched, and kept out of the AI stages |
 | `mesh-budget` | Face counts, decimation, rigging heavy meshes |
 | `asset-cleanup` | Curate the keepers, sweep the rest |
 

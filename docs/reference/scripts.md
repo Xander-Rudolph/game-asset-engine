@@ -27,6 +27,9 @@ Everything in `scripts/`. Each takes `--help`.
 | `simplify_concepts.sh` | Redraw existing art as simpler game ready versions. |
 | `asset_to_mesh.sh` | Concepts to shapes to textures to sheets to curated assets, correctly staged. |
 | `rig_units.sh` | Rig figures one at a time, with the settings that work. |
+| `make_hair.py` | Lay out a head of hair the repo owns: Poisson roots on a scalp cap, a whorl, a parting, cluster guides, and four layers of guide curves over a cap mesh with its own maps, written as an atlas plan, a numpy fallback OBJ and a preview, then handed to `bake_hair.py`. Styles, looks and colours are presets over flags. See [below](#make-hair-py). |
+| `bake_hair.py` | Sweep `make_hair.py`'s guides into closed lens shells and flat cards in the container's Blender, render the atlas from real strands, set the normals, and write one OBJ that `daz_import_probe.py scene --wear-obj` places. See [below](#bake-hair-py). |
+| `make_scalp.py` | Paint a scalp texture for `make_hair.py --cap-diffuse` with the repo's ComfyUI text-to-image graph: one job, made to tile, tinted to a hair colour, with a JSON of the prompt, seed and seam check. See [below](#make-scalp-py). |
 | `list_animations.py` | What animation clips are actually installed, read from the files. |
 | `bone_roles.py` | Name an articulationxl rig's `bone_N` bones by role (pelvis, chest, head, left thigh and so on) with `map`, then `compile` a role pose from `poses/roles/` into that rig's transforms file for `render_sheet.py`. `probe` says which way each part moved. See [below](#bone-roles-py). |
 | `generate_music.py` | Generate a folder of music prompts with ACE-Step 1.5. `--loop DIR` makes each take a seamless loop, and `--keep-best` keeps the take that loops best. Resumable: seeds already in `DIR/picks.json` are skipped, and `--reloop` loops the recorded takes again without generating. A take the server already made, for a run that died, is used rather than made again, and `--no-wait` queues the missing takes and exits. A track file can carry a section script as its lyrics, after a line of `---`. |
@@ -35,7 +38,7 @@ Everything in `scripts/`. Each takes `--help`.
 
 | Script | Does |
 |---|---|
-| `render_sheet.py` | Render a model to a sprite sheet. Angles across, poses down. |
+| `render_sheet.py` | Render a model to a sprite sheet. Angles across, poses down. `--span` and `--look-at` frame a fixed world box at a fixed height, for a set that must share a scale or for a head rather than a whole figure. |
 | `decimation_report.py` | Measure what each face budget costs, three ways, or bisect for an answer. |
 | `sheet_check.py` | Check a sprite sheet for the faults that are arithmetic. Exits non-zero on a fault. |
 | `transfer_weights.py` | Move a skeleton from a decimated proxy onto the original mesh. |
@@ -68,8 +71,9 @@ from Daz content to the gitignored `output/daz/`. None of it may be committed.
 
 | Script | Does |
 |---|---|
-| `daz_library.py` | Install Daz Install Manager zips downloaded by hand into a content library outside the repo, `MODELS_DIR/daz_library` by default, and record every file with its CRC-32, and the licence held with the date you read the EULA. Every path is checked before anything is written. `intake` does that for every zip in a folder, verifies what landed, deletes each zip and keeps a Markdown ledger beside them. `list`, `licence`, `verify`, `uninstall`, `case-check` and a `selftest` with invented packages. Standard library only, on the host. See [below](#daz-library-py). |
+| `daz_library.py` | Install content zips downloaded by hand into a content library outside the repo, `MODELS_DIR/daz_library` by default, and record every file with its CRC-32, and the licence held with the date you read the EULA. Every path is checked before anything is written. `intake` does that for every zip in a folder, verifies what landed, deletes each zip and keeps a Markdown ledger beside them. `list`, `licence`, `verify`, `uninstall`, `case-check` and a `selftest` with invented packages. Standard library only, on the host. See [below](#daz-library-py). |
 | `daz_import_probe.py` | Import a Genesis figure into the container's Blender with the Diffeomorphic DAZ Importer, which `fetch` pins by size and sha256 into the gitignored `input/_devtools/import_daz/`. `build` saves a `.blend` whose 17 viseme controllers come from FACS, `scene` adds morph sets, character shape dials, sliders, clothing and hair merged into the figure's rig and a pose preset, `verify` reopens a saved `.blend` with no add-on, and `render` draws a row per viseme with `render_sheet.py` and in three framings of its own, or measures what each moves with `--motion-only`. See [below](#daz-import-probe-py). |
+| `daz_characters.py` | Roll random Genesis characters from whatever the Daz library holds, build each one in the container's Blender through `daz_import_probe.py`, render it front and side with `render_sheet.py`, and write a JSON beside its two images holding the roll, the two commands that rebuild it and what was drawn. `list` prints what the library offers for each slot. The `.blend` is deleted once the views are drawn. See [below](#daz-characters-py). |
 | `daz_inventory.py` | List the figures, bones, morphs, aliases and HD morphs in a Daz content library outside this repo, reading every `.dsf` with the standard library. Figures are grouped by the content type their author set, aliases and other modifiers are counted apart from morphs, and a valid JSON file that is not DSON is skipped, not an error. It refuses a path in or above the repo. See [below](#daz-inventory-py). |
 
 ## Keeping the repo honest
@@ -87,8 +91,9 @@ Run both before a commit, with `npm run docs:build`.
 
 ```sh
 scripts/render_sheet.py MODEL [--poses SPEC] [--angles N] [--azimuth-start DEG]
-                        [--elevation DEG] [--size PX] [--zoom N] [--persp]
-                        [--span UNITS] [--key N] [--ambient N]
+                        [--azimuths DEG,DEG] [--elevation DEG] [--size PX]
+                        [--zoom N] [--persp]
+                        [--span UNITS] [--look-at UNITS] [--key N] [--ambient N]
                         [--engine {cycles,eevee}] [--samples N] [--denoise]
                         [--clay] [--clay-color R,G,B] [--flat] [--out PATH]
                         [--check] [--keep-frames] [--timeout SECONDS]
@@ -96,6 +101,11 @@ scripts/render_sheet.py MODEL [--poses SPEC] [--angles N] [--azimuth-start DEG]
 ```
 
 `--poses` takes `static`, `frames:1,7,13`, `even:N` or `transforms:FILE`.
+
+`--angles N` spaces N facings evenly from `--azimuth-start`. `--azimuths` names
+them instead, comma separated, for a set of facings that is not evenly spaced:
+`--azimuths 0,90 --elevation 0` is the front and side a character reference
+wants. It overrides `--angles`, `--azimuth-start` and `--flat`.
 
 `--span <units>` frames against a fixed world height rather than the subject's
 own extent, which is what makes a set share a scale. Without it each model is
@@ -258,6 +268,14 @@ where `<file>` is the pose file's path.
 The role files in `poses/roles/` carry `_note` strings, which this check refuses
 (`bone '_note' holds a string`), so compile them with
 [`bone_roles.py`](#bone-roles-py) rather than pass them to `--poses`.
+
+#### Framing a head rather than a whole figure
+
+`--span` fixes the frame's height in world units and `--look-at` fixes what it
+points at, as a height above the model's own floor. Without the second, the
+camera aims at half the frame: ask for a 0.42 m span on a 1.75 m figure and it
+frames the knees. `--span 0.42 --look-at 1.60` is a head and shoulders on
+Genesis 9 (measured 2026-09-22).
 
 ### `bone_roles.py`
 
@@ -471,12 +489,278 @@ overlaps, and `share`, adapted from the 0.08 s window of
 None has been judged on a portrait. `--text-only` writes a placeholder flap to `output/lipsync/text-only/`
 and never overwrites a timeline made from audio.
 
+### `make_hair.py`
+
+```
+scripts/make_hair.py --list
+scripts/make_hair.py [--style NAME] [--look {stylised,realistic}] [--colour NAME|R,G,B]
+                     [--part centre|left|right|none|X] [--part-width DEG] [--part-flow F]
+                     [--name STEM] [--out DIR] [--layers NAME=N,...] [--length CM]
+                     [--variation CM] [--wave F] [--cap DEG] [--hairline DEG]
+                     [--head-radius CM] [--lift F] [--guide-distance CM] [--jitter F]
+                     [--sweep F] [--cling CM] [--volume CM] [--band F] [--ramp F]
+                     [--cap-diffuse PNG] [--no-drape] [--seed N] [--no-preview] [--no-bake]
+                     [--beard {none,stubble,short,full}] [--beard-length CM] [--curl CM]
+                     [--curl-turns N] [--curl-start F] [--card-width SCALE]
+```
+
+Hair the repo owns outright, because the two other routes to it both stop short.
+A Daz hair product renders but may not ship as 3D without an Interactive License
+for that product. A strand hair is not even that: the two in the library carry
+236,136 and 167,264 vertices and **no polygons**, so Cycles draws the cap and
+nothing else, which is why `daz_characters.py` leaves them out.
+
+This is the numpy half of a two-script pipeline designed from the
+[hair cards research](/reference/hair-cards): it lays out the hair and grows
+guide curves in layers over a scalp cap, then hands them to
+[`bake_hair.py`](#bake-hair-py), which sweeps them into geometry in the
+container's Blender and renders the atlas. Everything below was measured on
+2026-09-22 on the host's `python3` unless it says otherwise.
+
+#### What it writes, all under `output/hair/`
+
+`<name>_guides.npz` (the guide polylines with a layer, a lock, a width, an atlas
+slot and a mirror flag per curve), `<name>_atlas.json` (the eight-slot sheet
+plan), `<name>_cap.obj` with `.mtl` and two 1024 px maps, `<name>_fallback.obj`
+with its own painted atlas (the numpy-only result, for a host with no
+container), `<name>_preview.obj` (the fallback and the cap on a plain scalp
+sphere, for `render_sheet.py`), and `<name>.json` with every setting and
+measurement. Then, unless `--no-bake`, it runs `bake_hair.py` as a child
+process and the baked `<name>.obj` is the one to use.
+
+**Static geometry.** No rig, no fitting, no morphs, no physics. It is placed on
+a head rather than skinned to one, which `daz_import_probe.py scene --wear-obj`
+does by measurement.
+
+#### Layers, not a population
+
+Every published card workflow builds hair as a stack over a cap, thick to thin
+outward <!-- HAIR-001, HAIR-044 -->, so the generator has a `LAYERS` table and
+grows each layer separately: 90 **shells** (the base, 2.4 cm wide tapering to
+0.35, roots 0.05 cm inside the scalp so their closed ends hide under the cap),
+150 **breakup** cards in 50 three-card tents <!-- HAIR-002 --> (1.4 to 0.5 cm,
+0.8 cm off the scalp), 40 **hairline** cards on a 12 degree band inside the
+hairline (1.0 to 0.4 cm, 0.6 of the style's length) and 30 **flyaways** (0.5 to
+0.2 cm, 1.5 cm off). Width is constant over the first 60 percent of a card then
+tapers <!-- HAIR-013 -->. `--layers shell=120,flyaway=0` overrides any count,
+and a style scales all of them (short 1.3, long 1.1). The counts and the
+offsets in centimetres are guesses; no source gives either.
+
+#### Roots, flow, locks
+
+Roots are Bridson Poisson-disk samples on the sphere cap, with a density mask
+that thins the frontal region to 0.6 and a hairline that is 48 degrees from the
+crown at the front, 76 at the temples and 83 at the nape <!-- HAIR-118 -->.
+Against the old Fibonacci spiral at the same count, the shell roots' nearest
+neighbour distance is 2.169 cm with a coefficient of variation of 0.162 where
+the spiral gave 2.085 cm and 0.363: as even, with a third of the scatter.
+
+Flow leaves a whorl 18 degrees behind the crown and 8 to one side
+<!-- HAIR-106 --> along the scalp, 0.85 away from the whorl and 0.15 down, tilted
+off the scalp by an exit angle of 12 degrees at the rim rising to 30 at the
+crown behind `--lift` (15 to 50 on the first bake fanned the crown out like a
+palm). A parting is a rejected strip closing to nothing at the nape, with the
+hair swept off it by `--part-flow`; 0.5 left a bare wedge, 0.35 leaves a line.
+Hair rooted over the face is brushed aside by `--sweep` as it falls. The
+curly style winds each strand in a helix round its own centreline, `--curl`
+1.1 cm in radius over `--curl-turns` 3 from `--curl-start` 0.2 of the length,
+in Blender's Curl Hair Curves terms <!-- HAIR-117 -->, with a phase shared by
+the lock; the sideways sine wave the style had before read as no curl at all
+on the figure (2026-09-22).
+
+Cluster centres are a second Poisson set at `--guide-distance` (4.5 cm
+stylised, 2.5 realistic; on the default bob 14 centres, 20 cards each), every
+root takes its nearest centre as its lock, and each strand is pulled towards
+its lock's centre guide by 0.8 shaped linearly root to tip with a 0.3 cm tip
+spread, the semantics of Blender's Clump Hair Curves <!-- HAIR-117 -->. A
+card's width comes from its lock's spread <!-- HAIR-101 -->, clamped to its
+layer's bounds.
+
+#### Draping over the body
+
+Long hair needs something to land on. The body below the head is five capsules
+in the hair's own frame, measured on the Genesis 9 base figure on 2026-09-22 by
+height band below the fitted skull centre (`output/hair/_exp/measure_body.py`):
+a neck 6.5 cm in radius sitting 1.5 cm behind the scalp centre from 11 to
+24 cm down, a shoulder bar 22 cm each side at 27 cm down, and three chest
+capsules of 9 cm below that; they scale with `--head-radius`. As a strand is
+stepped, any point that lands inside a capsule plus 0.8 cm of clearance is
+pushed out to it and the strand's heading loses its component into the
+surface, so it slides along the neck and over the shoulder; on the flat top of
+a shoulder, where sliding leaves no direction, the strand is sent forward or
+back to whichever side it is already on. The cluster pull and the wave come
+after, so a final pass pushes every point out again.
+
+Before this the 30 cm and 34 cm styles splayed outward from their exit angle
+and passed through the shoulders; with it they hang down the neck and turn at
+the shoulders, and on the figure `--declip 1.5` finds 4.64 and 4.57 percent of
+their vertices inside the body and leaves 0.00 percent, pushing at most
+10.9 mm. At 0.5 cm of clearance it had left 0.55 and 0.48 percent deeper than
+its 20 mm reach. `--no-drape` switches the capsules off. The preview OBJ draws
+them in grey under the scalp sphere so the drape can be judged with no figure
+in the frame.
+
+#### A beard, on a jaw that was measured
+
+`--beard stubble|short|full` grows a second asset, `<name>_beard`, or the
+beard alone with `--style none`. It grows on a jaw ellipsoid rather than the
+scalp sphere: the lower face of the Genesis 9 base figure was read by height
+band below the fitted skull centre (a read-only `bpy` script on 2026-09-22;
+the nose tip 8 cm down and 13.5 cm forward, the lips 9.5 to 12.5 down, the chin
+13 to 16.5 down at 11.1 forward, the jaw 7.2 cm each side at the lips and 5.6
+at the chin) and a bounded Nelder-Mead fit over 1,274 of those vertices gave
+an ellipsoid centred (0, -11.1, 2.1) cm with radii (6.9, 7.2, 9.0), rms
+0.63 cm; the guessed one had put the sides 1.6 cm too wide and the bottom
+2.8 cm too high. Only the fitted numbers are in the script. The beard region
+is the ellipsoid below a line from the lower lip at the midline up to the
+cheeks and back to the jaw angle, down to a neckline 17.5 cm below the scalp
+centre, plus a moustache band on the upper lip with the lower lip bare, 3.05
+steradians of the ellipsoid's own space. Roots are the same Poisson sampler
+run on the ellipsoid, the flow is down the face with 0.25 outward at a fixed
+exit angle of 20 degrees, every point is held clear of the ellipsoid, and the
+beard drapes over the body capsules with the neck starting at the neckline.
+Stubble is the cap and 60 flyaways of 0.4 cm; short is 3 cm of cards; full is
+7 cm with 30 shells. The beard cap is the region of the ellipsoid at 0.15 cm,
+its opacity 0.4, 0.45 and 0.7 by beard and blurred over 130 px at the edge: at
+70 px and 0.85 to 1.0 it read as a dark band with a straight top edge across
+the cheeks. Baked, the full beard is 6,176 triangles, the short 4,316 and the
+stubble 1,536, each in about 2 s wall in Blender; placed on the figure the
+declip finds 10.5, 8.0 and 26.1 percent of their vertices inside the face and
+leaves 0.5, 0.46 and 1.94 (`--declip-max-push 30`), the remainder at the
+chin, which sits 1.1 cm outside the ellipsoid. A second `--wear-obj` puts a
+beard under a hairstyle in one scene. Everything in that paragraph beyond the
+fit is a guess set by looking once; the short and stubble caps still read as
+a soft patch on the cheek.
+
+#### The cap
+
+A dome at the scalp radius plus 0.15 cm bounded by the same hairline, 14 rings
+of 48 with one pole vertex (1,296 triangles), a top-down UV, and two maps: a
+diffuse of the root colour at 0.75 with 9,000 follicle strokes flowing away
+from the whorl and a slightly lighter parting line, and an opacity that is one
+inside the hairline, blurred over 40 px at the rim and 0.85 along the parting
+<!-- HAIR-047, HAIR-048 -->. The first bake's parting stripe, a fifth of the cap
+wide at 0.7, read as a bald wedge. `--cap-diffuse PNG` replaces the painted
+colour with an image made elsewhere, resized to the cap map; the cap's own
+opacity still cuts the hairline and lightens the parting.
+
+#### The atlas plan and the fallback
+
+`<name>_atlas.json` is a 2048 by 1024 sheet of eight 256 px slots with 16 px
+gaps, strands 48, 32, 20, 12, 8, 4, 2 and 1 per slot, banded base, breakup,
+sparse and flyaway <!-- HAIR-018, HAIR-062 -->. `bake_hair.py` renders it from
+real strands; the fallback OBJ paints the same ladder in numpy, root at the
+bottom row, RGBA opacity with the mask in all four channels (Blender's OBJ
+importer wires `map_d`'s image *Alpha* output into Principled Alpha, and a
+greyscale PNG has none). Its slot mean alphas measured 0.394 down to 0.010
+against the rendered sheet's 0.380 down to 0.009.
+
+#### Winding
+
+`build()` emits each ribbon's triangles as `(a, d, b), (a, c, d)`, and the
+report prints the mean signed dot of every face's normal against the radial
+direction from the head centre: cap +1.000, shells +0.917, cards +0.940 on the
+default bob. The previous generator emitted `(a, b, d), (a, d, c)`, wound into
+the head, which is what made the hair render black ([the note](/reference/hair-cards#what-was-measured-here-before-anything-was-read)).
+
+#### Cost
+
+The default bob took 0.99 to 1.33 s wall over three runs (grow 0.19 to 0.22,
+cap maps 0.51 to 0.89, write 0.18): 310 curves, 1,930 points, a 4,536-triangle
+fallback. The retired flags of the old generator (`--strands`, `--round`,
+`--hairs` and the rest) exit 2 with the name of what replaced them.
+
+### `bake_hair.py`
+
+```
+scripts/bake_hair.py NAME [--dir DIR] [--dome-mix F] [--card-mix F] [--thickness F]
+                     [--samples N] [--timeout S] [--no-wait]
+```
+
+The Blender half. It reads `<name>_guides.npz`, `<name>_atlas.json` and the cap
+files that `make_hair.py` wrote, runs one job in the container's Blender 4.5.9
+(the way `daz_import_probe.py` does, waiting for an empty ComfyUI queue first),
+and writes `<name>.obj`, `<name>.mtl`, `<name>_diffuse.png` (RGBA, alpha is
+the opacity), `<name>_opacity.png`, `<name>_pack.png` (root gradient, random
+id, spare) and `<name>_bake.json`. Measured 2026-09-22 on the default bob.
+
+- **Shells.** Layer 0 becomes closed lens shells: Curve to Mesh over an 8-point
+  circle scaled to `--thickness` 0.12 of the width, with end caps, on curves set
+  to POLY (a Catmull-Rom curve of 8 points made 84 quads), the radius
+  attribute feeding the 4.5 Scale input, and Set Curve Normal to the radial
+  direction so the lens lies flat on the scalp <!-- HAIR-133 -->. The report
+  checks which face is outward by radius (u = 0 sits 0.63 cm further from the
+  head centre than u = 0.5) and that every shell is manifold with a positive
+  signed volume. 90 shells are 11,160 triangles.
+- **Cards.** Layers 1 to 3 become flat ribbons from a line profile, each
+  corner's UV laid over its card's atlas slot, mirrored when the card is
+  flagged.
+- **Normals.** Shell corner normals are the shell's own, with edges sharper
+  than 60 degrees split so the lens crease does not smear into a dark band,
+  mixed half way to a smooth dome's by Data Transfer (`--dome-mix` 0.5; at 1.0
+  a shell on the side of the head faces away from a front camera)
+  <!-- HAIR-020, HAIR-066 -->. Cards blend their ribbon frame 0.6 of the way to
+  the radial, flyaways 0.3. After the OBJ round trip the corner normals match
+  to a dot of 0.9979 on the unsplit mesh.
+- **The atlas** is rendered from 127 Cycles hair curves as ribbons in three
+  passes (diffuse with alpha, root gradient, random id) at 64 samples, about
+  0.35 s each, then the colour is dilated 32 px under alpha 0 by a distance
+  transform <!-- HAIR-054 -->. Slot mean alphas 0.380, 0.286, 0.179, 0.122,
+  0.083, 0.041, 0.018, 0.009. The shells wear the base slot's colour along
+  their length, opaque: a flat colour read as beige plastic, and laying `u`
+  straight round the closed profile put only the slot's edge quarters on the
+  outward face and every shell wore a dark band down each flank. The outward
+  face now spans the whole slot and the back mirrors it.
+- **The file.** One `o hair`, faces inside to outside, `usemtl <name>_cap`,
+  `<name>_shell`, `<name>_card`, exported with normals and UVs on the axes
+  `--wear-obj` imports, re-imported to check: the cap block lands within
+  0.000001 cm of `<name>_cap.obj`.
+
+The default bob bakes in 2.1 to 2.6 s in Blender, 2.6 to 2.9 s wall: 8,853
+vertices and 14,436 triangles. Across the six styles the skill lists, baked
+triangles are bob 14,436, curtains 14,436, crop 18,378, elder 15,750 and
+bounce 14,436, all inside the 4k to 20k budget <!-- HAIR-016 -->, and curls
+24,198, over it by design: each curly strand is a helix of 20 points, and at
+fewer the ringlets flatten. A 12-point profile had put the bob at 20,196. The six,
+generated, baked, placed on Genesis 9 and rendered at three angles each, took
+73 s wall.
+
+### `make_scalp.py`
+
+```
+scripts/make_scalp.py [--colour NAME|R,G,B] [--style {crop,stubble,bald}] [--graph JSON]
+                      [--seed N] [--steps N] [--raw PNG] [--contrast F] [--blend F]
+                      [--size PX] [--name STEM] [--out DIR] [--queue-wait S] [--dry-run]
+```
+
+A scalp texture for `make_hair.py --cap-diffuse` from the repo's own ComfyUI
+graphs, the one AI stage in the hair pipeline; no Daz content goes near it,
+the prompt is text. One job on `preset_ground_texture.json` at its native 1024
+px square (Qwen-Image, 20 steps, cfg 4, euler simple), fetched back over
+`/view`, made to tile with `make_seamless.py`'s mend, and tinted so the
+image's median lands on the hair colour darkened by the same 0.75 the painted
+cap uses. It writes `output/hair/scalp_<colour>.png`, the raw and tiled
+images beside it, and a JSON with the prompt, seed, graph, seam scores and
+timings. `--raw` retints an earlier image with no job; `--style` swaps the
+prompt for a crop, stubble or bald scalp.
+
+Measured 2026-09-22 on the RTX 4070 Ti SUPER: a job takes 85 to 95 s from
+`/prompt` to history, the tile and tint under 0.1 s. The seam check went from
+2.01 times the interior at 29 levels to 1.05 at 1.65 for the black crop, and
+passed on every colour and style tried; the third prompt wording worked and the
+two before it did not. Under the crop the difference from the painted cap is
+9 pixels of 940,800 in the head render, because the shells hide the cap; bare
+and from above, the AI cap shows follicle strokes radiating from a whorl where
+the painted one is featureless, which is the case it is for.
+
 ### `daz_library.py`
 
 ```sh
 scripts/daz_library.py install ZIP... [--dry-run] [--overwrite] [--eula-read YYYY-MM-DD]
+                              [--interactive-license] [--vendor NAME]
                        [--interactive-license]
 scripts/daz_library.py intake [--source DIR] [--ledger NAME] [--dry-run] [--keep-zips]
+                              [--vendor NAME]
 scripts/daz_library.py list
 scripts/daz_library.py licence SKU [--eula-read YYYY-MM-DD]
                        [--interactive-license | --standard-license]
@@ -487,6 +771,18 @@ scripts/daz_library.py selftest [--dir DIR]
 ```
 
 Every command but `selftest` takes `--library DIR`, `--json` and `--examples N`.
+**Packages that are not Daz packages.** A Daz Install Manager zip is named for
+its SKU and lists its files in `Manifest.dsx`. A zip from anywhere else has
+neither, so `--vendor NAME` records who made it, the record is named after the
+file, and the content root is found by looking: the first folder, or the zip
+root, that holds one of a library's own folders. Anything beside those is left
+in the zip and named. The licence wording in this script was read from Daz's
+EULA and is not applied to anyone else's content: the record keeps the vendor,
+the terms files the package shipped and the date you say you read them. A Daz
+package a browser numbered as a second download is refused by name, because it
+would otherwise install a second copy of a product under a name of its own. See
+[Daz figures](/guide/daz-figures#content-that-is-not-a-daz-package).
+
 `selftest --json` fails with `daz_library.py: error: unrecognized arguments:
 --json`.
 
@@ -616,6 +912,8 @@ scripts/daz_import_probe.py fetch
 scripts/daz_import_probe.py build --out output/daz/NAME.blend [--facs] [--visemes]
                             [--subdivision {keep,off}] [--figure DUF]
                             [--anatomy auto|none|DUF,...] [--library DIR]
+                            [--mat-preset DUF[@MESH,...]] [--mat-replace DUF[@MESH,...]]
+                            [--no-auto-materials] [--no-fit-report]
                             [--no-textures] [--material-method M] [--fit F]
                             [--content-dir DIR] [--no-dir-check] [--verbosity N]
                             [--timeout SECONDS] [--no-wait]
@@ -624,7 +922,15 @@ scripts/daz_import_probe.py scene --out output/daz/NAME.blend [--figure DUF]
                             [--morphs SET,...] [--custom-morphs DIR]
                             [--custom-files F,...] [--custom-category NAME]
                             [--custom-bodypart {Face,Body,Custom}] [--facs]
+                            [--mat-preset DUF[@MESH,...]] [--mat-replace DUF[@MESH,...]]
+                            [--no-auto-materials] [--hide NAME,...] [--hide-figure]
+                            [--hide-material NAME,...] [--offset MESH=DX,DY,DZ]
+                            [--declip MM] [--declip-max-push MM] [--declip-max-verts N]
+                            [--declip-skip NAME,...] [--no-fit-report]
                             [--set NAME=VALUE] [--wear DUF] [--no-transfer]
+                            [--wear-obj PATH] [--obj-bone NAME] [--obj-scale S|auto]
+                            [--obj-offset DX,DY,DZ] [--obj-yaw DEG] [--obj-radius CM]
+                            [--obj-no-shadow] [--obj-forward AXIS] [--obj-up AXIS]
                             [--skip-transfer NAME,...] [--set-dressed NAME=VALUE]
                             [--pose DUF] [--pose-affects-morphs] [--no-verify]
                             [--subdivision {keep,off}] [--material-method M]
@@ -661,6 +967,46 @@ from the figure's `.duf`, gzip-compressed or plain. Use `--facs`: on Genesis 9
 `--subdivision off`: the default `keep` saves the importer's Subsurf levels, up
 to 3 for render. It writes `NAME.blend`, `NAME_build.json`, which records the
 command line and every step, `NAME_blender.log` and `NAME_poses.json`.
+
+**Moving a garment.** `--offset "MESH=DX,DY,DZ"` shifts a worn mesh in
+millimetres along the world axes before the declip runs. Measure first: on a
+measured figure the hooded cloak's apex sat 69.6 mm below the crown of the head
+it covers, and raising it that far lifts its hem by the same amount.
+
+**Hiding one zone of a garment.** `--hide-material NAME,...` takes a material
+zone's alpha to zero, which is how a hooded cloak loses its hood and keeps the
+cloak. The mesh stays whole, so the framing still allows for it.
+
+**Hiding a figure under its costume.** `--hide-figure` keeps the figure's own
+meshes out of the render, its body and the eyes, mouth, lashes, tear and
+eyebrows a post-load script brings with it, and `--hide NAME,...` names any
+others. Nothing is deleted, so the clothes still fit and `render_sheet.py`
+frames what is left: a skull inside a hood instead of a face.
+
+**Fit, and pushing a garment out.** Every build measures how each mesh sits
+against the body: how many of its vertices are inside it, how deep, and the
+mean gap. Garments should be outside; an eyeball is inside the head whatever
+you do. `scene --declip MM` pushes each worn mesh's vertices clear of the body
+by that much, which took a pair of shorts from 73.3% of their vertices inside
+to 0 (2026-09-21), leaves a mesh above `--declip-max-verts` alone so a card
+hair keeps its shape, and refuses a posed figure because it edits the rest
+shape. See [Daz figures](/guide/daz-figures#cloth-that-clips-measured-rather-than-judged).
+
+**Material presets.** A Genesis 9 eyelash, eye, mouth or eyebrow figure arrives
+with no map at all, and Daz Studio fills them in afterwards with a MAT preset.
+Both `build` and `scene` now do that: they read the presets beside the figure
+and beside each anatomy file and wire the cutout opacity, the colour map or
+flat colour, and a plainly stacked layered colour image, filling in only what a
+material is missing. `--mat-preset FILE[@MESH,...]` names one, applied before
+those and winning over them; `--no-auto-materials` leaves the materials as the
+importer built them, which draws an eyelash card as an opaque fan.
+`--mat-replace FILE[@MESH,...]` is the other half: it swaps the maps a material
+already has, matched by what each file name says the map is for, which is what
+a skin swap needs. It runs after the fill. The report
+says, per preset, what was filled in, what was left alone, and what it could
+not resolve. Material merging is off in every import, because bare anatomy
+materials are identical and were merged into one slot. See
+[Daz figures](/guide/daz-figures).
 
 **`scene`** does everything `build` does and then drives the figure, in this
 order, each step recording its seconds, peak RSS and
@@ -772,6 +1118,131 @@ peak of 578.5 MB. `render --blend output/daz/g9_dressed.blend --only AA --sizes
 128 --columns face --samples 16 --no-sheet` drew 2 cells in 20.0 s. What each
 stage measured, and the two things that need Daz Studio, are in the
 [guide](/guide/daz-figures#a-dressed-posed-character-headless).
+
+#### Wearing something that is not a Daz product
+
+`--wear-obj PATH` puts a Wavefront OBJ on the figure. It is for geometry the
+repo owns, `scripts/make_hair.py` being the one that writes it, and it takes a
+different route from `--wear`, which loads a fitted Daz wearable.
+
+The OBJ is placed by measurement, not by guesswork. The body vertices that
+`--obj-bone` owns, meaning that bone's vertex group carries their largest
+weight, are collected; a sphere is fitted by least squares to the upper half of
+them; the OBJ's own origin goes to that sphere's centre; and `--obj-scale auto`,
+the default, is the scale that lands the OBJ's roots, `--obj-radius` from its
+origin, on that sphere.
+
+On Genesis 9 the `head` bone owns **2,471** body vertices, and a sphere fitted
+to the upper **636** of them has a radius of **8.26 cm**, centred 162.1 cm up,
+which every one of those 636 sits within **4.6 mm** of on average and 10.9 mm at
+worst. A 9.5 cm scalp therefore arrives at scale 0.008693 (measured
+2026-09-22).
+
+The object is then bone-parented rather than skinned, so it follows a pose like
+a hat rather than like skin, and `--obj-offset DX,DY,DZ` in millimetres and
+`--obj-yaw DEG` are there for what the report says is still wrong. The OBJ
+importer's axes are `--obj-forward NEGATIVE_Z` and `--obj-up Y` by default,
+which turns a +Y up OBJ into Blender's +Z up with its +Z at the figure's front.
+
+**The declip reaches it.** An imported OBJ is not a rigid prop: it is a sheet of
+hair or cloth modelled around a sphere, and bending it onto the body it rests
+against is the point. A skull is not a ball everywhere, and hair grown for a
+9.5 cm scalp sat inside the body on **11.24% of its 9,600 vertices**, mostly
+where it hangs past the head onto the neck and shoulders. `--declip 1.5` moved
+**1,830** of them out, by at most **8.38 mm**, and left **0.00%** inside
+(measured 2026-09-22).
+
+**`--obj-no-shadow` for hair.** Cards stacked several deep shadow each other.
+The same hair, alone in frame under the same light, measured **mean luma 38.7
+casting shadows and 51.7 not** on 2026-09-22; measured again the same day with
+the mesh's winding fixed ([hair cards](/reference/hair-cards)), the cost of
+shadows is 149.0 against 167.9, about 11 percent. Still worth the flag for
+stylised hair, no longer the difference between black and brown.
+
+The material comes from the OBJ's own MTL, and the probe then sets the map
+feeding Alpha to Non-Color and switches off backface culling, because the
+importer leaves the alpha map in sRGB.
+
+### `daz_characters.py`
+
+```sh
+scripts/daz_characters.py list [--library DIR] [--generation NAME]
+scripts/daz_characters.py keep SLUGS [--dir DIR] [--out FILE]
+scripts/daz_characters.py make [--from FILE] [--prune] [--count N] [--seed N] [--size PX]
+                          [--poses {none,upright,any}] [--dials {none,small,any}]
+                          [--declip MM] [--azimuths DEG,DEG] [--facings front,side]
+                          [--elevation DEG] [--span METRES] [--key N] [--ambient N]
+                          [--samples N] [--sheet-cell PX] [--sheet-columns N]
+                          [--any-brow-colour] [--library DIR] [--generation NAME]
+                          [--timeout SECONDS] [--keep-blend] [--dry-run]
+```
+
+A roster of characters out of whatever the library holds. The character presets
+and the two kinds of outfit are dealt out, so twelve characters use all six
+presets twice and half of them wear the armour; everything else is a draw: one
+of the four base skins for that build or the character's own, a hair colour the
+beard matches, an eyebrow colour, which armour pieces, and a weapon. The draw is seeded, so
+the same seed and the same library give the same characters, and `--dry-run`
+prints the roll and builds nothing.
+
+**No pose by default.** Genesis 9's rest pose is the A pose a character sheet
+wants; `--poses upright` rolls a standing, walking, flexing, running or
+stretching one, and `--poses any` rolls from all 58. `--span` follows: 2.0 m in
+the rest pose, 2.4 m when a pose is rolled, because a stretching figure reaches
+higher than a standing one.
+
+**No body dials by default either**, because the clothes and the face do not
+follow one: with three proportion dials set, 68.7% of a figure's trouser
+vertices sat inside its own legs and its eyes sat 14 mm inside its head
+(2026-09-21). `--dials small` and `--dials any` roll them anyway. Each garment
+is pushed clear of the body with `--declip`, 1.5 mm by default, and each
+character's JSON keeps the fit numbers that proves it.
+
+**Lit brighter than a sprite sheet.** `--key 6.5 --ambient 1.3` rather than
+`render_sheet.py`'s 1.6 and 0.22, under which a Daz figure's lit pixels
+averaged 0.248 of 1 (2026-09-21).
+
+Every slot is read from the library rather than named in the script, and from
+one figure generation at a time: `--generation` names the folder under
+`People/`, and by default it is the one the character presets sit in, so a
+Genesis 8 hair and a Genesis 9 Toon outfit are left out of a Genesis 9 roll.
+A wearable is anything under `Hair/` or `Clothing/` whose `.duf` says it is
+one; the weapons are the `Base`, `Masculine` and `Feminine` right-hand grips,
+which arrive bone-parented to `r_hand`; the poses are the ones whose names say
+standing, walking, flexing, running or stretching, because the rest are seated,
+laying or flying. The dForce pixie hair is left out and the run says why: its
+strand mesh follows no bone and draws nothing.
+
+Each character is built by `daz_import_probe.py scene` and drawn by
+`render_sheet.py --azimuths 0,90 --elevation 0`, square on at eye level, framed
+against a fixed `--span` so a short character reads as short. The sheet is cut
+into one image per facing, and the `.blend`, about 150 MB, is deleted once they
+are drawn unless `--keep-blend`.
+
+**Keeping the ones worth keeping.** A roll is only as good as its luck, and
+most of a roster is thrown away. `keep 1,3,4,12` writes those characters'
+recipes to `roster.json`, and `make --from roster.json` builds exactly them
+again, with no seed to remember: the same figure, skin, hair colour, outfit
+and weapon. The file is JSON and is meant to be edited, which is how a
+character changes its clothes or its hair without rolling anything.
+`make --prune` then deletes the character folders the run did not write, so
+what is left is that roster and nothing else.
+
+**What a run writes**, under `output/daz/characters/<slug>/`: `<slug>_front.png`
+and `<slug>_side.png`, `<slug>.json` with the roll, the two commands that
+rebuild it, the exit codes, the seconds and the drawn pixel count of each view,
+`<slug>_scene.json` from the probe, and the two logs. Beside them,
+`characters.json` indexes the run and `roster_sheet.png` holds every character,
+views side by side on a flat grey under a line naming what it is made of, at
+`--sheet-cell` pixels a cell and `--sheet-columns` characters a row. All of it
+is Daz content: gitignored, and never committed.
+
+**Measured on 2026-09-21**, twelve characters in the rest pose at 768 px,
+Cycles on the card at 128 samples, in `comfyui-packaged`: 10.3 to 25.5 s to
+build each one and 2.1 to 3.1 s to draw its two views, 230.9 s and 30.9 s over
+the twelve, every exit code 0, no garment left inside a body, and 8.1 MB kept
+once the twelve `.blend` files, 71 to 179 MB each, were deleted. The sheet is
+4096 by 1629 px.
 
 ### `daz_inventory.py`
 

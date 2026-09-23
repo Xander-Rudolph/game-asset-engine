@@ -134,6 +134,7 @@ picked from its description:
 | "import a Daz figure into Blender" / "render a Genesis character's visemes" | `daz-figure`, a Genesis figure you downloaded, imported and its visemes rendered, licence first |
 | "how many faces should this be" / "rig this 600k mesh" | `mesh-budget`, measured budgets and heavy-mesh rigging |
 | "tidy up, I'm done with this asset" | `asset-cleanup`, curate the keepers and sweep the rest |
+| "can I use my Character Creator character in my game" | `character-source`, what a commercial character tool lets you ship, licence first |
 
 ### What Claude will do first, every time
 
@@ -196,6 +197,7 @@ export MESHY_API_KEY=...
 | `game-music` | Licence-clear instrumental music, looped without a seam |
 | `lip-sync` | Talking portraits: mouth shapes timed to voice lines |
 | `daz-figure` | Genesis figures from Daz: install, import into Blender, render the visemes; only renders may ship |
+| `character-source` | Characters from Character Creator, iClone, Poser, ZBrush or Autodesk Character Generator: what may ship, kept out of the AI stages |
 | `mesh-budget` | Face counts, decimation, rigging heavy meshes |
 | `asset-cleanup` | Curate the keepers, sweep the rest |
 

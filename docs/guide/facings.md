@@ -137,6 +137,21 @@ Eight facings is four times the storage of four facings once you multiply by
 animation frames and team colours. Consider baking four and turning the model at
 runtime if your engine renders 3D at all.
 
+## Two facings that are not evenly spaced
+
+`--angles` always spaces its facings evenly, so a front and a side, 0 and 90,
+are not two of anything it can give: `--angles 2` is 0 and 180. Name them
+instead:
+
+```sh
+--azimuths 0,90 --elevation 0     # front and side, square on at eye level
+```
+
+That is a character reference sheet rather than a sprite: two cells, one row,
+no isometric diagonal. `--azimuths` overrides `--angles`, `--azimuth-start` and
+`--flat`. [The Daz roster](/guide/daz-figures#a-roster-of-characters-rolled-from-the-library)
+draws every character that way.
+
 ## The game side of the same agreement
 
 The renderer produces pictures. The game has to pick the right one. Three things

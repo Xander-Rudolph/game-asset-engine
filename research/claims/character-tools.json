@@ -1,0 +1,1588 @@
+{
+ "note": "docs/reference/character-tools.md",
+ "researched": "2026-09-23",
+ "checked": "2026-09-23",
+ "statuses": {
+  "confirmed": 37,
+  "corrected": 20
+ },
+ "conflicts_found": [
+  "CHT-069 vs CHT-002: Reallusion's free base FAQ says the only restriction is redistributing the unmodified base files; Section 5 of the Software EULA limits commercial use to Original Character Creations and lists restrictions A to D."
+ ],
+ "claims": [
+  {
+   "id": "CHT-001",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "Reallusion's Content EULA (\"Updated August 1st, 2025\") 2.1 Standard License, Restrictions (C), bars using the Content or any Derivative Content \"For machine learning, AI training, or AI-generated output\". The Content License Policy table (\"License Update (2025.8.1)\") ticks \"Use for AI training and deep learning\" only under Enterprise.",
+   "sources": [
+    "https://www.reallusion.com/Content/EULA/EULA.htm",
+    "https://www.reallusion.com/license/content.html"
+   ],
+   "as_first_reported": "Reallusion's Content EULA (\"Updated August 1st, 2025\") 2.1 Standard License, Restrictions (C), bars using the Content or any Derivative Content \"For machine learning, AI training, or AI-generated output\". The Content License Policy table (\"License Update (2025.8.1)\") ticks \"Use for AI training and deep learning\" only under Enterprise.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.reallusion.com/Content/EULA/EULA.htm (curl, 2026-09-23); https://www.reallusion.com/license/content.html (curl, 2026-09-23)",
+     "evidence": "\"Updated August 1 st , 2025\"; 2.1 Restrictions (C) \"You may NOT use the Content or any Derivative Content in the following scenarios or applications: ... For machine learning, AI training, or AI-generated output.\" Policy: \"License Update (2025.8.1)\"; row \"Use for AI training and deep learning\": iContent none, Standard none, Enterprise tick.",
+     "notes": "Both quotes verbatim; the table row carries a tick only in the Enterprise column."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback CDX for EULA.htm since 2025; id_ captures 20250710041038 (text 'Updated May 30th, 2025') and 20250815004032, fetched 2026-09-23; live pages diffed against captures 20250815004032 (EULA) and 20260830084432 (policy): no textual change.",
+     "evidence": "May 2025 text: \"(C) You may NOT use the Content in the following situations or applications: ... AI training/ deep learning.\"",
+     "notes": "No change since the August 2025 text the claim dates. The earlier (May 2025) text already barred AI training but not \"AI-generated output\"; the claim quotes the current wording only, so no conflation. Policy table and EULA share the 2025-08-01 date and agree."
+    }
+   ]
+  },
+  {
+   "id": "CHT-002",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "Reallusion's Software EULA (\"May 25th, 2026\"), section \"Character Creator Base Model License\", says \"The unique topology and character rigs of CC Avatar that generated from Character Creator's Base Model are the property of Reallusion\" and grants use of CC Avatar to generate \"Original Character Creations\", defined as \"a character created entirely from an original design, without using any content from Reallusion or its developers, including models, morphs, textures, hair, and outfit assets\". Those may be sold and published \"for any commercial use, including ... games\" except: \"A. Use in any character generation system. B. Use for AI training, machine learning, or synthetic data generation purpose. C. Use in any character-generating business. D. Selling the 3D model created from Character Creator's Base Model as a content asset in any third-party marketplace, regardless of file format.\"",
+   "sources": [
+    "https://www.reallusion.com/Content/EULA/AP/EULA_AP.htm"
+   ],
+   "as_first_reported": "Reallusion's Software EULA (\"May 25th, 2026\"), section \"Character Creator Base Model License\", says \"The unique topology and character rigs of CC Avatar that generated from Character Creator's Base Model are the property of Reallusion\" and grants use of CC Avatar to generate \"Original Character Creations\", defined as \"a character created entirely from an original design, without using any content from Reallusion or its developers, including models, morphs, textures, hair, and outfit assets\". Those may be sold and published \"for any commercial use, including ... games\" except: \"A. Use in any character generation system. B. Use for AI training, machine learning, or synthetic data generation purpose. C. Use in any character-generating business. D. Selling the 3D model created from Character Creator's Base Model as a content asset in any third-party marketplace, regardless of file format.\"",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.reallusion.com/Content/EULA/AP/EULA_AP.htm (curl, 2026-09-23)",
+     "evidence": "\"(May 25 th , 2026)\"; section 5 \"Character Creator Base Model License\": \"The unique topology and character rigs of CC Avatar that generated from Character Creator’s Base Model are the property of Reallusion.\" ... \"for any commercial use, including but not limited to image/video outputs, games, XR, ...\" ... \"B. Use for AI training, machine learning, or synthetic data generation purpose.\"",
+     "notes": "Every quoted clause, including the Original Character Creation definition and restrictions A to D, appears verbatim; the ellipsis in \"including ... games\" elides \"but not limited to image/video outputs,\"."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback CDX for EULA_AP.htm since 2025; id_ captures 20251118105851 ('October 29th, 2025'), 20260217155930 ('January 6th, 2026'), 20260625062305, fetched 2026-09-23; live page diffed against 20260625062305: identical.",
+     "evidence": "Oct 2025: \"B. For AI training, machine learning, synthetic data generation purpose;\"; Jan 2026: \"B. Use for AI training, machine learning, or synthetic data generation purpose.\"",
+     "notes": "Unchanged since the May 25th, 2026 text. January to May 2026 changes were only definition formatting and the new AI Service EULA reference; the Base Model clauses were reworded between October 2025 and January 2026 without change of substance. No conflation: the claim keeps the Software EULA separate from the Content EULA."
+    }
+   ]
+  },
+  {
+   "id": "CHT-003",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "Content EULA 2.1 Standard License (A) lets you \"provide, sell, and redistribute your creations with full ownership and use rights in Image or Video file formats (\\\"Imagery Use\\\")\", and \"The Imagery Use includes using the Content in ... games\". (B) grants \"full ownership and usage rights to provide, sell, and redistribute those creations for use in commercial games, AR/VR projects and interactive services\", with CC components usable for \"unlimited characters across multiple titles or projects\".",
+   "sources": [
+    "https://www.reallusion.com/Content/EULA/EULA.htm"
+   ],
+   "as_first_reported": "Content EULA 2.1 Standard License (A) lets you \"provide, sell, and redistribute your creations with full ownership and use rights in Image or Video file formats (\\\"Imagery Use\\\")\", and \"The Imagery Use includes using the Content in ... games\". (B) grants \"full ownership and usage rights to provide, sell, and redistribute those creations for use in commercial games, AR/VR projects and interactive services\", with CC components usable for \"unlimited characters across multiple titles or projects\".",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.reallusion.com/Content/EULA/EULA.htm (curl, 2026-09-23)",
+     "evidence": "(A) \"provide, sell, and redistribute your creations with full ownership and use rights in Image or Video file formats (“Imagery Use”)\" ... \"The Imagery Use includes using the Content in news, films, ... games, virtual worlds\"; (B) \"full ownership and usage rights to provide, sell, and redistribute those creations for use in commercial games, AR/VR projects and interactive services. ... unlimited characters across multiple titles or projects.\"",
+     "notes": "All quotes verbatim; ellipsis in (A) elides a list."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback CDX for EULA.htm since 2025; id_ captures 20250710041038 (text 'Updated May 30th, 2025') and 20250815004032, fetched 2026-09-23; https://www.reallusion.com/license/content.html (curl, 2026-09-23)",
+     "evidence": "May 2025 text: \"(D) CC Component. If you need to use characters made by the CC Component content in any game ... for Unlimited Characters ... you need to buy the CC Component’s Extended License.\" Policy FAQ Q1 today: \"for use in commercial games ... one Standard License only grants outputs for one single character.\"",
+     "notes": "Claim matches the binding August 2025 EULA, unchanged since. Caveat for the note: before August 2025 unlimited CC characters in games needed the Extended License, and the policy page FAQ (Q1, Q2, Q6 to Q8) still describes that old Extended regime, contradicting its own table and the EULA. The claim cites only the EULA, so it does not run the two together."
+    }
+   ]
+  },
+  {
+   "id": "CHT-004",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "Content EULA 6.3: \"Member shall make sure that the 3D Models must be contained in proprietary formats so that they cannot be opened or imported into a publicly available software application.\" 2.1 Restrictions (C) also bars use \"As embedded content within applications or online services\", which sits against 2.1(B)'s game grant; the Daz note records that tension as not settled (DAZ-105).",
+   "sources": [
+    "https://www.reallusion.com/Content/EULA/EULA.htm"
+   ],
+   "as_first_reported": "Content EULA 6.3: \"Member shall make sure that the 3D Models must be contained in proprietary formats so that they cannot be opened or imported into a publicly available software application.\" 2.1 Restrictions (C) also bars use \"As embedded content within applications or online services\", which sits against 2.1(B)'s game grant; the Daz note records that tension as not settled (DAZ-105).",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.reallusion.com/Content/EULA/EULA.htm (curl, 2026-09-23)",
+     "evidence": "6.3 \"Member shall make sure that the 3D Models must be contained in proprietary formats so that they cannot be opened or imported into a publicly available software application.\" 2.1 Restrictions (C): \"As embedded content within applications or online services.\"",
+     "notes": "Both verbatim; section numbering confirmed from the page's list markup (Member's Obligations is item 6). The DAZ-105 cross-reference is a register pointer, not a text claim."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback CDX for EULA.htm since 2025; id_ captures 20250710041038 (text 'Updated May 30th, 2025') and 20250815004032, fetched 2026-09-23",
+     "evidence": "May 2025: 6.3 same sentence; restriction then read \"As embedded content in the AP or online service.\"",
+     "notes": "6.3 is unchanged across May 2025, August 2025 and today. The embedded-content restriction was reworded in August 2025; the claim quotes the current form. The claim itself flags the tension as unsettled rather than resolving it."
+    }
+   ]
+  },
+  {
+   "id": "CHT-005",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": false,
+   "claim": "Content EULA 3.2: if a Reallusion Content One-Year Plan is cancelled or expires, files made with its content \"and saved in Reallusion's proprietary format will revert to Trial Content\", \"will display watermarks in the 3D viewer and cannot be exported\". The Software EULA's subscription terms say expiry \"does not affect your ownership of images, videos, or other outputs lawfully generated during an active subscription period\".",
+   "sources": [
+    "https://www.reallusion.com/Content/EULA/EULA.htm",
+    "https://www.reallusion.com/Content/EULA/AP/EULA_AP.htm"
+   ],
+   "as_first_reported": "Content EULA 3.2: if a Reallusion Content One-Year Plan is cancelled or expires, files made with its content \"and saved in Reallusion's proprietary format will revert to Trial Content\", \"will display watermarks in the 3D viewer and cannot be exported\". The Software EULA's subscription terms say expiry \"does not affect your ownership of images, videos, or other outputs lawfully generated during an active subscription period\".",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.reallusion.com/Content/EULA/EULA.htm (curl, 2026-09-23); https://www.reallusion.com/Content/EULA/AP/EULA_AP.htm (curl, 2026-09-23)",
+     "evidence": "3.2 \"If the plan is canceled or expires, any files created with the included content and saved in Reallusion’s proprietary format will revert to Trial Content ... they will display watermarks in the 3D viewer and cannot be exported.\" SW EULA Subscription License D: \"Expiration or termination of a subscription does not affect your ownership of images, videos, or other outputs lawfully generated during an active subscription period.\"",
+     "notes": "Quotes verbatim."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback CDX for EULA.htm since 2025; id_ captures 20250710041038 (text 'Updated May 30th, 2025') and 20250815004032, fetched 2026-09-23; Wayback CDX for EULA_AP.htm since 2025; id_ captures 20251118105851 ('October 29th, 2025'), 20260217155930 ('January 6th, 2026'), 20260625062305, fetched 2026-09-23",
+     "evidence": "May 2025 3.2 same wording (plan then called \"Reallusion Content Annual Plan\"); SW clause D present in January 2026 capture.",
+     "notes": "No change since the claim's texts. The claim names each clause's own EULA and plan (content plan vs software subscription), so it does not merge them."
+    }
+   ]
+  },
+  {
+   "id": "CHT-006",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "Both current Reallusion EULAs say the newest text governs: the Software EULA (\"May 25th, 2026\") says \"The most current version of these Terms supersedes all previous versions\", and the Content EULA (\"Updated August 1st, 2025\") says \"The most current version of these Terms, which supersedes all previous versions.\" The Software EULA's scope, \"all products ... that are currently provided or may be provided in the future by Reallusion\", is absent from its October 29th, 2025 text and present in its January 6th, 2026 text, the next version the Wayback Machine holds. Neither EULA names discontinued versions such as Character Creator 3 or iClone 7, to include or to exclude them.",
+   "sources": [
+    "https://www.reallusion.com/Content/EULA/AP/EULA_AP.htm",
+    "https://www.reallusion.com/Content/EULA/EULA.htm",
+    "https://web.archive.org/web/20251118105851id_/https://www.reallusion.com/Content/EULA/AP/EULA_AP.htm",
+    "https://web.archive.org/web/20260217155930id_/https://www.reallusion.com/Content/EULA/AP/EULA_AP.htm",
+    "https://web.archive.org/cdx/search/cdx?url=www.reallusion.com/Content/EULA/AP/EULA_AP.htm&from=2025&collapse=digest"
+   ],
+   "as_first_reported": "Both current Reallusion EULAs make the newest text govern: the Software EULA \"governs your use of all products ... that are currently provided or may be provided in the future by Reallusion\" and says \"The most current version of these Terms supersedes all previous versions\"; the Content EULA says \"The most current version of these Terms, which supersedes all previous versions.\" Neither exempts legacy versions such as Character Creator 3 or iClone 7.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.reallusion.com/Content/EULA/AP/EULA_AP.htm (curl, 2026-09-23); https://www.reallusion.com/Content/EULA/EULA.htm (curl, 2026-09-23)",
+     "evidence": "SW: \"governs your use of all products, including any associated software upgrades, patches, updates, and related services, that are currently provided or may be provided in the future by Reallusion\"; \"The most current version of these Terms supersedes all previous versions.\" CE: \"The most current version of these Terms, which supersedes all previous versions.\"",
+     "notes": "Quotes verbatim (the CE sentence is a fragment as published). Neither text contains \"legacy\" or names CC3 or iClone 7."
+    },
+    {
+     "lens": "drift",
+     "verdict": "refuted",
+     "read": "Wayback CDX for EULA_AP.htm since 2025; id_ captures 20251118105851 ('October 29th, 2025'), 20260217155930 ('January 6th, 2026'), 20260625062305, fetched 2026-09-23; Wayback CDX for EULA.htm since 2025; id_ captures 20250710041038 (text 'Updated May 30th, 2025') and 20250815004032, fetched 2026-09-23",
+     "evidence": "SW scope: \"all products ... that are currently provided or may be provided in the future\".",
+     "notes": "The scope clause first appears in the January 2026 capture (absent from the October 2025 text). It covers products \"currently provided or may be provided in the future\"; CC3 and iClone 7 are legacy and no longer sold, so the claim's gloss that the text reaches them ('Neither exempts legacy versions') runs current products and discontinued ones together: the text neither exempts nor includes them. The Content EULA governs Content regardless of software version, so the point holds more firmly there than for the software."
+    },
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.reallusion.com/Content/EULA/AP/EULA_AP.htm and https://www.reallusion.com/Content/EULA/EULA.htm, curl with a browser User-Agent, 2026-09-23",
+     "evidence": "SW header: \"(May 25 th , 2026)\" (superscript th); \"governs your use of all products, including any associated software upgrades, patches, updates, and related services, that are currently provided or may be provided in the future by Reallusion\"; \"The most current version of these Terms supersedes all previous versions.\" CE: \"Updated August 1 st , 2025\"; \"The most current version of these Terms, which supersedes all previous versions.\"",
+     "notes": "Every quote and both dates are verbatim (the CE sentence is a fragment as published; the ellipsis in the scope quote drops only \"including any associated ... services,\", which does not change its sense). A search of both live texts for \"Character Creator 3\", \"CC3\", \"iClone 7\", any \"iClone <n>\" or \"Character Creator <n>\", \"legacy\", \"discontinu\", \"older version\" and \"prior version\" finds nothing, so neither names discontinued versions either way. The proposed and final wording differ only in the drift sentence, which this lens does not decide."
+    },
+    {
+     "lens": "drift",
+     "verdict": "refuted",
+     "read": "CDX https://web.archive.org/cdx/search/cdx?url=www.reallusion.com/Content/EULA/AP/EULA_AP.htm&from=2025&collapse=digest (read 2026-09-23: captures 20250120224132, 20250814164505, 20251118105851, 20260217155930, 20260625062305); all five id_ captures fetched 2026-09-23. CE CDX returned \"Temporarily Offline\" on 2026-09-23, so the Content EULA's history was not re-read.",
+     "evidence": "20250120224132: \"(May 10, 2024)\"; 20250814164505: \"(August 1 st , 2025)\"; 20251118105851: \"(October 29 th , 2025)\"; none contains \"currently provided\". 20260217155930: \"(January 6 th , 2026) The following End User License Agreement (“EULA”) governs your use of all products ... that are currently provided or may be provided in the future by Reallusion\". 20260625062305: \"(May 25 th , 2026)\", clause present.",
+     "notes": "\"First appears in its January 2026 text\" says more than the captures show: the archive holds no capture between 2025-11-18 and 2026-02-17, so an unarchived version between October 29th, 2025 and January 6th, 2026 cannot be ruled out. The final wording states only what the captures show (absent in the October 29th, 2025 text, present in the January 6th, 2026 text, the next archived version); re-read against both captures and confirmed. No conflation: the final wording no longer glosses the scope as reaching discontinued products."
+    }
+   ]
+  },
+  {
+   "id": "CHT-007",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": false,
+   "claim": "Content EULA 2.2: \"Member may request authorization for a use not covered by the Standard License ... You may contact Reallusion to negotiate for the Enterprise License case by case\". Reallusion's Enterprise page lists AI training and machine learning, in-app character creation and embedding assets into platforms, and publishes no price.",
+   "sources": [
+    "https://www.reallusion.com/Content/EULA/EULA.htm",
+    "https://www.reallusion.com/license/enterprise.html"
+   ],
+   "as_first_reported": "Content EULA 2.2: \"Member may request authorization for a use not covered by the Standard License ... You may contact Reallusion to negotiate for the Enterprise License case by case\". Reallusion's Enterprise page lists AI training and machine learning, in-app character creation and embedding assets into platforms, and publishes no price.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.reallusion.com/Content/EULA/EULA.htm (curl, 2026-09-23); https://www.reallusion.com/license/enterprise.html (curl, 2026-09-23)",
+     "evidence": "2.2 \"Member may request authorization for a use not covered by the Standard License in this Agreement. You may contact Reallusion to negotiate for the Enterprise License case by case\". Enterprise page: \"AI TRAINING / MACHINE LEARNING\", \"INTEGRATED CHARACTER CREATION ... in-game and in-app character creation systems\", \"CONTENT INTEGRATION ... integrating ActorCore actors, motions, and character assets into your platform\".",
+     "notes": "Quote verbatim; the Enterprise page shows no price, only an inquiry form."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback CDX for EULA.htm since 2025; id_ captures 20250710041038 (text 'Updated May 30th, 2025') and 20250815004032, fetched 2026-09-23; enterprise.html diffed against Wayback 20260810003047: identical.",
+     "evidence": "May 2025: \"not covered by the Standard License or Extended License ... Reallusion will contact you to negotiate\".",
+     "notes": "Wording changed in August 2025; the claim quotes the current form. Enterprise page unchanged since August 2026."
+    }
+   ]
+  },
+  {
+   "id": "CHT-008",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "Reallusion's free CC base characters page says: \"The free CC character base is accessible for both personal and commercial purposes, encompassing applications like filmmaking, animation, gaming, 3D printing, and education\", and refers to the Software EULA \"Section 5: Character Creator Base Model License\". The download needs a Reallusion account (\"Register or log into your Reallusion account to access this free download\").",
+   "sources": [
+    "https://www.reallusion.com/character-creator/free-3d-character-base.html",
+    "https://magazine.reallusion.com/2024/03/20/fully-rigged-cc-character-bases-download-for-free/"
+   ],
+   "as_first_reported": "Reallusion's free CC base characters page says: \"The free CC character base is accessible for both personal and commercial purposes, encompassing applications like filmmaking, animation, gaming, 3D printing, and education\", and refers to the Software EULA \"Section 5: Character Creator Base Model License\". The download needs a Reallusion account (\"Register or log into your Reallusion account to access this free download\").",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.reallusion.com/character-creator/free-3d-character-base.html (curl, 2026-09-23); https://magazine.reallusion.com/2024/03/20/fully-rigged-cc-character-bases-download-for-free/ (curl, 2026-09-23)",
+     "evidence": "\"The free CC character base is accessible for both personal and commercial purposes, encompassing applications like filmmaking, animation, gaming, 3D printing, and education.\" \"(Section 5: Character Creator Base Model License)\"; \"Register or log into your Reallusion account to access this free download.\"",
+     "notes": "All verbatim; the page's EULA link goes to /Content/EULA/AP/EULA_AP.htm, where the Base Model License is indeed the fifth top-level item."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback 20250316134024 and 20260731165911 of the free base page, fetched 2026-09-23; live page identical to the July 2026 capture.",
+     "evidence": "March 2025: same sentence and \"(Section 5: Character Creator Base Model License)\".",
+     "notes": "Stable since at least March 2025 (and the 2024 magazine post). The claim presents it as the page's non-binding summary and points to the binding section, so no conflation; note that the binding section 5 limits commercial use to Original Character Creations with restrictions A to D."
+    }
+   ]
+  },
+  {
+   "id": "CHT-009",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "The free CC base download is \"5 fully-rigged character models in FBX, OBJ, and ZTL formats with texture files\", with \"UDIM layout textures for the head, torso, arms, legs, eyes, and teeth\" and \"150+ facial morphs for expressive lip-sync animation (FBX file)\"; the five are realistic and stylised male and female bases and a neutral base.",
+   "sources": [
+    "https://www.reallusion.com/character-creator/free-3d-character-base.html",
+    "https://magazine.reallusion.com/2024/03/20/fully-rigged-cc-character-bases-download-for-free/"
+   ],
+   "as_first_reported": "The free CC base download is \"5 fully-rigged character models in FBX, OBJ, and ZTL formats with texture files\", with \"UDIM layout textures for the head, torso, arms, legs, eyes, and teeth\" and \"150+ facial morphs for expressive lip-sync animation (FBX file)\"; the five are realistic and stylised male and female bases and a neutral base.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "free-3d-character-base.html and the 2024 magazine post (curl, 2026-09-23)",
+     "evidence": "\"5 fully-rigged character models in FBX, OBJ, and ZTL formats with texture files.\" \"UDIM layout textures for the head, torso, arms, legs, eyes, and teeth.\" \"150+ facial morphs for expressive lip-sync animation (FBX file).\" Magazine: \"both cartoony and realistic male and female characters, as well as a neutral character\".",
+     "notes": "All three quotes verbatim; 'stylised' matches the page's \"Stylized character bases\" and the magazine's \"cartoony\"."
+    }
+   ]
+  },
+  {
+   "id": "CHT-010",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "The Character Creator 5 trial lasts 30 days, allows \"Export FBX, OBJ, and USD\" 30 times, caps image output at 800x600 and video at HD 720P with a watermark and a 30 second limit. CC5 needs Windows 11 or 10 and 8 GB VRAM.",
+   "sources": [
+    "https://www.reallusion.com/character-creator/download.html"
+   ],
+   "as_first_reported": "The Character Creator 5 trial lasts 30 days, allows \"Export FBX, OBJ, and USD\" 30 times, caps image output at 800x600 and video at HD 720P with a watermark and a 30 second limit. CC5 needs Windows 11 or 10 and 8 GB VRAM.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://www.reallusion.com/character-creator/download.html (curl, 2026-09-23)",
+     "evidence": "Trial: \"Time Limitation 30 days\"; \"Export FBX, OBJ, and USD 30 times\"; \"Max Image Output Resolution 800x600\"; \"Max Video Output Resolution HD 720P (1280x720)\"; \"Video Output with Watermark Watermarked\"; \"Video Export Duration 30 seconds\"; Minimum: \"Windows 11, 10\", \"8GB VRAM\".",
+     "notes": "All match. 8 GB VRAM is the minimum (recommended \"8GB VRAM or higher\")."
+    }
+   ]
+  },
+  {
+   "id": "CHT-011",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "Character Creator 5's latest release is v5.13 (5.13.2031.1), dated 1 September 2026.",
+   "sources": [
+    "https://www.reallusion.com/character-creator/update.html"
+   ],
+   "as_first_reported": "Character Creator 5's latest release is v5.13 (5.13.2031.1), dated 1 September 2026.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://www.reallusion.com/character-creator/update.html, curl, read 2026-09-23",
+     "evidence": "\"The Latest Release Version: v5.13 (5.13.2031.1) Release Date: 2026-09-01 File Size: 614 MB\"",
+     "notes": "Version string and date match exactly. 'Latest' is true as of the read date only."
+    }
+   ]
+  },
+  {
+   "id": "CHT-012",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "CC5 ships a Free Resource Pack of \"CC5 HD assets, including complete projects, ready-to-use assets, ActorMIXER content, and lighting presets\", downloaded from the in-app Smart Content Manager; the download page advertises \"2,000+ Free Assets\". Whether each free pack carries a Standard or an iContent licence was not established.",
+   "sources": [
+    "https://www.reallusion.com/character-creator/3d-content.html",
+    "https://www.reallusion.com/character-creator/download.html"
+   ],
+   "as_first_reported": "CC5 ships a Free Resource Pack of \"CC5 HD assets, including complete projects, ready-to-use assets, ActorMIXER content, and lighting presets\", downloaded from the in-app Smart Content Manager; the download page advertises \"2,000+ Free Assets\". Whether each free pack carries a Standard or an iContent licence was not established.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://www.reallusion.com/character-creator/3d-content.html and https://www.reallusion.com/character-creator/download.html, curl, read 2026-09-23",
+     "evidence": "3d-content: \"Enhance your creative workflow with the CC5 Free Resource Pack. Inside you'll discover an extensive library of CC5 HD assets, including complete projects, ready-to-use assets, ActorMIXER content, and lighting presets. To download, open the in-app Smart Content Manager and browse the Pack View > Free Resource category.\" download: \"30-day Free Trial with 2,000+ Free Assets Available\"",
+     "notes": "Both quotes verbatim. The \"2,000+ Free Assets\" phrase sits in the headline \"30-day Free Trial with 2,000+ Free Assets Available\"; the page does not say the 2,000+ are the Free Resource Pack, and the claim does not say so either, but a reader could join them; quoting the whole headline would be safer. Neither page states which licence (Standard or iContent) the free assets carry, so the 'not established' clause stands."
+    }
+   ]
+  },
+  {
+   "id": "CHT-013",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "The Content EULA's 1.5 defines Reallusion's Stores as \"the Reallusion Content Store, Marketplace and ActorCore\", so ActorCore content is Content under that EULA, AI restriction included.",
+   "sources": [
+    "https://www.reallusion.com/Content/EULA/EULA.htm"
+   ],
+   "as_first_reported": "The Content EULA's 1.5 defines Reallusion's Stores as \"the Reallusion Content Store, Marketplace and ActorCore\", so ActorCore content is Content under that EULA, AI restriction included.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.reallusion.com/Content/EULA/EULA.htm (curl, 2026-09-23)",
+     "evidence": "1.5 \"Reallusion’s Stores - Refers to the Reallusion Content Store, Marketplace and ActorCore.\" 1.1 \"Content - Refers to digital assets published at Reallusion’s Stores\".",
+     "notes": "The inference follows directly from 1.1 plus 1.5."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback CDX for EULA.htm since 2025; id_ captures 20250710041038 (text 'Updated May 30th, 2025') and 20250815004032, fetched 2026-09-23; https://actorcore.reallusion.com/eula and /license (Playwright, 2026-09-23)",
+     "evidence": "actorcore.reallusion.com/eula: \"REALLUSION CONTENT END USER LICENSE AGREEMENT Updated August 1st, 2025\" ... \"For machine learning, AI training, or AI-generated output.\"",
+     "notes": "ActorCore's own 'Content EULA' page carries the same August 2025 Content EULA text, and its licence page offers AI training only under Enterprise, so there is no separate ActorCore licence. 1.5 read the same in May 2025."
+    }
+   ]
+  },
+  {
+   "id": "CHT-014",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "ActorCore offers \"3 actors and 32 motions free when you sign up, and free content every month\". AccuRIG is \"free for personal and commercial use\" and \"available for Windows OS only\", and since version 1.3.6 (2024-11-20) \"Login is now required at the start of the application, instead of being prompted at the export stage\".",
+   "sources": [
+    "https://actorcore.reallusion.com/",
+    "https://actorcore.reallusion.com/learn-and-support/faq/accurig",
+    "https://actorcore.reallusion.com/learn-and-support/update/accurig-release-note",
+    "https://actorcore.reallusion.com/auto-rig/accurig"
+   ],
+   "as_first_reported": "ActorCore gives \"3 actors and 32 motions\" free on sign-up plus monthly free content, and AccuRIG is a free Windows auto-rigger that needs an ActorCore account to export (secondary sources).",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "https://actorcore.reallusion.com/ , https://actorcore.reallusion.com/auto-rig/accurig , https://actorcore.reallusion.com/learn-and-support/faq/accurig and https://actorcore.reallusion.com/learn-and-support/update/accurig-release-note, headless Chrome (JS rendered), read 2026-09-23",
+     "evidence": "Home: \"Member Registration Reward Get 3 actors and 32 motions free when you sign up, and free content every month.\" FAQ: \"AccuRIG is a free software/application by Reallusion, it is free for personal and commercial use.\" \"Currently, AccuRIG is available for Windows OS only.\" Release notes 1.3.6 (2024-11-20): \"Login is now required at the start of the application, instead of being prompted at the export stage.\"",
+     "notes": "Sign-up offer, free and Windows parts confirmed on ActorCore's own pages, so the secondary sources (CG Channel 2022, Reallusion Magazine) are replaced. Refuted on 'needs an ActorCore account to export': that described versions before 1.3.6; since 1.3.6 login is required at start, not at export. The FAQ says the ActorCore account 'must be the same as your AccuRIG account' but no page read says outright that the login is an ActorCore account, so the final wording just quotes the release note. Latest AccuRIG is 2.1.0 (2025-12-04). The final wording was re-read against the same pages."
+    }
+   ]
+  },
+  {
+   "id": "CHT-015",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": false,
+   "claim": "soupday/cc_blender_tools, the CC/iC Blender Tools add-on, is GPL-3.0 (code), latest release 2_4_3 on 2026-08-09, and its README names Character Creator 3, 4 and 5 and iClone 7 and 8. soupday/cc_blender_bake is GPL-3.0 (code), last release 1_0_6 on 2022-11-26.",
+   "sources": [
+    "https://github.com/soupday/cc_blender_tools",
+    "https://github.com/soupday/cc_blender_bake"
+   ],
+   "as_first_reported": "soupday/cc_blender_tools, the CC/iC Blender Tools add-on, is GPL-3.0 (code), latest release 2_4_3 on 2026-08-09, and its README names Character Creator 3, 4 and 5 and iClone 7 and 8. soupday/cc_blender_bake is GPL-3.0 (code), last release 1_0_6 on 2022-11-26.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "GitHub API repos/soupday/cc_blender_tools and cc_blender_bake (license, releases, releases/latest), raw LICENSE and README.md, 2026-09-23",
+     "evidence": "license spdx_id \"GPL-3.0\" for both; LICENSE \"GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007\"; README: \"An add-on for importing and automatically setting up materials for Character Creator 3, 4 & 5 and iClone 7 & 8 character exports.\"; latest 2_4_3 2026-08-09; bake 1_0_6 2022-11-26.",
+     "notes": "All as claimed. A pre-release 2_4_4p (\"Preview 2\") was published 2026-09-07; GitHub's releases/latest still returns 2_4_3."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "same GitHub reads, 2026-09-23",
+     "evidence": "cc_blender_bake pushed_at 2022-11-26, not archived.",
+     "notes": "No licence change. The claim scopes GPL-3.0 to code, so no code/content conflation. Worth recording the 2_4_4p pre-release if the note is revised."
+    }
+   ]
+  },
+  {
+   "id": "CHT-016",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": false,
+   "claim": "Reallusion's AI Service EULA (\"May 25th, 2026\"), which governs AI Studio: Starter Plan output is \"non-commercial use only\", Standard and Pro grant commercial use, and \"for Free Plan users, all Output is Public by Default\".",
+   "sources": [
+    "https://www.reallusion.com/Content/EULA/AI-Service.htm"
+   ],
+   "as_first_reported": "Reallusion's AI Service EULA (\"May 25th, 2026\"), which governs AI Studio: Starter Plan output is \"non-commercial use only\", Standard and Pro grant commercial use, and \"for Free Plan users, all Output is Public by Default\".",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.reallusion.com/Content/EULA/AI-Service.htm (curl, 2026-09-23)",
+     "evidence": "\"(May 25 th , 2026)\"; \"The AI Service includes, but is not limited to, the \" Reallusion AI Studio \" platform\"; \"B. Starter Plan: Personal and social media use granted; non-commercial use only. C. Standard Plan: Commercial use granted. D. Pro Plan: Commercial use granted\"; \"for Free Plan users, all Output is Public by Default\".",
+     "notes": "Quotes verbatim; output rights are tied to tier by \"Usage rights for Outputs ... are determined by your subscription tier\"."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback CDX for AI-Service.htm (single capture 20260625060436), fetched 2026-09-23; diffed against live: identical.",
+     "evidence": "Only capture since 2025 is 2026-06-25.",
+     "notes": "No change since the claim date. Omitted but not contradicted: Free Plan output is for \"testing and evaluation purposes only\" and \"not permitted to be used for any purpose\"."
+    }
+   ]
+  },
+  {
+   "id": "CHT-020",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "iClone 7 is a legacy product: Reallusion's knowledge base files it under \"iClone 7 (Legacy)\", the perpetual store lists iClone 8 and no iClone 7, and Reallusion only provides \"the latest three versions re-download service\" (KB 50021). No statement on whether iClone 7 activation still works was found.",
+   "sources": [
+    "https://kb.reallusion.com/Product/1197",
+    "https://www.reallusion.com/plan-and-pricing/individual/perpetual",
+    "https://kb.reallusion.com/General/50021/How-can-I-redownload-the-program-if-I-lost-the-installer-for-legacy-program"
+   ],
+   "as_first_reported": "iClone 7 is a legacy product: Reallusion's knowledge base files it under \"iClone 7 (Legacy)\", the perpetual store lists iClone 8 and no iClone 7, and Reallusion only provides \"the latest three versions re-download service\" (KB 50021). No statement on whether iClone 7 activation still works was found.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://kb.reallusion.com/Product/1197, https://www.reallusion.com/plan-and-pricing/individual/perpetual, https://kb.reallusion.com/General/50021/How-can-I-redownload-the-program-if-I-lost-the-installer-for-legacy-program (all fetched 2026-09-23)",
+     "evidence": "KB 1197 title and breadcrumb: \"Home » Product » iClone » iClone 7 (Legacy)\". KB 50021 (dated 4/13/2023): \"we only provide the latest three versions re-download service on our website\". Perpetual store page text names \"iClone 8\" and \"Character Creator 5\"; no occurrence of \"iClone 7\".",
+     "notes": "All three parts hold. The perpetual page names iClone 8 once and has no iClone 7 product. The last sentence is a negative (nothing found on activation) and was not contradicted by anything read."
+    }
+   ]
+  },
+  {
+   "id": "CHT-021",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "In iClone 7, \"Export FBX: 3DXChange 7 Pipeline\" (KB 52534), and 3DXchange is discontinued: \"All related features are integrated into iClone 8 or Character Creator 4\" (KB 53036, read from a Wayback copy).",
+   "sources": [
+    "https://kb.reallusion.com/Product/52534/What-iClone-features-require-3DXChange-7-to-work",
+    "https://web.archive.org/web/20241007142427id_/https://kb.reallusion.com/Product/53036/Why-3DXchange-is-discontinued"
+   ],
+   "as_first_reported": "In iClone 7, \"Export FBX: 3DXChange 7 Pipeline\" (KB 52534), and 3DXchange is discontinued: \"All related features are integrated into iClone 8 or Character Creator 4\" (KB 53036, read from a Wayback copy).",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://kb.reallusion.com/Product/52534/What-iClone-features-require-3DXChange-7-to-work (live, 2026-09-23); https://web.archive.org/web/20241007142427id_/https://kb.reallusion.com/Product/53036/Why-3DXchange-is-discontinued (read 2026-09-23); live https://kb.reallusion.com/Product/53036/Why-3DXchange-is-discontinued (2026-09-23)",
+     "evidence": "KB 52534 (6/13/2017): \"Export FBX: 3DXChange 7 Pipeline Export Alembic: 3DXChange 7 Pipeline.\" Wayback 2024-10-07 KB 53036 (5/11/2022): \"3DXchange is discontinued. All related features are integrated into iClone 8 or Character Creator 4.\"",
+     "notes": "Both quotes verbatim. The live KB 53036 URL now serves the generic KB home page (article gone), so the Wayback copy is the only readable source, as the claim already says. CDX shows 200 captures of 53036 on 20240222, 20241007 and 20250322."
+    }
+   ]
+  },
+  {
+   "id": "CHT-022",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "The iClone 7 era Software EULA (archived copies dated April 30th, 2019 and January 1, 2021) said \"Publishing Reallusion content in games or interactive installations is authorized\" and \"The unique topology of characters generated by Character Creator is Reallusion’s property. You may not do the following applications unless getting explicit permission from Reallusion: Repurpose them into any other 3D formats, distribute them, or sell them in any third party marketplaces or applications\", and had no AI clause.",
+   "sources": [
+    "https://web.archive.org/web/20200418021130id_/https://www.reallusion.com/Content/EULA/AP/EULA_AP.htm",
+    "https://web.archive.org/web/20210211044524id_/https://www.reallusion.com/Content/EULA/AP/EULA_AP.htm"
+   ],
+   "as_first_reported": "The iClone 7 era Software EULA (archived copies dated April 30th, 2019 and January 1, 2021) said \"Publishing Reallusion content in games or interactive installations is authorized\" and \"The unique topology of characters generated by Character Creator is Reallusion's property. You may not ... Repurpose them into any other 3D formats, distribute them, or sell them in any third party marketplaces or applications\", and had no AI clause.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "https://web.archive.org/web/20210211044524id_/https://www.reallusion.com/Content/EULA/AP/EULA_AP.htm and https://web.archive.org/web/20200418021130id_/ (same URL), both read 2026-09-23",
+     "evidence": "\"The unique topology of characters generated by Character Creator is Reallusion's property. You may not do the following applications unless getting explicit permission from Reallusion: Repurpose them into any other 3D formats, distribute them, or sell them in any third party marketplaces or applications.\" ... \"Publishing Reallusion content in games or interactive installations is authorized.\"",
+     "notes": "Both quoted clauses are verbatim and the dates (April 30th, 2019 in the 2020-04-18 capture; January 1, 2021 in the 2021-02-11 capture) are right; no AI clause in either (grep for AI, artificial, machine, train: none). But the ellipsis drops \"do the following applications unless getting explicit permission from Reallusion:\", so the claim presents a prohibition that the text makes conditional on Reallusion's permission as absolute. Suggested wording: \"You may not do the following applications unless getting explicit permission from Reallusion: Repurpose them into any other 3D formats, ...\"."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "CDX https://web.archive.org/cdx/search/cdx?url=www.reallusion.com/Content/EULA/AP/EULA_AP.htm (read 2026-09-23); captures 20200418021130, 20210211044524, 20210524125232, 20221209133907 read 2026-09-23; live page 2026-09-23",
+     "evidence": "20200418021130: \"Animation Tools (April 30th, 2019)\"; 20210211044524 and 20210524125232: \"Animation Tools (January 1, 2021)\"; 20221209133907: \"Animation Tools (July 27th, 2022)\" with \"characters generated by Character Creator (Reallusion 3D Models) ... You shall not ... Transform Reallusion 3D Models into any other 3D formats\".",
+     "notes": "The 2019 and 2021 texts are identical apart from the date, the product list wording and the copyright line; the text changed on July 27th, 2022, so the claim is correctly scoped as the iClone 7 era text. No conflation: the same paragraph sends store and marketplace content to the Content EULA's Mass Distribution Policy, which CHT-023 covers, and the claim does not stretch \"authorized\" to that content."
+    },
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://web.archive.org/web/20200418021130id_/https://www.reallusion.com/Content/EULA/AP/EULA_AP.htm and https://web.archive.org/web/20210211044524id_/https://www.reallusion.com/Content/EULA/AP/EULA_AP.htm, curl, 2026-09-23",
+     "evidence": "\"The unique topology of characters generated by Character Creator is Reallusion’s property. You may not do the following applications unless getting explicit permission from Reallusion: Repurpose them into any other 3D formats, distribute them, or sell them in any third party marketplaces or applications.\" ... \"Publishing Reallusion content in games or interactive installations is authorized.\" Dates: \"(April 30th, 2019)\" (2020-04-18 capture), \"(January 1, 2021)\" (2021-02-11 capture).",
+     "notes": "The restored quote is verbatim and contiguous in both captures (the 700 characters from \"The unique topology\" are identical in the two), and now keeps the permission condition. The apostrophe in \"Reallusion’s\" is a curly U+2019 in the source. A search for \"AI\", \"artificial\", \"machine\" and \"train\" finds nothing in either capture: no AI clause."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "CDX https://web.archive.org/cdx/search/cdx?url=www.reallusion.com/Content/EULA/AP/EULA_AP.htm&from=2019&to=2023&collapse=digest and captures 20200418021130, 20210211044524, 20210524125232, 20221209133907, all read 2026-09-23",
+     "evidence": "20210524125232: \"(January 1, 2021)\", same topology and publishing clauses. 20221209133907: \"(July 27th, 2022)\", \"characters generated by Character Creator (Reallusion 3D Models) is Reallusion’s property. You shall not do the following applications unless getting explicit permission from Reallusion: Transform Reallusion 3D Models into any other 3D formats\"; the publishing sentence is gone.",
+     "notes": "The CDX lists no text between the 2021-05-24 and 2022-12-09 captures, and the clauses changed with the July 27th, 2022 text, so the claim is correctly scoped to the 2019 and 2021 texts. The \"iClone 7 era\" label is the claim's dating, not the EULA's: neither capture names a product version. No conflation: the claim does not stretch \"authorized\" to store or marketplace content."
+    }
+   ]
+  },
+  {
+   "id": "CHT-023",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "Before 27 July 2022, exporting Reallusion content needed an Export License (Export_License.pdf, 2015: \"Export license is an upgrade of iContent License which allows you to convert iContent into FBX, OBJ or BVH formats through the use of 3DXchange Pipeline\") and game use needed a free Mass Distribution Rights registration. The Content License Policy page's visible FAQ now says: \"All Standard Licenses, regardless of when they were purchased, are covered under the new Standard License policy.\" Older answers about legacy Export Licenses and Mass Distribution Rights (the source of the 27 July 2022 date) remain in the page's markup, but in a block styled display: none, so readers do not see them; the FAQ data file also holds the Mass Distribution Rights answer, as an entry marked disabled.",
+   "sources": [
+    "https://www.reallusion.com/ContentStore/Export_License.pdf",
+    "https://www.reallusion.com/license/content.html",
+    "https://www.reallusion.com/includes/rl-modules/faq/data/cs-content-policy-faq-general/en.json"
+   ],
+   "as_first_reported": "Before 27 July 2022, exporting Reallusion content needed an Export License (Export_License.pdf, 2015: \"Export license is an upgrade of iContent License which allows you to convert iContent into FBX, OBJ or BVH formats through the use of 3DXchange Pipeline\") and game use needed a free Mass Distribution Rights registration. The Content License Policy now says \"The legacy rights for iContent and Export License fall within the purview of the Standard License\" (Q3), export-ready content bought before that date got free Extended Licenses (Q4), and \"Reallusion no longer accepts free Mass Distribution Rights applications\" (Q10).",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.reallusion.com/ContentStore/Export_License.pdf (fetched 2026-09-23, one page, image only, read by rendering it); https://www.reallusion.com/license/content.html (fetched 2026-09-23)",
+     "evidence": "PDF: \"Export license is an upgrade of iContent License which allows you to convert iContent into FBX, OBJ or BVH formats through the use of 3DXchange Pipeline.\" \"To get the free mass distribution rights ... developers and vendors must first register\". Policy Q3: \"The legacy rights for iContent and Export License fall within the purview of the Standard License.\" Q4: \"Export-ready content that are purchased before July 27th, 2022 will receive FREE Extended Licenses\". Q10: \"Reallusion no longer accepts free Mass Distribution Rights applications by email.\"",
+     "notes": "All quotes verbatim; the PDF footer reads \"Copyright © 2015 Reallusion Inc.\" and its metadata dates are 6 Nov 2015. Q10 continues \"by email\"; the claim's cut is a verbatim substring and the answer goes on to say buy a licence instead, so it is not stretched. Q4's question is about \"Export Licenses for some CC Component [2] content\"; its answer is worded generally."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "CDX for Export_License.pdf and license/content.html (read 2026-09-23); content.html captures 20220816213106, 20240329174715, 20260830084432 read 2026-09-23",
+     "evidence": "Only Wayback capture of the PDF is 20151122204711, digest CWU6X5ZO4WHXPPXR2MY4SNKJJRK4ABVW, which equals the base32 SHA-1 of the live file fetched today. content.html 20220816213106: \"Q2. ... fall within the purview of the new Standard License\", \"Q9. ... no longer accepts free Mass Distribution Rights applications by email\"; 20240329174715 onward: Q3, Q4, Q10.",
+     "notes": "The PDF has not changed since 2015. The policy's substance is unchanged since its first capture (Aug 2022); only the question numbers moved (Q2/Q3/Q9 in 2022, Q3/Q4/Q10 from March 2024) and \"new Standard License\" became \"Standard License\". The claim's Q numbers match the current page. No conflation found: the 2015 PDF is dated and the post-2022 policy is the source for the transition."
+    },
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "https://www.reallusion.com/ContentStore/Export_License.pdf (fetched 2026-09-23, Last-Modified 6 Nov 2015, image-only, rendered with pdftoppm and read); https://www.reallusion.com/license/content.html (curl and rendered in Playwright 2026-09-23 (own tab): Q1 to Q11 p.question elements all offsetWidth/Height 0; enclosing element <div class=\"rl-row-1440 rl-row-80\" style=\"display: none;\"> (computed display none); visible #faq-general questions are the six non-disabled en.json entries); https://www.reallusion.com/includes/rl-modules/faq/data/cs-content-policy-faq-general/en.json (fetched 2026-09-23, Last-Modified 15 Aug 2025)",
+     "evidence": "PDF: \"Export license is an upgrade of iContent License which allows you to convert iContent into FBX, OBJ or BVH formats through the use of 3DXchange Pipeline.\" en.json (disabled:false): \"Yes. All Standard Licenses, regardless of when they were purchased, are covered under the new Standard License policy.\" Hidden block Q3: \"The legacy rights for iContent and Export License fall within the purview of the Standard License.\" en.json disabled:true: \"Is there any way to apply for free Mass Distribution Rights certificate?\"",
+     "notes": "Proposed wording refuted on one point: it says the older answers' \"FAQ data entries are marked disabled\". en.json has only five disabled entries (old Q7 to Q11: Extended once, contractor, character creation, Mass Distribution Rights, embedded content). The legacy Export License answers (Q3, Q4) have no entry in the data file at all; they exist only in the hidden markup. Everything else holds: the hidden block encloses Q1 to Q11 and renders invisible; the quoted visible answer is shown (in the accordion) and verbatim. Final wording fixed accordingly and re-read against the same fetches: confirmed."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "CDX for reallusion.com/license/content.html from 2025 (read 2026-09-23 after one Wayback 'Temporarily Offline' retry); captures 20250201013324, 20250404234513, 20250524125851, 20251206215335, 20260214221206, 20260225144122, 20260331211112, 20260524061802, 20260704061627, 20260830084432 fetched with id_ and parsed; CDX for Export_License.pdf not re-run; CDX for the en.json returned no captures",
+     "evidence": "20250524125851: Q1 to Q11 present, no display:none ancestor, no 2025.8.1 banner, no cs-content-policy-faq-general loader. 20251206215335 onward (all later captures and live): banner \"License Update (2025.8.1)\", Q1 to Q11 inside <div class=\"rl-row-1440 rl-row-80\" style=\"display: none;\">, new FAQ loaded from cs-content-policy-faq-general.",
+     "notes": "Last capture with the old FAQ visible: 20250524125851 (24 May 2025). First capture with it hidden: 20251206215335 (6 Dec 2025). No capture in between; the change most likely came with the 2025.8.1 update (en.json Last-Modified 15 Aug 2025) but Wayback cannot date it more closely. The hidden state is unchanged in every capture since. No conflation: the 2015 PDF is dated and the hidden answers are described as hidden, not as current policy."
+    }
+   ]
+  },
+  {
+   "id": "CHT-024",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "Only same-generation Reallusion tools sync: \"CC3 can transfer character to iClone 7, or CC4 can transfer character to iClone 8\", and iClone 8 can read iClone 7 projects (KB 53039).",
+   "sources": [
+    "https://kb.reallusion.com/Product/53039/Can-iClone-8-be-used-together-with-CC3-OR-can-iClone-7-be-used-together-with-CC4-"
+   ],
+   "as_first_reported": "Only same-generation Reallusion tools sync: \"CC3 can transfer character to iClone 7, or CC4 can transfer character to iClone 8\", and iClone 8 can read iClone 7 projects (KB 53039).",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://kb.reallusion.com/Product/53039/Can-iClone-8-be-used-together-with-CC3-OR-can-iClone-7-be-used-together-with-CC4- , curl, read 2026-09-23 (the bare /Product/53039 URL now serves only the KB index; the slug URL serves the article)",
+     "evidence": "\"No. Only the same generation software can be synced together. For instance, CC3 can transfer character to iClone 7, or CC4 can transfer character to iClone 8. Take note that iClone 8 and CC4 are backwards compatible, meaning that iClone 8 can read iClone 7 projects.\" Last Modified: 10/13/2025",
+     "notes": "Quote verbatim. The KB speaks of CC and iClone only; 'Reallusion tools' should be read as those two. The source URL should carry the slug, since the bare id URL no longer renders the article body."
+    }
+   ]
+  },
+  {
+   "id": "CHT-025",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Reallusion's current products are Windows only: a Reallusion forum post by Pete_RL (3 December 2024) says \"All Reallusion products are for Windows only. Linux is not supported.\", though Cartoon Animator had a Mac version until Cartoon Animator 5 (KB 53088). iClone 7's manual lists Windows 10, 8 and 7 SP1.",
+   "sources": [
+    "https://discussions.reallusion.com/t/linux-for-reallusion-software/12694",
+    "https://manual.reallusion.com/iClone_7/ENU/Content/iClone_7/Pro_7.4/04_Introducing_the_User_Interface/System_Requirements.htm"
+   ],
+   "as_first_reported": "Every Reallusion product is Windows only. A Reallusion forum post by Pete_RL (3 December 2024) says \"All Reallusion products are for Windows only. Linux is not supported.\" iClone 7's manual lists Windows 10, 8 and 7 SP1.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "https://discussions.reallusion.com/t/linux-for-reallusion-software/12694, https://manual.reallusion.com/iClone_7/ENU/Content/iClone_7/Pro_7.4/04_Introducing_the_User_Interface/System_Requirements.htm, https://kb.reallusion.com/Product/53088/Why-is-Cartoon-Animator-5-only-available-for-Windows-OS-and-not-for-Mac-OS (all fetched 2026-09-23)",
+     "evidence": "Forum: \"Pete_RL December 3, 2024, 3:03pm ... All Reallusion products are for Windows only. Linux is not supported.\" Manual: \"Operating System Windows 10, 8 and 7 (Sp1)\". KB 53088 (9/6/2022): \"we will no longer be providing the Cartoon Animator Mac version after the Cartoon Animator 5 launch.\"",
+     "notes": "The forum quote and the iClone 7 requirements are right. The claim's own opening, \"Every Reallusion product is Windows only\", says more than the sources: Reallusion shipped a Cartoon Animator Mac version up to Cartoon Animator 4 (KB 53088). The forum post is a staff reply, not a spec page, and speaks of current products."
+    }
+   ]
+  },
+  {
+   "id": "CHT-030",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Autodesk Character Generator is reached only \"as part of an Autodesk Maya, Autodesk Maya LT, Autodesk 3ds Max, Autodesk MotionBuilder, Autodesk Mudbox software, and Autodesk Media & Entertainment Collection subscription entitlement\"; standalone subscriptions ended on 7 August 2021, and an FAQ dated 10 February 2022 announced that it would move to Autodesk Forge on 22 March 2022 without migrating earlier assets, and that premium characters would no longer require cloud credits. Maya LT itself stopped selling on 7 December 2022.",
+   "sources": [
+    "https://charactergenerator.autodesk.com/",
+    "https://www.autodesk.com/support/technical/article/caas/tsarticles/ts/1M8HMZJKuBRw9cnzLLza5l.html",
+    "https://www.autodesk.com/products/maya-lt/overview"
+   ],
+   "as_first_reported": "Autodesk Character Generator is reached only \"as part of an Autodesk Maya, Autodesk Maya LT, Autodesk 3ds Max, Autodesk MotionBuilder, Autodesk Mudbox software, and Autodesk Media & Entertainment Collection subscription entitlement\"; standalone subscriptions ended on 7 August 2021, it moved to Autodesk Forge on 22 March 2022 without migrating earlier assets, and it no longer consumes cloud credits (FAQ dated 10 February 2022). Maya LT itself stopped selling on 7 December 2022.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "https://charactergenerator.autodesk.com/ (curl, 2026-09-23); https://www.autodesk.com/support/technical/article/caas/tsarticles/ts/1M8HMZJKuBRw9cnzLLza5l.html (Playwright, 2026-09-23); https://www.autodesk.com/products/maya-lt/overview (Playwright, 2026-09-23); help page GUID-4051534C (curl, 2026-09-23)",
+     "evidence": "Landing: \"You can access Character Generator as part of an Autodesk® Maya®, Autodesk® Maya LT™, ... Autodesk® Media & Entertainment Collection subscription entitlement.\" FAQ (\"Feb 10, 2022\"): \"Starting August 7, 2021, standalone subscriptions ... will no longer be available\"; \"On March 22, 2022, Autodesk Character Generator software is moving to the Autodesk Forge platform ... all assets previously created in Character Generator will not migrate\"; \"generating and downloading premium characters ... will no longer require cloud credit consumption\". Maya LT: \"On December 7, 2022, Autodesk discontinued the sale of new and renewal of Maya LT subscriptions.\"",
+     "notes": "Dates, entitlement list and Maya LT end of sale match. Two parts say more than the FAQ: it announces the Forge move as future (\"is moving\"), not that it happened; and it drops cloud credits only for premium characters, not for the service as a whole. The landing quote drops the trademark symbols (cosmetic). \"only\" is supported by the help page: \"Access to Character Generator is limited to subscribers of ...\"."
+    }
+   ]
+  },
+  {
+   "id": "CHT-031",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "No current Autodesk terms page names Character Generator: the Special Terms (\"Last updated: December 8, 2025\") list only Tinkercad, Instructables and Dynamo Package Manager as offerings with their own terms, and the service's own \"Terms and Conditions\" link goes to the General Terms (\"last updated: March 30, 2026\"). Those assign no ownership of \"Output\"; section 5 covers material \"created by You ... and submitted or uploaded to an Offering\", and section 13 reserves to Autodesk \"the Offerings ... and other information or material made available to You by Autodesk\" and \"any materials or other information based on, derived from, or otherwise using any of the foregoing\".",
+   "sources": [
+    "https://www.autodesk.com/company/terms-of-use/en/general-terms",
+    "https://www.autodesk.com/company/terms-of-use/en/special-terms",
+    "https://charactergenerator.autodesk.com/"
+   ],
+   "as_first_reported": "No current Autodesk terms page names Character Generator: the Special Terms (\"Last updated: December 8, 2025\") list only Tinkercad, Instructables and Dynamo Package Manager as offerings with their own terms, and the service's own \"Terms and Conditions\" link goes to the General Terms (\"last updated: March 30, 2026\"). Those assign no ownership of \"Output\"; section 5 covers material \"created by You ... and submitted or uploaded to an Offering\", and section 13 reserves to Autodesk \"the Offerings ... and other information or material made available to You by Autodesk\" and \"any materials or other information based on, derived from, or otherwise using any of the foregoing\".",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.autodesk.com/company/terms-of-use/en/general-terms and https://www.autodesk.com/company/terms-of-use/en/special-terms (Playwright innerText, 2026-09-23); https://charactergenerator.autodesk.com/ (curl, 2026-09-23)",
+     "evidence": "Special: \"Last updated: December 8, 2025\"; \"The following Offerings have their own terms of service ...: Tinkercad Instructables Dynamo Package Manager\". CG footer: <a href=\"https://www.autodesk.com/company/terms-of-use/en/general-terms\">Terms and Conditions</a>. General: \"General Terms last updated: March 30, 2026\"; s5 \"created by You (or Your Authorized Users) and submitted or uploaded to an Offering\"; s13 \"(a) the Offerings, Documentation, APIs, and other information or material made available to You by Autodesk\", \"(b) any materials or other information based on, derived from, or otherwise using any of the foregoing\".",
+     "notes": "All quotes verbatim; \"Character Generator\" appears on none of the General, Special, Acceptable Use or Offering Types pages. No clause assigns ownership of Output. Worth adding: s18 defines \"Your Content\" to include \"(b) Your specific output generated from the use of any Offering based on Your own raw data or information\", yet s5 retains ownership only of uploaded material, so the gap the claim describes stands, but the definition bears on it."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback id_ snapshots of general-terms 20251231 (Dec 8, 2025), 20260613212151 and 20260906171649 (Mar 30, 2026); special-terms 20251231141442, 20260315113308, 20260616191701; read 2026-09-23",
+     "evidence": "All three General Terms snapshots carry the s5 and s13 wording and the Your Content (b) definition; Special Terms snapshots all \"Last updated: December 8, 2025\" with the same three offerings and no Character Generator.",
+     "notes": "No change to the quoted text since December 2025. Conflation risk to flag, not an error: General Terms s2 says Special Terms may also be \"set forth in the Special Terms or in the Documentation for the Offerings\", and the CG About panel says use \"is subject to the terms and conditions of the Autodesk license agreement accepted upon installation of this Software and/or packaged with the Software\"; neither names a CG-specific text, so the claim holds."
+    }
+   ]
+  },
+  {
+   "id": "CHT-032",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "The Character Generator Terms of Service PDF, headed \"updated 7/2013\", says \"Autodesk does not own Your Content\", counts as Your Content \"Your specific output generated from the Service, if any, based on Your own raw data or information\", and reserves to Autodesk materials \"generated by, the Service (excluding Your Content)\". No page says whether this PDF still applies.",
+   "sources": [
+    "https://damassets.autodesk.net/content/dam/autodesk/www/Company/docs/pdf/legal-notices-&-trademarks/character-generator-terms-service.pdf"
+   ],
+   "as_first_reported": "The Character Generator Terms of Service PDF, headed \"updated 7/2013\", says \"Autodesk does not own Your Content\", counts as Your Content \"Your specific output generated from the Service, if any, based on Your own raw data or information\", and reserves to Autodesk materials \"generated by, the Service (excluding Your Content)\". No page says whether this PDF still applies.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://damassets.autodesk.net/content/dam/autodesk/www/Company/docs/pdf/legal-notices-&-trademarks/character-generator-terms-service.pdf (curl + pdftotext, 2026-09-23)",
+     "evidence": "Heading \"Autodesk® Character Generator (updated 7/2013)\"; s2.1 \"Autodesk does not own Your Content.\"; s10.31 \"(2) Your specific output generated from the Service, if any, based on Your own raw data or information\"; s5.1 \"... or generated by, the Service (excluding Your Content).\"",
+     "notes": "All three quotes verbatim. The CG site, General, Special, AUP and Offering Types pages do not link or mention this PDF, so \"No page says whether this PDF still applies\" holds for every page read."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback CDX for the PDF URL (read 2026-09-23); SHA-1 of today's download",
+     "evidence": "Only Wayback capture 20220819162331, digest GE7HF6CVZWCJ4OA5RTV2BDHNUI4K2EQG; today's file hashes to GE7HF6CVZWCJ4OA5RTV2BDHNUI4K2EQG (PDF CreationDate 2017-02-24).",
+     "notes": "PDF unchanged since at least August 2022. The claim keeps the 2013 PDF apart from the current terms. Context worth adding: General Terms 17.12 says they \"merge and supersede any prior or contemporaneous agreements\" on their subject matter; that is generic and does not name the PDF, so the claim is not wrong."
+    }
+   ]
+  },
+  {
+   "id": "CHT-033",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "Neither the Character Generator Terms of Service PDF (updated 7/2013) nor Autodesk's General Terms or Special Terms grants commercial or game use of Character Generator output; the explicit permissions found are Autodesk forum posts. verafx (2014-02-20, accepted solution): \"You can use the characters you generate commercially; whether it is for a game ...\". gaudres (2016-01-19): \"We don't restrict what you can do ('commercially' or otherwise) with the characters you create, as long as you do not redistribute the DNA data file.\" Mark.Lancaster, who signs as \"not an Autodesk Employee\", answered a Character Generator question on 2016-04-25: \"If you're not a student and your purchased a commerical version then you can use any asset you created in any game you develop\"; his accepted solution (2016-04-28) reads \"If you are not a student then its allowed.\" verafx and gaudres carry an \"Alumni\" rank, and neither page says either was Autodesk staff.",
+   "sources": [
+    "https://forums.autodesk.com/t5/character-generator-forum/how-can-the-paid-generated-characters-be-used-commercially/td-p/4829003",
+    "https://forums.autodesk.com/t5/installation-licensing-forum/character-generator-license/td-p/6289648",
+    "https://damassets.autodesk.net/content/dam/autodesk/www/Company/docs/pdf/legal-notices-&-trademarks/character-generator-terms-service.pdf",
+    "https://www.autodesk.com/company/terms-of-use/en/general-terms",
+    "https://www.autodesk.com/company/terms-of-use/en/special-terms"
+   ],
+   "as_first_reported": "The only explicit permission for commercial or game use found is in Autodesk forum posts: verafx (2014-02-20, accepted solution) \"You can use the characters you generate commercially; whether it is for a game ...\", and gaudres (2016-01-19) \"We don't restrict what you can do ('commercially' or otherwise) with the characters you create, as long as you do not redistribute the DNA data file.\" Both carry an \"Alumni\" rank; neither page says the author was Autodesk staff.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "https://forums.autodesk.com/t5/character-generator-forum/how-can-the-paid-generated-characters-be-used-commercially/td-p/4829003 and https://forums.autodesk.com/t5/installation-licensing-forum/character-generator-license/td-p/6289648 (Playwright, innerText and rank elements, 2026-09-23)",
+     "evidence": "verafx 02-20-2014, \"Accepted solution\", rank Alumni: \"You can use the characters you generate commercially; whether it is for a game, a film ...\". gaudres 01-19-2016, rank Alumni: \"We don’t restrict what you can do (“commercially” or otherwise) with the characters you create, as long as you do not redistribute the DNA data file.\" Page 6289648, Mark.Lancaster 04-28-2016, Accepted solution: \"If you are not a student then its allowed.\"; 04-25-2016: \"you can use any asset you created in any game you develop\" ... \"not an Autodesk Employee\".",
+     "notes": "Both quotes, dates, the accepted-solution mark and the Alumni ranks are right, and neither page says either author was staff (gaudres signs \"Sophie\" and writes \"We\"). But \"the only explicit permission\" is wrong on the claim's own second source: Mark.Lancaster's accepted solution there also permits game use, from a self-described non-employee. Both quoted posts are on the first page; the second page only re-quotes gaudres's first paragraph, not the \"We don't restrict\" sentence."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Same two pages, 2026-09-23; CG ToS PDF (updated 7/2013)",
+     "evidence": "verafx: \"The full details are contained in the Terms of Service, but essentially you can use them without restriction.\" gaudres: \"The Character Generator Terms of Service are not intended to limit what a user can do with the output\".",
+     "notes": "The claim keeps forum posts apart from the licence and flags the posters' standing, so no conflation. The posts date from 2014 and 2016 and speak to the 2013-era Terms of Service, before the 2021 standalone end and the announced 2022 Forge move; the claim gives their dates, so that is visible."
+    },
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "Both forum threads, the General Terms and the Special Terms (Playwright, own tab, innerText, 2026-09-23); Character Generator Terms of Service PDF (curl and pdftotext, 2026-09-23)",
+     "evidence": "6289648: Mark.Lancaster 04-25-2016 05:45 AM (no accepted mark): \"If you're not a student and your purchased a commerical version then you can use any asset you created in any game you develop.\" ... \"not an Autodesk Employee\". 04-28-2016 06:17 AM, \"Accepted solution\": \"If you are not a student then its allowed.\" 4829003: verafx 02-20-2014 \"Accepted solution\", rank Alumni; gaudres 01-19-2016, rank Alumni, quote as given.",
+     "notes": "Refutes the proposed wording: the quoted game-use sentence is from Mark.Lancaster's 2016-04-25 post, which is not the accepted solution; the accepted one (2016-04-28) says only \"If you are not a student then its allowed.\" The quote is also conditional on not being a student and on a purchased commercial version. verafx and gaudres quotes, dates and ranks are right. No grant of commercial or game use in the CG ToS PDF (updated 7/2013; says \"Autodesk does not own Your Content\"), the General Terms (last updated March 30, 2026) or Special Terms (December 8, 2025). The final claim names the terms read and splits the two posts; re-read against the same pages, it holds."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Same pages, 2026-09-23; Wayback CDX for the thread and General Terms URLs (returned nothing, then \"Temporarily Offline\", 2026-09-23)",
+     "evidence": "General Terms \"last updated: March 30, 2026\"; Special Terms \"Last updated: December 8, 2025\"; CG ToS \"Autodesk® Character Generator (updated 7/2013)\". gaudres: \"The Character Generator Terms of Service are not intended to limit what a user can do with the output\".",
+     "notes": "Wayback could not be read today, so no snapshot comparison. The final claim dates each post (2014, 2016) and each terms text, so the gap between 2013-era forum reassurance and the 2026 General Terms is visible; it keeps forum posts apart from binding terms and flags the posters' standing (Mark.Lancaster self-described non-employee, ranked \"Consultant\"). Mark.Lancaster's first question was \"What application are you using?\", so his answer is generic Autodesk advice in reply to a Character Generator question; the final claim says only that."
+    }
+   ]
+  },
+  {
+   "id": "CHT-034",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "Autodesk's Acceptable Use Policy (\"Last updated: December 8, 2025\") bars using any Offering \"to reverse engineer or replicate the functionality of any Offering, including through training of any machine learning or artificial intelligence algorithm or model\". The General Terms contain no machine learning or artificial intelligence clause.",
+   "sources": [
+    "https://www.autodesk.com/company/terms-of-use/en/acceptable-use",
+    "https://www.autodesk.com/company/terms-of-use/en/general-terms"
+   ],
+   "as_first_reported": "Autodesk's Acceptable Use Policy (\"Last updated: December 8, 2025\") bars using any Offering \"to reverse engineer or replicate the functionality of any Offering, including through training of any machine learning or artificial intelligence algorithm or model\". The General Terms contain no machine learning or artificial intelligence clause.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.autodesk.com/company/terms-of-use/en/acceptable-use and https://www.autodesk.com/company/terms-of-use/en/general-terms (Playwright innerText, 2026-09-23)",
+     "evidence": "AUP \"Last updated: December 8, 2025\"; \"Use any Offerings to reverse engineer or replicate the functionality of any Offering, including through training of any machine learning or artificial intelligence algorithm or model;\". General Terms: the only \"machine\" match is \"machine IDs\" in 17.8; no \"artificial intelligence\".",
+     "notes": "Quote verbatim. General Terms 11.3 binds users to the AUP: \"only in compliance with the Acceptable Use Policy\"."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback id_ AUP snapshots 20251003014629, 20251226152649, 20260311135051, 20260607052951; General Terms 20251231, 20260613212151, 20260906171649; read 2026-09-23",
+     "evidence": "Dec 2025 to Jun 2026 AUP snapshots: same clause, \"Last updated: December 8, 2025\". Oct 2025 AUP instead read: \"Use any Offering or related Output in connection with the training of any machine learning or artificial intelligence algorithm, software, or system;\".",
+     "notes": "Unchanged since the claim's date. Before 8 December 2025 the ban was broader and reached Output used for training; the current clause no longer names Output. The claim is right about the current text; the earlier wording may matter to anyone relying on pre-December 2025 terms."
+    }
+   ]
+  },
+  {
+   "id": "CHT-035",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": false,
+   "claim": "Education Offerings may not be used \"for commercial or professional purposes\", and their Output \"may contain certain notices and limitations that make the Output and other data usable only in certain circumstances\" (\"Last updated: September 17, 2026\").",
+   "sources": [
+    "https://www.autodesk.com/company/terms-of-use/en/offering-types-and-benefits"
+   ],
+   "as_first_reported": "Education Offerings may not be used \"for commercial or professional purposes\", and their Output \"may contain certain notices and limitations that make the Output and other data usable only in certain circumstances\" (\"Last updated: September 17, 2026\").",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.autodesk.com/company/terms-of-use/en/offering-types-and-benefits (Playwright innerText, 2026-09-23)",
+     "evidence": "\"Last updated: September 17, 2026\"; \"Education Users may not access or use the Education Offering for commercial or professional purposes, training classes ...\"; \"Output and other data created with Education Offerings may contain certain notices and limitations that make the Output and other data usable only in certain circumstances (e.g., only in the education field).\"",
+     "notes": "Quoted fragments verbatim; the claim's subject (\"Education Offerings may not be used\") paraphrases \"Education Users may not access or use the Education Offering\" without changing the meaning."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback id_ snapshots 20260417152711 (April 16, 2026) and 20260902132526 (August 28, 2026); read 2026-09-23",
+     "evidence": "Both snapshots contain \"for commercial or professional purposes\" and \"may contain certain notices and limitations that make the Output and other data usable only in certain circumstances\".",
+     "notes": "The page is revised often (April 16, August 28, September 17, 2026) but the two clauses are unchanged across those versions."
+    }
+   ]
+  },
+  {
+   "id": "CHT-036",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": false,
+   "claim": "General Terms 16.3: on expiry of a subscription \"You will stop all access to and use of the Offering and uninstall any and all copies of materials related to such Offering\"; whether downloaded characters count as such materials is not said.",
+   "sources": [
+    "https://www.autodesk.com/company/terms-of-use/en/general-terms"
+   ],
+   "as_first_reported": "General Terms 16.3: on expiry of a subscription \"You will stop all access to and use of the Offering and uninstall any and all copies of materials related to such Offering\"; whether downloaded characters count as such materials is not said.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.autodesk.com/company/terms-of-use/en/general-terms (Playwright innerText, 2026-09-23)",
+     "evidence": "16.3: \"At that time, You will stop all access to and use of the Offering and uninstall any and all copies of materials related to such Offering (including any related Software, Documentation, APIs, or other material from Autodesk).\"",
+     "notes": "Quote verbatim. The section does not say whether downloaded Output counts; it treats \"Your Content\" separately (Autodesk may give a period to retrieve it, or delete it)."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback id_ general-terms 20251231 (December 8, 2025), 20260613212151 and 20260906171649 (March 30, 2026); read 2026-09-23",
+     "evidence": "All three contain \"uninstall any and all copies of materials related to such Offering\".",
+     "notes": "Unchanged across the December 2025 and March 2026 versions."
+    }
+   ]
+  },
+  {
+   "id": "CHT-037",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Character Generator downloads as \"Generic .fbx\", \"Maya ( .mb )\", \"3ds Max ( .fbx )\" or \"Unity ( .fbx )\", at Crowd, Low, Medium or High poly resolution, quads or triangles, with a Medium or High skeleton, and with facial blend shapes, a facial bone rig for Maya, or neither; an account may hold at most 200 designs and 200 generated characters.",
+   "sources": [
+    "https://help.autodesk.com/cloudhelp/ENU/CharacterGen-Help/files/GUID-D94ACE19-A565-4E52-B974-58064420CC1F.htm",
+    "https://help.autodesk.com/cloudhelp/ENU/CharacterGen-Help/files/GUID-4051534C-3CD3-4826-8F98-FE3DD557E155.htm"
+   ],
+   "as_first_reported": "Character Generator downloads as \"Generic .fbx\", \"Maya ( .mb )\", \"3ds Max ( .fbx )\" or \"Unity ( .fbx )\", at Crowd, Low, Medium or High poly resolution, quads or triangles, with a Medium or High skeleton, and with facial blend shapes, a facial bone rig for Maya, or neither; an account may hold at most 200 designs and 200 generated characters.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "help.autodesk.com GUID-D94ACE19-A565-4E52-B974-58064420CC1F.htm and GUID-4051534C-3CD3-4826-8F98-FE3DD557E155.htm (curl, 2026-09-23)",
+     "evidence": "Options: \"Crowd\", \"Low\", \"Medium\", \"High\"; \"Quads\", \"Triangles\"; Facial Expressions \"None\", \"Facial blend shapes\", \"Facial bone rig ... for facial animation in Maya\"; \"Generic .fbx\", \"Maya ( .mb )\", \"3ds Max ( .fbx )\", \"Unity ( .fbx )\"; Skeleton Resolution \"Medium\", \"High\". \"Character Generator lets you create a maximum of 200 character designs and 200 generated characters.\"",
+     "notes": "All matches. Nuance: the procedure says to choose a skeleton resolution for the Generic .fbx and Maya ( .mb ) options; it does not offer one for 3ds Max or Unity. This is help documentation, not a test of the live service."
+    }
+   ]
+  },
+  {
+   "id": "CHT-038",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "Whether Character Generator still generates characters in 2026 was not tested; a forum post of 2025-08-06 asks Autodesk to \"make the character generator work again\" and has no reply. Autodesk lists Mudbox \"Starting at $9 / month\" and Maya and 3ds Max \"Starting at $168 / month\" (US, 2026-09-23).",
+   "sources": [
+    "https://forums.autodesk.com/t5/character-generator-forum/come-back-with-autodesk-character-generator/td-p/13756280",
+    "https://www.autodesk.com/products/mudbox/overview",
+    "https://www.autodesk.com/products/maya/overview",
+    "https://www.autodesk.com/products/3ds-max/overview"
+   ],
+   "as_first_reported": "Whether Character Generator still generates characters in 2026 was not tested; a forum post of 2025-08-06 asks Autodesk to \"make the character generator work again\" and has no reply. Autodesk lists Mudbox \"Starting at $9 / month\" and Maya and 3ds Max \"Starting at $168 / month\" (US, 2026-09-23).",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "forums.autodesk.com thread 13756280 and www.autodesk.com Mudbox, Maya and 3ds Max overview pages, Playwright (own page in the shared context, closed after), read 2026-09-23",
+     "evidence": "Forum: \"08-06-2025 06:53 AM 238 Views 0 Replies ... Please can you make the character generator work again because this character creator has been discontinued.\" \"Replies (0)\". Mudbox: \"Mudbox Starting at $9 / month\". Maya: \"Maya Starting at $168 / month\". 3ds Max: \"3ds Max Starting at $168 / month\".",
+     "notes": "All parts match. Forum date shown as 08-06-2025 in US format, i.e. 6 August 2025. Prices are what autodesk.com served to this host (USD); 'US' is an inference from the dollar pricing and .com site, not a region label on the page. The untested part is a statement about this project and needs no source. Maya and 3ds Max overview pages added as sources."
+    }
+   ]
+  },
+  {
+   "id": "CHT-040",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "Maxon's EULA (\"Updated April, 2026\") covers ZBrush on desktop and iPad (\"ZBrush operating on desktop and/or ZBrush operating on iPad\"). It defines \"User Content\" as \"any images, models, materials, textures, files, content, and materials that User creates or generates using the Software\", claims no licence to it and assigns no ownership of it, and places no commercial restriction on a paid subscription. An Educational License for students or teachers is \"exclusively for personal learning purposes\" and an Educational License for Classrooms \"exclusively for teaching purposes\", neither for commercial purposes; a trial may not be used \"for business or commercial purposes\".",
+   "sources": [
+    "https://www.maxon.net/en/legal/eula"
+   ],
+   "as_first_reported": "Maxon's EULA (\"Updated April, 2026\") covers ZBrush on desktop and iPad. It defines \"User Content\" as \"any images, models, materials, textures, files, content, and materials that User creates or generates using the Software\", claims no licence to it and assigns no ownership of it, and places no commercial restriction on a paid subscription; education licences are \"exclusively for personal learning purposes\" and a trial may not be used \"for business or commercial purposes\".",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "https://www.maxon.net/en/legal/eula, fetched with curl 2026-09-23 (page says 'Updated April, 2026')",
+     "evidence": "'The ZBrush Software refers to ZBrush operating on desktop and/or ZBrush operating on iPad.' 14.1 '\"User Content\" means any images, models, materials, textures, files, content, and materials that User creates or generates using the Software.' 7.1.2 '...Educational License for students or teachers exclusively for personal learning purposes...' 7.2.2 '...Educational License for Classrooms exclusively for teaching purposes...' 8.1 '...directly or indirectly for business or commercial purposes...is expressly prohibited.'",
+     "notes": "Every quote is verbatim. Section 14 (User Content) contains no licence grant to Licensor and no ownership assignment, and section 3 (Subscription License) places no commercial restriction. But the claim says education licences (plural) are 'exclusively for personal learning purposes': that applies only to the Educational License for students or teachers (7.1.2). The Educational License for Classrooms (7.2.2) is 'exclusively for teaching purposes', and both bar commercial use. So the claim says more than the text."
+    },
+    {
+     "lens": "drift",
+     "verdict": "refuted",
+     "read": "Wayback id_ snapshots 20251221222338 ('Updated December, 2025'), 20260417203419 and 20260725003040 (both 'Updated April, 2026') of https://www.maxon.net/en/legal/eula, diffed against the live page 2026-09-23",
+     "evidence": "April 2026 and July 2026 snapshots: agreement body identical to the live page. December 2025 to April 2026 changes: Autograph brand added, Command Line Render Client wording, 10.3 'permit' to 'permits'. Sections 7, 8, 13 and 14 are unchanged.",
+     "notes": "No drift: the clauses quoted are unchanged since at least December 2025 and the live text is the April 2026 version. Conflation: 'education licences' runs together the EULA's two educational licence types (7.1 students or teachers, 7.2 Classrooms), which have different permitted purposes."
+    }
+   ]
+  },
+  {
+   "id": "CHT-041",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "Maxon EULA 10.4: \"User shall not use or permit any third party to use the Software, including any files delivered with the Software ..., the Capsules ..., data or other information obtained or generated from the Software, to create, train, test or otherwise enhance ... a machine learning algorithm or artificial intelligence system that simulates or performs a function similar to any function incorporated in the Software.\"",
+   "sources": [
+    "https://www.maxon.net/en/legal/eula"
+   ],
+   "as_first_reported": "Maxon EULA 10.4: \"User shall not use or permit any third party to use the Software, including any files delivered with the Software ..., the Capsules ..., data or other information obtained or generated from the Software, to create, train, test or otherwise enhance ... a machine learning algorithm or artificial intelligence system that simulates or performs a function similar to any function incorporated in the Software.\"",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.maxon.net/en/legal/eula, fetched with curl 2026-09-23",
+     "evidence": "10.4 'Except to the limited extent that applicable law permits such actions notwithstanding contractual prohibitions, User shall not use or permit any third party to use the Software, including any files delivered with the Software or available online by Licensor, the Capsules (as defined in § 13 below), data or other information obtained or generated from the Software, to create, train, test or otherwise enhance, be it directly or indirectly, a machine learning algorithm or artificial intelligence system that simulates or performs a function similar to any function incorporated in the Software.'",
+     "notes": "Every quoted fragment is verbatim; the ellipses elide 'or available online by Licensor', '(as defined in § 13 below)' and 'be it directly or indirectly'. The quote starts after the opening carve-out for what applicable law permits notwithstanding contractual prohibitions, which the claim does not mention but does not contradict."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback id_ snapshots 20251221222338, 20260417203419, 20260725003040 of the EULA, diffed against the live page 2026-09-23",
+     "evidence": "'10.4 Except' clause present with identical wording in all three snapshots and today.",
+     "notes": "Unchanged since at least December 2025. No conflation: the clause is in the binding EULA, not a summary, and applies to ZBrush as part of 'the Software'."
+    }
+   ]
+  },
+  {
+   "id": "CHT-042",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "Maxon EULA section 13 lets you incorporate Maxon Capsules into your own content and distribute them as part of it on conditions, including that \"the primary value of such content ... does not lie with the Maxon Capsules themselves\" and that you do not use them \"in any way that technically allows a third party to ... extract or access the Capsules as a stand-alone file\" unless contractually barred. No licence specific to other bundled Lightbox content, such as the Mannequins, was found; 10.3 bars copying or distributing the Software beyond the right of use.",
+   "sources": [
+    "https://www.maxon.net/en/legal/eula",
+    "https://help.maxon.net/zbr/en-us/Content/html/getting-started/basic-concepts/lightbox/lightbox.html"
+   ],
+   "as_first_reported": "Maxon EULA section 13 lets you incorporate Maxon Capsules into your own content and distribute them as part of it on conditions, including that \"the primary value of such content ... does not lie with the Maxon Capsules themselves\" and that you do not use them \"in any way that technically allows a third party to ... extract or access the Capsules as a stand-alone file\" unless contractually barred. No licence specific to other bundled Lightbox content, such as the Mannequins, was found; 10.3 bars copying or distributing the Software beyond the right of use.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.maxon.net/en/legal/eula, fetched 2026-09-23; https://help.maxon.net/zbr/en-us/Content/html/getting-started/basic-concepts/lightbox/lightbox.html and .../creating-meshes/mannequins/mannequins.html, fetched 2026-09-23",
+     "evidence": "13.3 '...on the condition that (a) the primary value of such content and materials created by User does not lie with the Maxon Capsules themselves, ... (c) User may not use the Capsules in any way that technically allows a third party to use download, extract or access the Capsules as a stand-alone file, except if User contractually obliges any third party using its product not to extract or access the Capsules as stand-alone files'. 10.3 'the User may not copy, rework, decompile, reverse-engineer, distribute, modify or reproduce the Software'",
+     "notes": "Quotes verbatim with fair elisions. 'unless contractually barred' paraphrases the (c) exception accurately. The Lightbox and Mannequins help pages contain no licence, 'commercial', 'royalty' or 'copyright' text, and the EULA never mentions Lightbox or Mannequins, so 'no licence specific to ... was found' holds for the pages read."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback id_ snapshots 20251221222338, 20260417203419, 20260725003040 of the EULA, diffed against the live page 2026-09-23",
+     "evidence": "Section 13 identical across all snapshots; 10.3 changed only 'permit' to 'permits' between December 2025 and April 2026.",
+     "notes": "No drift. The claim keeps Capsules (section 13) and other bundled content apart and does not say Lightbox content is a Capsule. One caveat for the note: the EULA does not say in terms whether Lightbox files are 'the Software' for 10.3 (the Software is 'the software provided by Licensor'; 10.4 speaks of 'files delivered with the Software'), so 10.3 reaching Mannequins is an inference, not a stated rule."
+    }
+   ]
+  },
+  {
+   "id": "CHT-043",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": false,
+   "claim": "ZBrush for iPad's free plan is described as \"a limited feature set intended for learning and exploration\"; no page read states whether it allows commercial use.",
+   "sources": [
+    "https://support.maxon.net/hc/en-us/articles/26521973576220"
+   ],
+   "as_first_reported": "ZBrush for iPad's free plan is described as \"a limited feature set intended for learning and exploration\"; no page read states whether it allows commercial use.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://support.maxon.net/api/v2/help_center/en-us/articles/26521973576220.json, fetched 2026-09-23 (article 'ZBrush for iPad, Free Plan Overview', edited_at 2026-04-02, updated_at 2026-08-07); https://www.maxon.net/en/zbrush-plan-options fetched 2026-09-23; EULA section 9",
+     "evidence": "'The Free Plan provides a limited feature set intended for learning and exploration. Some advanced tools and workflows are not available in this plan.'",
+     "notes": "Quote verbatim. Neither the article nor the plan-options page mentions commercial use. EULA 9 (Free License) restricts commercial use only for Cinebench (9.3), but no page read says the iPad Free Plan is a section 9 Free License, so 'no page read states whether it allows commercial use' holds."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Zendesk API fields for the article, fetched 2026-09-23; earlier researcher copy zbrush/a26521973576220.json; Wayback CDX (no captures of the article)",
+     "evidence": "created_at 2026-04-02T06:51:41Z, edited_at 2026-04-02T07:13:01Z, updated_at 2026-08-07T11:34:03Z; body identical to the earlier copy.",
+     "notes": "Body last edited 2 April 2026 per Zendesk; no archive snapshots exist to compare further. The claim correctly treats the article as a description, not as licence terms, and does not infer a commercial permission from it. Side note: the plan-options page lists Free Plan export as a dash (none) while the article lists 'Export via 3D Print Hub presets'; not part of this claim."
+    }
+   ]
+  },
+  {
+   "id": "CHT-044",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "ZBrush 2026.2.1 (17 June 2026) \"runs on Windows (including Windows on Arm), macOS, and iPadOS\"; no page read lists a Linux build. The desktop app exports OBJ, Maya .ma, X3D, GoZ, STL and VRML (through the 3D Print Hub plugin), FBX (through the FBX ExportImport plugin) and USD, which \"only allows the import and export of meshes rather than whole scenes\" (ZBrush USD help page); Maxon's plan-options page also lists PLY, DAE, ABC and 3MF. No page lists glTF. ZBrush rigs with a ZSphere skeleton for posing (Rigging help page); no page read says it exports a skeleton for a game engine.",
+   "sources": [
+    "https://www.maxon.net/en/zbrush",
+    "https://support.maxon.net/hc/en-us/articles/15780513877788",
+    "https://www.maxon.net/en/zbrush/features/supported-formats"
+   ],
+   "as_first_reported": "ZBrush 2026.2.1 (17 June 2026) \"runs on Windows (including Windows on Arm), macOS, and iPadOS\"; there is no Linux build. It exports OBJ, Maya .ma, GoZ, STL, VRML, FBX through the FBX ExportImport plugin, and USD meshes only (\"only allows the import and export of meshes rather than whole scenes\"); no glTF, and no rig for a game skeleton.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "https://www.maxon.net/en/zbrush, https://support.maxon.net/api/v2/help_center/en-us/articles/15780513877788.json, https://www.maxon.net/en/zbrush/features/supported-formats, https://www.maxon.net/en/zbrush-plan-options, https://help.maxon.net/zbr/en-us/Content/html/user-guide/zbrush-other-programs/usd-format/usd-format.html and .../posing-your-model/rigging/rigging.html, all fetched 2026-09-23",
+     "evidence": "'ZBrush 2026.2.1 Release Notes - June 17, 2026'. 'ZBrush runs on Windows (including Windows on Arm), macOS, and iPadOS.' Formats page export: 'Wavefront OBJ (*.obj) Maya (*.ma) Web3D Standard (*.x3d) GoZ ... STL (*.stl) using the 3D Print Hub plugin VRML (*.wrl) using the 3D Print Hub plugin FBX using the FBX Export Import plugin'. Plan options, Desktop export: 'OBJ, MA, STL, VRML, FBX, PLY, DAE, ABC, 3MF, x3D'. USD help: 'only allows the import and export of meshes rather than whole scenes.'",
+     "notes": "Release date, platforms, no Linux (none of the pages lists it) and no glTF (absent from every page) hold. But the export list omits X3D (formats page) and PLY, DAE, ABC and 3MF (plan-options page), so it reads as complete when it is not. The USD quote is from the USD help page, not a listed source. 'No rig for a game skeleton' is not stated by any source: the Rigging help page describes a ZSphere skeleton used to pose a mesh, and no page read says whether a skeleton exports."
+    }
+   ]
+  },
+  {
+   "id": "CHT-045",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "ZBrush costs US$399.00 a year or US$49.00 a month; ZBrushCore and ZBrushCoreMini reached end of life on 30 September 2025. Current ZBrush releases' Maxon App reportedly fails under Wine (ZBrushCentral, 2026-07-30).",
+   "sources": [
+    "https://www.maxon.net/en/buy",
+    "https://www.maxon.net/en/zbrushcore-eol-faq",
+    "https://www.zbrushcentral.com/t/using-zbrush-on-linux/351246"
+   ],
+   "as_first_reported": "ZBrush costs US$399.00 a year or US$49.00 a month; ZBrushCore and ZBrushCoreMini reached end of life on 30 September 2025. Current ZBrush releases' Maxon App reportedly fails under Wine (ZBrushCentral, 2026-07-30).",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://www.maxon.net/en/buy (Playwright, annual and monthly toggles), https://www.maxon.net/en/zbrushcore-eol-faq (curl), https://www.zbrushcentral.com/t/using-zbrush-on-linux/351246 (Discourse JSON, posts 124 to 133), read 2026-09-23",
+     "evidence": "Buy, annual: \"ZBRUSH ... $ 33 .25 /mo $ 399.00 BILLED ANNUALLY\"; monthly: \"ZBRUSH ... $ 49 .00 /mo BILLED MONTHLY\". EOL FAQ: \"What is the date for the End of Life of ZBrushCore? September 30th, 2025.\" \"Once ZBrushCore and ZBrushCoreMini have reached their End of Life date\". ZBC post 133, Chris1118, 2026-07-30: \"Still no luck for the latest releases. The Maxon App is completely busted in Wine.\"",
+     "notes": "All parts match. The buy page notes 'All Pricing inclusive of the highest potential VAT rate' and that pricing may change; the dollar prices are what the /en page served to this host. The Wine report is one user's report, hence 'reportedly'; the same post says ZBrush 2022 runs through Bottles."
+    }
+   ]
+  },
+  {
+   "id": "CHT-050",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "Every Poser EULA read (Poser 12 manual, \"Last updated November 23, 2021\"; Poser 13 manual, \"Last updated January 05, 2025\"; Poser 14 manual and installer build 14.0.439) names as Unrestricted Content only \"low res male, low res female, medium res male, medium res female\" and their textures. The 12, 13 and 14 manual texts class all other included Content as either Restricted Content or a Vendor Resource (Pauline, Pauline Casual, Paul, Paul Casual, La Femme Base and L'Homme Base, \"not Pro version\"); the installer text defines Restricted Content as all included Content \"that is not Unrestricted Content\", while still granting Vendor Resources extra rights. On Restricted Content the licence grants the right \"To prepare derivative works based upon the Restricted Content solely for Legitimate Uses and lawful uses\", and to distribute content you create using it, again solely for Legitimate Uses.",
+   "sources": [
+    "https://www.posersoftware.com/documentation/12/Poser_Reference_Manual/Introduction/Installing/Poser_End_User_License_Agreement_(EULA).htm",
+    "https://www.posersoftware.com/documentation/14/HTML/poser-end-user-license-agreement-eula.html",
+    "Poser 14 installer 'Install Poser 14.exe' build 14.0.439, EULA page, from https://www.posersoftware.com/downloads/download/s3?filename=p14%2Fwin%2FInstall%20Poser%2014.exe"
+   ],
+   "as_first_reported": "Every Poser EULA read (Poser 12 manual, \"Last updated November 23, 2021\"; Poser 13 manual, \"Last updated January 05, 2025\"; Poser 14 manual and installer) names as Unrestricted Content only \"low res male, low res female, medium res male, medium res female\" and their textures; all other included Content is Restricted, on which you may only \"prepare derivative works ... solely for Legitimate Uses and lawful uses\".",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "https://www.posersoftware.com/documentation/12/Poser_Reference_Manual/Introduction/Installing/Poser_End_User_License_Agreement_(EULA).htm; https://www.posersoftware.com/documentation/13/HTML/Poser_Reference_Manual/Introduction/Installing/Poser_End_User_License_Agreement_(EULA).htm; https://www.posersoftware.com/documentation/14/HTML/poser-end-user-license-agreement-eula.html; poser/p14inst.exe (FileVersion 14.0.439.0), EULA RTF re-extracted by me with Python (Inno Setup 6.3.0 setup-0 block at offset 567637959, LZMA1 via the lzma module; innoextract in poser/ie would not run, missing libboost_iostreams), converted to chk_poser/eula14_fresh.txt (read 2026-09-23)",
+     "evidence": "All four: \"The following figure geometries and their associated textures are Unrestricted Content: low res male, low res female, medium res male, medium res female.\" and \"To prepare derivative works based upon the Restricted Content solely for Legitimate Uses and lawful uses.\" Manuals 12, 13, 14: \"\\\"Restricted Content\\\" means all Content included with or part of the Program that is not Unrestricted Content or a Vendor Resource\". Installer: \"...that is not Unrestricted Content, including without limitation...\"",
+     "notes": "Both quotes are verbatim in all four texts, and the two dates (\"Last updated November 23, 2021\", \"Last updated January 05, 2025\") match. But \"all other included Content is Restricted\" is wrong for the 12, 13 and 14 manual texts, which carve Vendor Resources (Pauline, Pauline Casual, Paul, Paul Casual, La Femme Base and L'Homme Base, not Pro) out of Restricted Content and grant them extra rights; only the installer text defines Restricted as everything not Unrestricted. \"may only prepare derivative works\" is also narrower than the grant: clause c also lets you reproduce and distribute content you create using Restricted Content, for Legitimate Uses. Note the Poser 13 URL: the Poser_Reference_Manual path under /documentation/13/ returns 404 today; the page is under /documentation/13/HTML/."
+    },
+    {
+     "lens": "drift",
+     "verdict": "refuted",
+     "read": "Wayback id_ snapshot 20250618092729 of the Poser 12 page (only CDX capture); fresh 12, 13, 14 manual pages and installer text above (read 2026-09-23)",
+     "evidence": "12 manual: the 2025-06-18 snapshot matches today's page line for line. 12 and 13 manual EULA bodies are identical; 14 manual differs from 13 only in a character encoding of \"(i) ... (iii)\". Installer differs: \"Restricted Content\" drops \"or a Vendor Resource\", Vendor Resources add \"La Femme 2 Lite (not Pro version)\" and \"L'Homme 2 (not Pro version)\".",
+     "notes": "No drift within each text since it was dated. But the claim runs the four texts together as if they agreed on how non-Unrestricted content is classed; they do not (three manuals have a Vendor Resource carve-out, the installer does not)."
+    }
+   ]
+  },
+  {
+   "id": "CHT-051",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "The Poser 14 EULA exists in two texts that differ. The installer's (build 14.0.439) lists Vendor Resources as Pauline, Pauline Casual, Paul, Paul Casual, La Femme 1 Base, L'Homme 1 Base, La Femme 2 Lite and L'Homme 2, the last four each marked \"not Pro version\", lets them be used \"to create derivative works for use in the Program\", permits \"Export the modified or derivative figures for inclusion in game engines\", and adds a ban on distributing anything based on them \"that competes directly with Company base figures\". The Poser 14 manual page lacks \"for use in the Program\" and the competing ban. Neither says which governs.",
+   "sources": [
+    "https://www.posersoftware.com/documentation/14/HTML/poser-end-user-license-agreement-eula.html",
+    "Poser 14 installer 'Install Poser 14.exe' build 14.0.439, EULA page, from https://www.posersoftware.com/downloads/download/s3?filename=p14%2Fwin%2FInstall%20Poser%2014.exe",
+    "https://www.posersoftware.com/downloads/download/s3?filename=p14%2Fwin%2FRelease_Notes.txt"
+   ],
+   "as_first_reported": "The Poser 14 EULA exists in two texts that differ. The installer's (build 14.0.439) lists Vendor Resources as Pauline, Paul, La Femme 1 Base, L'Homme 1 Base, La Femme 2 Lite and L'Homme 2 (\"not Pro version\"), lets them be used \"to create derivative works for use in the Program\", permits \"Export the modified or derivative figures for inclusion in game engines\", and adds a ban on distributing anything based on them \"that competes directly with Company base figures\". The Poser 14 manual page lacks \"for use in the Program\" and the competing ban. Neither says which governs.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "https://www.posersoftware.com/documentation/14/HTML/poser-end-user-license-agreement-eula.html; poser/p14inst.exe (FileVersion 14.0.439.0), EULA RTF re-extracted by me with Python (Inno Setup 6.3.0 setup-0 block at offset 567637959, LZMA1 via the lzma module; innoextract in poser/ie would not run, missing libboost_iostreams), converted to chk_poser/eula14_fresh.txt (read 2026-09-23)",
+     "evidence": "Installer: \"Pauline, Pauline Casual | Paul, Paul Casual | La Femme 1 Base (not Pro version) | L'Homme 1 Base (not Pro version) | La Femme 2 Lite (not Pro version) | L'Homme 2 (not Pro version)\"; \"Vendor Resources may be used to create derivative works for use in the Program based on the Figure files\"; \"Export the modified or derivative figures for inclusion in game engines.\"; \"Distribute any character, texture or geometry based on Vendor Resources that competes directly with Company base figures.\" Manual: \"...create derivative works based on the Figure files\".",
+     "notes": "All three quoted clauses are verbatim in the installer text, the manual lacks \"for use in the Program\" and the competing ban, and neither text has a precedence clause (both only say the EULA \"constitutes the entire agreement\"). The one error: the installer's Vendor Resource list is eight figures, not six; the claim omits Pauline Casual and Paul Casual. Suggested wording: \"lists Vendor Resources as Pauline, Pauline Casual, Paul, Paul Casual, La Femme 1 Base, L'Homme 1 Base, La Femme 2 Lite and L'Homme 2 (each \\\"not Pro version\\\")\"."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Poser 14 Release_Notes.txt via https://www.posersoftware.com/downloads/download/s3?filename=p14%2Fwin%2FRelease_Notes.txt; Wayback CDX for the 14 manual EULA URL (read 2026-09-23)",
+     "evidence": "Release notes top entry: \"Poser 14.0.439 - 2026-07-29\"; the installer's version resource reads \"14.0.439.0\". Wayback CDX holds no capture of the 14 manual EULA page.",
+     "notes": "The installer read is the current build, so the claim is not out of date; the manual page cannot be compared with an earlier capture. The claim keeps the two texts apart rather than running them together. Further differences it does not mention: the installer's Restricted Content definition drops the Vendor Resource carve-out, (g) reads \"Program export file formats for inclusion in games\" against the manual's \"Program Export File Formats for inclusion in game engines\", and its activation section is headed \"COLLECTION AND USE OF YOUR INFORMATION IN POSER GAME DEV\", which suggests it descends from an older Game Dev EULA."
+    },
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "https://www.posersoftware.com/documentation/14/HTML/poser-end-user-license-agreement-eula.html (curl, 2026-09-23); installer EULA text from the earlier checker's own LZMA extraction, chk_poser/eula14_fresh.txt and setup0.bin (the installer exe was deleted, so not re-extracted by me; strings cross-checked in setup0.bin), read 2026-09-23",
+     "evidence": "Installer: \"Pauline, Pauline Casual / Paul, Paul Casual / La Femme 1 Base (not Pro version) / L'Homme 1 Base (not Pro version) / La Femme 2 Lite (not Pro version) / L'Homme 2 (not Pro version)\"; \"create derivative works for use in the Program based on the Figure files\"; \"Export the modified or derivative figures for inclusion in game engines.\"; \"...that competes directly with Company base figures.\" Manual: \"create derivative works based on the Figure files\"; no \"competes\".",
+     "notes": "All three quoted clauses are verbatim in the installer text; the manual lacks \"for use in the Program\" and the competing ban; neither text has a precedence clause (each only \"constitutes the entire agreement\"). The eight names are right, but the proposed placement of (\"not Pro version\") after L'Homme 2 alone reads as if only that figure is so limited, when four carry it and Pauline and Paul do not. Final claim fixes that; re-read, it holds. Build number rests on the earlier checker's version-resource read."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Poser 14 Release_Notes.txt and a HEAD of the installer download (curl, 2026-09-23); Wayback CDX for the manual URL (\"Temporarily Offline\", 2026-09-23)",
+     "evidence": "Release notes top entry: \"Poser 14.0.439 - 2026-07-29\". Installer HEAD: content-length 569312808, last-modified Thu, 30 Jul 2026 07:06:03 GMT. Manual: \"Poser copyright ... 1991-2025\"; lists only \"La Femme Base (not Pro version)\" and \"L'Homme Base (not Pro version)\" after Pauline and Paul.",
+     "notes": "The installer on offer today was last modified the day after the 14.0.439 release, so the claim's build is still current. Wayback was offline, so the manual page could not be compared with a capture. The claim keeps the two texts apart. Further differences it does not mention: the manual's figure list is six names, not eight; the installer's activation section is headed \"COLLECTION AND USE OF YOUR INFORMATION IN POSER GAME DEV\" and cites bondware.com, suggesting an older Game Dev text."
+    }
+   ]
+  },
+  {
+   "id": "CHT-052",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": false,
+   "claim": "The Poser EULA's Legitimate Use (g), for games, reads in the Poser 14 installer text (build 14.0.439) \"creating characters or props based on Restricted Content in Program export file formats for inclusion in games ... where the original (or modified) geometry, texture, or other Restricted Content files are distributed with such characters or props\"; the Poser 12, 13 and 14 manual texts read \"Program Export File Formats for inclusion in game engines\" instead. Neither \"Program export file formats\" nor \"Program Export File Formats\" is defined.",
+   "sources": [
+    "https://www.posersoftware.com/documentation/12/Poser_Reference_Manual/Introduction/Installing/Poser_End_User_License_Agreement_(EULA).htm",
+    "Poser 14 installer 'Install Poser 14.exe' build 14.0.439, EULA page, from https://www.posersoftware.com/downloads/download/s3?filename=p14%2Fwin%2FInstall%20Poser%2014.exe"
+   ],
+   "as_first_reported": "The Poser EULA's Legitimate Use (g), for games, reads \"creating characters or props based on Restricted Content in Program export file formats for inclusion in games ... where the original (or modified) geometry, texture, or other Restricted Content files are distributed with such characters or props\"; \"Program export file formats\" is not defined.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "https://www.posersoftware.com/documentation/12/Poser_Reference_Manual/Introduction/Installing/Poser_End_User_License_Agreement_(EULA).htm; poser/p14inst.exe (FileVersion 14.0.439.0), EULA RTF re-extracted by me with Python (Inno Setup 6.3.0 setup-0 block at offset 567637959, LZMA1 via the lzma module; innoextract in poser/ie would not run, missing libboost_iostreams), converted to chk_poser/eula14_fresh.txt (read 2026-09-23)",
+     "evidence": "Installer: \"(g) creating characters or props based on Restricted Content in Program export file formats for inclusion in games and in compliance with the Program Content License below, where the original (or modified) geometry, texture, or other Restricted Content files are distributed with such characters or props\". Poser 12 manual: \"(g) creating characters or props based on Restricted Content in Program Export File Formats for inclusion in game engines and in compliance with the Program Content License below, where...\"",
+     "notes": "The quote is verbatim only in the installer text. The Poser 12 manual, also cited, reads \"Program Export File Formats for inclusion in game engines\" (13 and 14 manuals the same). The term is undefined in every text: the definitions define \"Proprietary File Formats\" but no export format, in either capitalisation."
+    },
+    {
+     "lens": "drift",
+     "verdict": "refuted",
+     "read": "https://www.posersoftware.com/documentation/13/HTML/Poser_Reference_Manual/Introduction/Installing/Poser_End_User_License_Agreement_(EULA).htm; https://www.posersoftware.com/documentation/14/HTML/poser-end-user-license-agreement-eula.html; Wayback id_ 20250618092729 of the Poser 12 page (read 2026-09-23)",
+     "evidence": "12, 13 and 14 manuals: \"in Program Export File Formats for inclusion in game engines\"; installer 14.0.439: \"in Program export file formats for inclusion in games\".",
+     "notes": "The Poser 12 page has not changed since the 2025-06-18 capture. The clause's wording differs between the manual texts and the installer text (\"game engines\" against \"games\", capitalised defined-looking term against lower case), and the claim presents one wording as \"the Poser EULA's\"."
+    }
+   ]
+  },
+  {
+   "id": "CHT-053",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "No Poser EULA read (12, 13, 14 manual, 14 installer) contains a clause on artificial intelligence or machine learning.",
+   "sources": [
+    "https://www.posersoftware.com/documentation/12/Poser_Reference_Manual/Introduction/Installing/Poser_End_User_License_Agreement_(EULA).htm",
+    "https://www.posersoftware.com/documentation/14/HTML/poser-end-user-license-agreement-eula.html",
+    "Poser 14 installer 'Install Poser 14.exe' build 14.0.439, EULA page, from https://www.posersoftware.com/downloads/download/s3?filename=p14%2Fwin%2FInstall%20Poser%2014.exe"
+   ],
+   "as_first_reported": "No Poser EULA read (12, 13, 14 manual, 14 installer) contains a clause on artificial intelligence or machine learning.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.posersoftware.com/documentation/12/Poser_Reference_Manual/Introduction/Installing/Poser_End_User_License_Agreement_(EULA).htm; https://www.posersoftware.com/documentation/13/HTML/Poser_Reference_Manual/Introduction/Installing/Poser_End_User_License_Agreement_(EULA).htm; https://www.posersoftware.com/documentation/14/HTML/poser-end-user-license-agreement-eula.html; poser/p14inst.exe (FileVersion 14.0.439.0), EULA RTF re-extracted by me with Python (Inno Setup 6.3.0 setup-0 block at offset 567637959, LZMA1 via the lzma module; innoextract in poser/ie would not run, missing libboost_iostreams), converted to chk_poser/eula14_fresh.txt (read 2026-09-23)",
+     "evidence": "Whole-word, case-insensitive search of each full text for AI, artificial, machine, learning, neural, dataset, generative, model(s), scraping, mining, synthetic: 0 hits in all four. The only \"training\" is \"lend the Program for third-party training, commercial time-sharing or service bureau use\".",
+     "notes": "No clause on artificial intelligence or machine learning in any of the four texts. The \"third-party training\" ban is about lending the software for teaching, not model training."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback id_ 20250618092729 of the Poser 12 page; fresh pages and installer text above (read 2026-09-23)",
+     "evidence": "Poser 12 page unchanged since the 2025-06-18 capture; the 12, 13 and 14 manual EULA bodies are identical; installer text differs elsewhere but also has no AI terms.",
+     "notes": "No version read adds an AI clause, and the claim is limited to the EULAs, so it does not run in any separate store or marketplace AI policy."
+    }
+   ]
+  },
+  {
+   "id": "CHT-054",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "Renderosity's Standard License allows \"2D rendered images for games or backgrounds\" and bars using a product \"in real-time rendering games (where the Product files are distributed)\" and converting it; it says an Extended License \"may be available for some Products\", and a 2014 Renderosity news post says offering one is \"the vendors' choice\". The Extended License allows embedding in a game \"provided there is encryption protection, the new work does not compete with the original, and the new work uses modifications of the original Product file(s)\". Neither licence has an AI clause.",
+   "sources": [
+    "https://www.renderosity.com/standard-license",
+    "https://www.renderosity.com/extended-license"
+   ],
+   "as_first_reported": "Renderosity's Standard License allows \"2D rendered images for games or backgrounds\" and bars using a product \"in real-time rendering games (where the Product files are distributed)\" and converting it; its Extended License, offered only where the vendor opts in, allows embedding in a game \"provided there is encryption protection, the new work does not compete with the original, and the new work uses modifications of the original Product file(s)\". Neither has an AI clause.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "https://www.renderosity.com/standard-license; https://www.renderosity.com/extended-license (read 2026-09-23)",
+     "evidence": "Standard: \"2D rendered images for games or backgrounds\"; \"shall not copy, modify, reverse compile, convert, ... or use Product in real-time rendering games (where the Product files are distributed)\"; \"An Extended License for additional uses at an additional cost may be available for some Products.\" Extended: \"provided there is encryption protection, the new work does not compete with the original, and the new work uses modifications of the original Product file(s).\"",
+     "notes": "All quotes are verbatim, and neither licence has an AI term (0 hits for AI, artificial, machine learning, neural, generative). But \"offered only where the vendor opts in\" is not in either licence; the standard licence says only that one \"may be available for some Products\". The vendor-choice point comes from a Renderosity news post of Apr 23, 2014 (https://www.renderosity.com/article/17054/important-notice-license-update: \"not all products will have an option for an Extended License. This is the vendors' choice.\"), which is not a cited source."
+    },
+    {
+     "lens": "drift",
+     "verdict": "refuted",
+     "read": "Wayback id_ captures of /standard-license 20220523151925, 20240618012421, 20250905153507 and /extended-license 20240302080631, 20250319173426; https://www.renderosity.com/wiki/policies/extended-license (read 2026-09-23)",
+     "evidence": "All captures carry the same quoted clauses; the only textual change is \"license@renderosity.com\" becoming \"license \\\"at\\\" renderosity.com\". A second Extended License text at /wiki/policies/extended-license (\"Last updated: Friday, July 8, 2011\") carries the same game clause.",
+     "notes": "The licence texts have not drifted since at least 2022 (standard) and 2024 (extended). The claim does, though, run a 2014 news post (vendor opt-in) into its description of the licence. Renderosity's /wiki/policies/ai-policy URL returns 404 today, so no separate AI policy could be read."
+    }
+   ]
+  },
+  {
+   "id": "CHT-055",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": false,
+   "claim": "The La Femme 2 Pro and L'Homme 2 Pro store pages say \"You may use all of the included textures, material shaders and morphs as merchant resources. While the base mesh is not a merchant resource, everything included in the DEV rigs is\".",
+   "sources": [
+    "https://www.posersoftware.com/store/products/387",
+    "https://www.posersoftware.com/store/products/857"
+   ],
+   "as_first_reported": "The La Femme 2 Pro and L'Homme 2 Pro store pages say \"You may use all of the included textures, material shaders and morphs as merchant resources. While the base mesh is not a merchant resource, everything included in the DEV rigs is\".",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.posersoftware.com/store/products/387 (La Femme 2 Pro); https://www.posersoftware.com/store/products/857 (L'Homme 2 Pro) (read 2026-09-23)",
+     "evidence": "Both pages: \"-You may use all of the included textures, material shaders and morphs as merchant resources. | -While the base mesh is not a merchant resource, everything included in the DEV rigs is, from mesh to UV mapping to rigging to morphs.\"",
+     "notes": "Verbatim on both pages (the claim stops at \"is\", before \", from mesh to UV mapping to rigging to morphs\")."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback id_ 20250115054441 of /store/products/387 and 20250908001722 of /store/products/857 (read 2026-09-23)",
+     "evidence": "Both captures carry the same sentence; the only diffs against today are site navigation links.",
+     "notes": "Unchanged since January 2025 (387) and September 2025 (857). The claim attributes the wording to the store pages, not to the EULA, so it does not run the two together."
+    }
+   ]
+  },
+  {
+   "id": "CHT-056",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Poser 14 is Windows only (the README says \"Existing Mac users will obviously want to stay with Poser 13\"), costs US$175.00, and exports OBJ, FBX, COLLADA and glTF/GLB (release notes 14.0.8, 2025-08-29, and 14.0.67, 2025-10-16).",
+   "sources": [
+    "https://www.posersoftware.com/article/1083/announcing-poser-14-release",
+    "https://www.posersoftware.com/store/products/973",
+    "Poser 14 installer 'Install Poser 14.exe' build 14.0.439, EULA page, from https://www.posersoftware.com/downloads/download/s3?filename=p14%2Fwin%2FInstall%20Poser%2014.exe"
+   ],
+   "as_first_reported": "Poser 14 is Windows only (the README says \"Existing Mac users will obviously want to stay with Poser 13\"), costs US$175.00, and exports OBJ, FBX, COLLADA and glTF/GLB (release notes 14.0.8, 2025-08-29, and 14.0.67, 2025-10-16).",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://www.posersoftware.com/article/1083/announcing-poser-14-release; https://www.posersoftware.com/store/products/973; Release_Notes.txt via https://www.posersoftware.com/downloads/download/s3?filename=p14%2Fwin%2FRelease_Notes.txt; README RTF in the installer's setup-0 block; https://www.posersoftware.com/documentation/14/HTML/exporting-3d-objects.html (read 2026-09-23)",
+     "evidence": "README: \"Existing Mac users will obviously want to stay with Poser 13.\" Store 973: \"Poser 14 - Full License for Windows\", \"$\" \"175.00\", \"Windows-only distribution\", \"GLTF/GLB Figure export\", \"support for industry-standard file formats like OBJ, FBX and GLTF/GLB\". Notes: \"Poser 14.0.8 - 2025-08-29\" \"GLTF format added to Import/Export.\"; \"Poser 14.0.67 - 2025-10-16\" \"FBX and Collada added back to the File Import/Export menus.\" Manual: \"export 3D objects in RIB, DXF, OBJ, VRML, LWO, OBJ, and COLLADA formats\".",
+     "notes": "Every part is supported. The parenthesis credits the release notes, which cover glTF, FBX and COLLADA only; OBJ export is in the manual and store page, and GLB only on the store page. The article is dated Nov 26, 2025 and gives the price as \"$175 (previously $199)\"."
+    }
+   ]
+  },
+  {
+   "id": "CHT-057",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": false,
+   "claim": "PsyDreamer-3D/poser_tools, a Blender add-on that cleans up Poser FBX exports, is GPL-3.0-or-later declared in its manifest metadata, with no licence file detected by GitHub.",
+   "sources": [
+    "https://github.com/PsyDreamer-3D/poser_tools"
+   ],
+   "as_first_reported": "PsyDreamer-3D/poser_tools, a Blender add-on that cleans up Poser FBX exports, is GPL-3.0-or-later declared in its manifest metadata, with no licence file detected by GitHub.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://github.com/PsyDreamer-3D/poser_tools; https://api.github.com/repos/PsyDreamer-3D/poser_tools; raw poser_tools/blender_manifest.toml and README.md at HEAD (read 2026-09-23)",
+     "evidence": "Manifest: license = [ \"SPDX:GPL-3.0-or-later\", ]. API: \"license\": null; /license endpoint 404; root holds no LICENSE file. README: \"Licensed under [GPL-3.0-or-later]\". Description: \"Blender add-on that features a collection of tools designed to make working with rigged models exported from Poser as fbx files easier.\"",
+     "notes": "Matches the claim. The README also declares GPL-3.0-or-later, so the manifest is not the only declaration."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "GitHub commit history of poser_tools/blender_manifest.toml; manifest at commits ac9211fe (2026-05-17) and 41011cab (2026-05-25) (read 2026-09-23)",
+     "evidence": "Both earlier commits and HEAD (last manifest commit ae81d647, 2026-09-12) declare \"SPDX:GPL-3.0-or-later\". Manifest copyright: \"2011-2023 Blender Foundation (vendored io_scene_fbx)\".",
+     "notes": "The declaration has not changed since the manifest was restructured on 2026-05-17. The add-on vendors Blender's io_scene_fbx under poser_tools/vendor/, which is Blender Foundation code; the claim is about the add-on's declared licence and does not conflate the two."
+    }
+   ]
+  },
+  {
+   "id": "CHT-060",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Character Creator 3's last release is v3.44 (3.44.4709.1), \"released on Nov 15th, 2021\"; Reallusion's knowledge base files it under \"Character Creator 3 (Legacy)\", and the perpetual store lists no CC3. The CC3 online manual now returns a \"Page Not Found\" body, already so in a Wayback capture of 2026-07-05.",
+   "sources": [
+    "https://www.reallusion.com/character-creator/cc-version-history.html",
+    "https://kb.reallusion.com/Product/1254",
+    "https://www.reallusion.com/plan-and-pricing/individual/perpetual"
+   ],
+   "as_first_reported": "Character Creator 3's last release is v3.44 (3.44.4709.1), \"released on Nov 15th, 2021\"; Reallusion's knowledge base files it under \"Character Creator 3 (Legacy)\", and the perpetual store lists no CC3. The CC3 online manual now returns a \"Page Not Found\" body, already so in a Wayback capture of 2026-07-05.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://www.reallusion.com/character-creator/cc-version-history.html, https://kb.reallusion.com/Product/1254, perpetual store page, https://manual.reallusion.com/Character_Creator_3/ENU/Default.htm (all fetched 2026-09-23); https://web.archive.org/web/20260705050145id_/https://manual.reallusion.com/Character_Creator_3/ENU/3/Content/Character_Creator_3/3/17_Export/Merging_Materials.htm?Highlight=merge%20material (read 2026-09-23)",
+     "evidence": "\"v3.44 (3.44.4709.1) released on Nov 15th, 2021\" (no later v3.x listed). KB 1254: \"Character Creator 3 (Legacy)\". Live CC3 manual and the 2026-07-05 capture: \"Reallusion - Page Not Found ... Sorry! The page you tried was not found.\"",
+     "notes": "All parts hold; the perpetual store lists Character Creator 5 and no CC3 product (\"CC3\" appears only as \"CC3+\"). CDX shows CC3 manual pages already serving the same Not Found digest (NFANF6LF...) on 20260610, while 20260206 still had the live manual (\"Character Creator v 3.4 Online Manual\"), so \"already so on 2026-07-05\" is true but not the earliest."
+    }
+   ]
+  },
+  {
+   "id": "CHT-061",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "\"CC3+ is a new generation of CC character base introduced in version 3.3\" (KB 52913), and the free base download is that base: \"Reallusion is offering the CC3+ character bases for free\". CC5 builds on it: \"CC5 HD characters are built on CC3+ base topologies with added subdivisions. Morph sliders between the two versions are fully cross-compatible.\" CC3+ has 100 bones and 17,683 polygons across all elements; the Game Base has 72 bones.",
+   "sources": [
+    "https://kb.reallusion.com/Product/52913",
+    "https://www.reallusion.com/character-creator/free-3d-character-base.html",
+    "https://faq.reallusion.com/en/Product/Character-Creator/Character_Creator_5",
+    "https://www.reallusion.com/character-creator/cc-avatar.html"
+   ],
+   "as_first_reported": "\"CC3+ is a new generation of CC character base introduced in version 3.3\" (KB 52913), and the free base download is that base: \"Reallusion is offering the CC3+ character bases for free\". CC5 builds on it: \"CC5 HD characters are built on CC3+ base topologies with added subdivisions. Morph sliders between the two versions are fully cross-compatible.\" CC3+ has 100 bones and 17,683 polygons across all elements; the Game Base has 72 bones.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://kb.reallusion.com/Product/52913/What-is-CC3-Base-Plus-CC3--do-I-need-CC3-- (live, 2026-09-23; the short URL /Product/52913 now serves the KB home page), https://www.reallusion.com/character-creator/free-3d-character-base.html, https://faq.reallusion.com/en/Product/Character-Creator/Character_Creator_5, https://www.reallusion.com/character-creator/cc-avatar.html (all 2026-09-23)",
+     "evidence": "\"CC3+ is a new generation of CC character base introduced in version 3.3\"; \"Reallusion is offering the CC3+ character bases for free\"; \"CC5 HD characters are built on CC3+ base topologies with added subdivisions. Morph sliders between the two versions are fully cross-compatible.\"; table: \"Bone Count 100 100 72 Total body polycount (all elements included) 17,683 ... 8,723\" (CC3+, CC5 HD, Game Base).",
+     "notes": "All quotes verbatim and the figures match the cc-avatar comparison table. The source URL kb.reallusion.com/Product/52913 without the slug no longer resolves to the article; the slugged URL does. The free base page also shows \"The download link you're trying to connect to is currently unavailable\" in its page text, which may be a script placeholder; not part of the claim."
+    }
+   ]
+  },
+  {
+   "id": "CHT-062",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "The CC3 era Software EULA (Wayback captures of the text dated \"April 30th, 2019\" and \"January 1, 2021\") said \"The unique topology of characters generated by Character Creator is Reallusion’s property. You may not do the following applications unless getting explicit permission from Reallusion: Repurpose them into any other 3D formats, distribute them, or sell them in any third party marketplaces or applications. Use the characters or their morph assets to build up another character generation system in games or interactive services\", and \"Publishing Reallusion content in games or interactive installations is authorized.\" It had no AI clause, no Original Character Creation test and no modification clause.",
+   "sources": [
+    "https://web.archive.org/web/20200418021130id_/https://www.reallusion.com/Content/EULA/AP/EULA_AP.htm",
+    "https://web.archive.org/web/20210211044524id_/https://www.reallusion.com/Content/EULA/AP/EULA_AP.htm"
+   ],
+   "as_first_reported": "The CC3 era Software EULA (Wayback captures of the text dated \"April 30th, 2019\" and \"January 1, 2021\") said \"The unique topology of characters generated by Character Creator is Reallusion's property. You may not ... Repurpose them into any other 3D formats, distribute them, or sell them in any third party marketplaces or applications. Use the characters or their morph assets to build up another character generation system in games or interactive services\", and \"Publishing Reallusion content in games or interactive installations is authorized.\" It had no AI clause, no Original Character Creation test and no modification clause.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "https://web.archive.org/web/20200418021130id_/https://www.reallusion.com/Content/EULA/AP/EULA_AP.htm and https://web.archive.org/web/20210211044524id_/ (same URL), read 2026-09-23",
+     "evidence": "\"You may not do the following applications unless getting explicit permission from Reallusion: Repurpose them into any other 3D formats, distribute them, or sell them in any third party marketplaces or applications. Use the characters or their morph assets to build up another character generation system in games or interactive services.\"",
+     "notes": "Quotes and dates verbatim; no AI clause, no Original Character Creation test and no modification clause in either capture (grep for AI, artificial, machine, train, modif, original character: only \"retains their original copyright\"). But the ellipsis drops \"do the following applications unless getting explicit permission from Reallusion:\", presenting a conditional prohibition as absolute. Restore that clause in place of the ellipsis."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "CDX for www.reallusion.com/Content/EULA/AP/EULA_AP.htm; captures 20200418021130, 20210211044524, 20210524125232, 20221209133907 (read 2026-09-23)",
+     "evidence": "April 30th, 2019 text (2020-04-18) and January 1, 2021 text (2021-02-11, 2021-05-24) identical in these clauses; July 27th, 2022 text (2022-12-09) rewords to \"Reallusion 3D Models\" and adds \"You agree not to modify, alter, translate, reverse engineer\".",
+     "notes": "The claim's era scoping is right: the change came with the July 27th, 2022 text. The first source is a Wayback calendar URL, not a capture; the 20200418021130 capture is the one that carries the 2019 date."
+    },
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://web.archive.org/web/20200418021130id_/https://www.reallusion.com/Content/EULA/AP/EULA_AP.htm and https://web.archive.org/web/20210211044524id_/https://www.reallusion.com/Content/EULA/AP/EULA_AP.htm, curl, 2026-09-23",
+     "evidence": "\"The unique topology of characters generated by Character Creator is Reallusion’s property. You may not do the following applications unless getting explicit permission from Reallusion: Repurpose them into any other 3D formats, distribute them, or sell them in any third party marketplaces or applications. Use the characters or their morph assets to build up another character generation system in games or interactive services.\" ... \"Publishing Reallusion content in games or interactive installations is authorized.\"",
+     "notes": "Quote verbatim and contiguous in both captures, with the permission condition restored. Dates verbatim: \"(April 30th, 2019)\" and \"(January 1, 2021)\". Searches for \"AI\", \"artificial\", \"machine\", \"train\", \"Original Character\" and \"modif\" find nothing in either capture: no AI clause, no Original Character Creation test, no modification clause. Sources are now id_ capture URLs, not a calendar URL."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "CDX https://web.archive.org/cdx/search/cdx?url=www.reallusion.com/Content/EULA/AP/EULA_AP.htm&from=2019&to=2023&collapse=digest and captures 20200418021130, 20210211044524, 20210524125232, 20221209133907, all read 2026-09-23",
+     "evidence": "20210524125232: \"(January 1, 2021)\", clauses unchanged. 20221209133907: \"(July 27th, 2022)\", \"Transform Reallusion 3D Models into any other 3D formats\" and \"You agree not to modify, alter, translate, reverse engineer, decompile, disassemble or otherwise attempt to derive the source code of the Software.\"",
+     "notes": "The modification clause and the reworded topology clause arrive with the July 27th, 2022 text, so the absences the claim lists hold for the 2019 and 2021 texts only, as scoped. \"CC3 era\" is the claim's dating; neither capture names a product version."
+    }
+   ]
+  },
+  {
+   "id": "CHT-063",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": false,
+   "claim": "The Content EULA as captured in July 2021 (text \"Updated June 19, 2021\") said \"Texture sources included within REALLUSION Content and REALLUSION softwares are only allowed to be used inside REALLUSION softwares. This includes REALLUSION Software embedded CONTENT\". That clause is absent from the current Content EULA (\"Updated August 1st, 2025\").",
+   "sources": [
+    "https://web.archive.org/web/20210726180335id_/https://www.reallusion.com/Content/EULA/EULA.htm",
+    "https://www.reallusion.com/Content/EULA/EULA.htm"
+   ],
+   "as_first_reported": "The Content EULA as captured in July 2021 (text \"Updated June 19, 2021\") said \"Texture sources included within REALLUSION Content and REALLUSION softwares are only allowed to be used inside REALLUSION softwares. This includes REALLUSION Software embedded CONTENT\". The current Content License Policy's Q11 on embedded content names only iClone 8 and Character Creator 4.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://web.archive.org/web/20210726180335id_/https://www.reallusion.com/Content/EULA/EULA.htm (read 2026-09-23); https://www.reallusion.com/license/content.html (fetched 2026-09-23)",
+     "evidence": "\"Updated June 19, 2021\" ... \"Texture sources included within REALLUSION Content and REALLUSION softwares are only allowed to be used inside REALLUSION softwares. This includes REALLUSION Software embedded CONTENT, and CONTENT sold in the REALLUSION Stores and Marketplaces.\" Q11: \"Do iClone 8 and Character Creator 4 embedded content carry an Extended license?\"",
+     "notes": "Quote verbatim (it continues \", and CONTENT sold in the REALLUSION Stores and Marketplaces\"; the cut is marked by the closing quote only, not an ellipsis, but does not change meaning). Q11 names only iClone 8 and Character Creator 4."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "CDX for www.reallusion.com/Content/EULA/EULA.htm; captures 20210211022636, 20210726180335, 20220530141424, 20230925211102, 20250815004032 and the live page (read 2026-09-23)",
+     "evidence": "Texture clause present in \"Updated August 13, 2020\" (2021-02-11), \"Updated June 19, 2021\" (2021-07-26) and \"Updated April 26, 2022\" (2022-05-30); absent from \"Updated September 13, 2023\" and \"Updated August 1 st , 2025\" (current).",
+     "notes": "The claim is correctly dated to the July 2021 capture. Worth adding in the note that the texture clause no longer appears in the current Content EULA (Aug 2025), so it describes the CC3/iClone 7 era only."
+    },
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://web.archive.org/web/20210726180335id_/https://www.reallusion.com/Content/EULA/EULA.htm and https://www.reallusion.com/Content/EULA/EULA.htm (both fetched 2026-09-23)",
+     "evidence": "2021 capture: \"Updated June 19, 2021\" ... \"Texture sources included within REALLUSION Content and REALLUSION softwares are only allowed to be used inside REALLUSION softwares. This includes REALLUSION Software embedded CONTENT, and CONTENT sold in the REALLUSION Stores and Marketplaces.\" Live: \"Updated August 1 st , 2025\" (st superscript); \"Texture sources\" 0 hits; the only texture mention is the 1.1 definition \"3D models, textures, materials\".",
+     "notes": "Quote verbatim; the cut before \", and CONTENT sold in...\" does not change meaning. The live EULA has no clause restricting textures to Reallusion software."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "CDX for reallusion.com/Content/EULA/EULA.htm from 2021 (read 2026-09-23); captures 20210211022636, 20210506014348, 20220530141424, 20230925211102, 20250710041038 fetched; live SHA-1 compared with CDX digests",
+     "evidence": "Clause present: \"Updated August 13, 2020\" (20210211), \"Updated January 1, 2021\" (20210506), \"Updated June 19, 2021\" (20210726), \"Updated April 26, 2022\" (20220530). Absent: \"Updated September 13, 2023\" (20230925), \"Updated May 30th, 2025\" (20250710), current. Live file base32 SHA-1 SIYQBQ4TEQNOEOXRSUALI3LMBB6IXH7B equals the 20250815004032 capture digest.",
+     "notes": "The clause went between the April 2022 and September 2023 versions and has not returned; the current EULA is byte-identical to the August 2025 capture. The claim dates each text and does not mix the old EULA with the current one."
+    }
+   ]
+  },
+  {
+   "id": "CHT-064",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Character Creator 3.4 (24 March 2021) added ExpressionPlus: \"63 custom blendshapes (52 Apple ARKit blendshapes and 11 tongues)\"; the CC3 manual said \"By default, CC3+ characters after version 3.4 will all come with ExpressionPlus profile applied\", and KB 52973 says ExPlus \"is only available for this generation\".",
+   "sources": [
+    "https://www.reallusion.com/character-creator/cc-version-history.html",
+    "https://web.archive.org/web/20220628022634/https://manual.reallusion.com/Character_Creator_3/ENU/3/Content/Character_Creator_3/3.4/08_Animation/Creating-Character-with-ARKit-Profile.htm",
+    "https://kb.reallusion.com/Product/52973"
+   ],
+   "as_first_reported": "Character Creator 3.4 (24 March 2021) added ExpressionPlus: \"63 custom blendshapes (52 Apple ARKit blendshapes and 11 tongues)\"; the CC3 manual said \"By default, CC3+ characters after version 3.4 will all come with ExpressionPlus profile applied\", and KB 52973 says ExPlus \"is only available for this generation\".",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://www.reallusion.com/character-creator/cc-version-history.html (2026-09-23); https://web.archive.org/web/20220628022634id_/https://manual.reallusion.com/Character_Creator_3/ENU/3/Content/Character_Creator_3/3.4/08_Animation/Creating-Character-with-ARKit-Profile.htm (read 2026-09-23); https://kb.reallusion.com/Product/52973/What-is-ExPlus-and-why-does-it-only-support-CC3- (live, 2026-09-23)",
+     "evidence": "\"v3.4 (3.4.3924.1) released on Mar. 24th, 2021\"; \"The new ExpressionPlus for CC3+ characters consists of 63 custom blendshapes (52 Apple ARKit blendshapes and 11 tongues)\"; manual: \"By default, CC3+ characters after version 3.4 will all come with ExpressionPlus profile applied.\"; KB 52973: \"it is only available for this generation.\"",
+     "notes": "All holds. The manual source URL in the claim is wrong: Wayback has no capture of .../ENU/Content/Character_Creator_3/3.4/Creating-Character-with-ARKit-Profile.htm (404); the page lives at .../ENU/3/Content/Character_Creator_3/3.4/08_Animation/Creating-Character-with-ARKit-Profile.htm (captures 20220628022634 onward). The short KB URL /Product/52973 now serves the KB home page; the slugged URL works."
+    }
+   ]
+  },
+  {
+   "id": "CHT-065",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "In CC3.1, FBX character export was new and \"3DXchange Pipeline Version is required\" (CC3.1 manual, \"Exporting FBX Characters (New for v3.1)\", via Wayback); CC3 characters sync only with iClone 7, iClone 8 can read iClone 7 projects, and the Content Manager in iClone 8 and CC4 can read iClone 7 and CC3 content (KB 53039). The CC/iC Blender Tools README now names \"Character Creator 3, 4 & 5 and iClone 7 & 8 character exports\".",
+   "sources": [
+    "https://web.archive.org/web/20191031040219/http://manual.reallusion.com/Character_Creator_3/ENU/3/Content/Character_Creator_3/3.1/17_Export/Exporting_FBX_Avatars.htm",
+    "https://kb.reallusion.com/Product/53039/Can-iClone-8-be-used-together-with-CC3-OR-can-iClone-7-be-used-together-with-CC4-",
+    "https://github.com/soupday/cc_blender_tools"
+   ],
+   "as_first_reported": "CC3 FBX export needed the Pipeline edition (\"3DXchange Pipeline Version is required\", CC3.1 manual via Wayback); CC3 characters sync only with iClone 7, and iClone 8 and CC4's Content Manager can read iClone 7 and CC3 content (KB 53039). The CC/iC Blender Tools README now names \"Character Creator 3, 4 & 5 and iClone 7 & 8 character exports\".",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "https://web.archive.org/web/20191031040219id_/http://manual.reallusion.com:80/Character_Creator_3/ENU/3/Content/Character_Creator_3/3.1/17_Export/Exporting_FBX_Avatars.htm (curl), KB 53039 slug URL (curl), raw README of soupday/cc_blender_tools main (curl), read 2026-09-23",
+     "evidence": "Manual: \"Exporting FBX Characters (New for v3.1) You can export a character in FBX format ... instead of sending the character to 3DXchange for exporting. 3DXchange Pipeline Version is required.\" KB: \"CC3 can transfer character to iClone 7\"; \"iClone 8 can read iClone 7 projects. Also, the Content Manager in iClone 8 and CC4 can read contents which were created using iClone 7and CC3.\" README line 2: \"Character Creator 3, 4 & 5 and iClone 7 & 8 character exports.\"",
+     "notes": "Refuted on the first clause: the manual requires the 3DXchange Pipeline version, not a CC3 'Pipeline edition', and it is the v3.1 page, so it does not show what later CC3 releases needed. Also the KB says the Content Manager in iClone 8 and CC4 reads iClone 7 and CC3 content, and separately that iClone 8 reads iClone 7 projects; the proposed wording ran these together. The Wayback CDX API was offline during this pass but the id_ snapshot fetched. Final wording re-read against all three sources."
+    }
+   ]
+  },
+  {
+   "id": "CHT-066",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "None of the Reallusion pages read names the licence of the CC5 Free Resource Pack. The 3D content page describes the pack under the heading \"EMBEDDED CC5 ASSETS\", and the download page's edition comparison marks \"Embedded Content\" \"Included in the Resource Pack\" under both Trial and Full. The Content License Policy page's only answer on embedded content, for iClone 8 and Character Creator 4 (\"If the embedded content items are CC Components content, then they include an Extended license already. If they are non CC Components content, then they only include a Standard license.\"), is not shown to readers: in the page source it sits in a block styled \"display: none\", and in the FAQ data file it is marked \"disabled\": true. The visible policy text says \"iContent is only available in-software purchase\". Applying the withdrawn answer to CC5's pack is an inference.",
+   "sources": [
+    "https://www.reallusion.com/character-creator/3d-content.html",
+    "https://www.reallusion.com/character-creator/download.html",
+    "https://www.reallusion.com/license/content.html",
+    "https://www.reallusion.com/includes/rl-modules/faq/data/cs-content-policy-faq-general/en.json",
+    "https://www.reallusion.com/includes/rl-modules/faq/rl_faq.js"
+   ],
+   "as_first_reported": "No Reallusion text names the licence of the CC5 Free Resource Pack. The pack is listed under \"EMBEDDED CC5 ASSETS\", and the download page marks Embedded Content \"Included in the Resource Pack\" for trial and full users. The Content License Policy says of iClone 8 and Character Creator 4 embedded content: \"If the embedded content items are CC Components content, then they include an Extended license already. If they are non CC Components content, then they only include a Standard license.\" It also says \"iContent is only available in-software purchase\". Applying that answer to CC5's pack is an inference.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "2026-09-23, curl of 3d-content.html, download.html, license/content.html, cs-content-policy-faq-general/en.json and rl_faq.js; HTML parsed for hidden ancestors",
+     "evidence": "3d-content: \"EMBEDDED CC5 ASSETS\" ... \"Enhance your creative workflow with the CC5 Free Resource Pack.\" download: \"Embedded Content ✓ *Included in the Resource Pack ✓ *Included in the Resource Pack\". content.html line 599: <div ... style=\"display: none;\"> containing \"Q11. Do iClone 8 and Character Creator 4 embedded content carry an Extended license?\". en.json item: \"disabled\": true. rl_faq.js: \"if (item.disabled) { return false; }\". Visible: \"iContent is only available in-software purchase\".",
+     "notes": "Every quote in the proposed wording appears verbatim, but \"The Content License Policy says\" overstates it: the embedded-content answer is withdrawn text. It is in a display:none block of the static page and disabled in the FAQ JSON, which the loader filters out, so no reader sees it. \"No Reallusion text\" was also wider than what was read; scoped to the pages read. Neither pack page mentions a licence for the pack. Final wording re-read against the same files and confirmed."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "2026-09-23, Wayback CDX and id_ snapshots: content.html 20260223133903, download.html 20251008020354 and 20260803013541, 3d-content.html 20260217153154 and 20260803013705; FAQ JSON has no captures",
+     "evidence": "content.html 2026-02-23: Q11 already inside the display:none div at line 599, visible text identical to today. download.html 2025-10-08 and 2026-08-03: same \"Embedded Content ... Included in the Resource Pack\" row. 3d-content 2026-02-17 and 2026-08-03: \"EMBEDDED CC5 ASSETS\" and \"CC5 Free Resource Pack\" unchanged.",
+     "notes": "The final wording holds across the captures. The FAQ JSON (cs-content-policy-faq-general/en.json) has no Wayback captures, so when its item was disabled is unknown; the static copy was hidden by 2026-02-23 at the latest. Conflation: the withdrawn answer covers iClone 8 and CC4 embedded content, not CC5; the final wording keeps that as an inference."
+    }
+   ]
+  },
+  {
+   "id": "CHT-067",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": false,
+   "claim": "The two free ActorCore items opened, the actor Party-M-0001 and the motion Dance Graceful, each show \"Standard License: $0.00\". Other free items were not opened, and the free listing also carries paid items discounted to nothing (\"$3.50 $0.00 -100%\"), so a $0.00 Standard Licence on other free items is not established.",
+   "sources": [
+    "https://actorcore.reallusion.com/3d-character/free?asset=party-m-0001",
+    "https://actorcore.reallusion.com/3d-motion/free?asset=dance-graceful-378939"
+   ],
+   "as_first_reported": "Free ActorCore items carry a Standard License at no cost: the actor Party-M-0001 and the motion Dance Graceful each show \"Standard License: $0.00\". Only those two items were opened.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "2026-09-23, headless Chrome --dump-dom of both ActorCore item URLs (own profile)",
+     "evidence": "Party-M-0001: \"Party-M-0001 Studio Black Standard License: $0.00 $0.00 VIEW ITEMS Add To Cart ( Actor )\". Dance Graceful: \"Dance Graceful Studio Black Standard License: $0.00 $0.00 VIEW ITEMS Add To Cart ( Motion )\".",
+     "notes": "Both quoted strings appear on today's rendered pages. The proposed wording is accurate on the two items; its opening generalisation is qualified by \"Only those two items were opened\"."
+    },
+    {
+     "lens": "drift",
+     "verdict": "refuted",
+     "read": "2026-09-23, Wayback CDX; snapshots 20250117001736 (party-m-0001) and 20240504223230 (dance-graceful_250999) fetched; today's rendered free-motion listing",
+     "evidence": "Snapshots are 3 KB client-side shells with no licence or price text. Today's listing on the Dance Graceful page: \"HeavyShoulderLift ToHighShelf FREE $3.50 $0.00 -100%\" beside \"Dance Graceful FREE $0.00\".",
+     "notes": "No dated snapshot shows licence text, so change over time cannot be checked. Conflation: \"Free ActorCore items carry a Standard License at no cost\" runs permanently free items together with paid items temporarily discounted to $0.00 in the same free listing, and generalises from two items. Final wording drops the generalisation; re-read against today's dumps and confirmed."
+    }
+   ]
+  },
+  {
+   "id": "CHT-068",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "A Character Creator 5 trial may not be used commercially: the download page's edition comparison marks \"Commercial Use\" with \"-\" under Trial and a tick under Full. The Software EULA (\"May 25th, 2026\") has no trial clause; its grant covers \"Reallusion Software purchased under a perpetual license or used under an active subscription license\", and it allows selling images and videos \"created with properly licensed Reallusion Software\".",
+   "sources": [
+    "https://www.reallusion.com/character-creator/download.html",
+    "https://www.reallusion.com/Content/EULA/AP/EULA_AP.htm"
+   ],
+   "as_first_reported": "A Character Creator 5 trial may not be used commercially: the download page's edition comparison marks \"Commercial Use\" with \"-\" under Trial and a tick under Full. The Software EULA (\"May 25th, 2026\") has no trial clause; its grant covers \"Reallusion Software purchased under a perpetual license or used under an active subscription license\", and it allows selling images and videos \"created with properly licensed Reallusion Software\".",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "2026-09-23, curl of download.html and Content/EULA/AP/EULA_AP.htm",
+     "evidence": "download: \"EDITION COMPARISON Features Trial Full\" ... \"Commercial Use - ✓ EULA\"; page covers CC5 (\"The basic functionalities of CC5\"). EULA: \"Reallusion Software EULA (End-User License Agreement) (May 25 th , 2026)\"; \"Grant of License For Reallusion Software purchased under a perpetual license or used under an active subscription license , Reallusion grants you\"; \"You may sell or redistribute images and videos created with properly licensed Reallusion Software\". \"trial\": 0 matches.",
+     "notes": "All quotes verbatim (the page renders \"25 th\" as a superscript). The claim keeps the non-binding comparison table and the binding EULA apart and states what each says."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "2026-09-23, Wayback id_ snapshots: download.html 20251008020354 and 20260803013541; EULA_AP.htm 20260217155930 and 20260625062305",
+     "evidence": "download 2025-10-08 and 2026-08-03: \"Commercial Use - ✓ EULA\". EULA 2026-02-17: \"(January 6 th , 2026)\", same grant sentence and \"created with properly licensed Reallusion Software\", 0 \"trial\" matches. EULA 2026-06-25: byte-identical to today's copy.",
+     "notes": "No drift in the quoted text between January and September 2026; the May 25th, 2026 date on the claim is current. No conflation: the table and the EULA are cited separately."
+    }
+   ]
+  },
+  {
+   "id": "CHT-069",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "Reallusion's free base FAQ says the base is licensed \"under a single, clear EULA (Section 5) that explicitly permits commercial use in film, games, animation, 3D printing, and education\", that \"Your derivative characters are fully yours\", and that \"the only restriction is redistributing the unmodified base files themselves\". Section 5 of the Software EULA grants commercial use only to \"Original Character Creations\", which the EULA's Definitions describe as made \"without using any content from Reallusion or its developers, including models\", and lists four restrictions, A to D; the Content License Policy FAQ says \"Using the Character Creator base model for any character generation system or commercial character creation feature is not permitted under the Reallusion EULA.\" The FAQ is not the binding text, and the two disagree.",
+   "sources": [
+    "https://www.reallusion.com/character-creator/free-3d-character-base.html",
+    "https://www.reallusion.com/includes/rl-modules/faq/data/cc-free-3d-character-base-faq/en.json",
+    "https://www.reallusion.com/Content/EULA/AP/EULA_AP.htm",
+    "https://www.reallusion.com/license/content.html",
+    "https://www.reallusion.com/includes/rl-modules/faq/data/cs-content-policy-faq-general/en.json"
+   ],
+   "as_first_reported": "Reallusion's free base FAQ says the base is licensed \"under a single, clear EULA (Section 5) that explicitly permits commercial use in film, games, animation, 3D printing, and education\", that \"Your derivative characters are fully yours\", and that \"the only restriction is redistributing the unmodified base files themselves\". Section 5 itself grants commercial use only to \"Original Character Creations\" made \"without using any content from Reallusion ... including models\" and lists four restrictions, and the Content License Policy FAQ says \"Using the Character Creator base model for any character generation system or commercial character creation feature is not permitted under the Reallusion EULA.\" The FAQ is not the binding text, and the two disagree.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "2026-09-23, curl of free-3d-character-base.html, cc-free-3d-character-base-faq/en.json, EULA_AP.htm, license/content.html and cs-content-policy-faq-general/en.json",
+     "evidence": "FAQ JSON: \"licensed directly by Reallusion under a single, clear EULA (Section 5) that explicitly permits commercial use in film, games, animation, 3D printing, and education. Your derivative characters are fully yours [dash] the only restriction is redistributing the unmodified base files themselves.\" EULA: 5th top-level item \"Character Creator Base Model License\" ... \"to generate your Original Character Creations\" ... \"A. Use in any character generation system.\" to \"D. Selling the 3D model ...\". Definitions: \"without using any content from Reallusion or its developers, including models\". Policy FAQ (not disabled): \"Using the Character Creator base model for any character generation system ...\".",
+     "notes": "All quotes verbatim. One misattribution: the \"without using any content from Reallusion\" wording is in the Definitions section (section 1), not in Section 5, so \"Section 5 itself grants commercial use only to Original Character Creations made ...\" puts a Definitions quote in Section 5. Final wording names the Definitions. Section numbering is by CSS counter; Base Model Licence is the fifth top-level item, so \"Section 5\" holds. The character-generation policy item is live (\"disabled\": false). Final wording re-read and confirmed."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "2026-09-23, Wayback id_ snapshots of free-3d-character-base.html (20251220190436, 20260211194111, 20260330031449, 20260507155053, 20260704062609, 20260731165911) and EULA_AP.htm (20260217155930, 20260625062305); FAQ JSON files have no captures",
+     "evidence": "rlFaq.load({name:'cc-free-3d-character-base-faq' ...}) absent from captures up to 20260507, present from 20260704; 20260731 byte-identical to today. EULA 2026-02-17 (\"January 6 th , 2026\") already has \"Original Character Creation\" definition and restrictions A and D; 2026-06-25 identical to today's May 25th, 2026 copy.",
+     "notes": "The free base FAQ was added between 2026-05-07 and 2026-07-04, after the May 25th, 2026 EULA, and has not changed since 2026-07-31 in the page; the JSON itself is not archived. Conflation: the claim correctly separates the non-binding marketing FAQ from the binding EULA and the policy FAQ. conflicts_with confirmed: CHT-002 records the Section 5 grant to Original Character Creations and restrictions A to D, which the free base FAQ's \"only restriction\" contradicts."
+    }
+   ],
+   "conflicts_with": "CHT-002: the FAQ says the only restriction is redistributing the unmodified base; Section 5 limits commercial use to Original Character Creations and lists restrictions A to D."
+  },
+  {
+   "id": "CHT-070",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Autodesk Character Generator is online: the landing page answers (\"Welcome to Autodesk® Character Generator\"), health.autodesk.com lists \"Character Generator\" as \"Operational\", and the retired-products page retired only \"Character Generator as a stand-alone product\" (August 7, 2021) and says it \"will continue to be available as an entitlement\". But a forum thread of 2025-07-06 reports \"Characters no longer have a rigged skeleton, just locators\"; replies of 2025-07-16, 2025-07-20 and 2025-07-21 report the same breakage, the last reply (2026-04-21) reports a different fault (it \"sometimes doesn't load or gets stuck during processing\"), and no reply is from Autodesk staff. Whether generation works today was not tested.",
+   "sources": [
+    "https://charactergenerator.autodesk.com/",
+    "https://health.autodesk.com/",
+    "https://www.autodesk.com/support/account/manage/billing/retired-products",
+    "https://forums.autodesk.com/t5/character-generator-forum/character-generator-broken/td-p/13712876"
+   ],
+   "as_first_reported": "Autodesk Character Generator is online and listed as maintained: the landing page answers, health.autodesk.com lists \"Character Generator\" as \"Operational\", and the retired-products page retired only the stand-alone product and says it \"will continue to be available as an entitlement\". But a forum thread of 2025-07-06 reports \"Characters no longer have a rigged skeleton, just locators\", replies confirm it on 2025-07-21 and later, the last on 2026-04-21, and no reply in it is from Autodesk staff. Whether generation works today was not tested.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "2026-09-23: charactergenerator.autodesk.com (curl and headless Chrome), health.autodesk.com and the forum thread (headless Chrome --dump-dom, own profiles), retired-products page (Playwright, own new page, closed after)",
+     "evidence": "Landing: \"Welcome to Autodesk ® Character Generator Create, customize, and download your rigged 3D characters\". Health: \"Character Generator Operational\". Retired: \"Character Generator as a stand-alone product August 7, 2021 Character Generator will continue to be available as an entitlement through: 3ds Max Maya ...\". Forum: Eths 07-06-2025 \"Characters no longer have a rigged skeleton, just locators\"; elisabeth.ganal 07-16-2025 \"I also ran into that issue\"; sxkx 07-20-2025 \"Same issue still persists\"; khauspro 04-21-2026 \"sometimes doesn't load or gets stuck during processing\".",
+     "notes": "Wrong in two places. Replies confirming the locator fault start on 2025-07-16, not 2025-07-21. The 2026-04-21 reply describes a different fault (loading and processing hangs), so it does not confirm the rig breakage. \"Listed as maintained\" says more than a status page reading \"Operational\"; changed to \"online\". Posters' ranks are Explorer, Community Visitor and Observer (2); none is Autodesk staff. Final wording re-read against the same captures and confirmed."
+    }
+   ]
+  },
+  {
+   "id": "CHT-071",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "The Content License Policy's visible FAQ (its data file last modified 15 August 2025) answers \"Can I use my purchased content for game production and distributing my game title?\" with \"Yes, you can use your purchased content in your game production and for distributing your game title.\" The FAQ is not the binding text: the Content EULA (\"Updated August 1st, 2025\") still bars use \"As embedded content within applications or online services\" and requires 3D models \"contained in proprietary formats\" (6.3).",
+   "sources": [
+    "https://www.reallusion.com/license/content.html",
+    "https://www.reallusion.com/includes/rl-modules/faq/data/cs-content-policy-faq-general/en.json",
+    "https://www.reallusion.com/Content/EULA/EULA.htm"
+   ],
+   "as_first_reported": "The Content License Policy's visible FAQ (its data file last modified 15 August 2025) answers \"Can I use my purchased content for game production and distributing my game title?\" with \"Yes, you can use your purchased content in your game production and for distributing your game title.\" The FAQ is not the binding text: the Content EULA (\"Updated August 1st, 2025\") still bars use \"As embedded content within applications or online services\" and requires 3D models \"contained in proprietary formats\" (6.3).",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.reallusion.com/license/content.html (rendered in Playwright 2026-09-23 (own tab): Q1 to Q11 p.question elements all offsetWidth/Height 0; enclosing element <div class=\"rl-row-1440 rl-row-80\" style=\"display: none;\"> (computed display none); visible #faq-general questions are the six non-disabled en.json entries); https://www.reallusion.com/includes/rl-modules/faq/data/cs-content-policy-faq-general/en.json (fetched 2026-09-23, HTTP Last-Modified Fri, 15 Aug 2025 09:20:43 GMT); https://www.reallusion.com/Content/EULA/EULA.htm (fetched 2026-09-23)",
+     "evidence": "en.json anchor game-use, disabled:false: \"Can I use my purchased content for game production and distributing my game title?\" / \"Yes, you can use your purchased content in your game production and for distributing your game title.\" EULA 2.1(C): \"You may NOT use the Content or any Derivative Content ... As embedded content within applications or online services.\" 6.3: \"the 3D Models must be contained in proprietary formats so that they cannot be opened or imported into a publicly available software application.\"",
+     "notes": "The question is the first visible item in the rendered General tab; its answer shows when expanded. \"Last modified\" is the HTTP Last-Modified header. The embedded-content bar sits under the Standard License restrictions; 6.3 applies to every Member. \"Not the binding text\" is a characterisation: the EULA is the agreement, the FAQ is a page summary."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "content.html captures 20250201013324 to 20260830084432 (see CHT-023); EULA CDX and captures 20230925211102, 20250710041038; en.json CDX (no captures); all read 2026-09-23",
+     "evidence": "New FAQ loader (cs-content-policy-faq-general) absent 20250524125851, present 20251206215335 onward. EULA live digest equals 20250815004032 capture. \"As embedded content within applications or online services\" absent from the May 30th 2025 and September 2023 EULAs; \"contained in proprietary formats\" present in both.",
+     "notes": "The FAQ answer cannot be traced in Wayback (data file never captured) beyond its Last-Modified date; the loader appears from December 2025. The EULA text quoted is unchanged since August 2025. \"Still\" is right for today; the exact embedded-content wording is new in the August 2025 EULA, which the claim names by date. The claim keeps the non-binding FAQ and the binding EULA apart, which is its point."
+    }
+   ]
+  }
+ ]
+}

@@ -18,6 +18,11 @@ A register is `claims/<note>.json`, with the same base name as `docs/reference/<
 | `docs/reference/source-filmmaker.md` | `claims/source-filmmaker.json` | `SFM-001` onwards |
 | `docs/reference/lip-sync.md` | `claims/lip-sync.json` | `LIP-001` onwards |
 | `docs/reference/daz-genesis.md` | `claims/daz-genesis.json` | `DAZ-001` onwards |
+| `docs/reference/hair-cards.md` | `claims/hair-cards.json` | `HAIR-001` onwards |
+| `docs/reference/character-tools.md` | `claims/character-tools.json` | `CHT-001` onwards |
+| `docs/reference/character-assets.md` | `claims/character-assets.json` | `CAS-001` onwards |
+| `docs/reference/hair-meshes.md` | `claims/hair-meshes.json` | `HM-001` onwards |
+| `docs/reference/vam-assets.md` | `claims/vam-assets.json` | `VAM-001` onwards |
 
 A claim id cited in a note, such as `LIP-001`, names the register by its prefix and the claim by its `id` field. Ids are unique within a register. `conflicts_found` and `conflicts_with` refer to claims by the same ids.
 

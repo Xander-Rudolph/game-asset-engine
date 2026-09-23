@@ -296,6 +296,24 @@ from xml.sax.saxutils import quoteattr
 ROOT = Path(__file__).resolve().parent.parent
 # Daz's documented pattern text, used with fullmatch and re.ASCII so that a
 # trailing newline or a non-ASCII digit does not pass
+# What a zip carries that a library should not: the folder macOS puts its
+# resource forks in, and the files it and Windows leave in every directory.
+JUNK_DIRS = {"__macosx"}
+JUNK_NAMES = {".ds_store", "thumbs.db", "desktop.ini"}
+# The folders a Daz content library holds at its root. A zip with none of them
+# anywhere near its root holds nothing this can install, whoever made it.
+CONTENT_DIRS = {
+    "data", "people", "runtime", "props", "scenes", "scripts", "presets", "cameras",
+    "environments", "lights", "light presets", "render presets", "shader presets",
+    "materials", "documentation", "readme's", "readmes", "templates", "animations",
+    "aniblocks", "figures", "general", "shaders", "poses", "shapes", "utilities",
+}
+# Who the content came from. Daz is the default because that is what the
+# licence wording in this script was read from; anything else is named, and
+# then this script claims nothing about its terms.
+DAZ_SOURCE = "Daz 3D"
+# " (1)" and "(1)" a browser adds to a second download of the same file.
+DUP_SUFFIX_RE = re.compile(r"\s*\(\d+\)$")
 PACKAGE_RE = re.compile(r"^([A-Z][0-9A-Z]{0,6})(?=\d{8})(\d{8})(-(\d{2}))?_([0-9A-Za-z]+)\.zip$",
                         re.ASCII)
 PART_OF = re.compile(r"\s*\((\d+) of (\d+)\)\s*$", re.ASCII)
@@ -416,14 +434,14 @@ def unsafe(path: str) -> str | None:
     return None
 
 
-def target_rel(value: str) -> tuple[str | None, str | None]:
-    """(library-relative path, None) for a manifest VALUE, or (None, why it is refused)."""
+def target_rel(value: str, root: str = "Content/") -> tuple[str | None, str | None]:
+    """(library-relative path, None) for a listed file, or (None, why it is refused)."""
     why = unsafe(value)
     if why:
         return None, why
-    if not value.startswith("Content/"):
-        return None, 'not under "Content/"'
-    rel = value[len("Content/"):]
+    if root and not value.startswith(root):
+        return None, f'not under "{root}"'
+    rel = value[len(root):]
     why = unsafe(rel)
     if why:
         return None, why
@@ -432,6 +450,36 @@ def target_rel(value: str) -> tuple[str | None, str | None]:
     if rel.endswith(TEMP_SUFFIX):
         return None, f"a name ending in {TEMP_SUFFIX}, which this script uses for temporary files"
     return rel, None
+
+
+def content_root(infos: list) -> tuple[str | None, list[str]]:
+    """Where the library's own folders start inside a zip, and what sits beside them.
+
+    Three shapes turn up: a Daz Install Manager package puts everything under
+    Content/, a Renderosity one often ships the folders at the zip's root, and
+    some ship them under the name of a library, such as "My DAZ 3D Library".
+    Returns (the prefix to strip, the names skipped) or (None, what it held).
+    """
+    tops: dict[str, int] = {}
+    for info in infos:
+        top = info.filename.split("/")[0]
+        tops[top] = tops.get(top, 0) + (0 if info.is_dir() else 1)
+    if any(t.casefold() in CONTENT_DIRS for t in tops):
+        return "", sorted(t for t in tops if t.casefold() not in CONTENT_DIRS)
+    for top in sorted(tops):
+        kids = {i.filename[len(top) + 1:].split("/")[0] for i in infos
+                if i.filename.startswith(top + "/") and len(i.filename) > len(top) + 1}
+        if any(k.casefold() in CONTENT_DIRS for k in kids):
+            return top + "/", sorted(k for k in kids if k.casefold() not in CONTENT_DIRS)
+    return None, sorted(tops)
+
+
+def package_key(stem: str) -> str:
+    """A record's name for a package that carries no Daz SKU: its file name,
+    with anything that is not a letter, a digit, a dot, a dash or an underscore
+    turned into a dash, and no leading dot or dash."""
+    key = re.sub(r"[^A-Za-z0-9._-]+", "-", stem).strip("-.")
+    return key or "package"
 
 
 def outside(lib_real: str, dest: Path) -> str | None:
@@ -539,9 +587,14 @@ def valid_date(text: str) -> str:
 
 
 def valid_sku(text: str) -> str:
-    if not re.fullmatch(r"\d{1,8}", text, re.ASCII):
-        raise argparse.ArgumentTypeError(f"a SKU is up to eight digits, got {text!r}")
-    return str(int(text))
+    """A Daz SKU, or the name a record got from a package that had none."""
+    if re.fullmatch(r"\d{1,8}", text, re.ASCII):
+        return str(int(text))
+    if re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,96}", text, re.ASCII):
+        return text
+    raise argparse.ArgumentTypeError(
+        "a record is named by a Daz SKU, up to eight digits, or by the file name a package "
+        f"with no SKU was installed from, got {text!r}")
 
 
 def valid_ledger(text: str) -> str:
@@ -687,8 +740,25 @@ AI_STAGES = ("excluded: never give the mesh, textures or UV maps to any model, a
              "answers in writing; an Interactive License does not lift this")
 
 
-def licence_block(interactive: bool, eula_read: str | None) -> dict:
-    """The record's licence block. Only `interactive_license` and `eula_read` are inputs."""
+def licence_block(interactive: bool, eula_read: str | None, source: str = DAZ_SOURCE,
+                  terms_files: list[str] | None = None) -> dict:
+    """The record's licence block.
+
+    For Daz content the wording comes from the EULA as the research note read
+    it. For anything else this script has read nothing, and says so: it names
+    the terms files the package shipped and the date the owner says they read
+    them, and leaves the reading to them.
+    """
+    if source != DAZ_SOURCE:
+        return {"source": source,
+                "held": f"from {source}; this script has read none of its terms",
+                "terms_files": sorted(terms_files or []),
+                "terms_read": eula_read,
+                "interactive_license": False,
+                "house_rule": ("until the owner records otherwise, this repo treats it as it "
+                               "treats Daz content: out of the repo, out of a build and out of "
+                               "every AI stage"),
+                "read_before": ("shipping a render, a mesh or anything made from it")}
     if interactive:
         mesh = ("an Interactive License is recorded (this script cannot check a purchase); the "
                 "mesh, rig, morphs and textures, and FBX or glTF exported from them, may go into "
@@ -714,18 +784,41 @@ def licence_block(interactive: bool, eula_read: str | None) -> dict:
 
 
 def current_licence(rec: dict) -> dict:
-    """The record's licence block as this version words it, from its two inputs."""
+    """The record's licence block as this version words it, from its inputs."""
     lic = rec.get("licence") or {}
-    return licence_block(bool(lic.get("interactive_license")), lic.get("eula_read"))
+    source = rec.get("source") or DAZ_SOURCE
+    return licence_block(bool(lic.get("interactive_license")),
+                         lic.get("eula_read") or lic.get("terms_read"),
+                         source, lic.get("terms_files") or rec.get("licence_files"))
 
 
 def licence_lines(rec: dict) -> list[str]:
     lic = current_licence(rec)
     name = rec.get("product_name") or "product name not recorded"
+    source = rec.get("source") or DAZ_SOURCE
 
     def para(text: str, indent: str = "  ", later: str | None = None) -> list[str]:
         return textwrap.wrap(text, 96, initial_indent=indent,
                              subsequent_indent=later if later is not None else indent)
+
+    if source != DAZ_SOURCE:
+        out = [f"Licence for {rec['sku']} ({name}): {lic['held']}"]
+        files = lic["terms_files"]
+        if files:
+            out += para(f"The package shipped {plural(len(files), 'file')} of terms. Read "
+                        "them in the library before shipping anything made from this content:")
+            out += [f"    {f}" for f in files[:10]]
+        else:
+            out += para("The package shipped no terms file this script could see. The vendor's "
+                        "page is where they are.")
+        out += para(f"This script records what was installed and from whom. It has read nothing "
+                    f"of {source}'s terms and states none of them.")
+        out += para(lic["house_rule"][0].upper() + lic["house_rule"][1:] + ".")
+        out += [f"  Terms last read: "
+                + (lic["terms_read"] or "not recorded (pass --eula-read YYYY-MM-DD after "
+                                        "reading them)"),
+                f"  From {NOTE}, \"Licences\", for the Daz rules this follows; not legal advice."]
+        return out
 
     out = [f"Licence for SKU {rec['sku']} ({name}): {lic['held']}"]
     if lic["interactive_license"]:
@@ -773,12 +866,24 @@ def read_xml(zf: zipfile.ZipFile, name: str, where: Path) -> ET.Element:
         raise Refused(f"refusing {where}: {name} is not well-formed XML ({e})") from None
 
 
-def open_package(path: Path) -> dict:
-    """Read a package's name, Manifest.dsx and Supplement.dsx. Raises Refused."""
+def open_package(path: Path, source: str = DAZ_SOURCE) -> dict:
+    """Read a package: its name, its Manifest.dsx if it has one, and where its
+    content starts inside the zip. Raises Refused.
+
+    A Daz Install Manager package is the well-lit path: its name carries the
+    SKU and the part, and Manifest.dsx lists every file to install. A package
+    from anywhere else has neither, so the file name becomes the record's name
+    and the content folders are found by looking.
+    """
     m = PACKAGE_RE.fullmatch(path.name)
     if not m:
-        raise Refused(f"refusing {path}: the name does not match Daz's package pattern "
-                      "<prefix><8-digit SKU>[-<2-digit part>]_<Name>.zip")
+        bare = DUP_SUFFIX_RE.sub("", path.stem) + path.suffix
+        # A Daz package the browser numbered is the one case worth naming: it
+        # would otherwise install a second copy of a product under another key.
+        if bare != path.name and PACKAGE_RE.fullmatch(bare):
+            raise Refused(f"refusing {path}: this is a Daz package a browser numbered as a "
+                          f"second download. Rename it to {bare} and install that, or delete "
+                          "it if the product is already in the library")
     if not path.is_file():
         raise Refused(f"refusing {path}: not a file")
     try:
@@ -798,7 +903,7 @@ def open_package(path: Path) -> dict:
                 if alt and alt != info.filename:
                     by_name.setdefault(alt, []).append(info)
         if "Manifest.dsx" not in by_name:
-            raise Refused(f"refusing {path}: no Manifest.dsx at the root of the zip")
+            return open_loose(path, zf, infos, by_name, source, m)
         root = read_xml(zf, "Manifest.dsx", path)
         if root.tag != "DAZInstallManifest":
             raise Refused(f"refusing {path}: Manifest.dsx's root element is <{root.tag}>, "
@@ -825,19 +930,20 @@ def open_package(path: Path) -> dict:
             sup = read_xml(zf, "Supplement.dsx", path)
             el = sup.find("ProductName")
             product = el.get("VALUE") if el is not None else None
-        part = m.group(4)
+        part = m.group(4) if m else None
         of = PART_OF.search(product or "")
         if part and of and int(of.group(1)) != int(part):
             raise Refused(f"refusing {path}: the name gives part {part} but Supplement.dsx "
                           f"says {product!r}; was the zip renamed?")
-        sku = str(int(m.group(2)))
-        named = {str(int(s.group(1))) for v in values
-                 if (s := SUPPORT_SKU.match(v[len("Content/"):] if v.startswith("Content/")
-                                            else v))}
-        if named and sku not in named:
-            raise Refused(f"refusing {path}: the name gives SKU {sku} but Manifest.dsx lists "
-                          f"Runtime/Support/DAZ_3D_{sorted(named)[0]}_... files; was the zip "
-                          "renamed?")
+        sku = str(int(m.group(2))) if m else package_key(path.stem)
+        if m:
+            named = {str(int(s.group(1))) for v in values
+                     if (s := SUPPORT_SKU.match(v[len("Content/"):] if v.startswith("Content/")
+                                                else v))}
+            if named and sku not in named:
+                raise Refused(f"refusing {path}: the name gives SKU {sku} but Manifest.dsx lists "
+                              f"Runtime/Support/DAZ_3D_{sorted(named)[0]}_... files; was the zip "
+                              "renamed?")
         listed = set(values)
         unlisted = sum(1 for i in infos if not i.is_dir()
                        and i.filename not in ("Manifest.dsx", "Supplement.dsx")
@@ -849,11 +955,73 @@ def open_package(path: Path) -> dict:
         zf.close()
         raise Refused(f"refusing {path}: not a readable zip ({e})") from None
     return {"path": path, "file": path.name, "zip": zf, "entries": by_name,
-            "prefix": m.group(1), "sku": sku, "sku8": m.group(2),
-            "part": part or SINGLE, "global_id": gid, "product": product,
-            "product_base": PART_OF.sub("", product) if product else None,
+            "prefix": m.group(1) if m else None, "sku": sku,
+            "sku8": m.group(2) if m else None, "root": "Content/",
+            "source": source if m is None else DAZ_SOURCE,
+            "licence_files": licence_files(values, "Content/"),
+            "skipped_dirs": [],
+            "part": part or SINGLE, "global_id": gid,
+            "product": product or path.stem,
+            "product_base": PART_OF.sub("", product) if product else path.stem,
             "parts_total": int(of.group(2)) if of else None,
             "values": values, "listed_twice": twice, "other_files": others,
+            "unlisted_entries": unlisted}
+
+
+def licence_files(values: list[str], root: str) -> list[str]:
+    """The terms a package ships with, as library-relative paths, for the record
+    to name. Nothing here reads them."""
+    out = []
+    for value in values:
+        rel = value[len(root):] if root and value.startswith(root) else value
+        name = rel.rsplit("/", 1)[-1].casefold()
+        if name.endswith((".txt", ".pdf", ".html", ".rtf")) and any(
+                word in name for word in ("licen", "eula", "terms", "readme", "read me")):
+            out.append(rel)
+    return sorted(out)[:20]
+
+
+def open_loose(path: Path, zf, infos: list, by_name: dict, source: str, m) -> dict:
+    """A package with no Manifest.dsx: find the content folders and list them."""
+    if m:
+        zf.close()
+        raise Refused(f"refusing {path}: a Daz package name but no Manifest.dsx at the root "
+                      "of the zip")
+    root, skipped = content_root(infos)
+    if root is None:
+        zf.close()
+        raise Refused(f"refusing {path}: no Daz content folder in the zip, which holds "
+                      + (", ".join(skipped[:6]) or "nothing") + ". A content package holds "
+                      "data/, People/, Runtime/ or another library folder, at its root or "
+                      "under one folder")
+    values, seen, junk = [], set(), 0
+    for info in infos:
+        if info.is_dir() or not info.filename.startswith(root):
+            continue
+        rel = info.filename[len(root):]
+        if not rel or rel.split("/")[0].casefold() not in CONTENT_DIRS:
+            continue
+        parts = [part.casefold() for part in rel.split("/")]
+        if parts[-1] in JUNK_NAMES or any(part in JUNK_DIRS for part in parts[:-1]):
+            junk += 1
+            continue
+        if info.filename in seen:
+            continue
+        seen.add(info.filename)
+        values.append(info.filename)
+    if not values:
+        zf.close()
+        raise Refused(f"refusing {path}: its content folders hold no files")
+    unlisted = sum(1 for i in infos if not i.is_dir() and i.filename not in seen)
+    if junk:
+        skipped.append(f"{junk} macOS and Windows scratch file(s)")
+    return {"path": path, "file": path.name, "zip": zf, "entries": by_name,
+            "prefix": None, "sku": package_key(path.stem), "sku8": None, "root": root,
+            "source": source, "licence_files": licence_files(values, root),
+            "skipped_dirs": skipped,
+            "part": SINGLE, "global_id": None, "product": path.stem,
+            "product_base": path.stem, "parts_total": None,
+            "values": values, "listed_twice": 0, "other_files": {},
             "unlisted_entries": unlisted}
 
 
@@ -862,7 +1030,7 @@ def safety_plan(pkg: dict, lib: Path) -> tuple[list[dict], list[dict]]:
     lib_real = os.path.realpath(lib)
     items, refusals = [], []
     for value in pkg["values"]:
-        rel, why = target_rel(value)
+        rel, why = target_rel(value, pkg["root"])
         info = None
         if not why:
             found = pkg["entries"].get(value, [])
@@ -1002,16 +1170,23 @@ def merge_record(rec: dict | None, pkg: dict, items: list[dict], placed: list[di
     stamp = now()
     if rec is None:
         rec = {"record_version": RECORD_VERSION, "sku": pkg["sku"], "store_prefix": pkg["prefix"],
+               "source": pkg["source"],
                "product_name": pkg["product_base"], "global_id": pkg["global_id"],
                "parts_total": pkg["parts_total"], "created_at": stamp, "updated_at": stamp,
                "packages": {}, "files": {},
-               "licence": licence_block(bool(args.interactive_license), args.eula_read),
+               "licence": licence_block(bool(args.interactive_license), args.eula_read,
+                                        pkg["source"], pkg["licence_files"]),
                "written_by": "scripts/daz_library.py"}
     else:
         held = rec.get("licence") or {}
+        rec["source"] = rec.get("source") or pkg["source"]
         rec["licence"] = licence_block(bool(args.interactive_license
                                             or held.get("interactive_license")),
-                                       args.eula_read or held.get("eula_read"))
+                                       args.eula_read or held.get("eula_read")
+                                       or held.get("terms_read"),
+                                       rec["source"],
+                                       sorted(set((held.get("terms_files") or [])
+                                                  + pkg["licence_files"])))
         rec["product_name"] = rec.get("product_name") or pkg["product_base"]
         rec["parts_total"] = rec.get("parts_total") or pkg["parts_total"]
         rec["updated_at"] = stamp
@@ -1058,16 +1233,20 @@ def plan_install(pkgs: list[dict], lib: Path) -> tuple[dict, list, list[dict], l
             messages.append(f"refusing {', '.join(p['file'] for p in group)}: two zips for "
                             f"SKU {sku} part {part}")
     for sku in sorted({p["sku"] for p in pkgs}):
-        gids = {p["global_id"] for p in pkgs if p["sku"] == sku}
+        # A package with no Manifest.dsx has no GlobalID, and every one of them
+        # would otherwise look like every other: the checks below are about a
+        # zip carrying an id that belongs to another product, which a package
+        # with no id cannot do.
+        gids = {p["global_id"] for p in pkgs if p["sku"] == sku and p["global_id"]}
         if len(gids) > 1:
             messages.append(f"refusing the SKU {sku} zips: they carry different GlobalIDs "
                             f"({', '.join(sorted(gids))})")
         rec = records.get(sku)
-        if rec and rec.get("global_id") not in gids:
+        if gids and rec and rec.get("global_id") and rec.get("global_id") not in gids:
             messages.append(f"refusing the SKU {sku} zips: GlobalID {sorted(gids)[0]} differs "
                             f"from the {rec.get('global_id')} recorded for SKU {sku}")
         for other, orec in records.items():
-            if other != sku and orec.get("global_id") in gids:
+            if other != sku and orec.get("global_id") and orec.get("global_id") in gids:
                 messages.append(f"refusing the SKU {sku} zips: GlobalID "
                                 f"{orec.get('global_id')} is recorded for SKU {other}")
     plans, refusals = [], []
@@ -1103,10 +1282,11 @@ def run_install(args, lib: Path, report: bool = True) -> tuple[int, dict]:
 
     With `report` off nothing is printed on stdout and the caller reports instead; refusals
     still go to stderr. `intake` uses that to install one product at a time."""
+    vendor = getattr(args, "vendor", None) or DAZ_SOURCE
     pkgs, opened = [], []
     for z in args.zips:
         try:
-            pkgs.append(open_package(Path(z)))
+            pkgs.append(open_package(Path(z), vendor))
         except Refused as e:
             opened.append(str(e))
 
@@ -1306,7 +1486,9 @@ def product_summary(rec: dict) -> dict:
             "parts_total": rec.get("parts_total"),
             "incomplete_parts": [p for p in parts if not rec["packages"][p].get("complete")],
             "files": len(rec["files"]), "bytes": sum(f["size"] for f in rec["files"].values()),
-            "licence": rec["licence"]["held"], "eula_read": rec["licence"].get("eula_read"),
+            "source": rec.get("source") or DAZ_SOURCE,
+            "licence": rec["licence"]["held"],
+            "eula_read": rec["licence"].get("eula_read") or rec["licence"].get("terms_read"),
             "created_at": rec.get("created_at"), "updated_at": rec.get("updated_at")}
 
 
@@ -1318,16 +1500,25 @@ def cmd_list(args, lib: Path) -> int:
         lines.append("  no products recorded" + ("" if lib.is_dir() else " (the folder does not exist)"))
     for r in rows:
         of = f" of {r['parts_total']}" if r["parts_total"] else ""
-        lines += [f"SKU {r['sku']}  {r['product_name'] or '(no product name)'}",
+        daz = r["source"] == DAZ_SOURCE
+        lines += [f"{'SKU' if daz else 'Package'} {r['sku']}  "
+                  f"{r['product_name'] or '(no product name)'}"
+                  + ("" if daz else f"  [{r['source']}]"),
                   f"  parts {', '.join(r['parts'])}{of}"
                   + (f"; incomplete: {', '.join(r['incomplete_parts'])}" if r["incomplete_parts"] else ""),
                   f"  {r['files']} files, {r['bytes']} bytes ({gb(r['bytes'])})",
-                  f"  licence: {r['licence']}; EULA last read: {r['eula_read'] or 'not recorded'}",
+                  f"  licence: {r['licence']}; "
+                  f"{'EULA' if daz else 'terms'} last read: {r['eula_read'] or 'not recorded'}",
                   f"  installed {r['created_at']}, updated {r['updated_at']}"]
-    if rows:
-        lines += ["Renders and sprites may ship on conditions. The mesh, rig, morphs and textures need an",
-                  "Interactive License, and conditions still apply under it. Keep Daz content out of the",
-                  f"AI stages. `licence SKU` gives the conditions ({NOTE})."]
+    if any(r["source"] == DAZ_SOURCE for r in rows):
+        lines += ["Daz products: renders and sprites may ship on conditions. The mesh, rig, morphs and",
+                  "textures need an Interactive License, and conditions still apply under it. Keep Daz",
+                  f"content out of the AI stages. `licence SKU` gives the conditions ({NOTE})."]
+    others = sorted({r["source"] for r in rows if r["source"] != DAZ_SOURCE})
+    if others:
+        lines += [f"From {', '.join(others)}: this script has read none of their terms. Each package's",
+                  "own terms files are named by `licence PACKAGE`, and until they are read this repo",
+                  "treats that content as it treats Daz content."]
     emit(args, {"library": str(lib), "products": rows}, lines)
     return 0
 
@@ -1510,8 +1701,8 @@ def cmd_intake(args, lib: Path) -> int:
             raise Refused(f"cannot read {path}: {e}") from None
         m = PACKAGE_RE.fullmatch(name)
         entry = {"file": name, "path": path, "size": st.st_size,
-                 "sku": str(int(m.group(2))) if m else None,
-                 "part": (m.group(4) or SINGLE) if m else None}
+                 "sku": str(int(m.group(2))) if m else package_key(path.stem),
+                 "part": (m.group(4) or SINGLE) if m else SINGLE}
         if not stat.S_ISREG(st.st_mode):
             entry.update(result="refused", why="not a regular file", severity=2, ready=False)
         entries.append(entry)
@@ -1545,7 +1736,8 @@ def cmd_intake(args, lib: Path) -> int:
             sub = argparse.Namespace(zips=[e["path"] for e in ready], overwrite=False,
                                      dry_run=bool(args.dry_run), interactive_license=False,
                                      eula_read=None, json=False, examples=args.examples,
-                                     library=args.library)
+                                     library=args.library,
+                                     vendor=getattr(args, "vendor", None) or DAZ_SOURCE)
             started = time.monotonic()
             _, obj = run_install(sub, lib, report=False)
             seconds = round(time.monotonic() - started, 2)
@@ -2508,7 +2700,13 @@ def main() -> int:
     p.add_argument("--interactive-license", action="store_true",
                    help="record a bought Interactive License for this product")
     p.add_argument("--eula-read", type=valid_date, metavar="YYYY-MM-DD",
-                   help="the date you last read the Daz EULA")
+                   help="the date you last read the Daz EULA, or the terms of whoever else "
+                        "made the package")
+    p.add_argument("--vendor", default=DAZ_SOURCE, metavar="NAME",
+                   help=f"who made the content, when it is not a Daz Install Manager package "
+                        f"(default {DAZ_SOURCE!r}). A package from anywhere else is recorded "
+                        "under its file name and this script states none of its terms: it names "
+                        "the terms files the package ships and leaves the reading to you")
     p = sub.add_parser("intake", parents=[common],
                        help="install every zip in a folder, verify it and delete the zip")
     p.add_argument("--source", type=Path, metavar="DIR",
@@ -2518,6 +2716,8 @@ def main() -> int:
     p.add_argument("--dry-run", action="store_true",
                    help="say what each zip would do; write nothing, delete nothing")
     p.add_argument("--keep-zips", action="store_true", help="install and verify, delete no zip")
+    p.add_argument("--vendor", default=DAZ_SOURCE, metavar="NAME",
+                   help=f"who made the content that is not a Daz package (default {DAZ_SOURCE!r})")
     sub.add_parser("list", parents=[common], help="products recorded in the library")
     p = sub.add_parser("licence", parents=[common], help="print or change the licence held")
     p.add_argument("sku", type=valid_sku)
