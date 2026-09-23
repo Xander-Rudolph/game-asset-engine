@@ -151,6 +151,8 @@ Four things the build found that the research had not said, each measured on the
 On 2026-09-23 the owner called off the procedural hair generator as the route for hair and beards, after looking at the settled generator on the figure beside a Virt-A-Mate groom on the same figure at the same framing (`output/daz/h_cards_vs_strands.png`). The owner's words: the procedural results "still look terrible", and the route is now "hair objs instead. same with beards". <!-- HAIR-153 --> That is a decision, not a measurement. The generator is not deleted, `scripts/make_hair.py` still runs and still carries the settle described below, and nothing above this section was withdrawn.
 :::
 
+The search for ready-made hair and beard meshes that replaces this route is in [hair and beard meshes](/reference/hair-meshes).
+
 Everything in this section was run on 2026-09-23 on the reference machine, on the host `python3` with numpy 2.3.5 and Pillow 12.1.1 and in Blender 4.5.9 in the container `comfyui-packaged`, Cycles on the RTX 4070 Ti SUPER.
 
 ### What was tried that day
