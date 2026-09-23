@@ -64,8 +64,37 @@ since the rewrite. Every number a style sets is also a flag, and
 | bounce | `--style wavy --colour red --part right --length 20 --volume 2.6` | 14,436 |
 
 All six keep the face clear, and five sit inside the 4k to 20k triangle budget
-the research gives; the curls run to 24,198 because each strand is a helix of
-20 points, and thinning them further loses the ringlets. The long two hang down the neck and turn at the shoulders:
+the research gives; the curls run to 24,108 because each strand is a helix of
+25 points on cards half a coil wide, and thinning them further loses the
+ringlets.
+
+### Beards
+
+```sh
+scripts/make_hair.py --style none --beard full --colour brown --name beard_full
+scripts/make_hair.py --style short --beard short --colour black --name crop   # writes crop and crop_beard
+```
+
+`--beard stubble|short|full` grows on a jaw ellipsoid fitted to Genesis 9's
+lower face (centre 11.1 cm below and 2.1 cm in front of the scalp centre,
+radii 6.9, 7.2 and 9.0 cm): stubble is a half-transparent cap and 60 short
+flyaways, short is 3 cm of cards, full is 7 cm with 30 shells. Baked 1,536,
+4,316 and 6,176 triangles. Place a beard with a second `--wear-obj` on the
+same scene and `--declip-max-push 30`, since the chin sits 1.1 cm outside the
+ellipsoid; the short and stubble caps still read as a soft patch on the cheek.
+
+### A scalp from ComfyUI
+
+```sh
+scripts/make_scalp.py --colour black                 # one job, about 90 s
+scripts/make_hair.py --style short --colour black --part none --length 5 \
+    --volume 0.6 --name crop --cap-diffuse output/hair/scalp_black.png
+```
+
+Check `http://127.0.0.1:8188/queue` is empty first. The image replaces the
+painted follicle strokes as the cap's colour; the cap's own opacity still cuts
+the hairline. Bare and from above it shows strokes radiating from a whorl; under
+a full head of shells it makes no visible difference. The long two hang down the neck and turn at the shoulders:
 strands slide over five body capsules measured on Genesis 9 (`--no-drape`
 switches that off), and the preview OBJ draws the capsules in grey.
 

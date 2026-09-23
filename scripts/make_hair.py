@@ -4,6 +4,7 @@
     scripts/make_hair.py --list
     scripts/make_hair.py --style wavy --colour brown
     scripts/make_hair.py --style long --colour blond --part left --name lyra
+    scripts/make_hair.py --style none --beard full --colour brown --name beard_full
 
 WHY: the engine's other two routes to hair both stop short.  A Daz hair product
 is Daz 3D data, so it may be rendered but never shipped as 3D without an
@@ -31,6 +32,14 @@ HAIR-101): roots are clustered by nearest Poisson centre at `--guide-distance`,
 pulled towards the centre with a root-to-tip shape and spread at the tip
 (HAIR-117), and the card's width comes from its cluster's spread within the
 layer's bounds (HAIR-101).
+
+A BEARD is the same construction on a second surface: `--beard` grows roots
+by the same Poisson sampler on a jaw ellipsoid (JAW_CENTRE, JAW_RADII) in the
+ellipsoid's own scaled space, restricted to the beard region (BEARD_REGION:
+below the mouth line round the chin and jaw, plus a moustache band), flowing
+down the face, kept clear of the ellipsoid and of the neck capsule, with a cap
+that is the beard region of the ellipsoid.  It is written as its own asset,
+<name>_beard (or <name> with --style none), so it can be worn alone.
 
 WHAT IT WRITES, all under output/hair/<name>: the layered guide curves
 (<name>_guides.npz) and the atlas plan (<name>_atlas.json) for the Blender
@@ -69,21 +78,31 @@ OUT = ROOT / "output" / "hair"
 # Length is centimetres of hair; cap is how far down the scalp roots reach at
 # the nape, in degrees from the crown; wave scales both sine amplitudes; scale
 # multiplies every layer's count; points overrides every layer's point count
-# (curls need 12 where a straight card needs 3 to 5, HAIR-019).  Shapes to start
-# from, not measurements: every one is reachable with the flags as well.
+# (curls need many where a straight card needs 3 to 5, HAIR-019); width scales
+# every layer's card width.  Shapes to start from, not measurements: every one
+# is reachable with the flags as well.
 STYLES = {
-    "wavy":     {"length": 14.0, "variation": 3.0, "wave": 1.0, "cap": 83.0, "scale": 1.0, "points": None, "curl": 0.0, "curl_turns": 0.0, "curl_start": 0.0},
-    "straight": {"length": 16.0, "variation": 2.0, "wave": 0.15, "cap": 83.0, "scale": 1.0, "points": None, "curl": 0.0, "curl_turns": 0.0, "curl_start": 0.0},
-    # 10 points and no extra count: at 12 and 1.2 the baked curls were 27,408
-    # triangles, past HAIR-016's 20k (measured 2026-09-22)
+    "wavy":     {"length": 14.0, "variation": 3.0, "wave": 1.0, "cap": 83.0, "scale": 1.0, "points": None, "curl": 0.0, "curl_turns": 0.0, "curl_start": 0.0, "width": 1.0},
+    "straight": {"length": 16.0, "variation": 2.0, "wave": 0.15, "cap": 83.0, "scale": 1.0, "points": None, "curl": 0.0, "curl_turns": 0.0, "curl_start": 0.0, "width": 1.0},
     # curly: the sideways sine wave read as no curl at all (2026-09-22), so the
     # style winds each strand round its own centreline instead, Blender's Curl
     # Hair Curves semantics (HAIR-117): a radius in cm, turns per strand, and
-    # where along the strand the curl starts; 20 points so a turn is round
-    "curly":    {"length": 11.0, "variation": 2.5, "wave": 0.4, "cap": 83.0, "scale": 0.62, "points": 20,
-                 "curl": 1.1, "curl_turns": 3.0, "curl_start": 0.2},
-    "short":    {"length": 6.0, "variation": 1.5, "wave": 0.8, "cap": 88.0, "scale": 1.3, "points": None, "curl": 0.0, "curl_turns": 0.0, "curl_start": 0.0},
-    "long":     {"length": 26.0, "variation": 4.0, "wave": 1.2, "cap": 80.0, "scale": 1.1, "points": None, "curl": 0.0, "curl_turns": 0.0, "curl_start": 0.0},
+    # where along the strand the curl starts.  At 1.1 cm, 3 turns, 20 points
+    # and cards 2.4 to 3.5 cm wide the helix was in the guides (keep_clear
+    # moved 0.5 percent of their points) but the baked curls still read as
+    # zigzag ribbons, because a card wider than the coil is a wavy sheet, not
+    # a ringlet.  So the cards are half width (`width` scales every layer's)
+    # and 25 points keep a turn round.  Tried at 1.0 cm, 4 turns and 0.42
+    # scale: 20,808 triangles, but the crown showed through 38 shells and the
+    # bake found shells wound inward (signed volume down to -2.576 cm3), the
+    # sweep's frame flipping on the tight coil.  At 0.9 cm, 3.5 turns and 0.5
+    # every one of the 45 shells is wound outward (min +1.25 cm3) and the
+    # figure render shows corkscrews, at 24,108 triangles, the same past-20k
+    # cost the old curls paid (all measured 2026-09-22; the shape is a guess).
+    "curly":    {"length": 11.0, "variation": 2.5, "wave": 0.4, "cap": 83.0, "scale": 0.5, "points": 25,
+                 "curl": 0.9, "curl_turns": 3.5, "curl_start": 0.15, "width": 0.5},
+    "short":    {"length": 6.0, "variation": 1.5, "wave": 0.8, "cap": 88.0, "scale": 1.3, "points": None, "curl": 0.0, "curl_turns": 0.0, "curl_start": 0.0, "width": 1.0},
+    "long":     {"length": 26.0, "variation": 4.0, "wave": 1.2, "cap": 80.0, "scale": 1.1, "points": None, "curl": 0.0, "curl_turns": 0.0, "curl_start": 0.0, "width": 1.0},
 }
 
 # The look sets how the cards gather and how the atlas is coloured.  `guide`
@@ -182,6 +201,65 @@ BODY_SCALE_RADIUS = 9.5      # the scalp radius BODY was measured against
 BODY_CLEAR = 0.8             # cm of air between the body and the hair (guess; at 0.5 the
                              # declip on Genesis 9 still found 0.5 percent of a 30 cm
                              # style deeper than its 20 mm reach, 2026-09-22)
+# The jaw proxy a beard grows on: an ellipsoid of the lower face in the hair
+# frame, centre and radii in cm at the 9.5 cm scalp scale, scaled with
+# --head-radius like BODY.  The scalp sphere is far inside the face at the
+# jaw, so a root put on it there sits inside the head.  The numbers are
+# guesses from the Genesis 9 lower face measured by height band
+# (output/hair/_exp/measure_body.py, 2026-09-22: at y -12 the head is x +-7.2
+# and z front 12.2, at y -16 z front 11.1, the chin), refined by the fit in
+# the report; see JAW_FIT below.
+JAW_CENTRE, JAW_RADII = (0.0, -11.1, 2.1), (6.9, 7.2, 9.0)
+# Those are a least-squares fit to 1,274 Genesis 9 vertices of the lower face
+# (y -18 to -9.5, z above -4.5, ears out) read from output/daz/h_bob.blend
+# the way measure_body.py reads the body, radii bounded to 9 cm and vertices
+# deeper than 1.5 cm inside (the mouth cavity) clipped: rms 0.63 cm over the
+# skin, the chin 1.1 cm outside the ellipsoid and the jaw sides 0.35 cm inside
+# it, both within --declip's 20 mm reach (measured 2026-09-22; the z radius
+# sits on its bound, since the jaw is a wedge, not an ellipsoid).
+# The beard region on that ellipsoid, hair-frame cm at the 9.5 cm scale, from
+# the same measurement: the nose base is at y -9.3, the upper lip -9.5 to -11,
+# the lower lip -11 to -12.5, the chin -13 to -16.5 and the jaw's underside
+# -17.5 (the midline's front drops from z 10.3 at y -17 to 4.9 at -18), the
+# jaw angle at z -4 (the jaw side at |x| 5 to 7 spans z -4 to 8 at y -12).
+# The beard's top edge runs from under the lower lip at the midline up to the
+# mouth-corner line on the cheeks (`cheek_x` is where it rises, a guess), so
+# the lower lip is the bare gap between it and the moustache band, which sits
+# on the upper lip's skin, front only.  `neckline` trims the beard where the
+# ellipsoid meets the neck.  `exit` is the angle a beard hair leaves the skin
+# at, in degrees, and `outward` how much of the flow points away from the
+# midline (guesses).
+BEARD_REGION = {"top_y_mid": -12.5, "top_y_cheek": -11.2, "cheek_x": (2.5, 5.5),
+                "jaw_z_back": -4.0, "neckline_y": -17.5,
+                "moustache_y": (-11.0, -9.4), "moustache_x": 3.6,
+                "exit_deg": 20.0, "outward": 0.25}
+# The beards, each a length in cm, its variation, a card count per layer, a
+# width scale on LAYERS' widths, a wave and a stand-off by the tip in cm.  All
+# guesses: stubble is the cap plus a few flyaways, short adds cards, full adds
+# the shell layer (the brief's starting point).  `guide` is the cluster
+# spacing in cm, closer than the scalp's 4.5 because the region is smaller.
+BEARDS = {
+    "stubble": {"length": 0.4, "variation": 0.1, "wave": 0.2, "volume": 0.06, "width": 0.5, "points": 3,
+                "cap_alpha": 0.4, "layers": {"shell": 0, "breakup": 0, "hairline": 0, "flyaway": 60}},
+    "short":   {"length": 3.0, "variation": 0.6, "wave": 0.5, "volume": 0.4, "width": 0.8, "points": None,
+                "cap_alpha": 0.45, "layers": {"shell": 0, "breakup": 220, "hairline": 80, "flyaway": 40}},
+    "full":    {"length": 7.0, "variation": 1.5, "wave": 0.6, "volume": 1.0, "width": 1.0, "points": None,
+                "cap_alpha": 0.7, "layers": {"shell": 30, "breakup": 90, "hairline": 30, "flyaway": 10}},
+}
+# `cap_alpha` is the beard cap's opacity where it is full: on the first
+# figure renders (2026-09-22) the short and stubble caps read as a flat
+# painted patch with a hard edge and the cards barely showed, so a stubble
+# lets the skin through, the short beard doubles its cards, and the cap's
+# edge blurs over BEARD_CAP_BLUR_PX rather than the scalp's 40 (guesses).
+# 130 px of blur and the lower alphas above: at 70 px and 0.85 to 1.0 the
+# beard cap read as a dark band with a straight top edge across the cheeks
+# on the first figure renders (2026-09-22)
+BEARD_GUIDE, BEARD_RIM_DEG, BEARD_CAP_BLUR_PX = 3.0, 10.0, 130
+# BODY's neck capsule starts at y -11, lip height, because the nape rises
+# that far; on the jaw that puts its top inside the beard region, so a beard
+# drapes over the same capsules with the neck starting at the neckline.
+BEARD_BODY = tuple((n, (a[0], BEARD_REGION["neckline_y"], a[2]) if n == "neck" else a, b, r)
+                   for n, a, b, r in BODY)
 # The density mask thins the frontal region to 0.6 (guess; HAIR-118).
 FRONT_DENSITY = 0.6
 # Cluster pull factor and its root-to-tip shape, and the tip spread in cm, in
@@ -263,7 +341,8 @@ def density_mask(p: np.ndarray) -> np.ndarray:
 
 def poisson_roots(spacing: float, hairline: float, cap: float, part: float | None,
                   part_width: float, rng: np.random.RandomState,
-                  masked: bool = True, rim: float | None = None, k: int = POISSON_K) -> np.ndarray:
+                  masked: bool = True, rim: float | None = None, k: int = POISSON_K,
+                  inside=None) -> np.ndarray:
     """Bridson Poisson-disk sampling of unit directions on the scalp cap.
 
     `spacing` is the minimum chord between roots on the unit sphere where the
@@ -276,14 +355,23 @@ def poisson_roots(spacing: float, hairline: float, cap: float, part: float | Non
     when none does.  Distances are checked against every accepted point rather
     than through a grid: the counts here are hundreds, and numpy does that in
     one line faster than a grid dictionary would.
+
+    `inside` replaces the scalp test with another region on the unit sphere,
+    which is how the beard samples the jaw ellipsoid: the same sampler in the
+    ellipsoid's own scaled space.
     """
     def local(q):
         return spacing / np.sqrt(density_mask(q)) if masked else np.full(len(q), spacing)
 
+    if inside is None:
+        def inside(q):
+            q = np.atleast_2d(q)
+            return (q[:, 1] > 0) & on_scalp(q, hairline, cap, part, part_width, rim)
+
     for _ in range(1000):
         first = rng.normal(size=3)
         first /= np.linalg.norm(first)
-        if first[1] > 0 and on_scalp(first, hairline, cap, part, part_width, rim)[0]:
+        if inside(first)[0]:
             break
     else:
         raise ValueError("no scalp: the hairline leaves nothing to grow on")
@@ -297,7 +385,7 @@ def poisson_roots(spacing: float, hairline: float, cap: float, part: float | Non
         t = unit(t)
         d = rp * (1.0 + rng.rand(k))
         cand = unit(p[None, :] * np.cos(d)[:, None] + t * np.sin(d)[:, None])
-        ok = on_scalp(cand, hairline, cap, part, part_width, rim)
+        ok = inside(cand)
         if ok.any():
             arr = np.array(points)
             rc = local(cand)
@@ -317,23 +405,26 @@ def poisson_roots(spacing: float, hairline: float, cap: float, part: float | Non
 
 def poisson_count(count: int, hairline: float, cap: float, part: float | None,
                   part_width: float, rng: np.random.RandomState, masked: bool = True,
-                  rim: float | None = None) -> np.ndarray:
+                  rim: float | None = None, inside=None, area: float | None = None) -> np.ndarray:
     """Poisson roots at the spacing that yields `count` of them, then exactly `count`.
 
     The spacing that gives a wanted count is found by running the sampler at a
     guess and rescaling by the square root of the ratio, twice, aiming eight
     percent over; the surplus is then dropped at random, which keeps the blue
     noise where dropping the last accepted points, the gap fillers, would not.
+    `inside` and `area` (steradians) describe another region, as for
+    poisson_roots.
     """
-    area = 2 * np.pi * (1 - np.cos(np.radians((hairline + cap) / 2)))
+    if area is None:
+        area = 2 * np.pi * (1 - np.cos(np.radians((hairline + cap) / 2)))
     spacing = np.sqrt(area / (0.7 * count))          # 0.7 roots per spacing squared: a first guess
     want = int(round(count * 1.08)) + 1
     if rim is not None:
         spacing *= np.sqrt(rim / 45.0)                # a rim band holds a fraction of the cap
-    roots = poisson_roots(spacing, hairline, cap, part, part_width, rng, masked, rim)
+    roots = poisson_roots(spacing, hairline, cap, part, part_width, rng, masked, rim, inside=inside)
     for _ in range(2):
         spacing *= np.sqrt(len(roots) / want)
-        roots = poisson_roots(spacing, hairline, cap, part, part_width, rng, masked, rim)
+        roots = poisson_roots(spacing, hairline, cap, part, part_width, rng, masked, rim, inside=inside)
     if len(roots) > count:
         roots = roots[rng.choice(len(roots), count, replace=False)]
     return roots
@@ -424,7 +515,8 @@ def strand_path(direction: np.ndarray, flow: np.ndarray, lift: float, radius: fl
                 offset: float, length: float, points: int, wave: float, volume: float,
                 aside: np.ndarray, lock: np.random.RandomState,
                 card: np.random.RandomState, jitter: float,
-                body: tuple | None = None, curl: tuple = (0.0, 0.0, 0.0)) -> np.ndarray:
+                body: tuple | None = None, curl: tuple = (0.0, 0.0, 0.0),
+                surface: Jaw | None = None) -> np.ndarray:
     """One guide: `points` positions from the root, over the scalp first, then falling free.
 
     A strand leaves along the scalp flow tilted off it by the region's exit
@@ -441,10 +533,18 @@ def strand_path(direction: np.ndarray, flow: np.ndarray, lift: float, radius: fl
     shoulders or the chest is pushed out of them and slides along them step by
     step, so long hair drapes down the neck and over the shoulders instead of
     splaying outward from its exit angle.
+
+    With `surface`, a Jaw, the strand is a beard hair: `direction` is a unit
+    direction in the ellipsoid's scaled space, the root and the normal come
+    from it, the exit angle is its fixed one, and the push-out is off the
+    ellipsoid rather than the scalp sphere.
     """
     down = np.array([0.0, -1.0, 0.0])
-    angle = exit_angle(direction, lift)
-    heading0 = flow * np.cos(angle) + direction * np.sin(angle)
+    if surface is None:
+        angle, normal, root = exit_angle(direction, lift), direction, direction * (radius + offset)
+    else:
+        angle, normal, root = surface.exit * lift, surface.normal(direction), surface.point(direction, offset)
+    heading0 = flow * np.cos(angle) + normal * np.sin(angle)
 
     # The lock decides the shape and the card only strays from it, so the cards
     # in a lock move together.  Seeded per card instead, as the first draft was,
@@ -468,7 +568,7 @@ def strand_path(direction: np.ndarray, flow: np.ndarray, lift: float, radius: fl
     # is why long hair frames a face rather than curtaining it.
     segments = points - 1
     step = length / segments
-    spine, headings, contact = [direction * keep_out], [], None
+    spine, headings, contact = [root], [], None
     for i in range(1, segments + 1):
         t = i / segments
         heading = (1 - t) * heading0 + t * down + aside * t
@@ -478,7 +578,7 @@ def strand_path(direction: np.ndarray, flow: np.ndarray, lift: float, radius: fl
             heading = slide(heading, contact, spine[-1], body[0])
         point = spine[-1] + heading * step
         if body is not None:
-            point, contact = body_push(point, body[1], body[0])
+            point, contact = body_push(point, body[1], body[0], *body[2:])
         headings.append(heading)
         spine.append(point)
 
@@ -508,13 +608,15 @@ def strand_path(direction: np.ndarray, flow: np.ndarray, lift: float, radius: fl
                 theta = 2.0 * np.pi * c_turns * (t - c_start) / max(1e-6, 1.0 - c_start) + c_phase
                 point = point + c_r * grow * (side * np.cos(theta) + swing * np.sin(theta))
         out.append(point)
+    if surface is not None:
+        return surface.keep_clear(np.array(out), offset, volume)
     return keep_clear(np.array(out), keep_out, volume, body)
 
 
-def body_push(point: np.ndarray, clearance: float, scale: float):
+def body_push(point: np.ndarray, clearance: float, scale: float, capsules: tuple = BODY):
     """The point pushed out of every body capsule, and the last surface normal it hit."""
     hit = None
-    for _, a, b, r in BODY:
+    for _, a, b, r in capsules:
         a = np.asarray(a) * scale; b = np.asarray(b) * scale; r = r * scale
         ab = b - a
         t = float(np.clip(np.dot(point - a, ab) / np.dot(ab, ab), 0.0, 1.0))
@@ -547,15 +649,136 @@ def slide(heading: np.ndarray, normal: np.ndarray, point: np.ndarray, scale: flo
 def keep_clear(path: np.ndarray, keep_out: float, volume: float,
                body: tuple | None = None) -> np.ndarray:
     """Every point pushed out to the layer's offset, plus `volume` by the tip,
-    and, when `body` is (scale, clearance), out of the body capsules too."""
+    and, when `body` is (scale, clearance) or (scale, clearance, capsules),
+    out of the body capsules too."""
     t = np.linspace(0.0, 1.0, len(path))
     floor = keep_out + volume * t
     dist = np.linalg.norm(path, axis=1)
     scale = np.where(dist < floor, floor / np.maximum(dist, 1e-9), 1.0)
     path = path * scale[:, None]
     if body is not None:
-        path = np.array([body_push(q, body[1], body[0])[0] for q in path])
+        path = np.array([body_push(q, body[1], body[0], *body[2:])[0] for q in path])
     return path
+
+
+def capsule_depth(points: np.ndarray, clearance: float, scale: float,
+                  capsules: tuple = BODY) -> np.ndarray:
+    """How far inside any body capsule plus `clearance` each point is, in cm; 0 when clear."""
+    points = np.atleast_2d(points)
+    depth = np.zeros(len(points))
+    for _, a, b, r in capsules:
+        a = np.asarray(a) * scale; b = np.asarray(b) * scale; r = r * scale
+        ab = b - a
+        t = np.clip((points - a) @ ab / np.dot(ab, ab), 0.0, 1.0)
+        dist = np.linalg.norm(points - (a + t[:, None] * ab), axis=1)
+        depth = np.maximum(depth, r + clearance - dist)
+    return depth
+
+
+class Jaw:
+    """The lower face as an ellipsoid a beard grows on, beside the scalp sphere.
+
+    Everything the sphere does for the scalp, the ellipsoid does here in its
+    own scaled space: a unit direction `q` there is the point centre + q *
+    radii on the surface, so the Poisson sampler, the clusters and the tents
+    run unchanged on unit directions, and only the placement, the normal, the
+    flow and the push-out differ.  Roots are the beard region of the surface
+    (BEARD_REGION) less anything inside a body capsule, since the underside of
+    the ellipsoid meets the neck; the capsules are BEARD_BODY, whose neck
+    starts at the neckline.  The flow is down the face and a little outward,
+    and every point is kept `offset` cm clear of the surface the way
+    keep_clear keeps hair off the scalp.
+    """
+
+    def __init__(self, scale: float, body: tuple | None):
+        self.scale = scale
+        self.centre = np.array(JAW_CENTRE) * scale
+        self.radii = np.array(JAW_RADII) * scale
+        self.mean_radius = float(self.radii.mean())
+        self.body = (body[0], body[1], BEARD_BODY) if body is not None else None
+        self.exit = np.radians(BEARD_REGION["exit_deg"])
+        # steradians of the region in the scaled space, by Monte Carlo, for
+        # poisson_count's first spacing guess (seeded, so the count is stable)
+        probe = unit(np.random.RandomState(3).normal(size=(20000, 3)))
+        self.area = 4 * np.pi * float(self.inside(probe).mean())
+
+    def point(self, q: np.ndarray, offset: float = 0.0) -> np.ndarray:
+        return self.centre + np.asarray(q) * (self.radii + offset)
+
+    def direction(self, p: np.ndarray) -> np.ndarray:
+        return unit((np.asarray(p) - self.centre) / self.radii)
+
+    def normal(self, q: np.ndarray) -> np.ndarray:
+        """The surface normal at direction q: the gradient of the ellipsoid, not q itself."""
+        return unit(np.asarray(q) / self.radii)
+
+    def region(self, p: np.ndarray) -> np.ndarray:
+        """Which world points lie in the beard region (BEARD_REGION, in unscaled cm)."""
+        p = np.atleast_2d(p) / self.scale
+        x, y, z = p[:, 0], p[:, 1], p[:, 2]
+        b = BEARD_REGION
+        top = np.interp(np.abs(x), b["cheek_x"], [b["top_y_mid"], b["top_y_cheek"]])
+        jaw = (y < top) & (y >= b["neckline_y"]) & (z >= b["jaw_z_back"])
+        # the moustache narrows towards the nose so it is not a rectangle (guess)
+        m0, m1 = b["moustache_y"]
+        half = b["moustache_x"] * (1.0 - 0.4 * np.clip((y - m0) / (m1 - m0), 0.0, 1.0))
+        moustache = ((y > m0) & (y < m1) & (np.abs(x) < half)
+                     & (z > JAW_CENTRE[2] + 0.5 * JAW_RADII[2]))
+        return jaw | moustache
+
+    def inside(self, q: np.ndarray, rim: float | None = None) -> np.ndarray:
+        """Which unit directions are roots: in the region and clear of the body.
+
+        With `rim` (degrees), only directions within that angle of the region's
+        edge count, found by probing eight tangent directions, which is where
+        the beard's transition cards go, as the hairline's do on the scalp.
+        """
+        q = np.atleast_2d(q)
+        p = self.point(q)
+        ok = self.region(p)
+        if self.body is not None:
+            ok &= capsule_depth(p, self.body[1], self.body[0], self.body[2]) <= 0.0
+        if rim is not None:
+            ref = np.where(np.abs(q[:, 1:2]) < 0.9, [[0.0, 1.0, 0.0]], [[1.0, 0.0, 0.0]])
+            t1 = unit(np.cross(q, ref))
+            t2 = np.cross(q, t1)
+            r = np.radians(rim)
+            edge = np.zeros(len(q), dtype=bool)
+            for a in np.linspace(0.0, 2 * np.pi, 8, endpoint=False):
+                probe = unit(np.cos(r) * q + np.sin(r) * (np.cos(a) * t1 + np.sin(a) * t2))
+                edge |= ~self.inside(probe)
+            ok &= edge
+        return ok
+
+    def flow(self, q: np.ndarray) -> np.ndarray:
+        """The tangent a beard hair leaves the skin along: down, and a little away from the midline."""
+        n = self.normal(q)
+        down = np.array([0.0, -1.0, 0.0])
+        out = np.array([1.0 if q[0] >= 0 else -1.0, 0.0, 0.0]) * BEARD_REGION["outward"]
+        f = down + out
+        f = f - np.dot(f, n) * n
+        norm = np.linalg.norm(f)
+        return f / norm if norm > 1e-6 else unit(np.cross(n, [1.0, 0.0, 0.0]))
+
+    def keep_clear(self, path: np.ndarray, offset: float, volume: float) -> np.ndarray:
+        """Every point pushed out to `offset` cm off the surface, plus `volume` by
+        the tip, radially in the scaled space, then out of the body capsules."""
+        t = np.linspace(0.0, 1.0, len(path))
+        radii = self.radii[None, :] + (offset + volume * t)[:, None]
+        q = (path - self.centre) / radii
+        s = np.linalg.norm(q, axis=1)
+        push = np.where(s < 1.0, 1.0 / np.maximum(s, 1e-9), 1.0)
+        path = self.centre + q * push[:, None] * radii
+        if self.body is not None:
+            path = np.array([body_push(p, self.body[1], self.body[0], self.body[2])[0] for p in path])
+        return path
+
+    def stand_in(self) -> dict:
+        """The ellipsoid as a low-poly mesh for the preview, wound outward."""
+        sphere = scalp_sphere(1.0, rings=16, segments=24)
+        return {"verts": sphere["verts"] * self.radii + self.centre,
+                "normals": unit(sphere["normals"] / self.radii),
+                "uvs": sphere["uvs"], "faces": sphere["faces"]}
 
 
 def cluster_pull(path: np.ndarray, centre: np.ndarray, spread: np.ndarray) -> np.ndarray:
@@ -672,26 +895,27 @@ def assign_slots(cards: list, plan: dict) -> None:
             previous = card["slot"]
 
 
-def cap_mesh(radius: float, hairline: float, cap: float) -> dict:
-    """The scalp cap: a dome on the scalp sphere bounded by the hairline, with one pole vertex.
+def dome_mesh(limit, place, normal_of) -> dict:
+    """A dome of CAP_RINGS by CAP_SEGMENTS with one pole vertex, bounded by `limit`.
 
-    Every workflow read has a cap under the cards (HAIR-008).  It sits at the
-    cling radius plus CAP_OFFSET on the repo's own sphere, never shrinkwrapped
-    to a Daz head, and reaches the shaped hairline at its rim.  Its UV is the
-    top-down view: the pole at the centre, the rim on the unit circle, the
-    face towards the top of the image, so a texel's place on the head is its
-    angle from the crown as a fraction of the local hairline.  Faces are wound
-    outward and normals are radial.
+    The dome is built on the unit sphere about its +Y pole, `limit(forward)`
+    giving its reach in radians by azimuth (`forward` +1 at the face, -1
+    behind), `place(d)` putting a unit direction in the world and `normal_of(d)`
+    giving its normal there.  Its UV is the top-down view: the pole at the
+    centre, the rim on the unit circle, the face towards the top of the image,
+    so a texel's place on the surface is its angle from the pole as a fraction
+    of the local limit.  Faces are wound outward.
     """
-    verts, uvs, normals = [np.array([0.0, radius, 0.0])], [(0.5, 0.5)], [np.array([0.0, 1.0, 0.0])]
+    pole = np.array([0.0, 1.0, 0.0])
+    verts, uvs, normals = [place(pole)], [(0.5, 0.5)], [normal_of(pole)]
     for i in range(1, CAP_RINGS + 1):
         for j in range(CAP_SEGMENTS):
             phi = 2 * np.pi * j / CAP_SEGMENTS
             forward = np.sin(phi)
-            theta = float(hairline_limit(forward, hairline, cap)) * i / CAP_RINGS
+            theta = float(limit(forward)) * i / CAP_RINGS
             d = np.array([np.sin(theta) * np.cos(phi), np.cos(theta), np.sin(theta) * np.sin(phi)])
-            verts.append(d * radius)
-            normals.append(d)
+            verts.append(place(d))
+            normals.append(normal_of(d))
             rho = 0.5 * i / CAP_RINGS
             uvs.append((0.5 + rho * np.cos(phi), 0.5 + rho * np.sin(phi)))
     faces = []
@@ -707,6 +931,56 @@ def cap_mesh(radius: float, hairline: float, cap: float) -> dict:
             faces.append((a, c, d))
     return {"verts": np.array(verts), "uvs": np.array(uvs), "normals": np.array(normals),
             "faces": faces}
+
+
+def cap_mesh(radius: float, hairline: float, cap: float) -> dict:
+    """The scalp cap: a dome on the scalp sphere bounded by the hairline, with one pole vertex.
+
+    Every workflow read has a cap under the cards (HAIR-008).  It sits at the
+    cling radius plus CAP_OFFSET on the repo's own sphere, never shrinkwrapped
+    to a Daz head, and reaches the shaped hairline at its rim; normals are
+    radial.
+    """
+    return dome_mesh(lambda forward: hairline_limit(forward, hairline, cap),
+                     lambda d: d * radius, lambda d: d)
+
+
+# The beard cap is a dome from the bottom of the jaw ellipsoid, so the dome
+# frame's +Y pole is the ellipsoid's -Y and its +X is the ellipsoid's -X: a
+# half turn about Z, which keeps the face at +Z and the winding outward.
+BEARD_DOME_TURN = np.array([-1.0, -1.0, 1.0])
+
+
+def beard_limit(forward: np.ndarray) -> np.ndarray:
+    """How far up the jaw the beard cap reaches, in radians from the chin, by azimuth.
+
+    The mouth line everywhere, rising to the top of the moustache band at the
+    front, each 3 degrees further so the opacity's blurred edge sits on the
+    mesh (guess).  The maps cut the exact region.
+    """
+    b = BEARD_REGION
+    mouth = np.arccos(-(b["top_y_cheek"] - JAW_CENTRE[1]) / JAW_RADII[1]) + np.radians(3.0)
+    top = np.arccos(-(b["moustache_y"][1] - JAW_CENTRE[1]) / JAW_RADII[1]) + np.radians(3.0)
+    return mouth + (top - mouth) * np.clip((np.asarray(forward, dtype=np.float64) - 0.3) / 0.4, 0.0, 1.0)
+
+
+def beard_cap_mesh(jaw: Jaw) -> dict:
+    """The beard cap: the beard region of the jaw ellipsoid, CAP_OFFSET out, as a dome from the chin.
+
+    The ellipsoid's bottom sits inside the neck (its pole is at y -18.3, the
+    neck's front at z 5), so the rings below the neckline, which the opacity
+    map leaves transparent, are pushed out of the beard's body capsules like
+    a strand: worn without that, 110 of the cap's vertices stayed deeper than
+    --declip's 20 mm reach; pushed above the neckline too, the cap stood 8 mm
+    off the neck at the jaw angle as a visible flap (both 2026-09-22).
+    """
+    cap = dome_mesh(beard_limit, lambda d: jaw.point(d * BEARD_DOME_TURN, CAP_OFFSET),
+                    lambda d: jaw.normal(d * BEARD_DOME_TURN))
+    if jaw.body is not None:
+        neckline = BEARD_REGION["neckline_y"] * jaw.scale
+        cap["verts"] = np.array([body_push(v, CAP_OFFSET, jaw.body[0], jaw.body[2])[0] if v[1] < neckline else v
+                                 for v in cap["verts"]])
+    return cap
 
 
 def blur(img: np.ndarray, px: int) -> np.ndarray:
@@ -727,6 +1001,60 @@ def blur(img: np.ndarray, px: int) -> np.ndarray:
     return out
 
 
+def dome_uv(limit) -> tuple:
+    """Every texel of a CAP_TEXTURE square map as a unit direction in the dome frame.
+
+    Returns the directions, the texel's radius on the UV disc (1 at the rim)
+    and its `forward`, the same top-down view dome_mesh lays out.
+    """
+    size = CAP_TEXTURE
+    v, u = np.mgrid[0:size, 0:size]
+    # image row 0 is the top, which is UV v = 1, the face
+    uu = (u + 0.5) / size - 0.5
+    vv = 0.5 - (v + 0.5) / size
+    rho = np.hypot(uu, vv) * 2.0
+    phi = np.arctan2(vv, uu)
+    forward = np.sin(phi)
+    theta = limit(forward) * np.minimum(rho, 1.0)
+    dirs = np.stack([np.sin(theta) * np.cos(phi), np.cos(theta), np.sin(theta) * np.sin(phi)], axis=-1)
+    return dirs, rho, forward
+
+
+def follicle_strokes(diffuse: np.ndarray, base: np.ndarray, origin: tuple, towards: bool,
+                     rng: np.random.RandomState) -> None:
+    """Short follicle strokes painted into `diffuse`, in UV, heading away from
+    `origin` (the whorl on the scalp) or towards it (the chin on a beard, where
+    hair runs down to the pole at the map's centre)."""
+    size = diffuse.shape[0]
+    count = 9000
+    su, sv = rng.uniform(-0.5, 0.5, count), rng.uniform(-0.5, 0.5, count)
+    keep = np.hypot(su, sv) < 0.5
+    su, sv = su[keep], sv[keep]
+    du, dv = su - origin[0], sv - origin[1]
+    norm = np.maximum(np.hypot(du, dv), 1e-6)
+    sign = -1.0 if towards else 1.0
+    du, dv = sign * du / norm, sign * dv / norm
+    ang = rng.uniform(-0.35, 0.35, len(su))
+    du, dv = du * np.cos(ang) - dv * np.sin(ang), du * np.sin(ang) + dv * np.cos(ang)
+    length = rng.uniform(0.012, 0.035, len(su))
+    tone = rng.uniform(0.8, 1.25, len(su))
+    steps = np.linspace(0.0, 1.0, 24)
+    for k in range(len(su)):
+        pu = su[k] + du[k] * length[k] * steps
+        pv = sv[k] + dv[k] * length[k] * steps
+        col = np.clip(((pu + 0.5) * size).astype(int), 0, size - 1)
+        row = np.clip(((0.5 - pv) * size).astype(int), 0, size - 1)
+        diffuse[row, col] = np.clip(base * tone[k], 0, 1)
+
+
+def to_images(diffuse: np.ndarray, mask: np.ndarray) -> tuple:
+    """The diffuse as RGB and the mask in all four channels, so an importer
+    reading either Alpha or Colour gets it."""
+    mask8 = (mask * 255).astype(np.uint8)
+    return (Image.fromarray((diffuse * 255).astype(np.uint8), mode="RGB"),
+            Image.fromarray(np.dstack([mask8] * 4), mode="RGBA"))
+
+
 def cap_textures(root_rgb: np.ndarray, hairline: float, cap: float, part: float | None,
                  part_width: float, rng: np.random.RandomState) -> tuple:
     """The cap's diffuse and opacity, in the dome's top-down UV.
@@ -740,39 +1068,13 @@ def cap_textures(root_rgb: np.ndarray, hairline: float, cap: float, part: float 
     channels so an importer reading either Alpha or Colour gets the mask.
     """
     size = CAP_TEXTURE
-    v, u = np.mgrid[0:size, 0:size]
-    # image row 0 is the top, which is UV v = 1, the face
-    uu = (u + 0.5) / size - 0.5
-    vv = 0.5 - (v + 0.5) / size
-    rho = np.hypot(uu, vv) * 2.0
-    phi = np.arctan2(vv, uu)
-    forward = np.sin(phi)
-    theta = hairline_limit(forward, hairline, cap) * np.minimum(rho, 1.0)
-    dirs = np.stack([np.sin(theta) * np.cos(phi), np.cos(theta), np.sin(theta) * np.sin(phi)], axis=-1)
-
+    dirs, rho, forward = dome_uv(lambda f: hairline_limit(f, hairline, cap))
     base = root_rgb * CAP_DARKEN
     diffuse = np.broadcast_to(base, (size, size, 3)).astype(np.float32).copy()
     # follicle strokes: short lines from random texels, heading away from the whorl in UV
     w = whorl_direction()
     wu, wv = 0.5 * (np.degrees(np.arctan2(np.hypot(w[0], w[2]), w[1])) / 70.0) * np.array([w[0], w[2]]) / max(np.hypot(w[0], w[2]), 1e-9)
-    count = 9000
-    su, sv = rng.uniform(-0.5, 0.5, count), rng.uniform(-0.5, 0.5, count)
-    keep = np.hypot(su, sv) < 0.5
-    su, sv = su[keep], sv[keep]
-    du, dv = su - wu, sv - wv
-    norm = np.maximum(np.hypot(du, dv), 1e-6)
-    du, dv = du / norm, dv / norm
-    ang = rng.uniform(-0.35, 0.35, len(su))
-    du, dv = du * np.cos(ang) - dv * np.sin(ang), du * np.sin(ang) + dv * np.cos(ang)
-    length = rng.uniform(0.012, 0.035, len(su))
-    tone = rng.uniform(0.8, 1.25, len(su))
-    steps = np.linspace(0.0, 1.0, 24)
-    for k in range(len(su)):
-        pu = su[k] + du[k] * length[k] * steps
-        pv = sv[k] + dv[k] * length[k] * steps
-        col = np.clip(((pu + 0.5) * size).astype(int), 0, size - 1)
-        row = np.clip(((0.5 - pv) * size).astype(int), 0, size - 1)
-        diffuse[row, col] = np.clip(base * tone[k], 0, 1)
+    follicle_strokes(diffuse, base, (wu, wv), False, rng)
     if part is not None:
         gap = parting_gap(forward, part_width) * 0.5
         line = np.abs(dirs[..., 0] - part) < gap
@@ -783,9 +1085,25 @@ def cap_textures(root_rgb: np.ndarray, hairline: float, cap: float, part: float 
     # the parting is a bare line, so the cap is a touch thinner there too
     if part is not None:
         mask = np.where(line, mask * 0.85, mask)
-    mask8 = (mask * 255).astype(np.uint8)
-    return (Image.fromarray((diffuse * 255).astype(np.uint8), mode="RGB"),
-            Image.fromarray(np.dstack([mask8] * 4), mode="RGBA"))
+    return to_images(diffuse, mask)
+
+
+def beard_cap_textures(root_rgb: np.ndarray, jaw: Jaw, alpha: float,
+                       rng: np.random.RandomState) -> tuple:
+    """The beard cap's diffuse and opacity: the same darkened root colour and
+    follicle strokes as the scalp cap, the strokes running down to the chin,
+    and an opacity that is `alpha` over the beard region and blurred to
+    nothing at the region's edge (HAIR-047), so the cap's own rim never
+    shows."""
+    size = CAP_TEXTURE
+    dirs, rho, _ = dome_uv(beard_limit)
+    base = root_rgb * CAP_DARKEN
+    diffuse = np.broadcast_to(base, (size, size, 3)).astype(np.float32).copy()
+    follicle_strokes(diffuse, base, (0.0, 0.0), True, rng)
+    world = jaw.point(dirs.reshape(-1, 3) * BEARD_DOME_TURN)
+    inside = (jaw.region(world).reshape(size, size) & (rho <= 1.0)).astype(np.float32)
+    mask = np.clip(blur(inside, BEARD_CAP_BLUR_PX) * inside, 0, 1) * alpha
+    return to_images(diffuse, mask)
 
 
 def paint_atlas(plan: dict, band: float, ramp: float, rng: np.random.RandomState) -> tuple:
@@ -884,10 +1202,10 @@ def material_text(name: str, diffuse: str | None, opacity: str | None,
     return "\n".join(lines) + "\n"
 
 
-def body_stand_in(scale: float) -> dict:
+def body_stand_in(scale: float, capsules: tuple = BODY) -> dict:
     """The body capsules as a run of low-poly spheres along each axis, for the preview."""
     verts, normals, faces = [], [], []
-    for _, a, b, r in BODY:
+    for _, a, b, r in capsules:
         a = np.asarray(a) * scale; b = np.asarray(b) * scale; r = r * scale
         n = max(2, int(np.ceil(np.linalg.norm(b - a) / (r * 0.6))) + 1)
         for k in range(n):
@@ -947,26 +1265,50 @@ def face_dot_radial(meshes: list) -> float:
     return float(np.concatenate(dots).mean()) if dots else float("nan")
 
 
-def grow(args, layers: list, plan: dict) -> dict:
+def grow(args, layers: list, plan: dict, jaw: Jaw | None = None, shape: dict | None = None) -> dict:
+    """Roots, flow, guides, clusters and widths for every layer; the cards and their statistics.
+
+    With `jaw` the same steps run on the ellipsoid for a beard: `shape` then
+    carries the beard's length, variation, wave, volume and cluster spacing in
+    place of the style's, unit directions are in the ellipsoid's scaled space,
+    the flow is the jaw's, and every push-out is off the ellipsoid.  A layer
+    with a count of 0 grows nothing (stubble is the cap and a few flyaways).
+    """
     body = (args.head_radius / BODY_SCALE_RADIUS, BODY_CLEAR) if args.drape else None
-    """Roots, flow, guides, clusters and widths for every layer; the cards and their statistics."""
     R, seed = args.head_radius, args.seed
     scalp = (args.hairline, args.cap, args.part, args.part_width)
-    rng = np.random.RandomState(seed)
+    shape = shape or {"length": args.length, "variation": args.variation, "wave": args.wave,
+                      "volume": args.volume, "guide": args.guide_distance}
+    curl = (args.curl, args.curl_turns, args.curl_start) if jaw is None else (0.0, 0.0, 0.0)
+    if jaw is not None:
+        R = jaw.mean_radius
+        seed += 500                    # the beard's roots are not the hair's roots
+    region = {"inside": jaw.inside if jaw else None, "area": jaw.area if jaw else None}
     # Cluster centres: Poisson at the guide distance, unmasked, so a lock is
     # the same size everywhere on the head (HAIR-117 semantics).
-    centres = poisson_roots(2 * np.sin(args.guide_distance / R / 2), *scalp,
-                            np.random.RandomState(seed + 1), masked=False)
+    centres = poisson_roots(2 * np.sin(shape["guide"] / R / 2), *scalp,
+                            np.random.RandomState(seed + 1), masked=False, inside=region["inside"])
     centre_paths: dict = {}
 
     def lock_rng(lock):
         return np.random.RandomState(seed + 9973 * int(lock))
 
     def flow_and_aside(direction):
+        if jaw is not None:
+            return jaw.flow(direction), np.zeros(3)
         flow = scalp_flow(direction, args.part, args.part_flow, args.cap)
         forward = direction[2] / max(np.hypot(direction[0], direction[2]), 1e-9)
         aside = np.array([1.0 if direction[0] >= 0 else -1.0, 0.0, 0.0]) * args.sweep * max(0.0, forward)
         return flow, aside
+
+    def apart_cm(d, centre):
+        """Root to cluster centre: an arc on the scalp sphere, a chord on the ellipsoid."""
+        if jaw is not None:
+            return float(np.linalg.norm(jaw.point(d) - jaw.point(centre)))
+        return float(2 * np.arcsin(min(1.0, np.linalg.norm(d - centre) / 2)) * R)
+
+    # a short beard's tips spread less than a lock of hair's (guess)
+    tip_spread = TIP_SPREAD if jaw is None else TIP_SPREAD * min(1.0, shape["length"] / 5.0)
 
     def centre_path(lock, layer):
         key = (int(lock), layer["name"])
@@ -974,57 +1316,68 @@ def grow(args, layers: list, plan: dict) -> dict:
             d = centres[lock]
             flow, aside = flow_and_aside(d)
             centre_paths[key] = strand_path(
-                d, flow, args.lift, R, layer["offset"], args.length * layer["length"],
-                layer["points"], args.wave, args.volume, aside, lock_rng(lock),
-                np.random.RandomState(seed + 9973 * int(lock) + 1), 0.0, body,
-                (args.curl, args.curl_turns, args.curl_start))
+                d, flow, args.lift, R, layer["offset"], shape["length"] * layer["length"],
+                layer["points"], shape["wave"], shape["volume"], aside, lock_rng(lock),
+                np.random.RandomState(seed + 9973 * int(lock) + 1), 0.0, body, curl, jaw)
         return centre_paths[key]
 
     cards, per_layer = [], {}
     for li, layer in enumerate(layers):
         count = layer["count"]
+        if count < 1:
+            per_layer[layer["name"]] = {"roots": 0, "poisson": spacing_stats(np.zeros((0, 3)), R)}
+            continue
         roots_wanted = -(-count // 3) if layer["tent"] else count
-        rim = 12.0 if layer["name"] == "hairline" else None
+        rim = (BEARD_RIM_DEG if jaw else 12.0) if layer["name"] == "hairline" else None
         roots = poisson_count(roots_wanted, *scalp, np.random.RandomState(seed + 100 + li),
-                              rim=rim)
+                              masked=jaw is None, rim=rim, **region)
         stats = {"roots": int(len(roots)), "poisson": spacing_stats(roots, R)}
-        if rim is None:
+        if rim is None and jaw is None:
             stats["fibonacci"] = spacing_stats(
                 fibonacci_roots(len(roots), args.cap, args.hairline, args.part, args.part_width), R)
         for direction in roots:
             lock = int(np.argmin(np.linalg.norm(centres - direction[None, :], axis=1)))
             flow, aside = flow_and_aside(direction)
-            side = unit(np.cross(flow, direction))
             members = [(direction, 0, 0.0)]
             if layer["tent"]:
                 # Three cards in a tent: the base at the root, two on top set
                 # off either side and a touch higher, the base the most opaque
                 # (HAIR-002).  The wing offsets are guesses.
-                shift = 0.45 * layer["width"] / R
-                members += [(unit(direction + side * shift), 1, 0.35),
-                            (unit(direction - side * shift), 2, 0.35)]
+                if jaw is None:
+                    side = unit(np.cross(flow, direction))
+                    shift = 0.45 * layer["width"] / R
+                    wings = [unit(direction + side * shift), unit(direction - side * shift)]
+                else:
+                    side = unit(np.cross(flow, jaw.normal(direction)))
+                    shift = 0.45 * layer["width"]
+                    wings = [jaw.direction(jaw.point(direction) + side * shift),
+                             jaw.direction(jaw.point(direction) - side * shift)]
+                members += [(wings[0], 1, 0.35), (wings[1], 2, 0.35)]
             base_index = len(cards)
             for d, rank, raise_by in members:
                 index = len(cards)
                 lock_r, card_r = lock_rng(lock), np.random.RandomState(seed + 31 + index)
-                length = (args.length * layer["length"]
-                          + lock_r.uniform(-args.variation, args.variation)
-                          + args.jitter * card_r.uniform(-args.variation, args.variation) / 2)
+                length = (shape["length"] * layer["length"]
+                          + lock_r.uniform(-shape["variation"], shape["variation"])
+                          + args.jitter * card_r.uniform(-shape["variation"], shape["variation"]) / 2)
                 path = strand_path(d, flow, args.lift, R, layer["offset"] + raise_by,
-                                   max(length, 0.5), layer["points"], args.wave, args.volume,
-                                   aside, lock_r, card_r, args.jitter, body,
-                                   (args.curl, args.curl_turns, args.curl_start))
+                                   max(length, 0.5 if jaw is None else 0.2), layer["points"],
+                                   shape["wave"], shape["volume"], aside, lock_r, card_r,
+                                   args.jitter, body, curl, jaw)
                 # pulled into the lock, spread at the tip, kept clear of the scalp
                 tip_dir = unit(path[-1] - path[-2])
                 spread = card_r.normal(size=3)
                 spread -= np.dot(spread, tip_dir) * tip_dir
-                spread = unit(spread) * card_r.uniform(0.0, TIP_SPREAD)
+                spread = unit(spread) * card_r.uniform(0.0, tip_spread)
                 path = cluster_pull(path, centre_path(lock, layer), spread)
-                path = keep_clear(path, R + layer["offset"] + raise_by, args.volume, body)
+                if jaw is None:
+                    path = keep_clear(path, R + layer["offset"] + raise_by, shape["volume"], body)
+                else:
+                    path = jaw.keep_clear(path, layer["offset"] + raise_by, shape["volume"])
                 cards.append({"layer": li, "band": layer["band"], "lock": lock, "root": d,
                               "path": path, "tent": base_index if layer["tent"] else -1,
                               "tent_rank": rank,
-                              "spread_cm": float(2 * np.arcsin(min(1.0, np.linalg.norm(d - centres[lock]) / 2)) * R)})
+                              "spread_cm": apart_cm(d, centres[lock])})
         per_layer[layer["name"]] = stats
 
     # Width from the cluster's spread within the layer's bounds (HAIR-101):
@@ -1048,7 +1401,7 @@ def grow(args, layers: list, plan: dict) -> dict:
     clusters = {"centres": int(len(centres)), "locks_used": int(len(by_lock)),
                 "members_mean": round(float(np.mean(sizes)), 2), "members_min": int(min(sizes)),
                 "members_max": int(max(sizes)), "spread_mean_cm": round(mean_spread, 3),
-                "guide_distance_cm": args.guide_distance}
+                "guide_distance_cm": shape["guide"]}
     return {"cards": cards, "centres": centres, "per_layer": per_layer, "clusters": clusters}
 
 
@@ -1057,7 +1410,7 @@ PARTS = {"centre": 0.0, "center": 0.0, "left": -0.34, "right": 0.34, "none": Non
 # Flags the layered generator has no use for, and what replaced each.
 RETIRED = {
     "strands": "card counts are per layer: --layers shell=60,breakup=150,hairline=40,flyaway=30",
-    "segments": "points per guide are per layer (8, 6, 4, 5; 12 for curly) and not a flag",
+    "segments": "points per guide are per layer (8, 6, 4, 5; 25 for curly) and not a flag",
     "width_root": "widths are per layer and come from the cluster spread; edit LAYERS",
     "width_tip": "widths are per layer and come from the cluster spread; edit LAYERS",
     "round": "normals are a per-layer blend of the ribbon frame and the radial",
@@ -1131,8 +1484,16 @@ def main() -> int:
                + "\nlayers: " + ", ".join(l["name"] for l in LAYERS))
     ap.add_argument("--list", action="store_true",
                     help="print the styles, looks, colours and layers with their numbers, and exit")
-    ap.add_argument("--style", choices=sorted(STYLES), default="wavy",
-                    help="the shape to start from (default wavy); every number below overrides it")
+    ap.add_argument("--style", choices=sorted(STYLES) + ["none"], default="wavy",
+                    help="the shape to start from (default wavy); every number below overrides it. "
+                         "none writes no hairstyle, only the --beard")
+    ap.add_argument("--beard", choices=["none"] + sorted(BEARDS), default="none",
+                    help="also grow a beard on the jaw ellipsoid as a second asset, <name>_beard "
+                         "(or <name> itself with --style none), in the same colour: stubble is "
+                         "a half-opaque cap and 40 flyaways 0.4 cm long, short 2.5 cm of 180 "
+                         "cards, full 7 cm with 30 shells (default none; every length a guess)")
+    ap.add_argument("--beard-length", type=float, default=None, metavar="CM",
+                    help="centimetres from the skin to the beard's tips (default from --beard)")
     ap.add_argument("--look", choices=sorted(LOOKS), default="stylised",
                     help="stylised gathers the cards into locks 4.5 cm apart, keeps half the "
                          "colour range and lays a highlight band; realistic clusters at 2.5 cm "
@@ -1169,7 +1530,10 @@ def main() -> int:
                     help="turns of that helix over the strand (default from --style: 3)")
     ap.add_argument("--curl-start", type=float, default=None,
                     help="where along the strand, 0 to 1, the curl begins (default from "
-                         "--style: 0.2)")
+                         "--style: 0.15)")
+    ap.add_argument("--card-width", type=float, default=None, metavar="SCALE",
+                    help="scales every layer's card width and tip (default from --style: "
+                         "0.5 for curly, so a card is narrower than its coil, 1 otherwise)")
     ap.add_argument("--cap", type=float, default=None, metavar="DEG",
                     help="how far down the scalp roots reach at the nape, from the crown "
                          "(default from --style)")
@@ -1227,10 +1591,11 @@ def main() -> int:
             return 2
 
     if args.list:
-        print("  style      length  variation  wave   cap    scale  points")
+        print("  style      length  variation  wave   cap    scale  width  curl          points")
         for name, s in sorted(STYLES.items()):
             print(f"  {name:10s} {s['length']:5.1f} cm {s['variation']:5.1f} cm {s['wave']:5.2f} "
-                  f"{s['cap']:5.1f} deg {s['scale']:4.1f}  {s['points'] or 'per layer'}")
+                  f"{s['cap']:5.1f} deg {s['scale']:4.2f} {s['width']:5.2f}  "
+                  f"{s['curl']:3.1f} cm x {s['curl_turns']:3.1f}  {s['points'] or 'per layer'}")
         print("\n  look       guide   jitter  band  ramp")
         for name, l in sorted(LOOKS.items()):
             print(f"  {name:10s} {l['guide']:4.1f} cm {l['jitter']:5.2f} {l['band']:5.2f} {l['ramp']:5.2f}")
@@ -1241,12 +1606,25 @@ def main() -> int:
         print("\n  colour     root            tip             flyaway")
         for name, (a, b, c) in sorted(COLOURS.items()):
             print(f"  {name:10s} {str(a):15s} {str(b):15s} {str(c)}")
+        print("\n  beard      length  variation  wave   volume  width  cap    layers")
+        for name, b in sorted(BEARDS.items()):
+            print(f"  {name:10s} {b['length']:5.1f} cm {b['variation']:5.1f} cm {b['wave']:5.2f} "
+                  f"{b['volume']:5.2f} cm {b['width']:4.1f}  {b['cap_alpha']:4.2f}   "
+                  + ", ".join(f"{k} {v}" for k, v in b["layers"].items()))
         return 0
 
-    style = STYLES[args.style]
+    if args.style == "none" and args.beard == "none":
+        print("  ! nothing to make: --style none needs a --beard")
+        return 2
+    # With --style none only the beard is made, but the scalp numbers are
+    # still read (the beard's cluster sampler takes them), so they come from
+    # the wavy style.
+    style = STYLES[args.style if args.style != "none" else "wavy"]
     for key in ("length", "variation", "wave", "cap", "curl", "curl_turns", "curl_start"):
         if getattr(args, key) is None:
             setattr(args, key, style[key])
+    if args.card_width is None:
+        args.card_width = style["width"]
     look = LOOKS[args.look]
     for key, flag in (("guide", "guide_distance"), ("jitter", "jitter"), ("band", "band"), ("ramp", "ramp")):
         if getattr(args, flag) is None:
@@ -1256,41 +1634,154 @@ def main() -> int:
     if isinstance(args.colour, str):
         args.colour = colour_arg(args.colour)
     root_rgb, tip_rgb, stray_rgb = args.colour
-    if args.length <= 0 or args.head_radius <= 0 or args.guide_distance <= 0:
-        print("  ! --length, --head-radius and --guide-distance need to be above 0")
+    if args.length <= 0 or args.head_radius <= 0 or args.guide_distance <= 0 or args.card_width <= 0:
+        print("  ! --length, --head-radius, --guide-distance and --card-width need to be above 0")
         return 2
     if not 0 < args.hairline <= args.cap < 180:
         print("  ! --hairline must be above 0 and no more than --cap, which is below 180")
+        return 2
+    if args.beard_length is not None and args.beard_length <= 0:
+        print("  ! --beard-length needs to be above 0")
         return 2
     layers = []
     for layer in LAYERS:
         layer = dict(layer)
         layer["count"] = args.layers.get(layer["name"], int(round(layer["count"] * style["scale"])))
+        for key in ("width", "tip", "max"):
+            layer[key] = round(layer[key] * args.card_width, 3)
         if style["points"]:
             layer["points"] = style["points"]
         if layer["name"] == "shell":
             layer["offset"] = args.cling
         layers.append(layer)
-    if any(l["count"] < 1 for l in layers):
+    if args.style != "none" and any(l["count"] < 1 for l in layers):
         print("  ! every layer needs at least one card; use --layers name=N")
         return 2
     named = next((n for n, c in COLOURS.items() if c == args.colour), None)
-    stem = args.name or f"hair_{args.style}_" + (named or "-".join(str(c) for c in root_rgb))
+    colour_stem = named or "-".join(str(c) for c in root_rgb)
     out = args.out if args.out.is_absolute() else ROOT / args.out
     out.mkdir(parents=True, exist_ok=True)
 
-    started = time.time()
-    timings = {}
+    # The beard: its own layer counts and widths from BEARDS, its own shape,
+    # and the jaw ellipsoid to grow on; a second asset with its own files so
+    # it can be worn alone.
+    jaw, beard_layers, beard_shape = None, [], None
+    if args.beard != "none":
+        beard = BEARDS[args.beard]
+        scale = args.head_radius / BODY_SCALE_RADIUS
+        jaw = Jaw(scale, (scale, BODY_CLEAR) if args.drape else None)
+        for layer in LAYERS:
+            layer = dict(layer)
+            layer["count"] = beard["layers"][layer["name"]]
+            for key in ("width", "tip", "max"):
+                layer[key] = round(layer[key] * beard["width"], 3)
+            if beard["points"]:
+                layer["points"] = beard["points"]
+            if layer["name"] == "shell":
+                layer["offset"] = args.cling
+            beard_layers.append(layer)
+        beard_shape = {"length": args.beard_length or beard["length"], "variation": beard["variation"],
+                       "wave": beard["wave"], "volume": beard["volume"],
+                       "guide": round(BEARD_GUIDE * args.guide_distance / LOOKS["stylised"]["guide"], 3)}
+    if args.style != "none":
+        stem = args.name or f"hair_{args.style}_{colour_stem}"
+        beard_stem = f"{stem}_beard"
+    else:
+        stem = None
+        beard_stem = args.name or f"beard_{args.beard}_{colour_stem}"
+
     root01 = np.array(root_rgb, dtype=np.float64) / 255.0
     tip01 = np.array(tip_rgb, dtype=np.float64) / 255.0
-    plan = atlas_plan(root01, tip01, args.band, args.ramp)
-    grown = grow(args, layers, plan)
-    cards = grown["cards"]
-    timings["grow_s"] = round(time.time() - started, 3)
+    colours = {"root": list(root_rgb), "tip": list(tip_rgb), "flyaway": list(stray_rgb), "name": named,
+               "root01": root01, "tip01": tip01}
+    baked = []
+    if stem is not None:
+        started = time.time()
+        plan = atlas_plan(root01, tip01, args.band, args.ramp)
+        grown = grow(args, layers, plan)
+        grow_s = round(time.time() - started, 3)
+        cap = cap_mesh(args.head_radius + CAP_OFFSET, args.hairline, args.cap)
+        t0 = time.time()
+        cap_maps = cap_textures(root01, args.hairline, args.cap, args.part, args.part_width,
+                                np.random.RandomState(args.seed + 42))
+        if args.cap_diffuse:
+            # a scalp painted elsewhere (scripts/make_scalp.py, or by hand) stands in
+            # for the follicle strokes; the opacity above still cuts the hairline
+            # and lightens the parting, so only the colour changes
+            cap_maps = (Image.open(args.cap_diffuse).convert("RGB").resize((CAP_TEXTURE, CAP_TEXTURE), Image.LANCZOS),
+                        cap_maps[1])
+        cap_s = round(time.time() - t0, 3)
+        shape = {"length": args.length, "variation": args.variation, "wave": args.wave,
+                 "volume": args.volume, "guide": args.guide_distance}
+        write_asset(args, stem, out, layers, shape, plan, grown, cap, cap_maps, jaw, colours, started,
+                    {"grow_s": grow_s, "cap_textures_s": cap_s},
+                    f"{args.style} hair, {len(grown['cards'])} cards in {len(layers)} layers over a cap, "
+                    f"{args.length} cm long, grown on a {args.head_radius} cm scalp sphere",
+                    {"kind": "hair", "cap_diffuse_from": str(args.cap_diffuse) if args.cap_diffuse else None})
+        baked.append(stem)
+    if jaw is not None:
+        started = time.time()
+        plan = atlas_plan(root01, tip01, args.band, args.ramp)
+        grown = grow(args, beard_layers, plan, jaw, beard_shape)
+        grow_s = round(time.time() - started, 3)
+        cap = beard_cap_mesh(jaw)
+        t0 = time.time()
+        cap_maps = beard_cap_textures(root01, jaw, beard["cap_alpha"], np.random.RandomState(args.seed + 44))
+        cap_s = round(time.time() - t0, 3)
+        b = BEARD_REGION
+        write_asset(args, beard_stem, out, beard_layers, beard_shape, plan, grown, cap, cap_maps, jaw,
+                    colours, started, {"grow_s": grow_s, "cap_textures_s": cap_s},
+                    f"{args.beard} beard, {len(grown['cards'])} cards in {len(beard_layers)} layers over a cap, "
+                    f"{beard_shape['length']} cm long, grown on a jaw ellipsoid beside a "
+                    f"{args.head_radius} cm scalp sphere",
+                    {"kind": "beard", "beard": args.beard, "beard_cap_alpha": beard["cap_alpha"],
+                     "beard_cap_blur_px": BEARD_CAP_BLUR_PX,
+                     "jaw": {"centre_cm": [round(float(c), 3) for c in jaw.centre],
+                             "radii_cm": [round(float(r), 3) for r in jaw.radii],
+                             "region": dict(b), "region_steradians": round(jaw.area, 4),
+                             "exit_degrees": b["exit_deg"],
+                             "body_capsules": [{"name": n, "a": list(a), "b": list(bb), "radius_cm": r}
+                                               for n, a, bb, r in BEARD_BODY] if args.drape else []},
+                     "cap_diffuse_from": None})
+        baked.append(beard_stem)
+    if args.no_bake:
+        print("  bake      skipped (--no-bake): the numpy fallback OBJ stands in for the baked one")
+        return 0
+    # The Blender half: lens shells, cards, a rendered atlas and the final OBJ.
+    # It is its own script so a host with no container still gets everything
+    # above; here it runs as a child process, one asset at a time, and its
+    # report follows this one.
+    import subprocess
+    for name in baked:
+        bake = [sys.executable, str(ROOT / "scripts" / "bake_hair.py"), name, "--dir", str(out)]
+        print(f"  bake      scripts/bake_hair.py {name} --dir {shown(out)}")
+        sys.stdout.flush()          # or the child's report lands above this line in a pipe
+        rc = subprocess.call(bake)
+        if rc != 0:
+            print(f"  ! bake_hair.py exited {rc}; {shown(out / (name + '_fallback.obj'))} is the numpy result")
+            return rc
+    return 0
 
+
+def shown(path: Path) -> str:
+    """Repo-relative when it is in the repo, else as given: --out may be anywhere."""
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
+def write_asset(args, stem: str, out: Path, layers: list, shape: dict, plan: dict, grown: dict,
+                cap: dict, cap_maps: tuple, jaw: Jaw | None, colours: dict, started: float,
+                timings: dict, header0: str, extra: dict) -> dict:
+    """The meshes, maps, files, measurements and report of one asset, hair or beard.
+
+    Writes <stem>_guides.npz, _atlas.json, the cap, the fallback, the preview
+    and <stem>.json under `out`, prints the report and returns the facts.
+    """
+    cards = grown["cards"]
     # the meshes: cap, then the fallback cards in layer order, inside to outside
     t0 = time.time()
-    cap = cap_mesh(args.head_radius + CAP_OFFSET, args.hairline, args.cap)
     inset = 4.0 / ATLAS_SIZE[0]
     card_meshes = {name: {"verts": [], "uvs": [], "normals": [], "faces": []}
                    for name in ("shell", "card")}
@@ -1311,15 +1802,7 @@ def main() -> int:
             group[key] = np.array(group[key]).reshape(-1, 3 if key != "uvs" else 2)
     timings["mesh_s"] = round(time.time() - t0, 3)
 
-    t0 = time.time()
-    cap_dif, cap_opa = cap_textures(root01, args.hairline, args.cap, args.part, args.part_width,
-                                    np.random.RandomState(args.seed + 42))
-    if args.cap_diffuse:
-        # a scalp painted elsewhere (scripts/make_scalp.py, or by hand) stands in
-        # for the follicle strokes; the opacity above still cuts the hairline
-        # and lightens the parting, so only the colour changes
-        cap_dif = Image.open(args.cap_diffuse).convert("RGB").resize((CAP_TEXTURE, CAP_TEXTURE), Image.LANCZOS)
-    timings["cap_textures_s"] = round(time.time() - t0, 3)
+    cap_dif, cap_opa = cap_maps
     t0 = time.time()
     atlas_dif, atlas_opa = paint_atlas(plan, args.band, args.ramp, np.random.RandomState(args.seed + 43))
     timings["atlas_s"] = round(time.time() - t0, 3)
@@ -1329,6 +1812,8 @@ def main() -> int:
     files = {}
     guides = out / f"{stem}_guides.npz"
     offsets = np.cumsum([0] + [len(c["path"]) for c in cards]).astype(np.int32)
+    colours = dict(colours)
+    root01, tip01 = (colours.pop(k).astype(np.float32) for k in ("root01", "tip01"))
     np.savez(guides,
              points=np.concatenate([c["path"] for c in cards]).astype(np.float32),
              offsets=offsets,
@@ -1342,13 +1827,12 @@ def main() -> int:
              head_radius_cm=np.float32(args.head_radius), cling_cm=np.float32(args.cling),
              hairline_deg=np.float32(args.hairline), cap_deg=np.float32(args.cap),
              part_x=np.float32(np.nan if args.part is None else args.part),
-             colour_root=root01.astype(np.float32), colour_tip=tip01.astype(np.float32))
+             colour_root=root01, colour_tip=tip01)
     files["guides"] = guides
     files["atlas"] = out / f"{stem}_atlas.json"
     files["atlas"].write_text(json.dumps(plan, indent=1) + "\n")
 
-    header = [f"{args.style} hair, {len(cards)} cards in {len(layers)} layers over a cap, "
-              f"{args.length} cm long, grown on a {args.head_radius} cm scalp sphere",
+    header = [header0,
               "static geometry: no rig, no fitting, no morphs",
               "units: centimetres, +Y up, +Z the face, origin at the centre of the scalp sphere",
               "faces wound outward: the geometric normal points away from the head",
@@ -1379,11 +1863,15 @@ def main() -> int:
     preview = out / f"{stem}_preview.obj"
     if args.preview:
         stand_ins = [(f"{stem}_scalp", scalp_sphere(args.head_radius))]
+        if jaw is not None:
+            stand_ins.append((f"{stem}_body", jaw.stand_in()))
         if args.drape:
-            stand_ins.append((f"{stem}_body", body_stand_in(args.head_radius / BODY_SCALE_RADIUS)))
+            capsules = BEARD_BODY if extra.get("kind") == "beard" else BODY
+            stand_ins.append((f"{stem}_body", body_stand_in(args.head_radius / BODY_SCALE_RADIUS, capsules)))
         write_groups(preview, fb["mtl"], [("hair", hair_groups), ("scalp", stand_ins)],
-                     ["the fallback hair, the cap, the scalp sphere it was grown on and the body it "
-                      "drapes over, for a look"])
+                     ["the fallback hair, the cap, the scalp sphere it was grown on"
+                      + (", the jaw ellipsoid the beard grows on" if jaw is not None else "")
+                      + " and the body it drapes over, for a look"])
         files["preview"] = preview
     else:
         preview.unlink(missing_ok=True)
@@ -1397,28 +1885,26 @@ def main() -> int:
                       for i, l in enumerate(layers)}
     tris = {"cap": len(cap["faces"]), **per_layer_tris}
     tris["total"] = sum(tris.values())
-    dots = {"all": round(face_dot_radial([cap] + list(card_meshes.values())), 4),
-            "cap": round(face_dot_radial([cap]), 4),
-            "shell": round(face_dot_radial([card_meshes["shell"]]), 4),
-            "card": round(face_dot_radial([card_meshes["card"]]), 4)}
+
+    def dot(meshes):
+        """None rather than NaN for a group with no faces, so the JSON stays JSON."""
+        d = face_dot_radial(meshes)
+        return None if np.isnan(d) else round(d, 4)
+
+    dots = {"all": dot([cap] + list(card_meshes.values())), "cap": dot([cap]),
+            "shell": dot([card_meshes["shell"]]), "card": dot([card_meshes["card"]])}
     for l in layers:
         l["poisson"] = grown["per_layer"][l["name"]]
 
-    def shown(path: Path) -> str:
-        """Repo-relative when it is in the repo, else as given: --out may be anywhere."""
-        try:
-            return str(path.relative_to(ROOT))
-        except ValueError:
-            return str(path)
-
     facts = {
         "date": time.strftime("%Y-%m-%d"), "argv": ["scripts/make_hair.py"] + sys.argv[1:],
+        **extra,
         "style": args.style, "look": args.look,
-        "colour": {"root": list(root_rgb), "tip": list(tip_rgb), "flyaway": list(stray_rgb), "name": named},
-        "seed": args.seed, "length_cm": args.length, "variation_cm": args.variation,
-        "wave": args.wave, "curl_cm": args.curl, "curl_turns": args.curl_turns,
-        "curl_start": args.curl_start,
-        "volume_cm": args.volume, "sweep": args.sweep, "lift": args.lift,
+        "colour": colours,
+        "seed": args.seed, "length_cm": shape["length"], "variation_cm": shape["variation"],
+        "wave": shape["wave"], "curl_cm": args.curl, "curl_turns": args.curl_turns,
+        "curl_start": args.curl_start, "card_width": args.card_width,
+        "volume_cm": shape["volume"], "sweep": args.sweep, "lift": args.lift,
         "jitter": args.jitter, "band": args.band, "ramp": args.ramp,
         "cap_degrees": args.cap, "hairline_degrees": args.hairline,
         "temple_degrees": round(args.hairline + (args.cap - args.hairline) * 0.8, 2),
@@ -1429,7 +1915,6 @@ def main() -> int:
         "front_density": FRONT_DENSITY, "cluster": {"pull": CLUSTER_PULL, "shape": CLUSTER_SHAPE,
                                                     "tip_spread_cm": TIP_SPREAD},
         "taper_from": TAPER_FROM, "poisson_k": POISSON_K,
-        "cap_diffuse_from": str(args.cap_diffuse) if args.cap_diffuse else None,
         "drape": args.drape, "body_capsules": [{"name": n, "a": list(a), "b": list(b), "radius_cm": r}
                                                for n, a, b, r in BODY] if args.drape else [],
         "body_clear_cm": BODY_CLEAR,
@@ -1454,22 +1939,29 @@ def main() -> int:
     facts_path = out / f"{stem}.json"
     facts_path.write_text(json.dumps(facts, indent=2) + "\n")
 
-    shell_stats = grown["per_layer"]["shell"]
-    print(f"  style     {args.style}, {named or 'rgb ' + ','.join(str(c) for c in root_rgb)}, "
-          f"{args.look}, seed {args.seed}, {args.length} cm give or take {args.variation} cm")
+    what = f"{args.beard} beard" if extra.get("kind") == "beard" else f"{args.style} hair"
+    print(f"  {'beard' if extra.get('kind') == 'beard' else 'style':9s} {what}, {stem}, "
+          f"{colours['name'] or 'rgb ' + ','.join(str(c) for c in colours['root'])}, "
+          f"{args.look}, seed {args.seed}, {shape['length']} cm give or take {shape['variation']} cm")
     print("  roots     poisson: " + ", ".join(
         f"{per_layer_cards[l['name']]} {l['name']}" + (f" ({facts['tents']} tents)" if l["tent"] else "")
         for l in layers))
-    print(f"  spacing   shell nearest neighbour {shell_stats['poisson']['mean_cm']} cm, "
-          f"cv {shell_stats['poisson']['cv']} poisson; {shell_stats['fibonacci']['mean_cm']} cm, "
-          f"cv {shell_stats['fibonacci']['cv']} fibonacci, same count")
+    dense = next((l for l in layers if l["poisson"]["poisson"]["mean_cm"] is not None), None)
+    if dense is not None:
+        st = dense["poisson"]
+        line = (f"  spacing   {dense['name']} nearest neighbour {st['poisson']['mean_cm']} cm, "
+                f"cv {st['poisson']['cv']} poisson")
+        if "fibonacci" in st:
+            line += f"; {st['fibonacci']['mean_cm']} cm, cv {st['fibonacci']['cv']} fibonacci, same count"
+        print(line)
     cl = grown["clusters"]
     print(f"  locks     {cl['locks_used']} of {cl['centres']} centres at {cl['guide_distance_cm']} cm, "
           f"{cl['members_mean']} cards each ({cl['members_min']} to {cl['members_max']})")
     print(f"  mesh      {tris['total']} triangles: cap {tris['cap']}, " + ", ".join(
         f"{l['name']} {tris[l['name']]}" for l in layers) + "; 4k to 20k is the budget (HAIR-016)")
-    print(f"  winding   face normal . radial {dots['all']:+.3f} mean (cap {dots['cap']:+.3f}, "
-          f"shell {dots['shell']:+.3f}, card {dots['card']:+.3f}); must be positive")
+    fmt = lambda d: "none" if d is None else f"{d:+.3f}"
+    print(f"  winding   face normal . radial {fmt(dots['all'])} mean (cap {fmt(dots['cap'])}, "
+          f"shell {fmt(dots['shell'])}, card {fmt(dots['card'])}); must be positive")
     print(f"  size      {facts['bounding_box_cm']['span'][0]} x {facts['bounding_box_cm']['span'][1]} x "
           f"{facts['bounding_box_cm']['span'][2]} cm about the origin")
     print(f"  atlas     {plan['size'][0]} x {plan['size'][1]}, {len(plan['slots'])} slots of "
@@ -1480,21 +1972,7 @@ def main() -> int:
     print(f"  facts     {shown(facts_path)}  ({facts['seconds']} s: grow {timings['grow_s']}, "
           f"mesh {timings['mesh_s']}, cap maps {timings['cap_textures_s']}, atlas {timings['atlas_s']}, "
           f"write {timings['write_s']})")
-    if args.no_bake:
-        print("  bake      skipped (--no-bake): the numpy fallback OBJ stands in for the baked one")
-        return 0
-    # The Blender half: lens shells, cards, a rendered atlas and the final OBJ.
-    # It is its own script so a host with no container still gets everything
-    # above; here it runs as a child process and its report follows this one.
-    import subprocess
-    bake = [sys.executable, str(ROOT / "scripts" / "bake_hair.py"), stem, "--dir", str(out)]
-    print(f"  bake      scripts/bake_hair.py {stem} --dir {shown(out)}")
-    sys.stdout.flush()          # or the child's report lands above this line in a pipe
-    rc = subprocess.call(bake)
-    if rc != 0:
-        print(f"  ! bake_hair.py exited {rc}; {shown(out / (stem + '_fallback.obj'))} is the numpy result")
-        return rc
-    return 0
+    return facts
 
 
 if __name__ == "__main__":

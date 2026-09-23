@@ -1074,9 +1074,10 @@ def main() -> int:
               f"{st.get('atlas_render', 0) + st.get('atlas_post', 0):.2f} s")
     m = res.get("manifold", {})
     sv = nm.get("shell_signed_volume_cm3", {})
-    print(f"  shells    {pl.get('0')} lens shells, {c.get('shell_triangles', 0)} triangles from "
+    print(f"  shells    {pl.get('0') or 0} lens shells, {c.get('shell_triangles', 0)} triangles from "
           f"{m.get('quads_before_triangulation', 0)} polygons, "
-          + ("manifold" if m.get("manifold") else f"NOT manifold: {m.get('boundary_edges')} boundary, "
+          + ("none swept" if not int(pl.get("0") or 0) else
+             "manifold" if m.get("manifold") else f"NOT manifold: {m.get('boundary_edges')} boundary, "
              f"{m.get('nonmanifold_edges')} non-manifold edges")
           + (f", signed volume {sv.get('min')} to mean {sv.get('mean')} cm3"
              + (" (all wound outward)" if sv.get("all_positive") else " (SOME WOUND INWARD)") if sv else "")
@@ -1113,7 +1114,11 @@ def main() -> int:
     for suffix in (".obj", ".mtl", "_diffuse.png", "_opacity.png", "_pack.png"):
         print(f"  wrote     {shown(folder / (n + suffix))}")
     print(f"  report    {shown(report_path)}  ({res.get('seconds')} s in Blender, {wall} s wall)")
-    ok = (m.get("manifold", True) and o.get("usemtl") == [f"{n}_{k}" for k in MATERIALS]
+    # a beard with no shell layer has no shell material: Blender's exporter
+    # writes only the materials that own faces, so the expected list follows
+    # the layers that were swept (stubble and short beards, 2026-09-22)
+    swept = [k for k in MATERIALS if k != "shell" or int(pl.get("0") or 0) > 0]
+    ok = (m.get("manifold", True) and o.get("usemtl") == [f"{n}_{k}" for k in swept]
           and rt.get("faces_dot_radial", {}).get("mean", 0) > 0
           and sv.get("all_positive", True) and cap_err is not None and cap_err < 1e-3
           and all(nm.get(k, {}).get("fraction_positive", 1.0) > 0.5

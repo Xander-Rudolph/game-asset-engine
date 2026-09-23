@@ -29,6 +29,7 @@ Everything in `scripts/`. Each takes `--help`.
 | `rig_units.sh` | Rig figures one at a time, with the settings that work. |
 | `make_hair.py` | Lay out a head of hair the repo owns: Poisson roots on a scalp cap, a whorl, a parting, cluster guides, and four layers of guide curves over a cap mesh with its own maps, written as an atlas plan, a numpy fallback OBJ and a preview, then handed to `bake_hair.py`. Styles, looks and colours are presets over flags. See [below](#make-hair-py). |
 | `bake_hair.py` | Sweep `make_hair.py`'s guides into closed lens shells and flat cards in the container's Blender, render the atlas from real strands, set the normals, and write one OBJ that `daz_import_probe.py scene --wear-obj` places. See [below](#bake-hair-py). |
+| `make_scalp.py` | Paint a scalp texture for `make_hair.py --cap-diffuse` with the repo's ComfyUI text-to-image graph: one job, made to tile, tinted to a hair colour, with a JSON of the prompt, seed and seam check. See [below](#make-scalp-py). |
 | `list_animations.py` | What animation clips are actually installed, read from the files. |
 | `bone_roles.py` | Name an articulationxl rig's `bone_N` bones by role (pelvis, chest, head, left thigh and so on) with `map`, then `compile` a role pose from `poses/roles/` into that rig's transforms file for `render_sheet.py`. `probe` says which way each part moved. See [below](#bone-roles-py). |
 | `generate_music.py` | Generate a folder of music prompts with ACE-Step 1.5. `--loop DIR` makes each take a seamless loop, and `--keep-best` keeps the take that loops best. Resumable: seeds already in `DIR/picks.json` are skipped, and `--reloop` loops the recorded takes again without generating. A take the server already made, for a run that died, is used rather than made again, and `--no-wait` queues the missing takes and exits. A track file can carry a section script as its lyrics, after a line of `---`. |
@@ -499,6 +500,8 @@ scripts/make_hair.py [--style NAME] [--look {stylised,realistic}] [--colour NAME
                      [--head-radius CM] [--lift F] [--guide-distance CM] [--jitter F]
                      [--sweep F] [--cling CM] [--volume CM] [--band F] [--ramp F]
                      [--cap-diffuse PNG] [--no-drape] [--seed N] [--no-preview] [--no-bake]
+                     [--beard {none,stubble,short,full}] [--beard-length CM] [--curl CM]
+                     [--curl-turns N] [--curl-start F] [--card-width SCALE]
 ```
 
 Hair the repo owns outright, because the two other routes to it both stop short.
@@ -597,6 +600,38 @@ its 20 mm reach. `--no-drape` switches the capsules off. The preview OBJ draws
 them in grey under the scalp sphere so the drape can be judged with no figure
 in the frame.
 
+#### A beard, on a jaw that was measured
+
+`--beard stubble|short|full` grows a second asset, `<name>_beard`, or the
+beard alone with `--style none`. It grows on a jaw ellipsoid rather than the
+scalp sphere: the lower face of the Genesis 9 base figure was read by height
+band below the fitted skull centre (a read-only `bpy` script on 2026-09-22;
+the nose tip 8 cm down and 13.5 cm forward, the lips 9.5 to 12.5 down, the chin
+13 to 16.5 down at 11.1 forward, the jaw 7.2 cm each side at the lips and 5.6
+at the chin) and a bounded Nelder-Mead fit over 1,274 of those vertices gave
+an ellipsoid centred (0, -11.1, 2.1) cm with radii (6.9, 7.2, 9.0), rms
+0.63 cm; the guessed one had put the sides 1.6 cm too wide and the bottom
+2.8 cm too high. Only the fitted numbers are in the script. The beard region
+is the ellipsoid below a line from the lower lip at the midline up to the
+cheeks and back to the jaw angle, down to a neckline 17.5 cm below the scalp
+centre, plus a moustache band on the upper lip with the lower lip bare, 3.05
+steradians of the ellipsoid's own space. Roots are the same Poisson sampler
+run on the ellipsoid, the flow is down the face with 0.25 outward at a fixed
+exit angle of 20 degrees, every point is held clear of the ellipsoid, and the
+beard drapes over the body capsules with the neck starting at the neckline.
+Stubble is the cap and 60 flyaways of 0.4 cm; short is 3 cm of cards; full is
+7 cm with 30 shells. The beard cap is the region of the ellipsoid at 0.15 cm,
+its opacity 0.4, 0.45 and 0.7 by beard and blurred over 130 px at the edge: at
+70 px and 0.85 to 1.0 it read as a dark band with a straight top edge across
+the cheeks. Baked, the full beard is 6,176 triangles, the short 4,316 and the
+stubble 1,536, each in about 2 s wall in Blender; placed on the figure the
+declip finds 10.5, 8.0 and 26.1 percent of their vertices inside the face and
+leaves 0.5, 0.46 and 1.94 (`--declip-max-push 30`), the remainder at the
+chin, which sits 1.1 cm outside the ellipsoid. A second `--wear-obj` puts a
+beard under a hairstyle in one scene. Everything in that paragraph beyond the
+fit is a guess set by looking once; the short and stubble caps still read as
+a soft patch on the cheek.
+
 #### The cap
 
 A dome at the scalp radius plus 0.15 cm bounded by the same hairline, 14 rings
@@ -689,6 +724,34 @@ bounce 14,436, all inside the 4k to 20k budget <!-- HAIR-016 -->, and curls
 fewer the ringlets flatten. A 12-point profile had put the bob at 20,196. The six,
 generated, baked, placed on Genesis 9 and rendered at three angles each, took
 73 s wall.
+
+### `make_scalp.py`
+
+```
+scripts/make_scalp.py [--colour NAME|R,G,B] [--style {crop,stubble,bald}] [--graph JSON]
+                      [--seed N] [--steps N] [--raw PNG] [--contrast F] [--blend F]
+                      [--size PX] [--name STEM] [--out DIR] [--queue-wait S] [--dry-run]
+```
+
+A scalp texture for `make_hair.py --cap-diffuse` from the repo's own ComfyUI
+graphs, the one AI stage in the hair pipeline; no Daz content goes near it,
+the prompt is text. One job on `preset_ground_texture.json` at its native 1024
+px square (Qwen-Image, 20 steps, cfg 4, euler simple), fetched back over
+`/view`, made to tile with `make_seamless.py`'s mend, and tinted so the
+image's median lands on the hair colour darkened by the same 0.75 the painted
+cap uses. It writes `output/hair/scalp_<colour>.png`, the raw and tiled
+images beside it, and a JSON with the prompt, seed, graph, seam scores and
+timings. `--raw` retints an earlier image with no job; `--style` swaps the
+prompt for a crop, stubble or bald scalp.
+
+Measured 2026-09-22 on the RTX 4070 Ti SUPER: a job takes 85 to 95 s from
+`/prompt` to history, the tile and tint under 0.1 s. The seam check went from
+2.01 times the interior at 29 levels to 1.05 at 1.65 for the black crop, and
+passed on every colour and style tried; the third prompt wording worked and the
+two before it did not. Under the crop the difference from the painted cap is
+9 pixels of 940,800 in the head render, because the shells hide the cap; bare
+and from above, the AI cap shows follicle strokes radiating from a whorl where
+the painted one is featureless, which is the case it is for.
 
 ### `daz_library.py`
 

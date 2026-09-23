@@ -1535,7 +1535,14 @@ side-parted style, a black 5 cm crop, auburn curls, a long white style and a
 red shoulder-length one. All six keep the face clear; five stay inside the 4k to
 20k triangle budget the research gives (bob 14,436, crop 18,378) and the curls,
 a helix of 20 points per strand, run to 24,198 by design.
-The sheet is `output/daz/hair_styles_sheet.png` on this machine.
+Later the same day the curls became real ringlets (a helix per strand rather
+than a sideways wave), the long styles learnt to drape over the neck and
+shoulders, and beards arrived: `--beard stubble|short|full` grows a second
+asset on a jaw ellipsoid fitted to the figure's lower face, worn as a second
+`--wear-obj` under a hairstyle or alone. The preview with all of it, eleven
+rows at three angles, is `output/daz/hair_preview_sheet.png` on this machine;
+the crop in it wears a scalp painted by `scripts/make_scalp.py` through
+ComfyUI rather than the follicle strokes.
 
 ### The declip reaches an OBJ, and has to
 

@@ -135,6 +135,18 @@ clear and stays inside 4k to 20k triangles.
   crease split, the 0.12 lens thickness, the 12 to 30 degree exit angles, the
   0.35 parting sweep, the cap's 0.75 darkening and 40 px rim blur.  Each was
   set by looking at the bob once.  Cost: an eye for hair and an afternoon.
+- **The beard is one fit and one look.**  The jaw ellipsoid was fitted to the
+  Genesis 9 base figure once (rms 0.63 cm, the chin 1.1 cm outside it) and
+  every region edge, exit angle, cap alpha and count is a guess set by looking
+  at three renders; the short and stubble caps still read as a soft dark
+  patch on the cheek, the full beard's cap edge shows on the cheek, and no
+  figure but the base one has worn one.  Cost: an eye for beards, then a
+  moustache, sideburns and a goatee as regions.
+- **The ComfyUI scalp was judged on one seed per style.**  Three prompt
+  wordings were tried at seed 1, the bald style's raw image looks
+  photographic rather than stylised, and no run compared seeds; only the
+  `preset_ground_texture.json` graph has been run, the Qwen and SDXL graphs are
+  offered and untried.  Cost: minutes of GPU per seed.
 - **The hairline is thin.**  40 short cards on a 12 degree band; at the temples
   the skin shows between them on every style.  Cost: minutes, then a look.
 - **Tents show at the parting.**  On the bob and the curls the breakup tents'
