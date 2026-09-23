@@ -1544,10 +1544,13 @@ because pushing a rigid prop's vertices towards a body bends it. A hair mesh is
 neither: it is a sheet modelled around a sphere, and bending it onto the head it
 rests on is the point.
 
-A skull is not a ball everywhere. On the default bob, 4.53 percent of the
-hair's vertices sat inside the body before the declip, at the neck and where
-the fitted sphere's 10.9 mm worst residual let a shell root sink in;
-`--declip 1.5` left **0.00 percent** inside (measured 2026-09-22).
+A skull is not a ball everywhere, and a neck and shoulders are not the five
+capsules `make_hair.py` drapes long hair over. On the default bob, 4.53 percent
+of the hair's vertices sat inside the body before the declip, at the neck and
+where the fitted sphere's 10.9 mm worst residual let a shell root sink in; on
+the 30 and 34 cm styles, which now hang down the neck and turn at the
+shoulders, 4.64 and 4.57 percent. `--declip 1.5` left **0.00 percent** inside
+on all three, pushing at most 10.9 mm (measured 2026-09-22).
 
 ### Why hair on a figure rendered black: its faces were wound into the head
 

@@ -498,7 +498,7 @@ scripts/make_hair.py [--style NAME] [--look {stylised,realistic}] [--colour NAME
                      [--variation CM] [--wave F] [--cap DEG] [--hairline DEG]
                      [--head-radius CM] [--lift F] [--guide-distance CM] [--jitter F]
                      [--sweep F] [--cling CM] [--volume CM] [--band F] [--ramp F]
-                     [--seed N] [--no-preview] [--no-bake]
+                     [--cap-diffuse PNG] [--no-drape] [--seed N] [--no-preview] [--no-bake]
 ```
 
 Hair the repo owns outright, because the two other routes to it both stop short.
@@ -568,6 +568,30 @@ spread, the semantics of Blender's Clump Hair Curves <!-- HAIR-117 -->. A
 card's width comes from its lock's spread <!-- HAIR-101 -->, clamped to its
 layer's bounds.
 
+#### Draping over the body
+
+Long hair needs something to land on. The body below the head is five capsules
+in the hair's own frame, measured on the Genesis 9 base figure on 2026-09-22 by
+height band below the fitted skull centre (`output/hair/_exp/measure_body.py`):
+a neck 6.5 cm in radius sitting 1.5 cm behind the scalp centre from 11 to
+24 cm down, a shoulder bar 22 cm each side at 27 cm down, and three chest
+capsules of 9 cm below that; they scale with `--head-radius`. As a strand is
+stepped, any point that lands inside a capsule plus 0.8 cm of clearance is
+pushed out to it and the strand's heading loses its component into the
+surface, so it slides along the neck and over the shoulder; on the flat top of
+a shoulder, where sliding leaves no direction, the strand is sent forward or
+back to whichever side it is already on. The cluster pull and the wave come
+after, so a final pass pushes every point out again.
+
+Before this the 30 cm and 34 cm styles splayed outward from their exit angle
+and passed through the shoulders; with it they hang down the neck and turn at
+the shoulders, and on the figure `--declip 1.5` finds 4.64 and 4.57 percent of
+their vertices inside the body and leaves 0.00 percent, pushing at most
+10.9 mm. At 0.5 cm of clearance it had left 0.55 and 0.48 percent deeper than
+its 20 mm reach. `--no-drape` switches the capsules off. The preview OBJ draws
+them in grey under the scalp sphere so the drape can be judged with no figure
+in the frame.
+
 #### The cap
 
 A dome at the scalp radius plus 0.15 cm bounded by the same hairline, 14 rings
@@ -576,7 +600,9 @@ diffuse of the root colour at 0.75 with 9,000 follicle strokes flowing away
 from the whorl and a slightly lighter parting line, and an opacity that is one
 inside the hairline, blurred over 40 px at the rim and 0.85 along the parting
 <!-- HAIR-047, HAIR-048 -->. The first bake's parting stripe, a fifth of the cap
-wide at 0.7, read as a bald wedge.
+wide at 0.7, read as a bald wedge. `--cap-diffuse PNG` replaces the painted
+colour with an image made elsewhere, resized to the cap map; the cap's own
+opacity still cuts the hairline and lightens the parting.
 
 #### The atlas plan and the fallback
 

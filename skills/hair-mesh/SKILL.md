@@ -64,8 +64,9 @@ since the rewrite. Every number a style sets is also a flag, and
 | bounce | `--style wavy --colour red --part right --length 20 --volume 2.6` | 14,436 |
 
 All six keep the face clear and sit inside the 4k to 20k triangle budget the
-research gives. The long two splay rather than drape: nothing collides with
-the shoulders yet.
+research gives. The long two hang down the neck and turn at the shoulders:
+strands slide over five body capsules measured on Genesis 9 (`--no-drape`
+switches that off), and the preview OBJ draws the capsules in grey.
 
 ## Look at it before putting it on anything
 

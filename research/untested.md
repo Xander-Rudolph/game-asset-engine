@@ -109,11 +109,14 @@ Six styles were generated, baked, placed on Genesis 9 and looked at at three
 angles each (`output/daz/hair_styles_sheet.png`); every one keeps the face
 clear and stays inside 4k to 20k triangles.
 
-- **Long hair does not drape.** Nothing collides with the shoulders or the
-  back, so a 30 cm style splays outward from its exit angle rather than falling
-  down the neck; the research names a shoulder capsule (design record A) and
-  none was built.  The curtains and elder styles show it.  Cost: code, then a
-  look.
+- **The body is five capsules measured once.**  The neck, shoulder bar and
+  chest that long hair drapes over were measured on the Genesis 9 base figure
+  in its rest pose and scale only with `--head-radius`; a broad, narrow or
+  child figure, a posed one, or a collar, cloak or pauldron under the hair has
+  never been tried, and the 0.8 cm clearance is a guess that cleared the two
+  long styles.  The slide sends a strand off a shoulder top to whichever side
+  it is already on, with no notion of a parting behind the ear.  Cost: one run
+  per figure, then a look.
 - **Only one figure, one skin, one light.**  Every look at it has been on the
   base Genesis 9 figure with `G9 Masculine Skin 01`, key 5.5 and ambient 1.5,
   in one head framing, Cycles only.  EEVEE, which `daz_import_probe.py render`

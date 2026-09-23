@@ -157,6 +157,26 @@ CAP_DARKEN, CAP_BLUR_PX = 0.75, 40
 # The whorl sits behind and lateral to the crown (HAIR-106, in words without
 # numbers): 18 degrees behind and 8 degrees to the +X side are guesses.
 WHORL_BEHIND_DEG, WHORL_ASIDE_DEG = 18.0, 8.0
+# The body below the head, as capsules the falling hair slides over, in the
+# hair's own frame: centimetres at the 9.5 cm scalp scale, +Y up, +Z the face,
+# origin at the scalp centre, scaled with --head-radius.  Measured 2026-09-22
+# on the Genesis 9 base figure by height band below the fitted skull centre
+# (output/hair/_exp/measure_body.py): the neck 6 to 7.4 cm each side of the
+# midline and from 8 cm behind to 5 in front of it, the shoulders 19.4 cm each
+# side at 24 cm down and 22.6 at 26, the chest from 13.6 behind to 5.9 in front
+# of the scalp centre.  Long hair grown without these splayed outward from its
+# exit angle instead of falling down the neck (research/untested.md).
+BODY = (
+    ("neck", (0.0, -11.0, -1.5), (0.0, -24.0, -1.5), 6.5),
+    ("shoulders", (-22.0, -27.0, -4.0), (22.0, -27.0, -4.0), 6.5),
+    ("chest", (-12.0, -30.0, -4.0), (-12.0, -50.0, -4.0), 9.0),
+    ("chest", (0.0, -30.0, -4.0), (0.0, -50.0, -4.0), 9.0),
+    ("chest", (12.0, -30.0, -4.0), (12.0, -50.0, -4.0), 9.0),
+)
+BODY_SCALE_RADIUS = 9.5      # the scalp radius BODY was measured against
+BODY_CLEAR = 0.8             # cm of air between the body and the hair (guess; at 0.5 the
+                             # declip on Genesis 9 still found 0.5 percent of a 30 cm
+                             # style deeper than its 20 mm reach, 2026-09-22)
 # The density mask thins the frontal region to 0.6 (guess; HAIR-118).
 FRONT_DENSITY = 0.6
 # Cluster pull factor and its root-to-tip shape, and the tip spread in cm, in
@@ -398,7 +418,8 @@ def exit_angle(p: np.ndarray, lift: float) -> float:
 def strand_path(direction: np.ndarray, flow: np.ndarray, lift: float, radius: float,
                 offset: float, length: float, points: int, wave: float, volume: float,
                 aside: np.ndarray, lock: np.random.RandomState,
-                card: np.random.RandomState, jitter: float) -> np.ndarray:
+                card: np.random.RandomState, jitter: float,
+                body: tuple | None = None) -> np.ndarray:
     """One guide: `points` positions from the root, over the scalp first, then falling free.
 
     A strand leaves along the scalp flow tilted off it by the region's exit
@@ -410,6 +431,11 @@ def strand_path(direction: np.ndarray, flow: np.ndarray, lift: float, radius: fl
     Lying on the scalp is enforced rather than hoped for: every point is pushed
     back out to `offset` centimetres clear of the scalp sphere, so no strand
     passes through the head and the layers keep their thick-to-thin order.
+
+    With `body` as (scale, clearance), a strand that reaches the neck, the
+    shoulders or the chest is pushed out of them and slides along them step by
+    step, so long hair drapes down the neck and over the shoulders instead of
+    splaying outward from its exit angle.
     """
     down = np.array([0.0, -1.0, 0.0])
     angle = exit_angle(direction, lift)
@@ -437,14 +463,19 @@ def strand_path(direction: np.ndarray, flow: np.ndarray, lift: float, radius: fl
     # is why long hair frames a face rather than curtaining it.
     segments = points - 1
     step = length / segments
-    spine, headings = [direction * keep_out], []
+    spine, headings, contact = [direction * keep_out], [], None
     for i in range(1, segments + 1):
         t = i / segments
         heading = (1 - t) * heading0 + t * down + aside * t
         norm = np.linalg.norm(heading)
         heading = heading / norm if norm > 1e-6 else down.copy()
+        if body is not None and contact is not None:
+            heading = slide(heading, contact, spine[-1], body[0])
+        point = spine[-1] + heading * step
+        if body is not None:
+            point, contact = body_push(point, body[1], body[0])
         headings.append(heading)
-        spine.append(spine[-1] + heading * step)
+        spine.append(point)
 
     out = [spine[0]]
     for i in range(1, segments + 1):
@@ -461,16 +492,54 @@ def strand_path(direction: np.ndarray, flow: np.ndarray, lift: float, radius: fl
                         + amp2 * np.sin(freq2 * t * np.pi + phase * 1.7))
                 + swing * amp1 * 0.4 * np.cos(freq1 * t * np.pi + phase))
         out.append(point)
-    return keep_clear(np.array(out), keep_out, volume)
+    return keep_clear(np.array(out), keep_out, volume, body)
 
 
-def keep_clear(path: np.ndarray, keep_out: float, volume: float) -> np.ndarray:
-    """Every point pushed out to the layer's offset, plus `volume` by the tip."""
+def body_push(point: np.ndarray, clearance: float, scale: float):
+    """The point pushed out of every body capsule, and the last surface normal it hit."""
+    hit = None
+    for _, a, b, r in BODY:
+        a = np.asarray(a) * scale; b = np.asarray(b) * scale; r = r * scale
+        ab = b - a
+        t = float(np.clip(np.dot(point - a, ab) / np.dot(ab, ab), 0.0, 1.0))
+        d = point - (a + t * ab)
+        dist = np.linalg.norm(d)
+        if dist < r + clearance:
+            n = d / dist if dist > 1e-9 else np.array([0.0, 1.0, 0.0])
+            point = a + t * ab + n * (r + clearance)
+            hit = n
+    return point, hit
+
+
+def slide(heading: np.ndarray, normal: np.ndarray, point: np.ndarray, scale: float) -> np.ndarray:
+    """A heading that no longer points into the body: its component into the
+    surface removed, and on the flat top of a shoulder, where that leaves
+    nothing, sent forward or back to whichever side the strand is already on,
+    which is the side it falls down.  Left to push out along the normal every
+    step, a strand meeting the shoulder from above stacks on one spot."""
+    into = float(np.dot(heading, normal))
+    if into < 0.0:
+        heading = heading - into * normal
+    norm = np.linalg.norm(heading)
+    if norm < 0.3:
+        front = 1.0 if point[2] > -4.0 * scale else -1.0
+        heading = np.array([0.0, -0.3, front])
+        norm = np.linalg.norm(heading)
+    return heading / norm
+
+
+def keep_clear(path: np.ndarray, keep_out: float, volume: float,
+               body: tuple | None = None) -> np.ndarray:
+    """Every point pushed out to the layer's offset, plus `volume` by the tip,
+    and, when `body` is (scale, clearance), out of the body capsules too."""
     t = np.linspace(0.0, 1.0, len(path))
     floor = keep_out + volume * t
     dist = np.linalg.norm(path, axis=1)
     scale = np.where(dist < floor, floor / np.maximum(dist, 1e-9), 1.0)
-    return path * scale[:, None]
+    path = path * scale[:, None]
+    if body is not None:
+        path = np.array([body_push(q, body[1], body[0])[0] for q in path])
+    return path
 
 
 def cluster_pull(path: np.ndarray, centre: np.ndarray, spread: np.ndarray) -> np.ndarray:
@@ -799,6 +868,23 @@ def material_text(name: str, diffuse: str | None, opacity: str | None,
     return "\n".join(lines) + "\n"
 
 
+def body_stand_in(scale: float) -> dict:
+    """The body capsules as a run of low-poly spheres along each axis, for the preview."""
+    verts, normals, faces = [], [], []
+    for _, a, b, r in BODY:
+        a = np.asarray(a) * scale; b = np.asarray(b) * scale; r = r * scale
+        n = max(2, int(np.ceil(np.linalg.norm(b - a) / (r * 0.6))) + 1)
+        for k in range(n):
+            c = a + (b - a) * (k / (n - 1))
+            sphere = scalp_sphere(r, rings=8, segments=12)
+            base = len(verts)
+            verts.extend(v + c for v in sphere["verts"])
+            normals.extend(sphere["normals"])
+            faces.extend((i + base, j + base, k2 + base) for i, j, k2 in sphere["faces"])
+    return {"verts": np.array(verts), "normals": np.array(normals),
+            "uvs": np.zeros((len(verts), 2)), "faces": faces}
+
+
 def scalp_sphere(radius: float, rings: int = 32, segments: int = 48) -> dict:
     """A plain UV sphere the size of the scalp the roots were grown on, wound outward.
 
@@ -846,6 +932,7 @@ def face_dot_radial(meshes: list) -> float:
 
 
 def grow(args, layers: list, plan: dict) -> dict:
+    body = (args.head_radius / BODY_SCALE_RADIUS, BODY_CLEAR) if args.drape else None
     """Roots, flow, guides, clusters and widths for every layer; the cards and their statistics."""
     R, seed = args.head_radius, args.seed
     scalp = (args.hairline, args.cap, args.part, args.part_width)
@@ -873,7 +960,7 @@ def grow(args, layers: list, plan: dict) -> dict:
             centre_paths[key] = strand_path(
                 d, flow, args.lift, R, layer["offset"], args.length * layer["length"],
                 layer["points"], args.wave, args.volume, aside, lock_rng(lock),
-                np.random.RandomState(seed + 9973 * int(lock) + 1), 0.0)
+                np.random.RandomState(seed + 9973 * int(lock) + 1), 0.0, body)
         return centre_paths[key]
 
     cards, per_layer = [], {}
@@ -908,14 +995,14 @@ def grow(args, layers: list, plan: dict) -> dict:
                           + args.jitter * card_r.uniform(-args.variation, args.variation) / 2)
                 path = strand_path(d, flow, args.lift, R, layer["offset"] + raise_by,
                                    max(length, 0.5), layer["points"], args.wave, args.volume,
-                                   aside, lock_r, card_r, args.jitter)
+                                   aside, lock_r, card_r, args.jitter, body)
                 # pulled into the lock, spread at the tip, kept clear of the scalp
                 tip_dir = unit(path[-1] - path[-2])
                 spread = card_r.normal(size=3)
                 spread -= np.dot(spread, tip_dir) * tip_dir
                 spread = unit(spread) * card_r.uniform(0.0, TIP_SPREAD)
                 path = cluster_pull(path, centre_path(lock, layer), spread)
-                path = keep_clear(path, R + layer["offset"] + raise_by, args.volume)
+                path = keep_clear(path, R + layer["offset"] + raise_by, args.volume, body)
                 cards.append({"layer": li, "band": layer["band"], "lock": lock, "root": d,
                               "path": path, "tent": base_index if layer["tent"] else -1,
                               "tent_rank": rank,
@@ -1081,6 +1168,14 @@ def main() -> int:
                          "just under the cap at 0.15, so a shell's closed root end never shows "
                          "above it; at 0.25 the ends showed as pale hexagons on the crown, "
                          "2026-09-22); the outer layers sit at 0.8, 0.3 and 1.5")
+    ap.add_argument("--cap-diffuse", type=Path, default=None, metavar="PNG",
+                    help="use this image as the scalp cap's colour instead of the painted "
+                         "follicle strokes; it is resized to the cap map and masked by the "
+                         "cap's own opacity")
+    ap.add_argument("--drape", action=argparse.BooleanOptionalAction, default=True,
+                    help="let falling hair slide over the neck, shoulders and chest measured "
+                         "on Genesis 9 (default on); off, long hair splays outward from its "
+                         "exit angle and passes through the body")
     ap.add_argument("--volume", type=float, default=1.2, metavar="CM",
                     help="how far the hair may stand off the scalp by the tip (default 1.2; 0 is "
                          "flat to the head)")
@@ -1193,6 +1288,11 @@ def main() -> int:
     t0 = time.time()
     cap_dif, cap_opa = cap_textures(root01, args.hairline, args.cap, args.part, args.part_width,
                                     np.random.RandomState(args.seed + 42))
+    if args.cap_diffuse:
+        # a scalp painted elsewhere (scripts/make_scalp.py, or by hand) stands in
+        # for the follicle strokes; the opacity above still cuts the hairline
+        # and lightens the parting, so only the colour changes
+        cap_dif = Image.open(args.cap_diffuse).convert("RGB").resize((CAP_TEXTURE, CAP_TEXTURE), Image.LANCZOS)
     timings["cap_textures_s"] = round(time.time() - t0, 3)
     t0 = time.time()
     atlas_dif, atlas_opa = paint_atlas(plan, args.band, args.ramp, np.random.RandomState(args.seed + 43))
@@ -1245,15 +1345,19 @@ def main() -> int:
         material_text(f"{stem}_cap", cap_names["diffuse"], cap_names["opacity"], ks=0.05, ns=8.0)
         + "\n" + material_text(f"{stem}_shell", fb["diffuse"], fb["opacity"])
         + "\n" + material_text(f"{stem}_card", fb["diffuse"], fb["opacity"])
-        + "\n" + material_text(f"{stem}_scalp", None, None, kd=(0.08, 0.07, 0.065), ks=0.05, ns=8.0))
+        + "\n" + material_text(f"{stem}_scalp", None, None, kd=(0.08, 0.07, 0.065), ks=0.05, ns=8.0)
+        + "\n" + material_text(f"{stem}_body", None, None, kd=(0.30, 0.28, 0.27), ks=0.05, ns=8.0))
     hair_groups = [(f"{stem}_cap", cap), (f"{stem}_shell", card_meshes["shell"]),
                    (f"{stem}_card", card_meshes["card"])]
     write_groups(files["fallback_obj"], fb["mtl"], [("hair", hair_groups)], header)
     preview = out / f"{stem}_preview.obj"
     if args.preview:
-        write_groups(preview, fb["mtl"], [("hair", hair_groups),
-                                          ("scalp", [(f"{stem}_scalp", scalp_sphere(args.head_radius))])],
-                     ["the fallback hair, the cap and the scalp sphere it was grown on, for a look"])
+        stand_ins = [(f"{stem}_scalp", scalp_sphere(args.head_radius))]
+        if args.drape:
+            stand_ins.append((f"{stem}_body", body_stand_in(args.head_radius / BODY_SCALE_RADIUS)))
+        write_groups(preview, fb["mtl"], [("hair", hair_groups), ("scalp", stand_ins)],
+                     ["the fallback hair, the cap, the scalp sphere it was grown on and the body it "
+                      "drapes over, for a look"])
         files["preview"] = preview
     else:
         preview.unlink(missing_ok=True)
@@ -1297,6 +1401,10 @@ def main() -> int:
         "front_density": FRONT_DENSITY, "cluster": {"pull": CLUSTER_PULL, "shape": CLUSTER_SHAPE,
                                                     "tip_spread_cm": TIP_SPREAD},
         "taper_from": TAPER_FROM, "poisson_k": POISSON_K,
+        "cap_diffuse_from": str(args.cap_diffuse) if args.cap_diffuse else None,
+        "drape": args.drape, "body_capsules": [{"name": n, "a": list(a), "b": list(b), "radius_cm": r}
+                                               for n, a, b, r in BODY] if args.drape else [],
+        "body_clear_cm": BODY_CLEAR,
         "layers": [{k: l[k] for k in ("name", "count", "width", "tip", "max", "offset", "points",
                                         "length", "band", "tent", "mix", "poisson")}
                    for l in layers],
@@ -1353,6 +1461,7 @@ def main() -> int:
     import subprocess
     bake = [sys.executable, str(ROOT / "scripts" / "bake_hair.py"), stem, "--dir", str(out)]
     print(f"  bake      scripts/bake_hair.py {stem} --dir {shown(out)}")
+    sys.stdout.flush()          # or the child's report lands above this line in a pipe
     rc = subprocess.call(bake)
     if rc != 0:
         print(f"  ! bake_hair.py exited {rc}; {shown(out / (stem + '_fallback.obj'))} is the numpy result")

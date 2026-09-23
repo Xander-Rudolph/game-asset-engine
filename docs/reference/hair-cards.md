@@ -138,6 +138,7 @@ The same day, as `scripts/make_hair.py` (numpy, the layout) and `scripts/bake_ha
 7. **Normals**: shells split at the 60 degree crease and mixed half way to a dome's; corner normals survive the OBJ round trip at a dot of 0.9979 on the unsplit mesh.
 8. **Render side unchanged** but for the card material set to dithered.
 9. **Judged by looking**: six styles on Genesis 9 at three angles, `output/daz/hair_styles_sheet.png`.
+10. **Draping**, added the same day: five body capsules measured on Genesis 9 that falling strands are pushed out of and slide along, so the 30 and 34 cm styles hang down the neck and turn at the shoulders; the declip then finds 4.64 and 4.57 percent of their vertices inside the body and clears all of it.
 
 Four things the build found that the research had not said, each measured on the bob before it was changed: a flat shell colour reads as beige plastic, so shells wear the atlas's base slot; laying `u` straight round a closed profile puts only the slot's edge quarters on the outward face and every shell wore a dark band down each flank, checked by the outward face sitting 0.63 cm further from the head centre than the back; smooth shading across the lens crease smears it into a dark band at any dome mix; and a 12-point profile doubled the shell triangles (20,196 on the bob, 37,776 on the curls). The whole pipeline, six styles generated, baked, placed and rendered, took 73 s wall. What is still untested is in `research/untested.md`.
 
