@@ -82,6 +82,11 @@ ALLOW = [
     ("skills/hair-mesh/SKILL.md", "Genesis",
      "names the Genesis 9 figure its placement was measured against and the library paths "
      "of the preset it loads; no Genesis data is in the file"),
+    ("scripts/make_hair.py", "Genesis",
+     "names Genesis 9 as the figure its five body capsules were measured on, by height "
+     "band below the fitted skull centre, and in the help of the flag that switches them "
+     "off; the numbers are proportions of a neck and shoulders, and no Genesis data is in "
+     "the file"),
     ("scripts/make_hair.py", "Daz",
      "its docstring says why the script exists: a Daz hair product is licence-bound and the "
      "strand hairs in the library have no polygons, so this writes hair the repo owns; it "

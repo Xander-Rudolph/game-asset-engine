@@ -558,7 +558,12 @@ off the scalp by an exit angle of 12 degrees at the rim rising to 30 at the
 crown behind `--lift` (15 to 50 on the first bake fanned the crown out like a
 palm). A parting is a rejected strip closing to nothing at the nape, with the
 hair swept off it by `--part-flow`; 0.5 left a bare wedge, 0.35 leaves a line.
-Hair rooted over the face is brushed aside by `--sweep` as it falls.
+Hair rooted over the face is brushed aside by `--sweep` as it falls. The
+curly style winds each strand in a helix round its own centreline, `--curl`
+1.1 cm in radius over `--curl-turns` 3 from `--curl-start` 0.2 of the length,
+in Blender's Curl Hair Curves terms <!-- HAIR-117 -->, with a phase shared by
+the lock; the sideways sine wave the style had before read as no curl at all
+on the figure (2026-09-22).
 
 Cluster centres are a second Poisson set at `--guide-distance` (4.5 cm
 stylised, 2.5 realistic; on the default bob 14 centres, 20 cards each), every
@@ -678,9 +683,10 @@ id, spare) and `<name>_bake.json`. Measured 2026-09-22 on the default bob.
 
 The default bob bakes in 2.1 to 2.6 s in Blender, 2.6 to 2.9 s wall: 8,853
 vertices and 14,436 triangles. Across the six styles the skill lists, baked
-triangles are bob 14,436, curtains 14,436, crop 18,378, curls 19,296, elder
-15,750 and bounce 14,436, all inside the 4k to 20k budget <!-- HAIR-016 -->; a
-12-point profile had put the bob at 20,196 and the curls at 37,776. The six,
+triangles are bob 14,436, curtains 14,436, crop 18,378, elder 15,750 and
+bounce 14,436, all inside the 4k to 20k budget <!-- HAIR-016 -->, and curls
+24,198, over it by design: each curly strand is a helix of 20 points, and at
+fewer the ringlets flatten. A 12-point profile had put the bob at 20,196. The six,
 generated, baked, placed on Genesis 9 and rendered at three angles each, took
 73 s wall.
 

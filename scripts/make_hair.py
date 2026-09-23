@@ -72,13 +72,18 @@ OUT = ROOT / "output" / "hair"
 # (curls need 12 where a straight card needs 3 to 5, HAIR-019).  Shapes to start
 # from, not measurements: every one is reachable with the flags as well.
 STYLES = {
-    "wavy":     {"length": 14.0, "variation": 3.0, "wave": 1.0, "cap": 83.0, "scale": 1.0, "points": None},
-    "straight": {"length": 16.0, "variation": 2.0, "wave": 0.15, "cap": 83.0, "scale": 1.0, "points": None},
+    "wavy":     {"length": 14.0, "variation": 3.0, "wave": 1.0, "cap": 83.0, "scale": 1.0, "points": None, "curl": 0.0, "curl_turns": 0.0, "curl_start": 0.0},
+    "straight": {"length": 16.0, "variation": 2.0, "wave": 0.15, "cap": 83.0, "scale": 1.0, "points": None, "curl": 0.0, "curl_turns": 0.0, "curl_start": 0.0},
     # 10 points and no extra count: at 12 and 1.2 the baked curls were 27,408
     # triangles, past HAIR-016's 20k (measured 2026-09-22)
-    "curly":    {"length": 11.0, "variation": 2.5, "wave": 2.2, "cap": 83.0, "scale": 1.0, "points": 10},
-    "short":    {"length": 6.0, "variation": 1.5, "wave": 0.8, "cap": 88.0, "scale": 1.3, "points": None},
-    "long":     {"length": 26.0, "variation": 4.0, "wave": 1.2, "cap": 80.0, "scale": 1.1, "points": None},
+    # curly: the sideways sine wave read as no curl at all (2026-09-22), so the
+    # style winds each strand round its own centreline instead, Blender's Curl
+    # Hair Curves semantics (HAIR-117): a radius in cm, turns per strand, and
+    # where along the strand the curl starts; 20 points so a turn is round
+    "curly":    {"length": 11.0, "variation": 2.5, "wave": 0.4, "cap": 83.0, "scale": 0.62, "points": 20,
+                 "curl": 1.1, "curl_turns": 3.0, "curl_start": 0.2},
+    "short":    {"length": 6.0, "variation": 1.5, "wave": 0.8, "cap": 88.0, "scale": 1.3, "points": None, "curl": 0.0, "curl_turns": 0.0, "curl_start": 0.0},
+    "long":     {"length": 26.0, "variation": 4.0, "wave": 1.2, "cap": 80.0, "scale": 1.1, "points": None, "curl": 0.0, "curl_turns": 0.0, "curl_start": 0.0},
 }
 
 # The look sets how the cards gather and how the atlas is coloured.  `guide`
@@ -419,7 +424,7 @@ def strand_path(direction: np.ndarray, flow: np.ndarray, lift: float, radius: fl
                 offset: float, length: float, points: int, wave: float, volume: float,
                 aside: np.ndarray, lock: np.random.RandomState,
                 card: np.random.RandomState, jitter: float,
-                body: tuple | None = None) -> np.ndarray:
+                body: tuple | None = None, curl: tuple = (0.0, 0.0, 0.0)) -> np.ndarray:
     """One guide: `points` positions from the root, over the scalp first, then falling free.
 
     A strand leaves along the scalp flow tilted off it by the region's exit
@@ -477,6 +482,13 @@ def strand_path(direction: np.ndarray, flow: np.ndarray, lift: float, radius: fl
         headings.append(heading)
         spine.append(point)
 
+    # A curl is a helix round the centreline, not a wave beside it: radius
+    # `c_r` cm, `c_turns` turns over the strand, growing in from `c_start`, with
+    # the lock's own phase so a lock's cards spiral together.  The sine wave
+    # alone, at any amplitude, read as no curl at all on the figure.
+    c_r, c_turns, c_start = curl
+    c_phase = lock.uniform(0, 2 * np.pi) + jitter * card.uniform(-0.4, 0.4)
+    c_r = c_r * (1.0 + jitter * card.uniform(-0.25, 0.25))
     out = [spine[0]]
     for i in range(1, segments + 1):
         t = i / segments
@@ -491,6 +503,10 @@ def strand_path(direction: np.ndarray, flow: np.ndarray, lift: float, radius: fl
                 side * (amp1 * np.sin(freq1 * t * np.pi + phase)
                         + amp2 * np.sin(freq2 * t * np.pi + phase * 1.7))
                 + swing * amp1 * 0.4 * np.cos(freq1 * t * np.pi + phase))
+            if c_r > 0.0 and c_turns > 0.0 and t > c_start:
+                grow = min(1.0, (t - c_start) / max(1e-6, 0.5 * (1.0 - c_start)))
+                theta = 2.0 * np.pi * c_turns * (t - c_start) / max(1e-6, 1.0 - c_start) + c_phase
+                point = point + c_r * grow * (side * np.cos(theta) + swing * np.sin(theta))
         out.append(point)
     return keep_clear(np.array(out), keep_out, volume, body)
 
@@ -960,7 +976,8 @@ def grow(args, layers: list, plan: dict) -> dict:
             centre_paths[key] = strand_path(
                 d, flow, args.lift, R, layer["offset"], args.length * layer["length"],
                 layer["points"], args.wave, args.volume, aside, lock_rng(lock),
-                np.random.RandomState(seed + 9973 * int(lock) + 1), 0.0, body)
+                np.random.RandomState(seed + 9973 * int(lock) + 1), 0.0, body,
+                (args.curl, args.curl_turns, args.curl_start))
         return centre_paths[key]
 
     cards, per_layer = [], {}
@@ -995,7 +1012,8 @@ def grow(args, layers: list, plan: dict) -> dict:
                           + args.jitter * card_r.uniform(-args.variation, args.variation) / 2)
                 path = strand_path(d, flow, args.lift, R, layer["offset"] + raise_by,
                                    max(length, 0.5), layer["points"], args.wave, args.volume,
-                                   aside, lock_r, card_r, args.jitter, body)
+                                   aside, lock_r, card_r, args.jitter, body,
+                                   (args.curl, args.curl_turns, args.curl_start))
                 # pulled into the lock, spread at the tip, kept clear of the scalp
                 tip_dir = unit(path[-1] - path[-2])
                 spread = card_r.normal(size=3)
@@ -1144,6 +1162,14 @@ def main() -> int:
                     help="how far a guide's length may stray either way (default from --style)")
     ap.add_argument("--wave", type=float, default=None,
                     help="scales both sine amplitudes: 0 is straight (default from --style)")
+    ap.add_argument("--curl", type=float, default=None, metavar="CM",
+                    help="radius of the helix each strand winds round its own centreline; "
+                         "0 is none (default from --style: 1.1 for curly, 0 otherwise)")
+    ap.add_argument("--curl-turns", type=float, default=None,
+                    help="turns of that helix over the strand (default from --style: 3)")
+    ap.add_argument("--curl-start", type=float, default=None,
+                    help="where along the strand, 0 to 1, the curl begins (default from "
+                         "--style: 0.2)")
     ap.add_argument("--cap", type=float, default=None, metavar="DEG",
                     help="how far down the scalp roots reach at the nape, from the crown "
                          "(default from --style)")
@@ -1218,7 +1244,7 @@ def main() -> int:
         return 0
 
     style = STYLES[args.style]
-    for key in ("length", "variation", "wave", "cap"):
+    for key in ("length", "variation", "wave", "cap", "curl", "curl_turns", "curl_start"):
         if getattr(args, key) is None:
             setattr(args, key, style[key])
     look = LOOKS[args.look]
@@ -1390,7 +1416,9 @@ def main() -> int:
         "style": args.style, "look": args.look,
         "colour": {"root": list(root_rgb), "tip": list(tip_rgb), "flyaway": list(stray_rgb), "name": named},
         "seed": args.seed, "length_cm": args.length, "variation_cm": args.variation,
-        "wave": args.wave, "volume_cm": args.volume, "sweep": args.sweep, "lift": args.lift,
+        "wave": args.wave, "curl_cm": args.curl, "curl_turns": args.curl_turns,
+        "curl_start": args.curl_start,
+        "volume_cm": args.volume, "sweep": args.sweep, "lift": args.lift,
         "jitter": args.jitter, "band": args.band, "ramp": args.ramp,
         "cap_degrees": args.cap, "hairline_degrees": args.hairline,
         "temple_degrees": round(args.hairline + (args.cap - args.hairline) * 0.8, 2),

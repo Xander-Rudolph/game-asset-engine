@@ -1532,8 +1532,9 @@ linked, so a swap finds nothing to swap and the face renders blown-out white.
 Six styles were built, placed and looked at this way on 2026-09-22, the
 commands in the `hair-mesh` skill: a brown centre-parted bob, a long blond
 side-parted style, a black 5 cm crop, auburn curls, a long white style and a
-red shoulder-length one. All six keep the face clear and stay inside the 4k to
-20k triangle budget the research gives (bob 14,436, crop 18,378, curls 19,296).
+red shoulder-length one. All six keep the face clear; five stay inside the 4k to
+20k triangle budget the research gives (bob 14,436, crop 18,378) and the curls,
+a helix of 20 points per strand, run to 24,198 by design.
 The sheet is `output/daz/hair_styles_sheet.png` on this machine.
 
 ### The declip reaches an OBJ, and has to

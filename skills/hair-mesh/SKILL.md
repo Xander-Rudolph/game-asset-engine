@@ -59,12 +59,13 @@ since the rewrite. Every number a style sets is also a flag, and
 | bob | `--style wavy --colour brown --part centre` | 14,436 |
 | curtains | `--style straight --colour blond --part left --length 30` | 14,436 |
 | crop | `--style short --colour black --part none --length 5 --volume 0.6` | 18,378 |
-| curls | `--style curly --colour auburn --part centre --length 20` | 19,296 |
+| curls | `--style curly --colour auburn --part centre --length 20` | 24,198 |
 | elder | `--style long --colour white --part centre --length 34` | 15,750 |
 | bounce | `--style wavy --colour red --part right --length 20 --volume 2.6` | 14,436 |
 
-All six keep the face clear and sit inside the 4k to 20k triangle budget the
-research gives. The long two hang down the neck and turn at the shoulders:
+All six keep the face clear, and five sit inside the 4k to 20k triangle budget
+the research gives; the curls run to 24,198 because each strand is a helix of
+20 points, and thinning them further loses the ringlets. The long two hang down the neck and turn at the shoulders:
 strands slide over five body capsules measured on Genesis 9 (`--no-drape`
 switches that off), and the preview OBJ draws the capsules in grey.
 
