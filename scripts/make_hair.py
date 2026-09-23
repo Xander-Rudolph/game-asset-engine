@@ -33,6 +33,26 @@ pulled towards the centre with a root-to-tip shape and spread at the tip
 (HAIR-117), and the card's width comes from its cluster's spread within the
 layer's bounds (HAIR-101).
 
+HOW IT FALLS, in two stages.  First the guides are grown in a STYLED POSE: the
+flow, the exit angle, the parting, the waves, the curl and the comb that lays
+the heading over the skull, all of it shape rather than physics.  Then that
+pose is dropped by a position-based settle, the solver the Virt-A-Mate work was
+run with (docs/reference/vam-assets.md, VAM-031, run 2026-09-23): a Verlet step
+with drag, a rigidity pull back towards the styled pose with a root-to-tip
+rolloff, inextensible segments solved root first, and a collision against the
+scalp sphere, the body capsules and the jaw ellipsoid, run until the strands
+stop moving.  This is how a Virt-A-Mate groom works and why the two stages are
+separate: the creator combs the guides and the solver only refines them
+(VAM-030).  Measured on the wavy bob on 2026-09-23, combing and then settling
+gives a span of 26.42 x 23.78 x 24.07 cm against 27.58 x 23.18 x 25.03 cm for
+the comb alone, while settling WITHOUT the comb gives 31.00 x 23.92 x 28.15 cm,
+because the rest pose is then a spike standing off the scalp and the rigidity
+holds it there.  So `--comb` and `--settle` are separate flags and both default
+on.  Note the styled pose is not free of downward terms even with `--no-comb`:
+`scalp_flow` blends a little `down` into the tangential flow, `Jaw.flow` is
+built from it, and `slide` forces a downward heading when a slid heading
+collapses.  Those are styling and collision response, not free fall.
+
 A BEARD is the same construction on a second surface: `--beard` grows roots
 by the same Poisson sampler on a jaw ellipsoid (JAW_CENTRE, JAW_RADII) in the
 ellipsoid's own scaled space, restricted to the beard region (BEARD_REGION:
@@ -516,7 +536,7 @@ def strand_path(direction: np.ndarray, flow: np.ndarray, lift: float, radius: fl
                 aside: np.ndarray, lock: np.random.RandomState,
                 card: np.random.RandomState, jitter: float,
                 body: tuple | None = None, curl: tuple = (0.0, 0.0, 0.0),
-                surface: Jaw | None = None) -> np.ndarray:
+                surface: Jaw | None = None, comb: bool = True) -> np.ndarray:
     """One guide: `points` positions from the root, over the scalp first, then falling free.
 
     A strand leaves along the scalp flow tilted off it by the region's exit
@@ -524,6 +544,15 @@ def strand_path(direction: np.ndarray, flow: np.ndarray, lift: float, radius: fl
     once it is past the head.  Grown along the normal instead, as the first
     draft was, every strand sprays outwards at once: on a 9.5 cm scalp that
     made a 46.6 cm wide spray with a bald crown showing through it.
+
+    THE COMB, and where the falling comes from.  With `comb` the heading is
+    blended towards straight down over the strand, which is a comb, not
+    gravity: it is where the hair fell before there was a solver.  With
+    `comb` off, which is what --settle wants, the heading keeps the styled
+    direction, flow and exit angle and --sweep, with no down in it at all,
+    and the strand is left standing along its style for settle() to drop.
+    Left in under a settle the hair falls twice, once by the comb and once by
+    the solver.
 
     Lying on the scalp is enforced rather than hoped for: every point is pushed
     back out to `offset` centimetres clear of the scalp sphere, so no strand
@@ -571,7 +600,7 @@ def strand_path(direction: np.ndarray, flow: np.ndarray, lift: float, radius: fl
     spine, headings, contact = [root], [], None
     for i in range(1, segments + 1):
         t = i / segments
-        heading = (1 - t) * heading0 + t * down + aside * t
+        heading = ((1 - t) * heading0 + t * down if comb else heading0) + aside * t
         norm = np.linalg.norm(heading)
         heading = heading / norm if norm > 1e-6 else down.copy()
         if body is not None and contact is not None:
@@ -779,6 +808,261 @@ class Jaw:
         return {"verts": sphere["verts"] * self.radii + self.centre,
                 "normals": unit(sphere["normals"] / self.radii),
                 "uvs": sphere["uvs"], "faces": sphere["faces"]}
+
+
+# THE SETTLE.  Lifted from output/hair/_exp/groom2.py's settle(), the
+# position-based solver the Virt-A-Mate work was measured with
+# (docs/reference/vam-assets.md, VAM-031, run 2026-09-23): a Verlet step with
+# drag, a rigidity pull toward the rest pose with a root-to-tip rolloff,
+# inextensible segments solved root first, then a one-sided collision and
+# friction.  Two things changed on the way in.  The collision no longer
+# queries a scipy cKDTree of a Daz figure's skin.  What bars it is not scipy,
+# which is on this host (scipy 1.16.3 on python3, measured 2026-09-23): it is
+# the tree's contents.  Guides settled against a Daz figure are Daz-shaped
+# geometry, which this repo may not hold, and this script's dependency
+# surface is the standard library plus numpy and Pillow, as its docstring
+# says.  So the colliders below are this file's own analytic stand-ins: the
+# scalp sphere keep_clear holds hair off, the body capsules body_push and
+# capsule_depth use, and the jaw ellipsoid Jaw.keep_clear uses.  And the
+# solver runs on this file's units, not groom2's.
+#
+# THE ONE ADAPTOR, and the only place anything is converted: groom2 works in
+# metres in the Blender world frame with gravity along -Z.  The four constants
+# below convert FROM that frame INTO this file's, which is centimetres with
+# +Y up, +Z the face and the origin at the centre of the scalp sphere: a
+# length in metres becomes M_TO_CM times itself, and -Z there is SETTLE_DOWN
+# here.  Nothing inside settle() or the colliders converts anything: they are
+# centimetres and +Y up throughout, and the only number that leaves in
+# another unit is the reported move, in millimetres.
+M_TO_CM = 100.0
+CM_TO_MM = 10.0
+SETTLE_DOWN = np.array([0.0, -1.0, 0.0])          # groom2's -Z, in this frame
+SETTLE_G_CM = 9.81 * M_TO_CM                      # m/s2 -> cm/s2
+SETTLE_STOP_CM = 5e-5 * M_TO_CM                   # groom2's 5e-5 m early-out
+SETTLE_MOVING_CM = 1e-3 * M_TO_CM                 # groom2's 1 mm "still moving" test
+# The solver's own numbers.  root_rigidity, main_rigidity, tip_rigidity,
+# rigidity_rolloff and frames are behind flags; the rest are groom2's values,
+# which are the ones read verbatim out of the VaM packages' .vaj storables
+# (docs/reference/vam-assets.md, VAM-015, read 2026-09-23).  There is no
+# collision radius here: groom2 pushed a point out to 1 mm clear of the skin
+# mesh, 6 mm after the first point, and the stand-ins below carry their own
+# clearance instead (the layer's offset plus `volume` by the tip off the
+# scalp or the jaw, BODY_CLEAR off the body), so a radius on top of that
+# would be counted twice.  That is a judgement, not a measurement.
+# no wind key: groom2's wind is metres per second squared in the Blender world
+# frame and nothing here converts it, so a value set by hand would be 100 times
+# too small and point along the wrong axis.  Add it with its conversion or not
+# at all.
+SETTLE = {"gravity": 1.0, "weight": 1.5,
+          "dt": 1.0 / 60, "iterations": 2, "drag": 0.1, "friction": 0.2,
+          "bending": 0.0}
+
+
+def capsule_push(points: np.ndarray, clearance: float, scale: float,
+                 capsules: tuple = BODY) -> tuple:
+    """body_push over a whole array at once: every point pushed out of every
+    body capsule, and which points any capsule pushed.
+
+    The arithmetic is body_push's, capsule by capsule in the same order, so a
+    point inside two capsules ends on the last of them, exactly as there.
+    Shape (..., 3) in, the same shape out plus a (...) boolean.
+    """
+    shape = np.shape(points)[:-1]
+    p = np.asarray(points, dtype=np.float64).reshape(-1, 3).copy()
+    hit = np.zeros(len(p), dtype=bool)
+    for _, a, b, r in capsules:
+        a = np.asarray(a, dtype=np.float64) * scale
+        b = np.asarray(b, dtype=np.float64) * scale
+        r = r * scale
+        ab = b - a
+        t = np.clip((p - a) @ ab / np.dot(ab, ab), 0.0, 1.0)
+        axis = a + t[:, None] * ab
+        d = p - axis
+        dist = np.linalg.norm(d, axis=1)
+        inside = dist < r + clearance
+        n = np.where(dist[:, None] > 1e-9, d / np.maximum(dist, 1e-9)[:, None],
+                     np.array([0.0, 1.0, 0.0]))
+        p[inside] = axis[inside] + n[inside] * (r + clearance)
+        hit |= inside
+    return p.reshape(*shape, 3), hit.reshape(shape)
+
+
+class ScalpCollider:
+    """What the settle collides with on the head: the scalp sphere and the body.
+
+    `floor` is the radius each point is held out to, the one keep_clear uses
+    (the layer's offset plus `volume` by the tip), as an (n, m) array in
+    centimetres; `body` is keep_clear's (scale, clearance) or
+    (scale, clearance, capsules), or None when --no-drape.
+    """
+
+    def __init__(self, floor: np.ndarray, body: tuple | None):
+        self.floor = np.asarray(floor, dtype=np.float64)
+        self.body = body
+
+    def push(self, X: np.ndarray) -> tuple:
+        dist = np.linalg.norm(X, axis=2)
+        low = dist < self.floor
+        X = X * np.where(low, self.floor / np.maximum(dist, 1e-9), 1.0)[:, :, None]
+        hit = low
+        if self.body is not None:
+            X, capped = capsule_push(X, self.body[1], self.body[0], *self.body[2:])
+            hit = hit | capped
+        return X, hit
+
+
+class JawCollider:
+    """What a beard's settle collides with: the jaw ellipsoid and the body.
+
+    `offset` is each card's stand-off from the surface in centimetres, an
+    (n, 1) array, and the push is Jaw.keep_clear's, radially in the
+    ellipsoid's own scaled space.
+    """
+
+    def __init__(self, jaw: Jaw, offset: np.ndarray, volume: float, points: int):
+        t = np.linspace(0.0, 1.0, points)
+        self.jaw = jaw
+        self.radii = jaw.radii[None, None, :] + (np.asarray(offset, dtype=np.float64)
+                                                 + volume * t[None, :])[:, :, None]
+
+    def push(self, X: np.ndarray) -> tuple:
+        q = (X - self.jaw.centre) / self.radii
+        s = np.linalg.norm(q, axis=2)
+        low = s < 1.0
+        X = self.jaw.centre + q * np.where(low, 1.0 / np.maximum(s, 1e-9), 1.0)[:, :, None] * self.radii
+        hit = low
+        if self.jaw.body is not None:
+            X, capped = capsule_push(X, self.jaw.body[1], self.jaw.body[0], self.jaw.body[2])
+            hit = hit | capped
+        return X, hit
+
+
+def settle(X: np.ndarray, sim: dict, collider) -> tuple:
+    """Position-based settle of every strand, in the order vkit says VaM's
+    solver runs (read, not run, 2026-09-23): Verlet step with drag, a rigidity
+    pull toward the PLANTED pose (root rigidity at point 1, then tip + (main -
+    tip) * (1 - (i-1)/(n-2))^rolloff), inextensible segments root-first, then a
+    one-sided collision with `collider` whose friction damps the point.  X is
+    (n, m, 3) centimetres in the hair frame, root first.  Returns the settled
+    X, the numbers to report and the per-strand arrays behind them.
+    """
+    n, m, _ = X.shape
+    rest = X.copy()
+    L = np.linalg.norm(np.diff(X, axis=1), axis=2)                  # rest segment lengths (n, m-1)
+    i = np.arange(m)
+    rig = np.zeros(m)
+    rig[1] = sim.get("root_rigidity", 0.2)
+    if m > 2:
+        rig[2:] = sim.get("tip_rigidity", 0.0) \
+            + (sim.get("main_rigidity", 0.75) - sim.get("tip_rigidity", 0.0)) \
+            * (1.0 - (i[2:] - 1) / (m - 2)) ** sim.get("rigidity_rolloff", 2.0)
+    bend = sim.get("bending", 0.0)
+    G = SETTLE_DOWN * SETTLE_G_CM * sim.get("gravity", 1.0) * sim.get("weight", 1.5) \
+
+    dt, its = sim.get("dt", 1.0 / 60), int(sim.get("iterations", 2))
+    drag, fric = sim.get("drag", 0.1), sim.get("friction", 0.2)
+    V = np.zeros_like(X)
+    hit_share, moved, mv = 0.0, [], np.zeros(n)
+    for frame in range(int(sim.get("frames", 240))):
+        Xf = X.copy()
+        for it in range(its):
+            V *= (1.0 - drag / its)
+            Xp = X + V * dt + G * dt * dt
+            Xp[:, 0] = X[:, 0]
+            # rigidity toward the planted pose (VaM: relative to the root, not a bend angle)
+            Xp = Xp + rig[None, :, None] * (rest - Xp)
+            if bend > 0:
+                for k in range(2, m):
+                    d = Xp[:, k - 1] - Xp[:, k - 2]
+                    d /= np.maximum(np.linalg.norm(d, axis=1), 1e-9)[:, None]
+                    Xp[:, k] += bend * (Xp[:, k - 1] + d * L[:, k - 1:k] - Xp[:, k])
+            for k in range(1, m):
+                d = Xp[:, k] - Xp[:, k - 1]
+                d /= np.maximum(np.linalg.norm(d, axis=1), 1e-9)[:, None]
+                Xp[:, k] = Xp[:, k - 1] + d * L[:, k - 1:k]
+            pushed, hit = collider.push(Xp)
+            Xp[:, 1:] = pushed[:, 1:]                   # the root stays where it grew
+            hit[:, 0] = False
+            V = (Xp - X) / dt
+            V[hit] *= max(0.0, 1.0 - fric)
+            X = Xp
+        hit_share = float(hit[:, 1:].mean())
+        mv = np.abs(X - Xf).max(axis=(1, 2))
+        moved.append(float(np.percentile(mv, 99)))
+        if frame > 30 and moved[-1] < SETTLE_STOP_CM:
+            break
+    still = mv > SETTLE_MOVING_CM
+    seg = np.diff(X, axis=1)
+    s = np.linalg.norm(seg, axis=2)
+    u = seg / np.maximum(s, 1e-9)[:, :, None]
+    bends = (np.degrees(np.arccos(np.clip((u[:, :-1] * u[:, 1:]).sum(2), -1, 1))).mean(axis=1)
+             if m > 2 else np.zeros(n))
+    reach = np.linalg.norm(X[:, -1] - X[:, 0], axis=1) / s.sum(1)
+    lift = np.degrees(np.arccos(np.clip((u[:, 0] * (rest[:, 1] - rest[:, 0]) / L[:, :1]).sum(1), -1, 1)))
+    raw = {"strands": n, "length_cm": s.sum(1), "reach": reach, "lift_deg": lift,
+           "turn_deg": bends, "moving": still, "hit_share": hit_share}
+    return X, {"frames": len(moved), "last_frame_p99_move_mm": round(moved[-1] * CM_TO_MM, 3),
+               "share_moving_over_1mm": round(float(still.mean()), 4),
+               "turn_deg": round(float(bends.mean()), 1),
+               "root_segment_off_normal_deg": round(float(lift.mean()), 1),
+               "reach_over_length_median": round(float(np.median(reach)), 3),
+               "length_cm_median": round(float(np.median(s.sum(1))), 2),
+               "last_frame_hit_share": round(hit_share, 4)}, raw
+
+
+def settle_sim(args) -> dict:
+    """The solver's numbers: SETTLE, plus the five the flags carry."""
+    return dict(SETTLE, root_rigidity=args.root_rigidity, main_rigidity=args.main_rigidity,
+                tip_rigidity=args.tip_rigidity, rigidity_rolloff=args.rigidity_rolloff,
+                frames=args.settle_frames)
+
+
+def settle_cards(args, cards: list, layers: list, shape: dict, body: tuple | None,
+                 jaw: Jaw | None, radius: float) -> dict:
+    """Settle every card in place, one layer at a time, and report the lot.
+
+    A layer is the natural batch: its cards all carry the same number of
+    points, which is what the solver needs to run them as one array.  Each
+    layer's collider is built from the numbers that layer's own push-out
+    used, so the settle holds the hair exactly where keep_clear and
+    Jaw.keep_clear left it and no closer to the head.
+    """
+    sim = settle_sim(args)
+    per_layer, raws = {}, []
+    for li, layer in enumerate(layers):
+        group = [c for c in cards if c["layer"] == li]
+        if not group or len(group[0]["path"]) < 2:
+            continue
+        X = np.array([c["path"] for c in group], dtype=np.float64)
+        offset = np.array([[c["offset_cm"]] for c in group], dtype=np.float64)
+        points = X.shape[1]
+        if jaw is None:
+            t = np.linspace(0.0, 1.0, points)[None, :]
+            collider = ScalpCollider(radius + offset + shape["volume"] * t, body)
+        else:
+            collider = JawCollider(jaw, offset, shape["volume"], points)
+        X, info, raw = settle(X, sim, collider)
+        for card, path in zip(group, X):
+            card["path"] = path
+        per_layer[layer["name"]] = info
+        raws.append(raw)
+    if not raws:
+        return {"ran": False}
+    strands = sum(r["strands"] for r in raws)
+    joined = {k: np.concatenate([r[k] for r in raws])
+              for k in ("length_cm", "reach", "lift_deg", "turn_deg", "moving")}
+    report = {"frames": max(v["frames"] for v in per_layer.values()),
+              "last_frame_p99_move_mm": max(v["last_frame_p99_move_mm"] for v in per_layer.values()),
+              "share_moving_over_1mm": round(float(joined["moving"].mean()), 4),
+              "turn_deg": round(float(joined["turn_deg"].mean()), 1),
+              "root_segment_off_normal_deg": round(float(joined["lift_deg"].mean()), 1),
+              "reach_over_length_median": round(float(np.median(joined["reach"])), 3),
+              "length_cm_median": round(float(np.median(joined["length_cm"])), 2),
+              "last_frame_hit_share": round(float(sum(r["hit_share"] * r["strands"] for r in raws)
+                                                  / max(strands, 1)), 4)}
+    return {"ran": True, "strands": strands,
+            "sim": {k: (list(v) if isinstance(v, tuple) else v) for k, v in sim.items()},
+            "report": report, "per_layer": per_layer}
 
 
 def cluster_pull(path: np.ndarray, centre: np.ndarray, spread: np.ndarray) -> np.ndarray:
@@ -1280,6 +1564,12 @@ def grow(args, layers: list, plan: dict, jaw: Jaw | None = None, shape: dict | N
     shape = shape or {"length": args.length, "variation": args.variation, "wave": args.wave,
                       "volume": args.volume, "guide": args.guide_distance}
     curl = (args.curl, args.curl_turns, args.curl_start) if jaw is None else (0.0, 0.0, 0.0)
+    # with a settle the rest pose is the styled pose and the solver does the
+    # falling, so strand_path keeps its comb out of it (see strand_path)
+    # The comb is the STYLED POSE, not gravity: a VaM creator combs the guides and
+    # the solver only refines them (vam-assets.md, VAM-030).  Decoupled from
+    # --settle so the two can be measured apart.
+    comb = args.comb
     if jaw is not None:
         R = jaw.mean_radius
         seed += 500                    # the beard's roots are not the hair's roots
@@ -1318,7 +1608,7 @@ def grow(args, layers: list, plan: dict, jaw: Jaw | None = None, shape: dict | N
             centre_paths[key] = strand_path(
                 d, flow, args.lift, R, layer["offset"], shape["length"] * layer["length"],
                 layer["points"], shape["wave"], shape["volume"], aside, lock_rng(lock),
-                np.random.RandomState(seed + 9973 * int(lock) + 1), 0.0, body, curl, jaw)
+                np.random.RandomState(seed + 9973 * int(lock) + 1), 0.0, body, curl, jaw, comb)
         return centre_paths[key]
 
     cards, per_layer = [], {}
@@ -1363,7 +1653,7 @@ def grow(args, layers: list, plan: dict, jaw: Jaw | None = None, shape: dict | N
                 path = strand_path(d, flow, args.lift, R, layer["offset"] + raise_by,
                                    max(length, 0.5 if jaw is None else 0.2), layer["points"],
                                    shape["wave"], shape["volume"], aside, lock_r, card_r,
-                                   args.jitter, body, curl, jaw)
+                                   args.jitter, body, curl, jaw, comb)
                 # pulled into the lock, spread at the tip, kept clear of the scalp
                 tip_dir = unit(path[-1] - path[-2])
                 spread = card_r.normal(size=3)
@@ -1376,9 +1666,15 @@ def grow(args, layers: list, plan: dict, jaw: Jaw | None = None, shape: dict | N
                     path = jaw.keep_clear(path, layer["offset"] + raise_by, shape["volume"])
                 cards.append({"layer": li, "band": layer["band"], "lock": lock, "root": d,
                               "path": path, "tent": base_index if layer["tent"] else -1,
-                              "tent_rank": rank,
+                              "tent_rank": rank, "offset_cm": layer["offset"] + raise_by,
                               "spread_cm": apart_cm(d, centres[lock])})
         per_layer[layer["name"]] = stats
+
+    # The settle, on the finished cards: they have been pulled into their
+    # locks and pushed clear of the head, so this is the pose the solver
+    # drops, and the guides that are written are the settled ones.
+    settled = settle_cards(args, cards, layers, shape, body, jaw,
+                           args.head_radius) if args.settle and cards else {"ran": False}
 
     # Width from the cluster's spread within the layer's bounds (HAIR-101):
     # a lock whose members sit far from its centre is a wider lock.  The map
@@ -1402,7 +1698,8 @@ def grow(args, layers: list, plan: dict, jaw: Jaw | None = None, shape: dict | N
                 "members_mean": round(float(np.mean(sizes)), 2), "members_min": int(min(sizes)),
                 "members_max": int(max(sizes)), "spread_mean_cm": round(mean_spread, 3),
                 "guide_distance_cm": shape["guide"]}
-    return {"cards": cards, "centres": centres, "per_layer": per_layer, "clusters": clusters}
+    return {"cards": cards, "centres": centres, "per_layer": per_layer, "clusters": clusters,
+            "settle": settled}
 
 
 PARTS = {"centre": 0.0, "center": 0.0, "left": -0.34, "right": 0.34, "none": None}
@@ -1566,6 +1863,38 @@ def main() -> int:
                     help="let falling hair slide over the neck, shoulders and chest measured "
                          "on Genesis 9 (default on); off, long hair splays outward from its "
                          "exit angle and passes through the body")
+    ap.add_argument("--comb", action=argparse.BooleanOptionalAction, default=True,
+                    help="lay the heading over the skull as the strand is grown, which is the "
+                         "styled pose the settle then refines (default on). Off, the strand "
+                         "stands along its flow and exit angle and the settle has to do all "
+                         "the styling, which measured a wider silhouette on 2026-09-23")
+    ap.add_argument("--settle", action=argparse.BooleanOptionalAction, default=True,
+                    help="drop the styled hair under gravity with the position-based solver "
+                         "lifted from the Virt-A-Mate work (default on; docs/reference/vam-assets.md, "
+                         "VAM-031, run 2026-09-23). Off, the styled pose is written as grown"
+                         "down as it is grown instead, which is what the generator did before there "
+                         "was a solver")
+    ap.add_argument("--root-rigidity", type=float, default=0.2,
+                    help="how hard the first point off the root is held to the styled pose, 0 to 1 "
+                         "(default 0.2, which cleanleft and vikingtop ship; vikingchin ships 0.4997, "
+                         "VAM-015, read 2026-09-23)")
+    ap.add_argument("--main-rigidity", type=float, default=0.75,
+                    help="how hard the rest of the strand is held to the styled pose before the "
+                         "rolloff (default 0.75: at 0.75 with a rolloff of 2 the crown survived "
+                         "200 frames of gravity and the ends still fell, VAM-031, run 2026-09-23. "
+                         "That was on a 24-point strand; this file's layers are 8, 6, 4 and 5 "
+                         "points, so carrying the value over is a judgement, not a measurement)")
+    ap.add_argument("--tip-rigidity", type=float, default=0.0,
+                    help="what the rigidity falls to by the tip (default 0.0, free; the packages "
+                         "ship 0 to 0.5, VAM-015, read 2026-09-23)")
+    ap.add_argument("--rigidity-rolloff", type=float, default=2.0,
+                    help="the power the rigidity falls off at from root to tip (default 2.0; the "
+                         "packages ship 8, which leaves only the first three points of a 24-point "
+                         "strand rigid and let 200 frames of gravity flatten the crown, VAM-031, "
+                         "run 2026-09-23, on a 24-point strand)")
+    ap.add_argument("--settle-frames", type=int, default=240, metavar="N",
+                    help="how many frames of gravity to run at most; the solver stops early once "
+                         "the 99th percentile move falls below 0.05 mm in a frame (default 240)")
     ap.add_argument("--volume", type=float, default=1.2, metavar="CM",
                     help="how far the hair may stand off the scalp by the tip (default 1.2; 0 is "
                          "flat to the head)")
@@ -1642,6 +1971,15 @@ def main() -> int:
         return 2
     if args.beard_length is not None and args.beard_length <= 0:
         print("  ! --beard-length needs to be above 0")
+        return 2
+    if args.settle_frames < 1:
+        print("  ! --settle-frames needs to be at least 1")
+        return 2
+    if args.rigidity_rolloff < 0:
+        print("  ! --rigidity-rolloff cannot be negative")
+        return 2
+    if not all(0.0 <= r <= 1.0 for r in (args.root_rigidity, args.main_rigidity, args.tip_rigidity)):
+        print("  ! --root-rigidity, --main-rigidity and --tip-rigidity are each 0 to 1")
         return 2
     layers = []
     for layer in LAYERS:
@@ -1921,6 +2259,7 @@ def write_asset(args, stem: str, out: Path, layers: list, shape: dict, plan: dic
         "layers": [{k: l[k] for k in ("name", "count", "width", "tip", "max", "offset", "points",
                                         "length", "band", "tent", "mix", "poisson")}
                    for l in layers],
+        "settle": grown["settle"],
         "cards": len(cards), "cards_per_layer": per_layer_cards,
         "tents": sum(1 for c in cards if c["tent"] >= 0 and c["tent_rank"] == 0),
         "guide_points": int(offsets[-1]),
@@ -1957,6 +2296,19 @@ def write_asset(args, stem: str, out: Path, layers: list, shape: dict, plan: dic
     cl = grown["clusters"]
     print(f"  locks     {cl['locks_used']} of {cl['centres']} centres at {cl['guide_distance_cm']} cm, "
           f"{cl['members_mean']} cards each ({cl['members_min']} to {cl['members_max']})")
+    st = grown["settle"]
+    if st.get("ran"):
+        r = st["report"]
+        print(f"  settle    {r['frames']} frames of {st['sim']['frames']}, p99 move "
+              f"{r['last_frame_p99_move_mm']} mm, {r['share_moving_over_1mm']} still over 1 mm, "
+              f"hit share {r['last_frame_hit_share']}; rigidity root {st['sim']['root_rigidity']}, "
+              f"main {st['sim']['main_rigidity']}, tip {st['sim']['tip_rigidity']}, "
+              f"rolloff {st['sim']['rigidity_rolloff']}")
+        print(f"  strands   turn {r['turn_deg']} deg, root segment {r['root_segment_off_normal_deg']} deg "
+              f"off the styled pose, reach over length {r['reach_over_length_median']}, "
+              f"length {r['length_cm_median']} cm, all medians but the two angles")
+    else:
+        print("  settle    none (--no-settle): the strand is combed towards down as it is grown")
     print(f"  mesh      {tris['total']} triangles: cap {tris['cap']}, " + ", ".join(
         f"{l['name']} {tris[l['name']]}" for l in layers) + "; 4k to 20k is the budget (HAIR-016)")
     fmt = lambda d: "none" if d is None else f"{d:+.3f}"
