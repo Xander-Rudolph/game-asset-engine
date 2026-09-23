@@ -1,0 +1,1031 @@
+{
+ "note": "docs/reference/character-assets.md",
+ "researched": "2026-09-23",
+ "checked": "2026-09-23",
+ "statuses": {
+  "corrected": 15,
+  "unverifiable": 3,
+  "confirmed": 25
+ },
+ "conflicts_found": [],
+ "claims": [
+  {
+   "id": "CAS-001",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "A third-party wiki (poserdazfreebies.miraheze.org, last edited 22 Oct 2022, read 2026-09-23) lists the free Genesis 9 Starter Essentials as 'the Genesis 9 figure', 'Genesis 9 Base Clothing', 'Genesis 9 Base dForce Pixie Hair', base materials including 4 feminine and 4 masculine skins, and '29 Base poses'; that the one figure carries Base Feminine and Base Masculine shapes rests on DAZ-049 (Daz's own page, not re-read here). Renderosity's Genesis 9 browse page, read 2026-09-23, counted Characters 457, Clothing 1,010, Footwear 221, Accessories 273, Hair 389. RenderHub's Genesis 9 category showed 327 pages, but its DAZ Dragon 3 URL returned the same listing and page count, so that count is unreliable. No Daz store count was read, and no creature count was found in any store.",
+   "sources": [
+    "https://poserdazfreebies.miraheze.org/wiki/Genesis_9_Starter_Essentials",
+    "https://www.renderosity.com/marketplace/browse/figures/71/genesis-9",
+    "https://www.renderhub.com/3d-figures-and-assets/genesis-9"
+   ],
+   "as_first_reported": "A third-party wiki (poserdazfreebies.miraheze.org, read 2026-09-23) lists the free Genesis 9 Starter Essentials as the Genesis 9 figure with feminine and masculine morphs, 'Genesis 9 Base dForce Pixie Hair', 'Genesis 9 Base Clothing', 4 feminine and 4 masculine skins and 29 base poses; Daz's own list was not read. Renderosity's Genesis 9 browse page, read 2026-09-23, counted Characters 457, Clothing 1,010, Footwear 221, Accessories 273, Hair 389. RenderHub's Genesis 9 category showed 327 pages of 50, but its DAZ Dragon 3 URL returned the same page, so that count is unreliable. No Daz store count was read, and no creature count was found in any store.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "https://poserdazfreebies.miraheze.org/wiki/Genesis_9_Starter_Essentials (headless Chrome, 2026-09-23; page last edited 22 Oct 2022); https://www.renderosity.com/marketplace/browse/figures/71/genesis-9 (headless Chrome, 2026-09-23); https://www.renderhub.com/3d-figures-and-assets/genesis-9 and /daz-dragon-3 (curl and headless Chrome, 2026-09-23)",
+     "evidence": "Wiki: 'The Genesis 9 Starter Essentials include: the Genesis 9 figure Genesis 9 Base Clothing Genesis 9 Base dForce Pixie Hair Base Materials (4 feminine skins, 4 masculine skins, ...) 29 Base poses (each for the Base, G9F and G9M)'. Renderosity: 'Characters ( 457 ) Clothing ( 1010 ) ... Hair ( 389 ) Footwear ( 221 )', 'Accessories ( 273 )'. RenderHub genesis-9 and daz-dragon-3: both paginate to page 327 and list the same 103 item links.",
+     "notes": "The wiki does not mention feminine and masculine morphs; it lists 'the Genesis 9 figure' only. The base feminine and masculine shapes rest on DAZ-049 (Daz product page, not re-read, daz3d.com not fetched). Everything else reproduces today: the wiki contents, all five Renderosity counts exactly, RenderHub 327 pages, and the Dragon 3 URL returning the same listing (its h1 differs, 'Daz Content : Daz Dragon 3', but the items and page count are the same). The 'no Daz store count' and 'no creature count found' parts are statements about the search, not re-checkable."
+    }
+   ]
+  },
+  {
+   "id": "CAS-002",
+   "status": "unverifiable",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "In a WebSearch on 2026-09-23, a search result shows Daz store Genesis 9 items: Michael 9 HD Character Bundle at US$99.99; Wise Wizard Remastered HD Bundle (on the owner's list) at US$59.99; dForce XYZ Ca Hair at US$22.99; and, with no price found, dForce Hexenblade HD Armor (the result says 94,000 quads), dForce Light Plate Armor, dForce Stormguard Fantasy Armor Outfit and dForce FE Beards Of All Shapes (strand-based). These were not read on Daz's page. No price was found for the Ivar 9 HD or Thimor 9 HD Add-On Bundles.",
+   "sources": [
+    "https://www.daz3d.com/michael-9-hd-character-bundle",
+    "https://www.daz3d.com/wise-wizard-remastered-hd-bundle",
+    "https://www.daz3d.com/dforce-hexenblade-hd-armor-for-genesis-9",
+    "https://www.daz3d.com/dforce-light-plate-armor-for-genesis-9",
+    "https://www.daz3d.com/dforce-stormguard-fantasy-armor-outfit-for-genesis-9",
+    "https://www.daz3d.com/dforce-fe-beards-of-all-shapes-for-genesis-9",
+    "https://www.daz3d.com/dforce-xyz-ca-hair-for-genesis-9"
+   ]
+  },
+  {
+   "id": "CAS-003",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "Genesis 9 items on other stores, read 2026-09-23. RenderHub, under an Extended Use License: RKS Gwen US$21.00 list (sale US$15.75), GBJ Dan US$18.00 (US$16.20), JPR Hernest US$15.00 (US$9.00), Scorpio Outfit for Genesis 9 and Genesis 8 Female US$14.99, Hair Pack G9 Men US$11.00 (no sale later on 2026-09-23). Romeo Hair and Beard for Genesis 9 is under RenderHub's Personal Use Only License, US$15.00 list, US$11.25 at 25% off. Renderosity: Aurum Sentinel Armor Set for Genesis 9 Female US$25.00 list, US$12.50 sale ending 24 September, Prime US$10.00; Skyler Female Hair with dForce US$18.99 list, US$13.29 sale.",
+   "sources": [
+    "https://www.renderhub.com/3d-figures-and-assets/genesis-9",
+    "https://www.renderhub.com/3d-figures-and-assets/genesis-9/outfits",
+    "https://www.renderhub.com/3d-figures-and-assets/genesis-9/male-hair",
+    "https://www.renderosity.com/marketplace/products/170263/aurum-sentinel-armor-set-for-genesis-9-female",
+    "https://www.renderosity.com/marketplace/browse/figures/71/genesis-9"
+   ],
+   "as_first_reported": "Genesis 9 items on other stores, read 2026-09-23. RenderHub, under an Extended Use License: RKS Gwen US$21.00 list (sale US$15.75), GBJ Dan US$18.00 (US$16.20), JPR Hernest US$15.00 (US$9.00), Scorpio Outfit for Genesis 9 and Genesis 8 Female US$14.99, Hair Pack G9 Men US$11.00 (US$8.80), Romeo Hair and Beard US$11.25 after 25% off (list not found). Renderosity: Aurum Sentinel Armor Set for Genesis 9 Female US$25.00 list, US$12.50 sale ending 24 September, Prime US$10.00; Skyler Female Hair with dForce US$18.99 list, US$13.29 sale.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "https://www.renderhub.com/3d-figures-and-assets/genesis-9, /genesis-9/outfits, /genesis-9/male-hair (curl, card HTML parsed, 2026-09-23); https://www.renderhub.com/lightblue/hair-pack-g9-men and /kuraikya/romeo-hair-and-beard-for-genesis-9 (curl, 2026-09-23); https://www.renderosity.com/marketplace/products/170263/aurum-sentinel-armor-set-for-genesis-9-female and /marketplace/browse/figures/71/genesis-9 (curl, 2026-09-23)",
+     "evidence": "RenderHub cards: 'Extended Use License ... RKS Gwen for Genesis 9 -25% $ 15 . 75 $21.00'; 'GBJ Dan for Genesis 9 -10% $ 16 . 20 $18.00'; 'JPR Hernest for Genesis 9 -40% $ 9 . 00 $15.00'; 'Scorpio Outfit for Genesis 9 and Genesis 8 Female(s) $ 14 . 99'; 'Extended Use License ... Hair Pack G9 Men $ 11 . 00'; 'Personal Use Only License ... Romeo Hair and Beard for Genesis 9 -25% $ 11 . 25 $15.00'. Renderosity: '$25.00 USD 50% Off Sale Ends: Sep 24 ... Price: $12.50 USD Prime Price: $10.00 USD'; 'Skyler Female Hair with dForce for Genesis 9 ... $18.99 USD 30% Off $13.29 USD'.",
+     "notes": "Gwen, Dan, Hernest, Scorpio, Aurum Sentinel and Skyler reproduce. Wrong: (1) Hair Pack G9 Men is US$11.00 with no sale on the listing and its product page today; the US$8.80 sale has gone (an earlier check today still saw it). (2) Romeo Hair and Beard for Genesis 9 is not under an Extended Use License: its card and product page say 'Personal Use Only License'. (3) Its list price is shown: US$15.00, 25% off to US$11.25, ending within a day."
+    }
+   ]
+  },
+  {
+   "id": "CAS-004",
+   "status": "unverifiable",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "In a WebSearch on 2026-09-23, a search result shows Daz store non-human content: Drakarae for Genesis 9 (RawArt, male and female reptilian with a tail geograft) at US$25.99, Lizardian for Genesis 8.1 Male (tail geograft), M3D Reptilian Skins for Genesis 9, Genesis 9 orcs and goblins (Grugmar the Orc HD, Warlord Orc HD, Krugan the Orc HD, Norba the Orc HD, FN Gribble Goblin HD, Monster Mashup Goblins HD), and DAZ Dragon 3, a separate quadruped figure, whose Pro Bundle a release-era post calls 'usually $124.95'; not read on Daz's page. Only Drakarae's price was found.",
+   "sources": [
+    "https://www.daz3d.com/drakarae-for-genesis-9",
+    "https://www.daz3d.com/lizardian-for-genesis-81-male",
+    "https://www.daz3d.com/m3d-reptilian-skins-for-genesis-9",
+    "https://www.daz3d.com/grugmar-the-orc-hd-for-genesis-9",
+    "https://www.daz3d.com/daz-dragon-3"
+   ]
+  },
+  {
+   "id": "CAS-005",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "Renderosity pages read 2026-09-23: Dracarys for G9 (Sangriart, released 2026-04-29) US$22.50 list, Standard License only; Green Dragon for Genesis 8 Male (JerryJang), a dragon bodysuit rather than a quadruped, US$18.00 list, US$11.70 clearance, Prime US$8.10. RenderHub lists a copy of Green Dragon at US$10.00 under Extended Use. A community wiki (poserdazfreebies.miraheze.org, last edited 4 June 2026, read 2026-09-23) lists over 100 free Poser and Daz Studio fantasy figures and props, including dragons, orcs and goblins, hosted on sites including Renderosity, DeviantArt and Patreon.",
+   "sources": [
+    "https://www.renderosity.com/marketplace/products/171570/dracarys-for-g9",
+    "https://www.renderosity.com/marketplace/products/127254/green-dragon-for-genesis-8-male",
+    "https://www.renderhub.com/jerryjang/green-dragon-for-genesis8-male",
+    "https://poserdazfreebies.miraheze.org/wiki/Fantasy_Monsters"
+   ],
+   "as_first_reported": "Renderosity pages read 2026-09-23: Dracarys for G9 (Sangriart, released 2026-04-29) US$22.50 list, Extended License offered but its price not shown; Green Dragon for Genesis 8 Male (JerryJang), a dragon bodysuit rather than a quadruped, US$18.00 list, US$11.70 clearance, Prime US$8.10. RenderHub lists a copy of Green Dragon at US$10.00 under Extended Use. A community wiki (poserdazfreebies.miraheze.org, read 2026-09-23) lists over 100 free Poser and Daz Studio creature models, including dragons, orcs and goblins, hosted on Renderosity, DeviantArt and Patreon.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "https://www.renderosity.com/marketplace/products/171570/dracarys-for-g9 and /127254/green-dragon-for-genesis-8-male (curl, 2026-09-23); https://www.renderhub.com/jerryjang/green-dragon-for-genesis8-male (curl, 2026-09-23); https://poserdazfreebies.miraheze.org/wiki/Fantasy_Monsters (headless Chrome, 2026-09-23; 'last edited on 4 June 2026')",
+     "evidence": "Dracarys: 'released on Apr 29, 2026'; 'Available Uses: Standard License AI Use: No AI was used ... Price: $22.50 USD'. Green Dragon: 'Departments: Clothing • Other • Bodysuits'; '$18.00 USD 35% Off Clearance Price: $11.70 USD Prime Price: $8.10 USD'. RenderHub: '$10.00', 'License Extended Use License'. Wiki: 'A list of figures and props suitable for use in swords-and-sorcery fantasy images'; entries include 'Goblin (Sixus1)', 'Orc (Sixus1)', 'Apollo Ork Pack', a Dragons list; links to renderosity.com, deviantart.com, patreon.com.",
+     "notes": "Wrong: Dracarys for G9 offers only the Standard License today; no Extended License appears in its Available Uses or licence selector. The rest reproduces. The wiki's auto-generated monster-type lists link 170 distinct wiki pages (counted from the HTML), so 'over 100' holds; they are 'figures and props', not all creatures (the centaur list includes a tutorial). Hosting: the entries the page links out directly go to Renderosity, DeviantArt and Patreon but also most-digital-creations.com, freedom-of-art.ucoz.com, free3d.com and Wayback copies; the 170 sub-pages were not opened, so 'hosted on Renderosity, DeviantArt and Patreon' is at most a partial list."
+    }
+   ]
+  },
+  {
+   "id": "CAS-006",
+   "status": "unverifiable",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "In a WebSearch on 2026-09-23, a search result shows Daz+ at US$8.99 a month or US$69 a year; not read on Daz's page. A third-party review (toolnerdy.com, read 2026-09-23) says Daz+ gives about 30% off Daz Originals, member pricing and weekly or monthly free releases, and Daz Premier about 35% off Daz Originals, and describes itself as research-based rather than hands-on.",
+   "sources": [
+    "https://www.daz3d.com/"
+   ]
+  },
+  {
+   "id": "CAS-007",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "CG Channel's 2025 deals round-up (read 2026-09-23) lists Daz 3D's pre-Black Friday 2025 sale at 50% off featured artists and its Black Friday and Holiday 2025 sales at 'typically around 30%'. How often Daz runs sales was not found.",
+   "sources": [
+    "https://www.cgchannel.com/2025/11/black-friday-cyber-week-and-holiday-2025-deals-for-cg-artists/"
+   ],
+   "as_first_reported": "CG Channel's 2025 deals round-up (read 2026-09-23) lists Daz 3D's pre-Black Friday 2025 sale at 50% off featured artists and its Black Friday and Holiday 2025 sales at 'typically around 30%'. How often Daz runs sales was not found.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://www.cgchannel.com/2025/11/black-friday-cyber-week-and-holiday-2025-deals-for-cg-artists/ (curl, 2026-09-23)",
+     "evidence": "'Who: Daz 3D What: Selected assets (3D characters and clothing) When: Pre-Black Friday Discount: Varies (50% off featured artists' content)'; 'Who: Daz 3D ... When: Black Friday Discount: Varies (typically around 30%)'; 'Who: Daz 3D ... When: Holiday 2025 Discount: Varies (typically around 30%)'.",
+     "notes": "All three entries reproduce. The page scopes each to 'Selected assets (3D characters and clothing)'. 'How often Daz runs sales was not found' is a statement about the search and cannot be re-checked without daz3d.com, which was not fetched."
+    }
+   ]
+  },
+  {
+   "id": "CAS-008",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "RenderHub's Content Licensing agreement (https://www.renderhub.com/info/3d-content-licensing, full text read 2026-09-23) says the Extended Use License \"permits both non-commercial and commercial use of the Digital Asset\" and lists among its permitted uses \"Computer games and software (computer/web/mobile games, virtual and augmented worlds, simulation and training environments, software user interfaces, electronic textbooks)\"; the Personal Use Only License \"permits only non-commercial use\". Under Unauthorized Uses, which apply to both licences, \"you may not redistribute, publish or make a Digital Asset available to any third party unless the Digital Asset becomes part of a larger Creation\" (a Creation is defined as any work created by you), the same condition applies to a modified Digital Asset, and a Competition clause reads: \"You may not use or distribute the Digital Asset, or any modified version of the Digital Asset, in any way that is competitive with the original Digital Asset or the Site, or in any way that displaces the market for the original Digital Asset\", with uploading it \"to another digital content marketplace\" as an example. The agreement does not require encryption or any protection against extraction of the files in a shipped game; its only security duty is that collaborators and clients a licensee shares an asset with \"must take reasonable care to secure the Digital Asset\". It has no clause on AI or machine learning; the site's separate AI Policy page governs AI-made listings and posts, not buyers' use. The page ends with \"Rev: 2022.02.10\", but that line is not a reliable version date: it is absent from Wayback snapshots of Aug 2023 and Aug and Nov 2025, and the text changed between 2023 and 2025. The Green Dragon for Genesis 8 Male item page shows an \"Extended Use License\" badge and a single displayed price of US$10.00 (2026-09-23), with no separate licence add-on price.",
+   "sources": [
+    "https://www.renderhub.com/info/3d-content-licensing",
+    "https://www.renderhub.com/info/ai-content-policy",
+    "https://www.renderhub.com/jerryjang/green-dragon-for-genesis8-male",
+    "https://web.archive.org/web/20230803112707id_/https://www.renderhub.com/info/3d-content-licensing",
+    "https://web.archive.org/web/20251115234320id_/https://www.renderhub.com/info/3d-content-licensing"
+   ],
+   "as_first_reported": "RenderHub's licensing page (https://www.renderhub.com/info/3d-content-licensing, Rev 2022.02.10), read 2026-09-23 through a summarising fetch that did not quote it in full, says its Extended Use License covers 'Computer games and software'; items marked 'Personal Use Only' are excluded. No clause read addresses shipping the files in a build or protecting them, and no AI clause was found in the summary. The Extended Use items recorded (Genesis 9 characters, Green Dragon at US$10.00) showed a single price, with no separate add-on price recorded.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "https://www.renderhub.com/info/3d-content-licensing (curl, full text, 2026-09-23); https://www.renderhub.com/jerryjang/green-dragon-for-genesis8-male (headless Chrome, 2026-09-23)",
+     "evidence": "'Permitted Uses . ... Computer games and software (computer/web/mobile games, virtual and augmented worlds, ...)'; 'Rev: 2022.02.10'; 'The Personal Use Only license permits only non-commercial use'; 'you may not redistribute, publish or make a Digital Asset available to any third party unless the Digital Asset becomes part of a larger Creation'; Green Dragon page: '$10.00', 'Extended Use License'.",
+     "notes": "Quotes, the Rev marker, the Personal Use Only exclusion and the single US$10.00 Green Dragon price (Extended Use, no add-on price shown) all hold. But the full text, now read, does address shipping: the Distribution and Modification clauses allow a Digital Asset to reach third parties only as 'part of a larger Creation', and a Competition clause bars uses that compete with the original. There is still no clause requiring encryption or other protection of the files in a build (only 'reasonable care to secure' when sharing with collaborators or clients), and no AI clause in the licence itself. The claim's 'No clause read addresses shipping the files in a build' is therefore too strong once the full text is read."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback CDX for renderhub.com/info/3d-content-licensing; snapshots 20230803112707 and 20251115234320 (id_), compared with today's text, 2026-09-23",
+     "evidence": "2023: 'RenderHub may discontinue licensing the Digital Asset at any time in its sole discretion'; today: 'RenderHub may discontinue licensing a Digital Asset in response to policy violations or claimed infringement at any time in its sole discretion'. 'Computer games and software' present in both snapshots.",
+     "notes": "No change since the claim's date (today). The quoted permitted-use clause is unchanged since at least Aug 2023. Note that the text changed between 2023 and 2025 while no Rev marker was shown in either snapshot; 'Rev: 2022.02.10' appears only in today's page, so the Rev date is not a reliable version marker. The claim keeps the per-item 'Extended Use License' badge and the licence text apart, so no conflation."
+    },
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.renderhub.com/info/3d-content-licensing (found via the renderhub.com footer 'Content Licensing' link; curl, full text, 2026-09-23); https://www.renderhub.com/info/ai-content-policy (curl, 2026-09-23); https://www.renderhub.com/jerryjang/green-dragon-for-genesis8-male (curl and Playwright render, 2026-09-23)",
+     "evidence": "'the Extended Use License permits both non-commercial and commercial use of the Digital Asset.'; 'Computer games and software (computer/web/mobile games, ...)'; 'you may not redistribute, publish or make a Digital Asset available to any third party unless the Digital Asset becomes part of a larger Creation.'; 'Competition . You may not use or distribute the Digital Asset ... displaces the market for the original Digital Asset.'; 'must take reasonable care to secure the Digital Asset'; 'Rev: 2022.02.10'. Green Dragon rendered text: '$10.00', 'Extended Use License'.",
+     "notes": "Every quoted string was matched programmatically against today's text. No 'encrypt' or extraction-protection wording anywhere; the only security duty is on sharing with collaborators or clients. The only 'AI' on the licence page is the footer link to a separate AI Policy, which covers vendors marking AI-made items, promo images, galleries, contests, forums and avatars, and says nothing about buyers' use or training. Unauthorized Uses apply to both licences. Green Dragon: the rendered page shows one price, $10.00, but its embedded schema.org offer data says '6.00' USD; the claim states the displayed price only."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback CDX for renderhub.com/info/3d-content-licensing from 2023 (200 snapshots 20230308 to 20251115, 403 at 20260212); snapshots 20230803112707, 20250818020318, 20251115234320 (id_, decompressed) compared with today's text, 2026-09-23",
+     "evidence": "All eight quoted licence strings present in all three snapshots. 'Rev:' absent from all three snapshots, present today. 2023: 'RenderHub may discontinue licensing the Digital Asset at any time in its sole discretion'; 2025 and today: 'RenderHub may discontinue licensing a Digital Asset in response to policy violations or claimed infringement at any time in its sole discretion'.",
+     "notes": "The quoted clauses are unchanged since at least Aug 2023, and the claim is dated today, so no drift within its date. The text did change between 2023 and 2025 with no Rev marker shown then, which supports the claim's statement that 'Rev: 2022.02.10' is not a reliable version date. Conflation: the per-item 'Extended Use License' badge and price are kept apart from the agreement text, and the separate AI Policy page is kept apart from the licence. The Genesis 9 category page from the draft is dropped, as it was not re-read."
+    }
+   ]
+  },
+  {
+   "id": "CAS-009",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "A Daz-ecosystem cast for sprites only (no 3D shipped; that no Interactive or Extended licence is then needed rests on DAZ-001, DAZ-019 and DAZ-058, not re-read): 4 humans on the free Genesis 9 base with free Pixie hair and Base Clothing (DAZ-048, DAZ-049); outfits such as Aurum Sentinel at US$12.50 (50% sale ending 24 Sep 2026, list US$25.00) plus 3 more estimated at US$10 to US$15 each; hair Hair Pack G9 Men US$8.80 (RenderHub, Extended Use) and Skyler Female Hair US$13.29 (Renderosity, 30% sale); Romeo Hair and Beard for Genesis 9 (US$11.25 on RenderHub) is Personal Use Only, non-commercial, and cannot be used. No reptilian Genesis 9 character was found: Dracarys for G9 (US$22.50) is a human woman. Green Dragon for Genesis 8 Male (US$11.70 clearance, Renderosity) is a cosplay dragon costume (bodysuit), not a creature. Prices read 2026-09-23, derived, not a checkout quote; a lizardfolk character and a quadruped dragon (DAZ Dragon 3) add unknown amounts.",
+   "sources": [
+    "https://www.renderosity.com/marketplace/products/170263/aurum-sentinel-armor-set-for-genesis-9-female",
+    "https://www.renderosity.com/marketplace/products/171570/dracarys-for-g9",
+    "https://www.renderosity.com/marketplace/products/127254/green-dragon-for-genesis-8-male",
+    "https://www.renderhub.com/3d-figures-and-assets/genesis-9/male-hair"
+   ],
+   "as_first_reported": "The cheapest Daz-ecosystem cast found, for sprites only (no 3D shipped, so no Interactive or Extended licence): 4 humans on the free Genesis 9 base with free Pixie hair and Base Clothing; outfits such as Aurum Sentinel at US$12.50 sale plus 3 more estimated at US$10 to US$15 each; hair Hair Pack G9 Men US$8.80, Romeo Hair and Beard US$11.25, Skyler Female Hair US$13.29; one reptilian character (Dracarys for G9 US$22.50) for both lizardfolk; Green Dragon for Genesis 8 Male US$11.70 clearance as a dragon-man. Prices read total US$80.04; with the estimate about US$110 to US$130 (2026-09-23, derived, not a checkout quote). A quadruped dragon (DAZ Dragon 3) adds an unknown amount.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "Renderosity product pages 170263, 171570, 127254 and the Genesis 9 browse page (headless Chrome, 2026-09-23); https://www.renderhub.com/3d-figures-and-assets/genesis-9/male-hair (headless Chrome, HTML structure read, 2026-09-23); https://www.renderhub.com/info/3d-content-licensing (curl, 2026-09-23)",
+     "evidence": "Dracarys for G9: 'She is a young charming woman ... Price: $22.50 USD'. Green Dragon for G8M: 'Departments: Clothing • Other • Bodysuits', 'hero costumes series for cosplay', '$18.00 USD 35% Off Clearance Price: $11.70 USD'. Aurum Sentinel: '$25.00 USD 50% Off Sale Ends: Sep 24 ... Price: $12.50 USD'. RenderHub: '✓ Personal Use Only License ✓ Genesis 9 ✓ Daz Studio Romeo Hair and Beard for Genesis 9 -25% $ 11 . 25 $15.00'; Hair Pack G9 Men '✓ Extended Use License' '$ 8 . 80 $11.00'. Skyler Female Hair '$18.99 USD 30% Off $13.29 USD'.",
+     "notes": "All six prices reproduce and total US$80.04. But (1) Dracarys for G9 is a human woman character, not a reptilian one; (2) Romeo Hair and Beard for Genesis 9 carries RenderHub's Personal Use Only License, which 'permits only non-commercial use', so it cannot go into a commercial game even as sprites; (3) Green Dragon for G8M is a cosplay bodysuit costume (Clothing department), not a creature figure; (4) the Aurum Sentinel sale ends 24 Sep. Parts resting on register claims, not re-read (daz3d.com not fetched): the free Genesis 9 base with Pixie hair and Base Clothing (DAZ-048, DAZ-049; the wiki read for CAS-001 corroborates the contents), and 'sprites only, so no Interactive or Extended licence' (DAZ-001, DAZ-019 for Daz; DAZ-058 for Renderosity's Standard licence)."
+    }
+   ]
+  },
+  {
+   "id": "CAS-010",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "The owner's shopping list, /asset-engine/'assets to checkout.md' (read 2026-09-23; its URLs not fetched), names 41 distinct Daz store products. Judged by URL slug only: 25 outfits or armour sets, 12 weapon, prop or accessory items (including a crown and a barbarian circlet), 2 character add-on bundles (Ivar 9 HD, Thimor 9 HD), 1 character bundle (Wise Wizard Remastered HD) and 1 lich visage (Dark Sovereign HD). 27 slugs name Genesis 9 and 2 more are Genesis 9 characters by name; 1 names Genesis 3 and 8 Female; 11 name no figure. One line runs two URLs together (Legendary Blades). No price was read from a source this register accepts (daz3d.com not fetched).",
+   "sources": [
+    "assets to checkout.md"
+   ],
+   "as_first_reported": "The owner's shopping list, /asset-engine/'assets to checkout.md' (read 2026-09-23; its URLs not fetched), names 41 distinct Daz store products, almost all for Genesis 9: about 30 outfits or armour sets, 9 weapon or prop sets, 2 character add-on bundles (Ivar 9 HD, Thimor 9 HD), 1 character bundle (Wise Wizard Remastered HD) and 1 lich visage (Dark Sovereign HD). One line runs two URLs together (Legendary Blades). A price was found for only one (Wise Wizard, from a search result).",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "/asset-engine/assets to checkout.md (read in full, 2026-09-23; its URLs not fetched)",
+     "evidence": "41 non-blank lines, 41 distinct; 27 slugs contain 'genesis-9' (e.g. 'dforce-armor-wild-hunt-for-genesis-9'); others include 'dark-fantasy-weapons-for-genesis-3-and-8-female-s', 'zk-dforce-agnus-dei-paladin-armor', 'polish-fantasy-crown', 'stf-brutal-gear--barbarian-circlet', 'the-heros-armoury', 'ivar-9-hd-add-on-bundle', 'thimor-9-hd-add-on-bundle', 'wise-wizard-remastered-hd-bundle', 'dark-sovereign-hd--a-lich-visage-for-genesis-9'; line 41: 'https://www.daz3d.com/legendary-bladeshttps://www.daz3d.com/legendary-blades'.",
+     "notes": "41 products and the doubled Legendary Blades URL hold. The breakdown does not: the claim's parts add to 43. By slug (the only evidence, since the pages were not fetched): 25 outfits or armour sets, 12 weapon, prop or accessory items (10 weapon sets or armouries, a crown and a circlet), 2 add-on bundles, 1 character bundle, 1 lich visage. 'Almost all for Genesis 9' overstates: 27 slugs name Genesis 9, 2 more are Genesis 9 characters by name (Ivar 9, Thimor 9), 1 names Genesis 3 and 8 Female, and 11 name no figure. The Wise Wizard price rests only on a daz3d.com search result, which this check may not use."
+    }
+   ]
+  },
+  {
+   "id": "CAS-011",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Reallusion prices read 2026-09-23: Character Creator 5 perpetual US$299.00; CC5 Deluxe US$647.00 list, US$388.00 sale; Character Creator 365 US$8.25 a month billed annually (US$99 a year, derived). PRIME is US$99 a year, 'EXTRA 15% OFF Storewide savings every purchase on top of promotion', renewing at US$79; Reallusion's own calculator shows PRIME still costing US$9 more at US$600 of purchases and saving US$6 at US$700 (break-even about US$660 a year, derived). On 2026-09-23, 455 of 489 hair items and 2,352 of 2,430 outfits were exactly 30% off, 40% for 2 or more, promotion period 1 to 30 Sep 2026; most discounted Marketplace items run 40% to 60% off (2,159 of 2,657 discounted items in the first 10,000 CC results), with outliers from 5% to 98%. The Content One-Year Plan page redirects to the store home; a search snippet gives US$199, not confirmed.",
+   "sources": [
+    "https://www.reallusion.com/plan-and-pricing/individual/perpetual",
+    "https://www.reallusion.com/plan-and-pricing/individual/subscription",
+    "https://www.reallusion.com/plan-and-pricing/prime",
+    "https://www.reallusion.com/reallusion-prime/"
+   ],
+   "as_first_reported": "Reallusion prices read 2026-09-23: Character Creator 5 perpetual US$299.00; CC5 Deluxe US$647.00 list, US$388.00 sale; Character Creator 365 US$8.25 a month billed annually (US$99 a year, derived). PRIME is US$99 a year, 'EXTRA 15% OFF Storewide ... on top of promotion', renewing at US$79; Reallusion's own calculator shows it pays back only above about US$600 of purchases a year. On 2026-09-23, 455 of 489 hair items and 2,352 of 2,430 outfits were exactly 30% off, 40% for 2 or more, ending 30 Sep 2026; Marketplace vendors run 40% to 60% sales. The Content One-Year Plan page redirects to the store home; a search snippet gives US$199, not confirmed.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "reallusion.com/plan-and-pricing/individual/perpetual, /individual/subscription, /plan-and-pricing/prime, /reallusion-prime/, /ContentStore/promo/offers/, /ContentStore/3d-essential-annual/ (headless Chrome, 2026-09-23); Content Store OpenSearch JSON api.reallusion.com/ContentData20/v1/Content/OpenSearch (curl, 2026-09-23); Marketplace OpenSearch JSON (curl, 2026-09-23)",
+     "evidence": "'Character Creator 5 Universal 3D Character Creation System $ 299 .00'; 'Character Creator 5 Deluxe ... $647 .00 $ 388 .00 -40%'; 'Character Creator 365 ... $ 8 .25 /mo Billed Annually'; 'EXTRA 15% OFF Storewide savings every purchase on top of promotion'; 'renewal for just only $79.00/year'; calculator: '$600 *0.85=$510 $99+$510= $609 A $9 difference', '$700 *0.85=$595 $99+$595= $694'; 'Promotion Period: September 1 - 30, 2026 23:59 UTC', 'Buy 1 for 30% off Buy 2+ for 40% off'.",
+     "notes": "All prices, PRIME terms, the 455/489 hair and 2,352/2,430 outfit counts at exactly 30% off, the 30 Sep end date and the 3D Essentials Annual redirect to the store home reproduce. Wrong: the calculator shows PRIME still costs US$9 more at US$600 of purchases and saves only from somewhere below US$700 (break-even US$660, derived: 99/0.15). Marketplace: of 2,657 discounted items among the first 10,000 CC Marketplace results, 2,159 are 40% to 60% off; discounts range 5% to 98%."
+    }
+   ]
+  },
+  {
+   "id": "CAS-012",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "Reallusion Content Store items read 2026-09-23 (product pages, or the store's own JSON search feed where marked): Akua Character Base Model US$10.00 list, US$7.00 sale (feed); HD Ultimate Morphs US$149.00, US$104.30 (feed); Orc Warrior US$59.00, US$41.30; Scan Reality Marco US$59.00, US$41.30; Fantasy Creatures CC Morph Pack (12 sliders, CC3+) US$45.00, US$31.50; Universal ORC Bundle US$60.00, US$39.00 (feed). ActorCore's Medieval actors (Gothic Knight, Paladin, Barbarian, Nordic Plate Armor, Warlock and others) are US$30.00 each.",
+   "sources": [
+    "https://www.reallusion.com/contentstore/pack/character-creator/3d-character/orc-warrior",
+    "https://www.reallusion.com/contentstore/pack/character-creator/3d-character/fantasy-creatures-cc-morph-pack",
+    "https://www.reallusion.com/contentstore/pack/character-creator/3d-character/orcs-pack",
+    "https://actorcore.reallusion.com/3d-character/Medieval%20Humanoid"
+   ],
+   "as_first_reported": "Reallusion Content Store items read 2026-09-23 (product pages, or the store's own JSON search feed where marked): Akua Character Base Model US$10.00 list, US$7.00 sale (feed); HD Ultimate Morphs US$149.00, US$104.30 (feed); Orc Warrior US$59.00, US$41.30; Scan Reality Marco US$59.00, US$41.30; Fantasy Creatures CC Morph Pack (12 sliders, CC3+) US$45.00, US$31.50; Universal ORC Bundle US$60.00, US$39.00 (feed). ActorCore's Medieval actors (Gothic Knight, Paladin, Barbarian, Nordic Plate Armor, Warlock and others) are US$30.00 each.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "Content Store OpenSearch JSON api.reallusion.com/ContentData20/v1/Content/OpenSearch, CategoryID cc, all 4,469 items (curl, 2026-09-23); product pages orc-warrior, scan-reality-marco, fantasy-creatures-cc-morph-pack (headless Chrome, 2026-09-23); https://actorcore.reallusion.com/3d-character/Medieval%20Humanoid (headless Chrome, 2026-09-23)",
+     "evidence": "Feed: 'Akua - Character Base Model' 7.0/10.0; 'HD Ultimate Morphs' 104.3/149.0; 'Universal ORC Bundle' 39.0/60.0. Pages: Orc Warrior '$59.00 30% OFF $41.30'; Scan Reality Marco '$59.00 30% OFF $41.30'; Fantasy Creatures '$45.00 30% OFF $31.50', '12 CC Morph Sliders', 'CC3+ & IC7 Compatible'. ActorCore: 'Medieval 9', 'Barbarian - M $30.00 Gothic Knight - M $30.00 Nordic Plate Armor - F $30.00 ... Paladin - M $30.00 ... Warlock - F $30.00 Warlock - M $30.00'.",
+     "notes": "Every price reproduces. The feed also lists the same prices for Orc Warrior, Scan Reality Marco and Fantasy Creatures. ActorCore's Medieval category holds 9 actors, all US$30.00 (also Oriental Steel, Roman Soldier)."
+    }
+   ]
+  },
+  {
+   "id": "CAS-013",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "Reallusion CC armour read 2026-09-23: Medieval Knight Armor Vol 1 (Libertas Armory, 'built around the CC3+ Neutral_M Avatar') US$25.00 list, US$17.50 sale; Modular Medieval Knight US$40.00, US$28.00 (feed); Modular Medieval Knight Bundle US$80.00, US$56.00; Guardian Inferna US$40.00, US$28.00 (feed); Costume MEGA 22 pack US$115.00, US$80.50 (feed); on the Marketplace, Lizard Armor 2,500 DA (US$25.00; 100 DA to US$1). Across 2,430 CC outfits the median list price is US$19.50, the lowest US$3.00, and none is free.",
+   "sources": [
+    "https://www.reallusion.com/contentstore/pack/character-creator/3d-cloth/medieval-knight-armor-vol-1",
+    "https://www.reallusion.com/contentstore/pack/character-creator/3d-character/modular-medieval-knight-bundle",
+    "https://marketplace.reallusion.com/lizard-armor",
+    "https://www.reallusion.com/da-points/default.html"
+   ],
+   "as_first_reported": "Reallusion CC armour read 2026-09-23: Medieval Knight Armor Vol 1 (Libertas Armory, 'built around the CC3+ Neutral_M Avatar') US$25.00 list, US$17.50 sale; Modular Medieval Knight US$40.00, US$28.00 (feed); Modular Medieval Knight Bundle US$80.00, US$56.00; Guardian Inferna US$40.00, US$28.00 (feed); Costume MEGA 22 pack US$115.00, US$80.50 (feed); on the Marketplace, Lizard Armor 2,500 DA (US$25.00; 100 DA to US$1). Across 2,430 CC outfits the median list price is US$19.50, the lowest US$3.00, and none is free.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "Content Store OpenSearch JSON, CategoryID cc (4,469 items) and SubCategoryID outfit (2,430 items) (curl, 2026-09-23); product pages medieval-knight-armor-vol-1 and modular-medieval-knight-bundle (headless Chrome, 2026-09-23); https://marketplace.reallusion.com/lizard-armor and https://www.reallusion.com/da-points/default.html (headless Chrome, 2026-09-23)",
+     "evidence": "Vol 1 page: '$25.00 30% OFF $17.50', 'the costume was built around the CC3+ Neutral_M Avatar'. Bundle page: '$80.00 30% OFF $56.00'. Feed: 'Modular Medieval Knight' 28.0/40.0; 'Guardian Inferna' 28.0/40.0; 'Costume MEGA 22 pack! V1 & V2' 80.5/115.0. Lizard Armor: 'Lizard Armor ... 2,500 Add to Cart'. DA page: '1 USD = 100 DA Points'. Outfit feed: 2,430 items, list price min 3.0, median 19.5, none with list or sale price 0.",
+     "notes": "Every price, quote and statistic reproduces exactly. Lizard Armor is for 'CC v3.40 or above; iC v8.00 or above'."
+    }
+   ]
+  },
+  {
+   "id": "CAS-014",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "Reallusion CC hair read 2026-09-23 (store feed unless marked): Hair Builder 3 Edgy US$149.00, US$104.30 sale; Beard and Brows Builder US$149.00, US$104.30; Hair and Beard Builder Combo US$298.00, US$199.00; HairStudio Beard Styles Vol.01 (product page, 'conform to any CC3+ character shape') US$49.00, US$34.30; Solaire short_hair2 and long_hair_1 US$6.00 and US$7.50, sale US$4.20 and US$5.25. Of 489 CC hair items the list prices run from US$6.00 to US$923.00 (median US$18.99); none is free.",
+   "sources": [
+    "https://www.reallusion.com/contentstore/pack/character-creator/3d-hair/hairstudio-beard-styles-vol-01",
+    "https://www.reallusion.com/contentstore/character-creator/pack/hair-beard-builder-combo/default.html",
+    "https://www.reallusion.com/contentstore/pack/character-creator/3d-hair/short-hair2"
+   ],
+   "as_first_reported": "Reallusion CC hair read 2026-09-23 (store feed unless marked): Hair Builder 3 Edgy US$149.00, US$104.30 sale; Beard and Brows Builder US$149.00, US$104.30; Hair and Beard Builder Combo US$298.00, US$199.00; HairStudio Beard Styles Vol.01 (product page, 'conform to any CC3+ character shape') US$49.00, US$34.30; Solaire short_hair2 and long_hair_1 US$6.00 and US$7.50, sale US$4.20 and US$5.25. Of 489 CC hair items the list prices run from US$6.00 to US$923.00 (median US$18.99); none is free.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "Content Store OpenSearch JSON, CategoryID cc and SubCategoryID hair (489 items) (curl, 2026-09-23); product page hairstudio-beard-styles-vol-01 (headless Chrome, 2026-09-23)",
+     "evidence": "Feed: 'Hair Builder 3 - Edgy' 104.3/149.0; 'Beard & Brows Builder' 104.3/149.0; 'Hair & Beard Builder Combo' 199.0/298.0; 'short_hair2' 4.2/6.0 (Solaire); 'long_hair_1' 5.25/7.5 (Solaire). Page: '$49.00 30% OFF $34.30', 'The modular elements will conform to any CC3+ character shape'. Hair feed: 489 items, list min 6.0, max 923.0, median 18.99, none free.",
+     "notes": "Every price, quote and statistic reproduces exactly."
+    }
+   ]
+  },
+  {
+   "id": "CAS-015",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Reallusion non-human content read 2026-09-23: HD Alien Mixer Lizard Alien (Content Store 'Character Creator > Actor > HD', CC v5.20 or above, an ActorMIXER avatar with 12 mixer presets) US$49.00 list, US$34.30 sale; that CC clothing and hair fit it is inferred from its category, not stated on the page. Marketplace Reptilian 1,200 DA (US$12.00; '1 USD = 100 DA Points'); LizardMan by Dexsoft Games, 'a non-standard creature' iClone actor, 2,495 DA list (1,248 DA at 50% off to 30 Sep 2026). The Content Store dragons are iClone props, not CC characters: Young Dragon Pack (3 dragons) US$49.00 list, US$34.30 sale, and Dragons Pack (Infinity PBR, 6) US$75.00, US$52.50, are iClone 'Morphable Props' with embedded animations. Whether they animate in CC5 without iClone 8 was not established; no first-party quadruped or dragon base for CC was found (a third-party Marketplace WYVERN Dragon ships as a Non-Human/Creature actor).",
+   "sources": [
+    "https://www.reallusion.com/contentstore/pack/character-creator/3d-character/hd-alien-mixer-lizard-alien",
+    "https://marketplace.reallusion.com/reptilian-412089",
+    "https://marketplace.reallusion.com/lizardman-by-dexsoft-games",
+    "https://marketplace.reallusion.com/wyvern-dragon-fantasy-creature",
+    "https://www.reallusion.com/contentstore/pack/iclone/3d-character/young-dragon-pack"
+   ],
+   "as_first_reported": "Reallusion non-human content read 2026-09-23: HD Alien Mixer Lizard Alien (CC5 HD, humanoid, so CC clothing and hair fit) US$49.00 list, US$34.30 sale; Marketplace Reptilian 1,200 DA (US$12.00; 100 DA to US$1); LizardMan by Dexsoft Games, 'a non-standard creature' iClone actor, 2,495 DA. The Content Store dragons are iClone props, not CC characters: Young Dragon Pack (3 dragons) US$49.00 list, US$34.30 sale, and Dragons Pack (Infinity PBR, 6) US$75.00, US$52.50, are iClone 'Morphable Props' with embedded animations. Whether they animate in CC5 without iClone 8 was not established; no first-party quadruped or dragon base for CC was found.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "Content Store pages hd-alien-mixer-lizard-alien, young-dragon-pack, dragons-pack; Marketplace pages reptilian-412089, lizardman-by-dexsoft-games, wyvern-dragon-fantasy-creature; reallusion.com/da-points (headless Chrome, 2026-09-23); Content Store OpenSearch JSON (curl, 2026-09-23)",
+     "evidence": "Lizard Alien: 'Character Creator > Actor > HD ... $49.00 30% OFF $34.30', 'Pack includes： Teeth (1) Eye (1) Skin (1) Morph Data (13) Avatar (1) Mixer Preset (12)'. Reptilian: '1,200'. DA page: '1 USD = 100 DA Points'. LizardMan: '2,495 50% off Ends on Sep 30, 2026 (UTC) 1,248', 'LizardMan is a non-standard creature'. Young Dragon Pack: '$49.00 30% OFF $34.30', '3 PBR Morphable Young Dragon Creatures', 'supplied as Morphable Props with 57 Embedded Animations'. Dragons Pack: '$75.00 30% OFF $52.50', '6 PBR Morphable Dragon Creatures', 'Morphable Props with 43 Embedded Animations'.",
+     "notes": "Every price and quote reproduces. Wrong or unsupported: the Lizard Alien page never says it is humanoid or that CC clothing and hair fit it; that is an inference from its Content Store category (CC Actor, HD) and ActorMIXER morph data, not stated. LizardMan is also on a 50% sale today (1,248 DA to 30 Sep); the claim's 2,495 DA is the list price. 'No first-party quadruped or dragon base for CC' is a search result, not re-checkable; note the third-party Marketplace WYVERN Dragon (PROTOFACTOR, 3,595 DA) ships as 'Actor > Non-Human/Creature' for CC and iClone with 4-leg motions."
+    }
+   ]
+  },
+  {
+   "id": "CAS-016",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Reallusion forum posts read 2026-09-23: Peter (RL), forum administrator, in a post shown as 3 years old (answering a question dated 7/31/2023), 'AccuRig is designed for rigging human and other types of bipedal characters. There are no plans to support quadruped or other types of animals at this time.'; in another thread, also Peter (RL), 'Character Creator 4 can't rig quadruped or non bipedal characters. You can however import pre-rigged characters that are not bipedal.' The CC4 manual says such an imported 'Creature' 'can only be animated by the commands in the right-mouse menu, or by using key-frame techniques with Motion Editor'.",
+   "sources": [
+    "https://forum.reallusion.com/523069/Animals",
+    "https://forum.reallusion.com/536732/",
+    "https://manual.reallusion.com/character-creator-4/content/enu/4.0/09-Import-Creature/Importing-Model-to-Create-Non-Human-Character.htm"
+   ],
+   "as_first_reported": "Reallusion forum posts read 2026-09-23 through a summarising fetch: Peter (RL), in a post about 4 years old, 'AccuRig is designed for rigging human and other types of bipedal characters. There are no plans to support quadruped or other types of animals at this time.'; another reply, 'Character Creator 4 can't rig quadruped or non bipedal characters. You can however import pre-rigged characters that are not bipedal.' The CC4 manual says such an imported 'Creature' 'can only be animated by the commands in the right-mouse menu, or by using key-frame techniques with Motion Editor'.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "https://forum.reallusion.com/523069/Animals and https://forum.reallusion.com/536732/ (curl, full thread text, 2026-09-23); CC4 manual page Importing-Model-to-Create-Non-Human-Character.htm (curl, 2026-09-23)",
+     "evidence": "523069: 'Peter (RL) Posted 3 Years Ago ... divyamulawekar (7/31/2023) ... AccuRig is designed for rigging human and other types of bipedal characters. There are no plans to support quadruped or other types of animals at this time.' 536732: 'Peter (RL) Posted 3 Years Ago ... Character Creator 4 can't rig quadruped or non bipedal characters. You can however import pre-rigged characters that are not bipedal.' Manual: 'The exported avatar is called a Creature ... can only be animated by the commands in the right-mouse menu, or by using key-frame techniques with Motion Editor'.",
+     "notes": "All three quotes are verbatim. Wrong: Peter's AccuRig post is shown as 'Posted 3 Years Ago' (answering a 7/31/2023 question), not about 4 years. The 'another reply' is also by Peter (RL), an administrator. The full post adds that pre-rigged quadrupeds can be imported with CC4's Creature import option."
+    }
+   ]
+  },
+  {
+   "id": "CAS-017",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Reallusion catalogue counts read 2026-09-23 from the Content Store category API: CC total 4,469 items; CC Actor 1,114 (CC1 8, CC3 801, HD 306); CC Morph 435; Combo 371; CC Outfit 2,430 (Cloth 2,265, Shoes 167, Glove 14); CC Hair 489; iClone Actor/Creature 77. ActorCore: 1,018 actors, Fantasy 18, Medieval 9. Marketplace CC section 26,533 items (13,988 of them packs), 626 of them free. Fuzzy text searches: Content Store dragon 56, lizard 9, orc 51, goblin 13; Marketplace iClone dragon 215 (120 packs), lizardman 2; Marketplace CC lizardman 1.",
+   "sources": [
+    "https://www.reallusion.com/contentstore/",
+    "https://actorcore.reallusion.com/3d-character",
+    "https://marketplace.reallusion.com/character-creator/free"
+   ],
+   "as_first_reported": "Reallusion catalogue counts read 2026-09-23 from the Content Store category API: CC total 4,469 items; CC Actor 1,114 (CC1 8, CC3 801, HD 306); CC Morph 435; Combo 371; CC Outfit 2,430 (Cloth 2,265, Shoes 167, Glove 14); CC Hair 489; iClone Actor/Creature 77. ActorCore: 1,018 actors, Fantasy 18, Medieval 9. Marketplace CC section 13,988 items, 626 of them free. Fuzzy text searches: Content Store dragon 56, lizard 9, orc 51, goblin 13; Marketplace iClone dragon 120, lizardman 2; Marketplace CC lizardman 1.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "api.reallusion.com/ContentData20/v1/public/category and ContentData20 OpenSearch (curl, 2026-09-23); api.reallusion.com/Marketplace20/v1/Content/OpenSearch and /Aggs (curl, 2026-09-23); marketplace.reallusion.com/character-creator/all, /character-creator/free, /iclone/search?keyword=dragon, lizardman searches (headless Chrome, 2026-09-23); actorcore.reallusion.com/3d-character (headless Chrome, 2026-09-23)",
+     "evidence": "Category API: cc 4469; Actor 1114 (CC1 8, CC3 801, HD 306); Morph 435; Combo 371; Outfit Cloth 2265, Shoes 167, Glove 14; Hair 489; ic Actor 'Creature' 77. ActorCore: 'All 1018 ... Fantasy 18 ... Medieval 9'. Content Store Text search: dragon 56, lizard 9, orc 51, goblin 13. Marketplace site: character-creator/all '26533 results'; /free '626 results'; iclone search dragon '215 results'; with productincluded=2 (Pack) '120 results'; lizardman iClone 2, CC 1. API ProductIncluded options: ['Pack','Single Item']; CC with ProductIncluded pack: 13988.",
+     "notes": "Content Store and ActorCore counts all reproduce exactly (outfit total 2,430 also includes Combo 149 and Texture 1). Wrong: the Marketplace CC section shows 26,533 items; 13,988 is the count with the 'Product Included: Pack' filter, while the 626 free figure is unfiltered (453 with the pack filter), so the two numbers use different filters. The Marketplace iClone dragon search shows 215 results on the site; 120 is again the pack-filtered count."
+    }
+   ]
+  },
+  {
+   "id": "CAS-018",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "Reallusion's Content License page (read 2026-09-23 with curl) says 'Introducing the iContent License for Internal Workflows', 'Priced at just 30 percent of the Standard License' and 'iContent is only available in-software purchase'; its table ticks iContent for 'Render image or video for commercial use' but not 'Export to 3rd party software' or 'Games, XR, & Interactive Online Services'. No web product page shows an iContent price. The store's JSON still carries an 'ExtendListPrice' at exactly 3x list for 1,862 of 2,430 outfits, but product pages no longer display it.",
+   "sources": [
+    "https://www.reallusion.com/license/content.html"
+   ],
+   "as_first_reported": "Reallusion's Content License page (read 2026-09-23 with curl) says 'Introducing the iContent License for Internal Workflows', 'Priced at just 30 percent of the Standard License' and 'iContent is only available in-software purchase'; its table ticks iContent for 'Render image or video for commercial use' but not 'Export to 3rd party software' or 'Games, XR, & Interactive Online Services'. No web product page shows an iContent price. The store's JSON still carries an 'ExtendListPrice' at exactly 3x list for 1,862 of 2,430 outfits, but product pages no longer display it.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.reallusion.com/license/content.html (curl, 2026-09-23); Content Store OpenSearch JSON for CC Outfit (curl, 2026-09-23); product page pack/character-creator/3d-cloth/pretty-summer-dress (headless Chrome, 2026-09-23)",
+     "evidence": "'Introducing the iContent License for Internal Workflows'; 'Priced at just 30 percent of the Standard License'; 'iContent is only available in-software purchase'. Table (iContent, Standard, Enterprise): 'Render image or video for commercial use' ✓ ✓ ✓; 'Export to 3rd party software' (blank) ✓ ✓; under 'Games, XR, & Interactive Online Services' both rows are blank for iContent. Pretty Summer Dress JSON ListPrice 19.5, ExtendListPrice 58.5; page shows only '$19.50 30% OFF $13.65'.",
+     "notes": "All quotes verbatim. 'Games, XR, & Interactive Online Services' is a section heading; both rows beneath it are unticked for iContent, so the claim's reading holds. JSON: 1,862 of 2,430 CC outfits have ExtendListPrice exactly 3x ListPrice today. One product page checked shows no extended or iContent price; 'no web product page' generalises from that sample."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback CDX for reallusion.com/license/content.html; snapshots 20250524125851, 20251206215335, 20260214221206, 20260830084432 (id_), compared with today, 2026-09-23",
+     "evidence": "May 2025 snapshot: no 'iContent' text. Dec 2025, Feb 2026 and Aug 2026 snapshots: all three quoted phrases present, and the licence table rows are identical to today's.",
+     "notes": "iContent was added between May and Dec 2025; the page text and table are unchanged since Dec 2025. The claim reports only what this summary page says and does not present it as the binding Content EULA; the known tension that the same page still describes the old Extended licence elsewhere is recorded under DAZ-105."
+    }
+   ]
+  },
+  {
+   "id": "CAS-019",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "The cheapest Reallusion cast found (2026-09-23, derived, not a checkout quote): Character Creator 365 US$99 a year (US$8.25 a month billed annually; Windows only); 4 humans from CC5 embedded characters and the free CC3+ bases at US$0 (CHT-008, CHT-012); Modular Medieval Knight Bundle US$80 list, built around the CC3+ Neutral_M avatar (whether it fits the HD Lizard Alien is not established); HD Alien Mixer Lizard Alien US$49 list for two lizardfolk variants; Young Dragon Pack US$49 list; CC5 built-in hair. Total US$277 at list (plus US$45 for six paid Solaire hairs at US$7.50), or US$205.80 with the September Content Store offer of 40% off list on 2 or more items. Add US$359 (sale) to US$599 (list) if iClone 8 proves necessary for the dragon.",
+   "sources": [
+    "https://www.reallusion.com/plan-and-pricing/individual/subscription",
+    "https://www.reallusion.com/contentstore/pack/character-creator/3d-character/modular-medieval-knight-bundle",
+    "https://www.reallusion.com/contentstore/pack/iclone/3d-character/young-dragon-pack"
+   ],
+   "as_first_reported": "The cheapest Reallusion cast found (2026-09-23, derived, not a checkout quote): Character Creator 365 US$99 a year (Windows only); 4 humans from CC5 embedded characters and the free CC3+ bases at US$0; Modular Medieval Knight Bundle US$80 list for outfits that fit the CC3+ base, lizardfolk included; HD Alien Mixer Lizard Alien US$49 list for two lizardfolk variants; Young Dragon Pack US$49 list; CC5 built-in hair. Total US$277 at list (plus US$45 for paid hair), or US$205.80 with the September 40% deal on 2 or more items. Add US$359 to US$599 if iClone 8 proves necessary for the dragon.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "reallusion.com/plan-and-pricing/individual/subscription and /perpetual, Content Store pages modular-medieval-knight-bundle, hd-alien-mixer-lizard-alien, young-dragon-pack, /ContentStore/promo/offers/ (headless Chrome, 2026-09-23); Content Store OpenSearch JSON for CC Hair (curl, 2026-09-23)",
+     "evidence": "'Character Creator 365 ... $ 8 .25 /mo Billed Annually'; 'iClone 8 and Character Creator 5 only support Windows Operating Systems'; Knight Bundle '$80.00 30% OFF $56.00', '*Note, the costume was built around the CC3+ Neutral_M Avatar. It is recommended you use that base'; Lizard Alien '$49.00'; Young Dragon Pack '$49.00'; iClone 8 '$599 .00 $ 359 .00 -40%'; offer: 'Buy 2+ for 40% off', 'The discount applies to each item's LIST PRICE', 'Valid on Content Store purchases only'.",
+     "notes": "Arithmetic holds: 99 + 80 + 49 + 49 = 277; 99 + 0.6 x 178 = 205.80, and the 40% deal applies to Content Store items only, as the total assumes. The US$45 paid hair reproduces as six Solaire CC hairs at US$7.50 list. Unsupported: the Knight Bundle page says it was built around the CC3+ Neutral_M avatar; nothing says it fits the HD Lizard Alien, so 'lizardfolk included' is an inference. The US$0 humans rest on CHT-008 and CHT-012 (licence tier of free CC5 packs not established), not re-read."
+    }
+   ]
+  },
+  {
+   "id": "CAS-020",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "Poser base figures read 2026-09-23: La Femme 2 Pro US$39.95 and L'Homme 2 Pro US$39.95; La Femme 1 Pro US$29.95 and L'Homme 1 Pro US$29.95, which many La Femme 1 and L'Homme 1 add-ons require; Dawn 2 (HiveWire3D) US$29.95; bundles La Femme 1 Pro Bundle US$147.99, La Femme 1 Starter Bundle US$64.99, L'Homme Pro Bundle US$99, L'Homme Starter Bundle US$68.00; Poser 14 upgrade US$99.95. Dusk and Dawn 1 base prices were not found (hivewire3d.com timed out).",
+   "sources": [
+    "https://www.posersoftware.com/store/category/4/poser-figures",
+    "https://www.posersoftware.com/store/products/387",
+    "https://www.renderosity.com/marketplace/products/165884/lhomme-2-pro",
+    "https://www.renderosity.com/marketplace/products/163669/dawn-2"
+   ],
+   "as_first_reported": "Poser base figures read 2026-09-23: La Femme 2 Pro US$39.95 and L'Homme 2 Pro US$39.95; La Femme 1 Pro US$29.95 and L'Homme 1 Pro US$29.95, which many La Femme 1 and L'Homme 1 add-ons require; Dawn 2 (HiveWire3D) US$29.95; bundles La Femme 1 Pro Bundle US$147.99, La Femme 1 Starter Bundle US$64.99, L'Homme Pro Bundle US$99, L'Homme Starter Bundle US$68.00; Poser 14 upgrade US$99.95. Dusk and Dawn 1 base prices were not found (hivewire3d.com timed out).",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://www.posersoftware.com/store/category/4/poser-figures, /store/products/387 and /store (curl, 2026-09-23); https://www.renderosity.com/marketplace/products/165884/lhomme-2-pro and /163669/dawn-2 (curl, 2026-09-23); Renderosity add-on pages 145602, 135437, 138521, 154030, 154646 (curl, 2026-09-23); https://hivewire3d.com/ (curl, timed out after 25 s, 2026-09-23)",
+     "evidence": "Store: 'L'Homme 2 Pro ... $ 39.95', 'Dawn 2 By: HiveWireChris , CG_Cubed $ 29.95', 'La Femme 2 Pro ... $ 39.95', 'L'Homme 1 Pro ... $ 29.95', 'L'Homme Pro Bundle ... $ 99', 'L'Homme Starter Bundle ... $ 68.00', 'La Femme 1 Starter Bundle $ 64.99', 'La Femme 1 Pro Bundle $ 147.99', 'La Femme 1 Pro Female Base Figure $ 29.95'; 'Poser 14 - Upgrade for Windows $ 99.95'. Add-ons: 'Required Products: La Femme 1 Pro' (135437, 138521), 'Required Products: L'Homme 1 Pro' (145602, 154030, 154646).",
+     "notes": "Every price reproduces; Renderosity shows the same US$39.95 and US$29.95. The Poser 14 upgrade is the Windows upgrade. The add-on requirement is read from add-on pages' Required Products field, not from the figure pages. hivewire3d.com timed out again today, so Dusk and Dawn 1 base prices remain unread."
+    }
+   ]
+  },
+  {
+   "id": "CAS-021",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "Renderosity characters, clothing and hair for Poser figures, read 2026-09-23 at list price: RP L'Homme Fantasy Morphs US$13.95; T3d Carl L'Homme 2 US$18.99 (US$13.29 at 30% off); Anna for La Femme US$14.49; Dynamic Collection Medieval La Femme US$11.95; Fantasy Armor for La Femme US$16.99; L'Homme Prince US$18.95; L'Homme Fantasy 1 US$16.00; Eirc Togs for Dusk US$15.95; Prae-Elf Hair US$13.99 (US$7.00 sale to 24 September, Prime US$5.60); Prae-Jevon Hair US$14.50; Leafy Hair for La Femme US$13.99; Oh My Facial Hair for Dusk US$13.99 (Prime US$8.00). Fantasy searches are thin: 'medieval La Femme' 2, 'armor L'Homme' 1, 'medieval L'Homme' 0, 'beard L'Homme' 4.",
+   "sources": [
+    "https://www.renderosity.com/marketplace/products/135437/dynamic-collection-medieval-la-femme",
+    "https://www.renderosity.com/marketplace/products/138521/fantasy-armor-for-la-femme",
+    "https://www.renderosity.com/marketplace/products/166890/prae-elf-hair-for-la-femme-2-poser",
+    "https://www.renderosity.com/marketplace/products/120525/oh-my-facial-hair-for-dusk-or-dusk-se"
+   ],
+   "as_first_reported": "Renderosity characters, clothing and hair for Poser figures, read 2026-09-23 at list price: RP L'Homme Fantasy Morphs US$13.95; T3d Carl L'Homme 2 US$18.99 (US$13.29 at 30% off); Anna for La Femme US$14.49; Dynamic Collection Medieval La Femme US$11.95; Fantasy Armor for La Femme US$16.99; L'Homme Prince US$18.95; L'Homme Fantasy 1 US$16.00; Eirc Togs for Dusk US$15.95; Prae-Elf Hair US$13.99 (US$7.00 sale to 24 September, Prime US$5.60); Prae-Jevon Hair US$14.50; Leafy Hair for La Femme US$13.99; Oh My Facial Hair for Dusk US$13.99 (Prime US$8.00). Fantasy searches are thin: 'medieval La Femme' 2, 'armor L'Homme' 1, 'medieval L'Homme' 0, 'beard L'Homme' 4.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "Renderosity product pages 145602, 135437, 138521, 154030, 154646, 147633, 166890, 120525 and 165884 (curl, 2026-09-23); Renderosity marketplace searches 'medieval La Femme', 'armor L'Homme', 'medieval L'Homme', 'beard L'Homme', 'Anna for La Femme', 'Prae-Jevon', 'Leafy Hair', 'T3d Carl' (curl, 2026-09-23)",
+     "evidence": "'$13.95' (RP L'Homme Fantasy Morphs); 'T3d Carl L'Homme 2 $18.99 USD 30% Off $13.29 USD'; 'Anna for La Femme | pixpax | $14.49'; '$11.95' (Dynamic Collection Medieval); '$16.99' (Fantasy Armor); '$18.95' (L'Homme Prince); '$16.00' (L'Homme Fantasy 1); '$15.95' (Eirc Togs); Prae-Elf: '$13.99 USD 50% Off Sale Ends: Sep 24 ... Price: $7.00 USD Prime Price: $5.60 USD'; 'Prae-Jevon Hair L'Homme ... $14.50'; 'Leafy Hair for La Femme ... $13.99 USD 30% Off $9.79 USD'; Oh My Facial Hair 'Price: $13.99 USD Prime Price: $8.00 USD'. Searches: 'We've found 2', '1', '0', '4 unique marketplace results'.",
+     "notes": "Every list price, sale and search count reproduces. Leafy Hair for La Femme is also on a 30% sale today (US$9.79); the claim gives list prices, so this is not an error."
+    }
+   ]
+  },
+  {
+   "id": "CAS-022",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "Renderosity non-human Poser content read 2026-09-23: LaReptile for La Femme and L'Homme (lizardfolk morphs and 5 reptile skins) US$16.95, Prime US$8.95; Snake Man for Poser US$16.99; Wyvern for Poser US$14.99; Lindwurm III (dragon) US$10.00; Draccer DR US$27.00; Monster Dreadtalon US$16.00 (US$11.20 to 30 September; AI use declared); Orc Elite Extended License, a Unity or Unreal FBX game model with 15 animations and 12,771 triangles, US$30.00. The standalone creatures do not depend on a Poser base figure. Renderosity search found 0 real results for 'lizardman' or 'lizard man'.",
+   "sources": [
+    "https://www.renderosity.com/marketplace/products/155408/lareptile-for-la-femme-and-lhomme",
+    "https://www.renderosity.com/marketplace/products/170660/snake-man-for-poser",
+    "https://www.renderosity.com/marketplace/products/132771/lindwurm-iii",
+    "https://www.renderosity.com/marketplace/products/119261/orc-elite-extended-license"
+   ],
+   "as_first_reported": "Renderosity non-human Poser content read 2026-09-23: LaReptile for La Femme and L'Homme (lizardfolk morphs and 5 reptile skins) US$16.95, Prime US$8.95; Snake Man for Poser US$16.99; Wyvern for Poser US$14.99; Lindwurm III (dragon) US$10.00; Draccer DR US$27.00; Monster Dreadtalon US$16.00 (US$11.20 to 30 September; AI use declared); Orc Elite Extended License, a Unity or Unreal FBX game model with 15 animations and 12,771 triangles, US$30.00. The standalone creatures do not depend on a Poser base figure. Renderosity search found 0 real results for 'lizardman' or 'lizard man'.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "Renderosity product pages 155408, 170660, 170580, 132771, 102329, 172884, 119261 (curl, fields box and meta description, 2026-09-23); Renderosity searches 'lizardman' and 'lizard man' (curl, 2026-09-23)",
+     "evidence": "LaReptile: 'Price: $16.95 USD Prime Price: $8.95 USD', 'LaReptile morphs for: Head', '5 Superfly reptilian styled 'second skin' materials'. Snake Man '$16.99'; Wyvern '$14.99'; Lindwurm III '$10.00', 'an old typical germanic dragon'; Draccer DR '$27.00'; Dreadtalon '$16.00 USD 30% Off Sale Ends: Sep 30 ... Price: $11.20 USD', 'AI was used'; Orc Elite 'Available Uses: Extended License ... $30.00', 'Animated model, 15 animations!, 12771 triangles', 'UNREAL Game Engine , UNITY'. 'lizardman': 'found 1 ... Sorry! We couldn't find any products'; 'lizard man': 'found 0'.",
+     "notes": "Every price and detail reproduces. The five standalone creatures and Orc Elite show no Base Figures or Required Products field, and are in 'Stand Alone Figures'. The 'lizardman' search reports 1 result but displays no product, so '0 real results' holds. Orc Elite lists FBX and OBJ; 'Unity or Unreal' comes from its Software field."
+    }
+   ]
+  },
+  {
+   "id": "CAS-023",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "On every Renderosity product page read 2026-09-23 that offered an Extended License, its price was 3 times the Standard list price: Aurum Sentinel US$25.00 to US$75.00, Snake Man US$16.99 to US$50.97, Wyvern US$14.99 to US$44.97, Dynamic Collection Medieval La Femme US$11.95 to US$35.85, Prae-Jevon Hair US$14.50 to US$43.50, Draccer DR US$27.00 to US$81.00, Celestial Dragonis US$39.99 to US$119.97. On Prae-Elf Hair the Standard sale price was US$7.00 while Extended stayed US$41.97, 3x list. A pattern seen on 8 pages, not a stated rule; Extended is offered only where the vendor opts in.",
+   "sources": [
+    "https://www.renderosity.com/marketplace/products/170263/aurum-sentinel-armor-set-for-genesis-9-female",
+    "https://www.renderosity.com/marketplace/products/170660/snake-man-for-poser",
+    "https://www.renderosity.com/marketplace/products/102329/draccer-dr",
+    "https://www.renderosity.com/marketplace/products/166890/prae-elf-hair-for-la-femme-2-poser",
+    "https://www.renderosity.com/extended-license"
+   ],
+   "as_first_reported": "On every Renderosity product page read 2026-09-23 that offered an Extended License, its price was 3 times the Standard list price: Aurum Sentinel US$25.00 to US$75.00, Snake Man US$16.99 to US$50.97, Wyvern US$14.99 to US$44.97, Dynamic Collection Medieval La Femme US$11.95 to US$35.85, Prae-Jevon Hair US$14.50 to US$43.50, Draccer DR US$27.00 to US$81.00, Celestial Dragonis US$39.99 to US$119.97. On Prae-Elf Hair the Standard sale price was US$7.00 while Extended stayed US$41.97, 3x list. A pattern seen on 8 pages, not a stated rule; Extended is offered only where the vendor opts in.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "curl of the 8 Renderosity product pages (https://www.renderosity.com/marketplace/products/170263, 170660, 170580, 135437, 142332, 102329, 163460, 166890) and https://www.renderosity.com/extended-license, 2026-09-23",
+     "evidence": "Aurum: '$25.00 USD 50% Off ... Standard + $0.00 $12.50 Extended + $62.50 $75.00'; Snake Man 'Standard $16.99 Extended $50.97'; Wyvern '$14.99 ... $44.97'; Medieval LF '$11.95 ... $35.85'; Prae-Jevon '$14.50 ... $43.50'; Draccer '$27.00 ... $81.00'; Celestial Dragonis '$39.99 ... $119.97'; Prae-Elf '$13.99 USD 50% Off ... Price: $7.00 ... Extended + $34.98 $41.97'.",
+     "notes": "Every price matches today. The Extended licence text states no price rule, consistent with 'not a stated rule'. The opt-in point is not in the licence text but is stated in Renderosity's article 17237 (Aug 14, 2014): 'Participation of Extended License products are up to each vendor and their respective products'. Aurum's Extended ($75.00) is 3x the $25.00 list, not the $12.50 sale price, as the claim says."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback CDX and snapshots: extended-license 20250319173426 vs live 2026-09-23; celestial-dragonis 20250125030731 and 20260515140718",
+     "evidence": "Extended License body text identical between the 2025-03-19 snapshot and today (9,781 chars, equal). Celestial Dragonis snapshots 2025-01-25 and 2026-05-15: 'Standard + $0.00 $39.99 Extended + $79.98 $119.97'.",
+     "notes": "No drift in the licence text or the sampled price since 2025. The only conflation risk is that the opt-in wording comes from a 2014 article written when Extended products were separate listings ('Extended License' in the title); today it is a per-product option on the same page. The claim itself does not cite that article, so it is not conflated."
+    }
+   ]
+  },
+  {
+   "id": "CAS-024",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Renderosity figure facet counts read 2026-09-23 (products, with Extended in brackets): La Femme 1 1,466 (183), La Femme 2 402 (77), L'Homme 1 341 (69), L'Homme 2 37 (9), Dawn 971 (151), Dawn 2 110 (26), Dusk 222 (78); 3D Base Figures 597; Characters 5,790 store-wide. Clothing: La Femme 1 534, La Femme 2 169, L'Homme 1 95, L'Homme 2 14. Hair: La Femme 1 462, L'Homme 1 128, L'Homme 2 3. Reptiles department 52 (12 Extended); searches 'dragon' 277, 'snake' 99, 'orc' 46, 'goblin' 23. Freestuff: 'la femme' 359, 'dragon' 141.",
+   "sources": [
+    "https://www.renderosity.com/marketplace/browse",
+    "https://www.renderosity.com/search/freestuff?keyword=la%20femme"
+   ],
+   "as_first_reported": "Renderosity figure facet counts read 2026-09-23 (products, with Extended in brackets): La Femme 1 1,466 (183), La Femme 2 402 (77), L'Homme 1 341 (69), L'Homme 2 37 (9), Dawn 971 (151), Dawn 2 110 (26), Dusk 222 (78); 3D Base Figures 597; Characters 5,790 store-wide. Clothing: La Femme 1 534, La Femme 2 169, L'Homme 1 95, L'Homme 2 14. Hair: La Femme 1 462, L'Homme 1 128, L'Homme 2 3. Reptiles department 52 (12 Extended); searches 'dragon' 277, 'snake' 99, 'orc' 46, 'goblin' 23. Freestuff: 'la femme' 359, 'dragon' 141.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "curl of https://www.renderosity.com/marketplace/browse unfiltered and with ?figures=<id> and ?departments=359583 facets; /search/marketplace?keyword=dragon|snake|orc|goblin; /search/freestuff?keyword=la%20femme|dragon, 2026-09-23",
+     "evidence": "La Femme 1 Female (1466), Ext 183, Clothing 534, Hair 462; La Femme 2 (402) Ext 77 Clothing 169; L'Homme 1 (341) Ext 69 Clothing 95 Hair 128; L'Homme 2 (37) Ext 9 Clothing 14 Hair 3; Dawn (971) Ext 151; Dawn 2 (110) Ext 26; Dusk (222) Ext 78; 3D Base Figures (597); Characters (5790); Reptiles (52) Ext 12; 'found 277/99/46/23 unique marketplace results'; freestuff '1-60 of 359 results', '1-60 of 141 results'.",
+     "notes": "Every count reproduced exactly by the same facet and search method. Filter URLs need the comma form (figures=59), not figures[]=59, which returns no facets."
+    }
+   ]
+  },
+  {
+   "id": "CAS-025",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Renderosity Prime Annual Membership is US$39.95 (product page, read 2026-09-23). The Prime page says 'Pay about half . On 8,474 products', 'Member discount 40-70%' and 'The average member saved $224.68 over the last twelve months' (the saving figure changes daily). Sales run continuously: the on-sale listing had 167 pages of 60 on 2026-09-23, and current events offer 30% or 50% off for all, with 60% or 70% for Prime members on the pages read. The Extended price does not follow the sale price.",
+   "sources": [
+    "https://www.renderosity.com/marketplace/products/87657/renderosity-prime-annual-membership",
+    "https://www.renderosity.com/marketplace/prime"
+   ],
+   "as_first_reported": "Renderosity Prime Annual Membership is US$39.95 (product page, read 2026-09-23). The Prime page says 'Pay about half . On 8,474 products', 'Member discount 40-70%' and 'The average member saved $224.71 over the last twelve months'. Sales run continuously: the on-sale listing had 167 pages of 60 on 2026-09-23, and current events offer 50% off for all and 60% or 65% for Prime members. The Extended price does not follow the sale price.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "curl of https://www.renderosity.com/marketplace/products/87657/renderosity-prime-annual-membership, https://www.renderosity.com/marketplace/prime, /marketplace/browse/on-sale, /marketplace/deals, /marketplace/browse?sales_events=1 and ~40 product pages linked from them, 2026-09-23",
+     "evidence": "'Price: $39.95 USD'; 'Pay about half . On 8,474 products'; 'Member discount 40-70%'; 'The average member saved $224.68 over the last twelve months'; on-sale page links to page=167, 60 items on page 1; deals items '50% Off'; Prime flash sale items '30% Off Sale Ends ... Prime Price ... 70% Off' and '60% Off'; Aurum and Prae-Elf 'Prime Price ... 60% Off'.",
+     "notes": "The average-saving figure reads $224.68 today, not $224.71 (it moves daily). No '65%' Prime price appeared on any page read today; current events show 30% or 50% off for all and 60% or 70% for Prime. The $39.95 price, the 8,474 products, the 40-70% band, the 167 pages of 60 and the Extended-price point (Aurum and Prae-Elf Extended stay at 3x list during a sale) all match."
+    }
+   ]
+  },
+  {
+   "id": "CAS-026",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "The cheapest Poser cast found (list prices, sum computed 2026-09-23): Poser 14 US$175.00 (Windows only); La Femme 1 Pro and L'Homme 1 Pro US$29.95 each; outfits Dynamic Collection Medieval LF US$11.95, Fantasy Armor for La Femme US$16.99, L'Homme Prince US$18.95, L'Homme Fantasy 1 US$16.00; hair Prae-Elf US$13.99, Leafy US$13.99, Prae-Jevon US$14.50, Zodiac Short US$16.95; LaReptile US$16.95 for both lizardfolk with Lucian Tunic for L'homme US$12.00; Lindwurm III US$10.00 for the dragon. Total US$397.17, lower with sales or Prime. For sprites only: most of these items are Standard-only, so none of it may ship as 3D.",
+   "sources": [
+    "https://www.posersoftware.com/store",
+    "https://www.renderosity.com/marketplace/products/155408/lareptile-for-la-femme-and-lhomme",
+    "https://www.renderosity.com/marketplace/products/132771/lindwurm-iii"
+   ],
+   "as_first_reported": "The cheapest Poser cast found (list prices, sum computed 2026-09-23): Poser 14 US$175.00 (Windows only); La Femme 1 Pro and L'Homme 1 Pro US$29.95 each; outfits Dynamic Collection Medieval LF US$11.95, Fantasy Armor for La Femme US$16.99, L'Homme Prince US$18.95, L'Homme Fantasy 1 US$16.00; hair Prae-Elf US$13.99, Leafy US$13.99, Prae-Jevon US$14.50, Zodiac Short US$16.95; LaReptile US$16.95 for both lizardfolk with Lucian Tunic for L'homme US$12.00; Lindwurm III US$10.00 for the dragon. Total US$397.17, lower with sales or Prime. For sprites only: most of these items are Standard-only, so none of it may ship as 3D.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "curl of https://www.posersoftware.com/store, /store/category/4/poser-figures, and Renderosity product pages 138521, 154030, 154646, 166890, 145968, 142332, 166062, 155408, 154863, 132771, 135437, 2026-09-23",
+     "evidence": "'Poser 14 - Full License for Windows $ 175.00'; 'La Femme 1 Pro Female Base Figure $ 29.95'; 'L'Homme 1 Pro By: RPublishing $ 29.95'; Fantasy Armor $16.99; L'Homme Prince $18.95; L'Homme Fantasy 1 $16.00; Leafy '$13.99 USD 30% Off'; Zodiac $16.95; LaReptile $16.95; Lucian Tunic $12.00; Lindwurm III $10.00; Prae-Elf list $13.99; Prae-Jevon $14.50; Medieval LF $11.95.",
+     "notes": "All list prices match; sum recomputed as 397.17. Eight of the eleven Renderosity items show 'Available Uses: Standard License' only (Medieval LF, Prae-Elf and Prae-Jevon also offer Extended), so 'most ... Standard-only' holds. Leafy and Prae-Elf are on sale today, which the claim covers with 'lower with sales'."
+    }
+   ]
+  },
+  {
+   "id": "CAS-027",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Autodesk's Mudbox buy page, read 2026-09-23, shows annual '$9/month Paid annually' with '$105/year for 1 user (pay annually)', monthly '$10 Paid monthly', and Flex '$99/33 tokens (minimum)'. Its FAQ says 'Mudbox software's 3-year subscription offering will be discontinued on August 7th, followed by the end of sale of 1-year and monthly Mudbox subscriptions on November 7th, 2026'. After that the cheapest entitlement read is Maya or 3ds Max; the Maya buy page shows '$168/month Paid annually' and '$2,010/year for 1 user'. Whether Flex tokens unlock Character Generator was not found.",
+   "sources": [
+    "https://www.autodesk.com/products/mudbox/buy",
+    "https://www.autodesk.com/products/maya/buy"
+   ],
+   "as_first_reported": "Autodesk's Mudbox buy page, read 2026-09-23, shows annual '$9/month Paid annually' with '$105/year for 1 user (pay annually)', monthly '$10 Paid monthly', and Flex '$99/33 tokens (minimum)'. Its FAQ says 'Mudbox software's 3-year subscription offering will be discontinued on August 7th, followed by the end of sale of 1-year and monthly Mudbox subscriptions on November 7th, 2026'. After that the cheapest entitlement read is Maya or 3ds Max; the Maya buy page shows '$168/month Paid annually' and '$2,010/year for 1 user'. Whether Flex tokens unlock Character Generator was not found.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "Playwright (own tab) render of https://www.autodesk.com/products/mudbox/buy (FAQ expanded) and https://www.autodesk.com/products/maya/buy, plus 3ds-max, maya-lt and motionbuilder buy pages, 2026-09-23; curl and headless Chrome got 'Access Denied'",
+     "evidence": "Mudbox: 'Annual subscription $9/month Paid annually', 'Monthly subscription $10 Paid monthly', 'Flex $99/33 tokens (minimum)', '$105/year for 1 user (pay annually)'; FAQ: 'Mudbox software's 3-year subscription offering will be discontinued on August 7th, followed by the end of sale of 1-year and monthly Mudbox subscriptions on November 7th, 2026.' Maya: '$168/month Paid annually', '$2,010/year for 1 user'.",
+     "notes": "All quotes verbatim. 'Maya or 3ds Max' as cheapest after Mudbox holds: 3ds Max also shows $2,010/year; Maya LT 'is no longer available' (sale ended December 7, 2022); MotionBuilder is $2,300/year. The Flex token question stays open."
+    }
+   ]
+  },
+  {
+   "id": "CAS-028",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Autodesk describes the Character Generator catalogue as 'over 100 body types, outfits, hairstyles, and physical attributes' (read 2026-09-23); no per-category count is published. The help page lists three Artistic Styles, 'Standard', 'Bulk' and 'Gorn, with exotic or fantastical body types', Top, Bottom and Shoes catalogues and Female and Male Hair catalogues. No fantasy or medieval outfit, beard, reptile, lizardfolk, dragon, quadruped or winged creature option was found.",
+   "sources": [
+    "https://charactergenerator.autodesk.com/",
+    "https://help.autodesk.com/cloudhelp/ENU/CharacterGen-Help/files/GUID-0795641D-CE0D-4193-B323-A7995FC767EE.htm"
+   ],
+   "as_first_reported": "Autodesk describes the Character Generator catalogue as 'over 100 body types, outfits, hairstyles, and physical attributes' (read 2026-09-23); no per-category count is published. The help page lists three Artistic Styles, 'Standard', 'Bulk' and 'Gorn, with exotic or fantastical body types', Top, Bottom and Shoes catalogues and Female and Male Hair catalogues. No fantasy or medieval outfit, beard, reptile, lizardfolk, dragon, quadruped or winged creature option was found.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "curl of https://charactergenerator.autodesk.com/ and https://help.autodesk.com/cloudhelp/ENU/CharacterGen-Help/files/GUID-0795641D-CE0D-4193-B323-A7995FC767EE.htm, 2026-09-23",
+     "evidence": "'a catalog of over 100 body types, outfits, hairstyles, and physical attributes'; 'There are three physiques to choose from: Standard, with regular body types Bulk, with exaggerated body types Gorn, with exotic or fantastical body types.'; 'The Top clothing catalog displays by default'; Bottom, Shoes; 'choose a hair style from the Female or Male Hair catalog'.",
+     "notes": "Quotes match (the site spells it 'catalog'; the claim's 'catalogue' is outside the quote). Neither page contains beard, dragon, reptile, lizard, medieval, fantasy outfit, armour, quadruped or wing, and no per-category count appears."
+    }
+   ]
+  },
+  {
+   "id": "CAS-029",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "The cheapest Autodesk Character Generator cast found (2026-09-23): a Mudbox annual subscription (US$105 a year as shown, or US$108 at US$9 x 12) covers the 4 humans with catalogue outfits and hair; the 2 lizardfolk and the dragon cannot be made, so the cast cannot be completed in this ecosystem. From 7 November 2026 the entry cost becomes about US$2,010 a year through Maya.",
+   "sources": [
+    "https://www.autodesk.com/products/mudbox/buy",
+    "https://charactergenerator.autodesk.com/"
+   ],
+   "as_first_reported": "The cheapest Autodesk Character Generator cast found (2026-09-23): a Mudbox annual subscription (US$105 a year as shown, or US$108 at US$9 x 12) covers the 4 humans with catalogue outfits and hair; the 2 lizardfolk and the dragon cannot be made, so the cast cannot be completed in this ecosystem. From 7 November 2026 the entry cost becomes about US$2,010 a year through Maya.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "Playwright render of the Autodesk Mudbox, Maya, 3ds Max, Maya LT and MotionBuilder buy pages, and curl of https://charactergenerator.autodesk.com/, 2026-09-23",
+     "evidence": "'$9/month Paid annually', '$105/year for 1 user (pay annually)'; 'You can access Character Generator as part of an Autodesk Maya, Autodesk Maya LT, Autodesk 3ds Max, Autodesk MotionBuilder, Autodesk Mudbox software, and Autodesk Media & Entertainment Collection subscription entitlement.'; Maya '$2,010/year for 1 user'.",
+     "notes": "Mudbox is an entitling product and the cheapest; after 7 November 2026 the cheapest remaining entitlement read is Maya or 3ds Max at $2,010/year (Maya LT no longer sold; MotionBuilder $2,300/year). 'Cannot be made' for the lizardfolk and the dragon rests on CAS-028's negative search, not a positive statement."
+    }
+   ]
+  },
+  {
+   "id": "CAS-030",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "ZBrush bundles Mannequins ('both humanoid and animal figures', Maxon base-mesh page) and ZeeZoo, 'a selection of mannequins featuring animals and birds, totalling 100 projects' (help page), read 2026-09-23; no dragon or reptile is named, and there is no character morph or preset library of the Daz or Poser kind (ZBrush's Morph Targets only store one geometry configuration per SubTool). ArtStation marketplace search counts across all categories, read 2026-09-23 in a browser: 'human base mesh' 5,481, 'medieval armor character' 1,502, 'beard hair cards' 141, 'dragon base mesh' 188, 'lizard base mesh' 10, 'lizardman base mesh' 1. The search mixes in brushes and reference images, so the larger counts overstate usable models.",
+   "sources": [
+    "https://www.maxon.net/en/zbrush/features/base-mesh-creation",
+    "https://help.maxon.net/zbr/en-us/Content/html/user-guide/3d-modeling/modeling-basics/creating-meshes/mannequins/zeezoo/zeezoo.html",
+    "https://www.artstation.com/marketplace"
+   ],
+   "as_first_reported": "ZBrush bundles Mannequins ('both humanoid and animal figures', Maxon base-mesh page) and ZeeZoo, 'a selection of mannequins featuring animals and birds, totalling 100 projects' (help page), read 2026-09-23; no dragon or reptile is named, and there is no morph or preset system. ArtStation 3D model search counts, read 2026-09-23 in a browser: 'human base mesh' 5,481, 'medieval armor character' 1,502, 'beard hair cards' 141, 'dragon base mesh' 188, 'lizard base mesh' 10, 'lizardman base mesh' 1. The search mixes in brushes and reference images, so the larger counts overstate usable models.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "curl of https://www.maxon.net/en/zbrush/features/base-mesh-creation, the ZeeZoo help page and https://help.maxon.net/zbr/en-us/Content/html/user-guide/3d-modeling/sculpting/morph-targets/morph-targets.html; Playwright (own tab) ArtStation marketplace searches via https://www.artstation.com/marketplace/game-dev?section=trending&q=..., 2026-09-23",
+     "evidence": "'With a wide variety of both humanoid and animal figures in the library, Mannequins are...'; 'ZeeZoo is a selection of mannequins featuring animals and birds, totalling 100 projects!'; 'Morph Targets are a way to store a geometry configuration so that you can recall it later.'; ArtStation 'All Categories5,481 results', 1,502, 141, 188, 10, '1 result'.",
+     "notes": "Quotes and all six counts match. Two parts say more than the sources: (1) 'there is no morph or preset system' is contradicted literally, since ZBrush documents Morph Targets (one stored shape per SubTool) and ZModeler and Array Mesh presets; what the pages lack is a character morph or preset library of the Daz or Poser kind. (2) The counts are the marketplace search across All Categories, not a 3D-model search; the claim's own caveat about brushes already implies this."
+    }
+   ]
+  },
+  {
+   "id": "CAS-031",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "ArtStation Marketplace items read 2026-09-23 (lowest listed tier; from search listings unless marked): Basemeshes Kit (J Hill, male and female, product page) US$25.00; Female Anatomy Base mesh US$7.99+; Stylized Blockout Basemesh Collection US$5.00+; Ultimate Superhero Character Blockout US$25.00; +100 Clothing Base Mesh Bundle US$6.98+; 45 Anime Fantasy Outfit Base Mesh Pack Vol 02 US$6.45+; Verta 3D Men's Realtime Haircard Collection v5 and Beard and Mustache Haircard Collection v5 US$9.50+ each, the v1 beard collection US$0.00+; Game ready middle length hairstyle with short beard US$10.49+.",
+   "sources": [
+    "https://www.artstation.com/marketplace/p/kxjAA/basemeshes-kit",
+    "https://www.artstation.com/marketplace/p/Rybr3/100-clothing-base-mesh-bundle-male-and-female-fbx-obj-zprj-70-off",
+    "https://www.artstation.com/marketplace/p/j7Pog/men-s-realtime-haircard-collection-v5",
+    "https://www.artstation.com/marketplace/p/m71aq/realtime-beard-mustache-haircard-collection-v1"
+   ],
+   "as_first_reported": "ArtStation Marketplace items read 2026-09-23 (lowest listed tier; from search listings unless marked): Basemeshes Kit (J Hill, male and female, product page) US$25.00; Female Anatomy Base mesh US$7.99+; Stylized Blockout Basemesh Collection US$5.00+; Ultimate Superhero Character Blockout US$25.00; +100 Clothing Base Mesh Bundle US$6.98+; 45 Anime Fantasy Outfit Base Mesh Pack Vol 02 US$6.45+; Verta 3D Men's Realtime Haircard Collection v5 and Beard and Mustache Haircard Collection v5 US$9.50+ each, the v1 beard collection US$0.00+; Game ready middle length hairstyle with short beard US$10.49+.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "ArtStation public JSON: https://www.artstation.com/api/v2/marketplace/products/<hash>.json for kxjAA, 2a2d9, 19yb, MrAn5, Rybr3, NGdJm, j7Pog, 6elLa, m71aq, kk09q, and the listing endpoint /api/v2/marketplace/products.json?visibility=website&q=... (curl, 2026-09-23)",
+     "evidence": "kxjAA 'Basemeshes Kit' J Hill: Standard 25.00, Extended 300.00; 'Male Basemesh ( ZTL / OBJ / FBX ) Female Basemesh'. 2a2d9 'Female Anatomy Base mesh' 7.99; 19yb 'Stylized Blockout Basemesh Collection' 5.00; MrAn5 'Ultimate Superhero Character Blockout' 25.00 (one tier); Rybr3 '+100 Clothing Base Mesh Bundle' 6.98; NGdJm '45 Anime Fantasy Outfit Base Mesh Pack VOL 02' 6.45; j7Pog and 6elLa (Verta 3D) 9.50; m71aq 'Free Sample For Personal Use' 0.00; kk09q 'Game ready middle length hairstyle male with short beard' 10.49.",
+     "notes": "Every lowest-tier price reproduces; the listing's price_with_discount equals the price for all of them, so no sale today. Read from ArtStation's JSON, not the rendered search listing. The v1 beard collection's US$0.00 tier is 'Free Sample For Personal Use'."
+    }
+   ]
+  },
+  {
+   "id": "CAS-032",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "ArtStation non-human items read 2026-09-23: 3D Kobold / Lizardman (Kilutica3D), rigged, game ready, with rigged clothing, about 16k faces, US$39.99, sold under Extended Commercial only (product page); Reptilian (PKO STUDIO) US$24.00+; Base Mesh Lizard Stylized US$3.00; Kilutica3D goblin base meshes US$10.00; Dragolisco Dragon Creation Kit free demo under 20 assets. Sellers run their own multi-buy offers (Swijngedau 10% off 2, 15% off 3+; Kilutica3D 25% off 2, 40% off 3+); ArtStation's site-wide sale schedule was not found and ZBrush has no content membership.",
+   "sources": [
+    "https://www.artstation.com/marketplace/p/vmo6d/3d-kobold-lizardman-rigged-game-ready",
+    "https://www.artstation.com/marketplace/p/x9X8a/reptilian",
+    "https://www.artstation.com/marketplace/p/BBoqL/base-mesh-lizard-stylized"
+   ],
+   "as_first_reported": "ArtStation non-human items read 2026-09-23: 3D Kobold / Lizardman (Kilutica3D), rigged, game ready, with rigged clothing, about 16k faces, US$39.99, sold under Extended Commercial only (product page); Reptilian (PKO STUDIO) US$24.00+; Base Mesh Lizard Stylized US$3.00; Kilutica3D goblin base meshes US$10.00; Dragolisco Dragon Creation Kit free demo under 20 assets. Sellers run their own multi-buy offers (Swijngedau 10% off 2, 15% off 3+; Kilutica3D 25% off 2, 40% off 3+); ArtStation's site-wide sale schedule was not found and ZBrush has no content membership.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "ArtStation JSON for vmo6d, x9X8a, BBoqL, YwPk1, NPe9 and listing search 'Kilutica3D goblin' (curl, 2026-09-23); rendered product pages /marketplace/p/vmo6d and /marketplace/p/NPe9 (headless Chrome, 2026-09-23)",
+     "evidence": "vmo6d: 'Extended Use License USD $39.99', 'License: Extended Commercial License' (one tier); 'stylized Kobold / Lizardman', 'modular, fully rigged clothing set', 'Total Polycount: ~16k Faces'. x9X8a 'Reptilian' PKO STUDIO standard 24.00; BBoqL 3.00; xk7e2 'Female and Male Goblin basemeshes' Kilutica3D 10.00; YwPk1 'DEMO VERSION' 0.00, 'Includes less than 20 assets'. Pages: 'Get 25% off when you buy 2 products. Get 40% off when you buy 3 or more products' (Kilutica3D); 'Get 10% off when you buy 2 products. Get 15% off when you buy 3 or more' (NPe9, Swijngedau).",
+     "notes": "Every price, detail and multi-buy offer reproduces. The Kobold page names its only tier 'Extended Use License' and the licence 'Extended Commercial License'. 'Site-wide sale schedule not found' and 'ZBrush has no content membership' are statements about the search, not re-checked."
+    }
+   ]
+  },
+  {
+   "id": "CAS-033",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "ArtStation's Marketplace product EULA (read 2026-09-23; no 'Last updated' date found) lets a buyer 'copy, use, modify, adapt, translate, distribute ... and create derivative works from the Product in works you create (“Works”), which may include things like films, videos, multi-media projects, computer games'. The Standard licence covers personal use and 'one commercial Work, with up to a maximum of, as applicable, 2,000 sales of the Work or 20,000 monthly views of the Work'; Extended Commercial covers 'any number of commercial Works, with no limit on sales or views'. Section 25 only requires sellers to tag Generative AI products ('CreatedWithAI'); no ban on buyer AI use was found.",
+   "sources": [
+    "https://www.artstation.com/marketplace-product-eula"
+   ],
+   "as_first_reported": "ArtStation's Marketplace product EULA (read 2026-09-23; no 'Last updated' date found) lets a buyer 'copy, use, modify, adapt, translate, distribute ... and create derivative works from the Product in works you create (“Works”), which may include things like films, videos, multi-media projects, computer games'. The Standard licence covers personal use and 'one commercial Work, with up to a maximum of, as applicable, 2,000 sales of the Work or 20,000 monthly views of the Work'; Extended Commercial covers 'any number of commercial Works, with no limit on sales or views'. Section 25 only requires sellers to tag Generative AI products ('CreatedWithAI'); no ban on buyer AI use was found.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "Playwright (own tab) render of https://www.artstation.com/marketplace-product-eula, 2026-09-23",
+     "evidence": "'(c) Stock Assets ... you may copy, use, modify, adapt, translate, distribute, publicly display, transmit, broadcast, and create derivative works from the Product in works you create (“Works”), which may include things like films, videos, multi-media projects, computer games'; 'respect to one commercial Work, with up to a maximum of, as applicable, 2,000 sales of the Work or 20,000 monthly views of the Work'; 'with respect to any number of commercial Works, with no limit on sales or views'; '25. Artificial Intelligence ... we have applied the “CreatedWithAI” tag'.",
+     "notes": "All quotes verbatim; no 'Last updated' date on the page. Section 5 (Additional Restrictions) lists no AI or training restriction. Section 25 is a seller representation and warranty that AI-made products carry the tag, which the claim fairly summarises as a tagging requirement."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback CDX for artstation.com/marketplace-product-eula; snapshots 20250506051722, 20260324133051, 20260711181929 diffed against each other; live page 2026-09-23",
+     "evidence": "Agreement text of 19,619 characters identical in the 2025-05-06, 2026-03-24 and 2026-07-11 snapshots except the footer '© 2025' to '© 2026'; the live quotes match.",
+     "notes": "No change since at least May 2025. Conflation note: the agreement 'applies to all downloadable products ... unless a custom agreement or license is provided by the seller', so a seller's own licence text can displace it; the claim describes the default EULA and does not say otherwise."
+    }
+   ]
+  },
+  {
+   "id": "CAS-034",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "ArtStation Extended prices are set per seller (product pages, read 2026-09-23): Basemeshes Kit US$25.00 Standard, US$300.00 Extended Commercial (12x); Dragon + Wyvern Base Meshes (Nicolas Swijngedau) US$15.00 Personal (Standard), US$45.00 commercial up to US$100,000 revenue, US$90.00 studio (Extended); Dragon Creation Kit (Dragolisco) US$59.99 personal (Standard), US$249.99 commercial (Extended). Some sellers label the Standard tier 'For personal use' although the EULA's Standard allows one commercial Work.",
+   "sources": [
+    "https://www.artstation.com/marketplace/p/kxjAA/basemeshes-kit",
+    "https://www.artstation.com/marketplace/p/NPe9/dragon-wyvern-base-meshes",
+    "https://www.artstation.com/marketplace/p/YwPk1/over-600-brushes-and-ztools-for-dragons"
+   ],
+   "as_first_reported": "ArtStation Extended prices are set per seller (product pages, read 2026-09-23): Basemeshes Kit US$25.00 Standard, US$300.00 Extended Commercial (12x); Dragon + Wyvern Base Meshes (Nicolas Swijngedau) US$15.00 Personal (Standard), US$45.00 commercial up to US$100,000 revenue, US$90.00 studio (Extended); Dragon Creation Kit (Dragolisco) US$59.99 personal (Standard), US$249.99 commercial (Extended). Some sellers label the Standard tier 'For personal use' although the EULA's Standard allows one commercial Work.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "Playwright (own tab) render of https://www.artstation.com/marketplace/p/kxjAA/basemeshes-kit, /p/NPe9/dragon-wyvern-base-meshes, /p/YwPk1/over-600-brushes-and-ztools-for-dragons, 2026-09-23",
+     "evidence": "'Standard License USD $25.00' / 'Extended Commercial License USD $300.00'; 'Personal License USD $15.00 License: Standard License For personal use', 'Commercial license - revenue up to $100 000 USD $45.00 License: Extended Commercial License', 'Studio license - revenue over $100 000 USD $90.00'; 'Dragon Creation Kit FULL VERSION personal use USD $59.99 License: Standard License', '... commercial use USD $249.99 License: Extended Commercial License'.",
+     "notes": "All prices and tiers match; 300/25 = 12x. The 'For personal use' label on a Standard tier is on the Dragon + Wyvern page as claimed."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback snapshot 20220527215457 of /p/NPe9/dragon-wyvern-base-meshes; EULA snapshots as in CAS-033",
+     "evidence": "2022: 'Personal License' price 1500, 'Commercial license - revenue up to $100 000' 4500, 'Studio license - revenue over $100 000' 8000 (cents).",
+     "notes": "Studio tier rose from $80 (2022) to $90; the claim is dated and matches today. Seller-set tiers change over time, which the claim's 'set per seller' framing allows. It keeps the seller label and the EULA Standard terms apart rather than merging them."
+    }
+   ]
+  },
+  {
+   "id": "CAS-035",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "The cheapest ZBrush and ArtStation cast found (lowest listed tiers, sums computed 2026-09-23): ZBrush annual US$399.00; Basemeshes Kit US$25.00 Standard (one game, up to 2,000 sales) or US$300.00 Extended; 3D Kobold / Lizardman US$39.99 Extended, reskinned or resculpted for the second; Dragon + Wyvern Base Meshes US$45.00 commercial; +100 Clothing Base Mesh Bundle US$6.98+; Verta 3D hair and beard cards US$9.50+ each. About US$534.97 with the Standard human kit or US$809.97 with Extended, plus the retopology, UV, texturing and rigging labour for 6 of 7 characters.",
+   "sources": [
+    "https://www.artstation.com/marketplace/p/kxjAA/basemeshes-kit",
+    "https://www.artstation.com/marketplace/p/vmo6d/3d-kobold-lizardman-rigged-game-ready",
+    "https://www.artstation.com/marketplace/p/NPe9/dragon-wyvern-base-meshes"
+   ],
+   "as_first_reported": "The cheapest ZBrush and ArtStation cast found (lowest listed tiers, sums computed 2026-09-23): ZBrush annual US$399.00; Basemeshes Kit US$25.00 Standard (one game, up to 2,000 sales) or US$300.00 Extended; 3D Kobold / Lizardman US$39.99 Extended, reskinned or resculpted for the second; Dragon + Wyvern Base Meshes US$45.00 commercial; +100 Clothing Base Mesh Bundle US$6.98+; Verta 3D hair and beard cards US$9.50+ each. About US$534.97 with the Standard human kit or US$809.97 with Extended, plus the retopology, UV, texturing and rigging labour for 6 of 7 characters.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "Playwright (own tab) render of https://www.maxon.net/en/buy and /en/zbrush, and ArtStation pages kxjAA, vmo6d, NPe9, Rybr3, j7Pog, 6elLa, 2026-09-23",
+     "evidence": "'ZBRUSH ... $ 33 .25 /mo $ 399.00 BILLED ANNUALLY'; Basemeshes 'USD $25.00' / 'USD $300.00'; Kobold 'Extended Use License USD $39.99 License: Extended Commercial License'; Dragon + Wyvern commercial 'USD $45.00'; +100 Clothing 'Standard License 🔥 70% OFF 🔥 USD $6.98'; Verta hair and beard 'Standard License USD $9.50 License: Standard License For Personal Use'.",
+     "notes": "Every price matches; 399+25+39.99+45+6.98+9.50+9.50 = 534.97, and 809.97 with the $300 kit. Caveats the claim leaves implicit: the $6.98 clothing tier is a 70% sale price, and both Verta $9.50 tiers are labelled 'For Personal Use' (their commercial tier is $35.00), so the 'lowest listed tiers' sum mixes personal-labelled and commercial tiers."
+    }
+   ]
+  },
+  {
+   "id": "CAS-036",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "Free and cheap character packs read 2026-09-23: Quaternius Universal Base Characters, Standard free with 5 hairstyles and a beard, Source US$19.99+ with 20 hairstyles; Modular Character Outfits Fantasy, for that base, 12 outfits, Standard free, Source US$20+ (Standard contents not verified); KayKit Mystery Monthly Series 4, 5 and 6 at US$19.99+ each, 15, 14 and 14 rigged CC0 characters including Orc Raider, Black Knight and Orc Brute; Quaternius RPG Character Pack (6) and Animated Knight (10), CC0; Kenney Mini Characters, 25 files, CC0; Mixamo's API lists 108 characters, all 'human'; Blender Studio's Rain rig is free under CC-BY.",
+   "sources": [
+    "https://quaternius.itch.io/universal-base-characters",
+    "https://quaternius.itch.io/modular-character-outfits-fantasy",
+    "https://kenney.nl/assets/mini-characters",
+    "https://www.mixamo.com/api/v1/products?type=Character",
+    "https://studio.blender.org/characters/rain/v3/",
+    "https://kaylousberg.itch.io/kaykit-series-6",
+    "https://kaylousberg.itch.io/kaykit-skeletons",
+    "https://quaternius.com/packs/rpgcharacters.html"
+   ],
+   "as_first_reported": "Free and cheap character packs read 2026-09-23: Quaternius Universal Base Characters, Standard free with 5 hairstyles and a beard, Source US$19.99+ with 20 hairstyles; Modular Character Outfits Fantasy, for that base, 12 outfits, Standard free, Source US$20+ (Standard contents not verified); KayKit Mystery Monthly Series 4, 5 and 6 at US$19.99+ each, 15, 14 and 14 rigged CC0 characters including Orc Raider, Black Knight and Orc Brute; Quaternius RPG Character Pack (6) and Animated Knight (10), CC0; Kenney Mini Characters, 25 files, CC0; Mixamo's API lists 108 characters, all 'human'; Blender Studio's Rain rig is free under CC-BY.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://quaternius.itch.io/universal-base-characters and /modular-character-outfits-fantasy (curl, 2026-09-23); Universal Base Characters[Standard].zip fetched through itch's free download flow and listed (2026-09-23, then deleted); https://kaylousberg.itch.io/kaykit-series-4, -5, -6; https://quaternius.com/packs/rpgcharacters.html and /knightcharacter.html; https://kenney.nl/assets/mini-characters; https://studio.blender.org/characters/rain/v3/ (curl, 2026-09-23); https://www.mixamo.com/api/v1/products?type=Character pages 1-2 with X-Api-Key: mixamo2 (2026-09-23)",
+     "evidence": "UBC: 'Name your own price', '20 Hairstyles', 'Source ... $19.99 USD or more'; Standard zip: Hair_Buns, Hair_Buzzed, Hair_BuzzedFemale, Hair_Long, Hair_SimpleParted, Hair_Beard. Outfits: '12 game-ready character outfits', '$20 USD or more'. KayKit: '$19.99 USD or more'; '15 ... characters: The Orc Raider'; '14 ... The Black Knight'; '14 ... The Orc Brute'; '(CC0 License)'. Quaternius: 'RPG Character Pack Models 6', 'Animated Knight Pack Models 10', both 'License CC0'. Kenney: 'Files 25x License Creative Commons CC0'. Rain: 'Free', 'License: CC-BY'. Mixamo: num_results 108, all 'human'.",
+     "notes": "Everything reproduces. Mixamo's 108 results hold 106 distinct ids (2 repeat across pages). The Animated Knight pack's 10 is its model count; the page describes one Knight character with accessories. Outfits Standard contents were not verified, as the claim says."
+    }
+   ]
+  },
+  {
+   "id": "CAS-037",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": false,
+   "claim": "MakeHuman asset packs read 2026-09-23: the 'MakeHuman system assets' pack (94 items, all CC0) has 10 hair and 12 eyebrows; Hair 01 is CC0 (25 items), Hair 02 (21) and Hair 03 (14) CC-BY; Bodyparts 05 beards CC0 (5), Bodyparts 06 CC-BY (4); Suits 02 is 'shared under CC0' and includes monk robes and viking boots, plus three items named after existing fictional characters (Rei Ayanami, Yoko Tsuno and Spider-Gwen). Bodyparts 03 (tails and wings, including a dragon wing) is CC-BY and Animal 01 CC0. A keyword search of the repository index (assets.json) found no lizard target, but found CC-BY snake and reptile targets (snakedetail, furry_mouth(reptile), serpiente, serpiente_cabeza; the last two say they are based on Disney's Kaa) and a CC0 'Snek' proxy. The repository labels CC-BY items without a version.",
+   "sources": [
+    "https://static.makehumancommunity.org/assets/assetpacks/makehuman_system_assets.html",
+    "https://static.makehumancommunity.org/assets/assetpacks/hair01.html",
+    "https://static.makehumancommunity.org/assets/assetpacks/hair02.html",
+    "https://static.makehumancommunity.org/assets/assetpacks/hair03.html",
+    "https://static.makehumancommunity.org/assets/assetpacks/suits02.html",
+    "https://static.makehumancommunity.org/assets/assetpacks/bodyparts03.html",
+    "https://static.makehumancommunity.org/assets/assetpacks/bodyparts05.html",
+    "https://static.makehumancommunity.org/assets/assetpacks/bodyparts06.html",
+    "https://static.makehumancommunity.org/assets/assetpacks/animal01.html",
+    "http://www.makehumancommunity.org/sites/default/files/assets.json",
+    "http://www.makehumancommunity.org/node/250"
+   ],
+   "as_first_reported": "MakeHuman asset packs read 2026-09-23: the 'MakeHuman system assets' pack (CC0) has 10 hair and 12 eyebrows; Hair 01 is CC0 (25 items), Hair 02 (21) and Hair 03 (14) CC-BY; Bodyparts 05 beards CC0 (5), Bodyparts 06 CC-BY (4); Suits 02 is 'shared under CC0' and includes monk robes and viking boots, plus two items named after existing fictional characters. Bodyparts 03 (tails and wings, including a dragon wing) is CC-BY and Animal 01 CC0; no lizard or snake target was found by keyword. The repository labels CC-BY items without a version.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "https://static.makehumancommunity.org/assets/assetpacks/ pages makehuman_system_assets, hair01, hair02, hair03, suits02, bodyparts03, bodyparts05, bodyparts06, animal01 (curl, 2026-09-23); http://www.makehumancommunity.org/sites/default/files/assets.json (curl, 2026-09-23); http://www.makehumancommunity.org/node/250 (2026-09-23)",
+     "evidence": "suits02: \"A set of thematic fantasy and sci-fi suits, shared under CC0\"; items include green_tomato_rei_ayanami, green_tomato_yoko_tsuno, slayer227_spider-gwen. assets.json targets: \"snakedetail\" CC-BY (\"Makes the character have a snake hod.\"), \"furry_mouth(reptile)\" CC-BY (\"A reptile base mouth for furry characters.\"), \"serpiente\" CC-BY. node/250: \"License: CC-BY - Creative Commons Attribution\".",
+     "notes": "Counts reproduce: system assets 94 items, all CC0, 10 hair, 12 eyebrows; Hair 01 25 CC0; Hair 02 21 CC-BY; Hair 03 14 CC-BY; Bodyparts 05 5 CC0; Bodyparts 06 4 CC-BY; Bodyparts 03 11 CC-BY incl. elvs_static_wings2_dragon1; Animal 01 5 CC0; monk robes and viking boots present; CC-BY shown with no version. Two parts are wrong: Suits 02 has three items named after existing fictional characters (Rei Ayanami, Yoko Tsuno, Spider-Gwen), not two; and a keyword search of assets.json does find snake and reptile targets (snakedetail, furry_mouth(reptile), serpiente, serpiente_cabeza, all CC-BY; the last two describe a snake based on Disney's Kaa). No lizard target was found."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback id_ snapshots read 2026-09-23: suits02 20260626175531 and 20260907172916; hair01 20260826163953; makehuman_system_assets 20260916192747; CDX listings for these pages",
+     "evidence": "suits02 snapshots 2026-06-26 and 2026-09-07: \"A set of thematic fantasy and sci-fi suits, shared under CC0\", 21 items all CC0, same item list as today incl. rei_ayanami, yoko_tsuno, spider-gwen. hair01 2026-08-26: 25 items CC0. system assets 2026-09-16: 94 items CC0.",
+     "notes": "No change in the pack pages between the snapshots and today, so the errors are not drift. The pack-level wording (\"shared under CC0\", \"shared under CC-BY\") matches the per-item labels, so no summary-versus-item conflation. The repository's per-item CC-BY label has no version (node/250), as the claim says."
+    },
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "curl 2026-09-23: static.makehumancommunity.org/assets/assetpacks/ makehuman_system_assets, hair01, hair02, hair03, suits02, bodyparts03, bodyparts05, bodyparts06, animal01 (table rows parsed); www.makehumancommunity.org/sites/default/files/assets.json (3421 entries); www.makehumancommunity.org/node/250",
+     "evidence": "suits02: \"A set of thematic fantasy and sci-fi suits, shared under CC0\"; rows green_tomato_rei_ayanami, green_tomato_yoko_tsuno, slayer227_spider-gwen, donitz_monk_robe, rehmanpolanski_viking_boots. bodyparts03: \"A set of tails and wings shared under CC-BY\", elvs_static_wings2_dragon1. assets.json: snakedetail CC-BY \"Makes the character have a snake hod.\"; furry_mouth(reptile) CC-BY; serpiente CC-BY \"basada en la version realista de Kaa\"; Snek proxy CC0. node/250: \"License: CC-BY - Creative Commons Attribution\".",
+     "notes": "Rows counted from each table: system assets 94 (all CC0; hair 10, eyebrows 12); Hair 01 25 CC0; Hair 02 21 CC-BY; Hair 03 14 CC-BY; Suits 02 21 CC0; Bodyparts 03 11 CC-BY; Bodyparts 05 5 CC0; Bodyparts 06 4 CC-BY; Animal 01 5 CC0. Keyword search (snake, serpent, serpien, reptil, lizard, lagart, gecko, iguana) of assets.json: no lizard entry of any type; targets 2931, 2932, 3745, 3746 all CC-BY; nid 3578 Snek proxy CC0. Other snake items exist (snake_tail and CL Snake tail clothes, skins, materials, poses) but the claim names only targets and the proxy, so it says no more than the index. assets.json licence values are CC0, CC-BY, AGPL or empty, never versioned."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback id_ snapshots read 2026-09-23: suits02 20260727135723 and 20260907172916; hair01 20260826163953; makehuman_system_assets 20260916192747; bodyparts03 20260823121226; CDX listings for these four pages and for assets.json",
+     "evidence": "suits02 2026-07-27 and 2026-09-07: \"A set of thematic fantasy and sci-fi suits, shared under CC0\", 21 rows all CC0, incl. rei_ayanami, yoko_tsuno, spider-gwen, monk_robe, viking_boots. hair01 2026-08-26: 25 rows CC0. system assets 2026-09-16: 94 rows CC0, hair 10, eyebrows 12. bodyparts03 2026-08-23: \"A set of tails and wings shared under CC-BY\", 11 rows CC-BY incl. elvs_static_wings2_dragon1.",
+     "notes": "Snapshots match today's pages in wording, row counts and licences, so no drift over July to September 2026. The CDX query for assets.json returned no captures, so the snake and reptile part rests on today's read only and cannot be checked for drift. Conflation: the pack-level \"shared under\" line agrees with every per-item label where a pack has one (Suits 02, Bodyparts 03, 05, 06); the system assets, Hair and Animal 01 pages have no pack-level licence line, so their licence in the claim rests on the per-item labels, which are uniform. The claim keeps the pack pages and the repository index apart."
+    }
+   ]
+  },
+  {
+   "id": "CAS-038",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "Quaternius's Ultimate Monsters page (read 2026-09-23) says 'License CC0'. Its glTFs, downloaded from the pack's Google Drive and inspected with Python on 2026-09-23 (measured), include Dragon_Evolved with 46 joints (arms, fingers, Wing1 to Wing4 left and right) and Dragon with 13, each with 8 animations (Death, Fast_Flying, Flying_Idle, Headbutt, HitReact, No, Punch, Yes) and 0 morph targets. The pack's License.txt reads 'CC0 1.0 Universal (CC0 1.0) Public Domain Dedication' but its header names 'Ultimate Platformer Pack', a copy-paste slip. The Drive folder lists 50 animated monsters, including Orc, Demon and Yeti.",
+   "sources": [
+    "https://quaternius.com/packs/ultimatemonsters.html"
+   ],
+   "as_first_reported": "Quaternius's Ultimate Monsters page (read 2026-09-23) says 'License CC0'. Its glTFs, downloaded from the pack's Google Drive and inspected with Python on 2026-09-23 (measured), include Dragon_Evolved with 46 joints (arms, fingers, Wing1 to Wing4 left and right) and Dragon with 13, each with 8 animations (Death, Fast_Flying, Flying_Idle, Headbutt, HitReact, No, Punch, Yes) and 0 morph targets. The pack's License.txt reads 'CC0 1.0 Universal (CC0 1.0) Public Domain Dedication' but its header names 'Ultimate Platformer Pack', a copy-paste slip. The Drive folder lists 50 animated monsters, including Orc, Demon and Yeti.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://quaternius.com/packs/ultimatemonsters.html (curl, 2026-09-23); Drive folder 18m4KpzpEzhC9wl7jzr6dUc0N8Jozr79C listed via embeddedfolderview (2026-09-23); License.txt, Flying/glTF/Dragon.gltf, Dragon_Evolved.gltf, Flying/FBX/Dragon.fbx, Dragon_Evolved.fbx downloaded from Drive and parsed with Python json and a byte scan (2026-09-23, measured)",
+     "evidence": "Page: \"Models 50 Animated Textured Formats FBX OBJ Blend glTF License CC0\"; \"This pack includes 50 fully animated monsters.\" License.txt: \"Ultimate Platformer Pack by @Quaternius\" ... \"CC0 1.0 Universal (CC0 1.0) Public Domain Dedication https://creativecommons.org/publicdomain/zero/1.0/\". Dragon.gltf skin 13 joints; Dragon_Evolved.gltf skin 46 joints (Shoulder/UpperArm/LowerArm, Thumb/Index/Middle/Pinky, Wing1-4 .L/.R); 8 animations each: Death, Fast_Flying, Flying_Idle, Headbutt, HitReact, No, Punch, Yes; 0 morph targets.",
+     "notes": "My downloads are byte-identical to the earlier researcher's glTFs. The FBX files carry the same 8 AnimStacks (CharacterArmature|Death etc.). Drive lists Big (16), Blob (17) and Flying (17) sets, 50 FBX and 50 glTF in all, including Orc, Demon and Yeti; some names recur across sets (40 distinct glTF names), so 50 is a count of models, not of distinct creatures. In License.txt the quoted phrase is split across two lines. The page's prose says \"FBX, OBJ and Blend\" while its format list adds glTF."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback id_ snapshots of quaternius.com/packs/ultimatemonsters.html 20230206190008 and 20260823220225 (read 2026-09-23); CDX list (2026 captures share digest U573CDDN...); https://quaternius.com/license.html (curl, 2026-09-23)",
+     "evidence": "2023-02-06: \"Models 50 Animated Yes Textured No Formats FBX, OBJ, Blend License CC0 Released October 2022\"; 2026-08-23: \"License CC0\", same Drive folder id. license.html: \"Quaternius Asset License (QAL) v1.0 Last updated: 8/28/2026\" ... governs \"the digital content (the \"Assets\") released by Quaternius under this License\"; \"Changes will not apply retroactively to Assets you've already obtained under an earlier version\".",
+     "notes": "The pack has said CC0 since 2023 and still does today; the Drive folder is unchanged. The site-wide QAL, dated 2026-08-28, covers only assets released under it, and this pack page and its License.txt name CC0, so the claim does not mix the two up. Worth a reader note: the QAL is linked from every page's header, and a later relabel of this pack would need a re-check."
+    }
+   ]
+  },
+  {
+   "id": "CAS-039",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "No free CC0 rigged lizardfolk was found on 2026-09-23 in Quaternius, KayKit, Kenney, Mixamo, MakeHuman, OpenGameArt, itch.io or Sketchfab. The nearest free one is OpenGameArt's 'Rigged, textured Reptile' ('A rigged, textured model of a reptile/lizardman'), offered under 'CC-BY 3.0 CC-BY-SA 3.0 GPL 3.0 GPL 2.0', whose page says 'You must include a link to http://opengameart.org with your attribution of this model'. OpenGameArt's 'Snake low poly animated 3d model' is CC0, rigged and animated, 206 triangles. Paid: Downrain DC Lizardmen US$8.99 or more, custom licence.",
+   "sources": [
+    "https://opengameart.org/content/rigged-textured-reptile",
+    "https://opengameart.org/content/snake-low-poly-animated-3d-model",
+    "https://downraindc3d.itch.io/lizardmen"
+   ],
+   "as_first_reported": "No free CC0 rigged lizardfolk was found on 2026-09-23 in Quaternius, KayKit, Kenney, Mixamo, MakeHuman, OpenGameArt, itch.io or Sketchfab. The nearest free one is OpenGameArt's 'Rigged, textured Reptile' ('A rigged, textured model of a reptile/lizardman'), offered under 'CC-BY 3.0 CC-BY-SA 3.0 GPL 3.0 GPL 2.0', whose page says 'You must include a link to http://opengameart.org with your attribution of this model'. OpenGameArt's 'Snake low poly animated 3d model' is CC0, rigged and animated, 206 triangles. Paid: Downrain DC Lizardmen US$8.99 or more, custom licence.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://opengameart.org/content/rigged-textured-reptile, https://opengameart.org/content/snake-low-poly-animated-3d-model, https://downraindc3d.itch.io/lizardmen, https://opengameart.org/content/lizardman and /lizardman-0 (curl, 2026-09-23); OGA art-search-advanced lizardman CC0 and CC-BY; Sketchfab search API lizardfolk and lizardman with license=cc0; itch.io free 3D tag-lizard/snake/reptile (Playwright, 2026-09-23); Mixamo products API; assets.json; quaternius.com pack list",
+     "evidence": "Reptile: \"License(s): CC-BY 3.0 CC-BY-SA 3.0 GPL 3.0 GPL 2.0\"; \"A rigged, textured model of a reptile/lizardman, commissioned by OGA.\"; \"You must include a link to http://opengameart.org with your attribution of this model\". Snake: \"License(s): CC0\" \"Rigged: Yes Animated: Yes Triangle Count: 206\". Downrain: \"$8.99 USD or more\"; \"This asset may be used for commercial and personal projects. - Unauthorized sharing or reselling of this asset is prohibited.\"",
+     "notes": "Search part reproduced today: Sketchfab CC0 downloadable lizardfolk 0 and lizardman 0; OGA 3D lizardman CC0 0; itch free 3D lizard, snake, reptile tags 0; Mixamo 108 characters, all character_type human; no reptile pack in the 83 quaternius.com packs. KayKit and Kenney were not re-searched. Near misses: OGA 'Lizardman' by Skorpio is animated (walk, attack, death, idle) but CC-BY-SA 3.0 / GPL 3.0; MakeHuman has a CC0 'Snek' proxy (\"A snake-like creature with elven ears\"), a snake person rather than lizardfolk. Measured: the reptile .blend (Blender 2.54 file, 2010) has 1 armature, 7 actions, 1 mesh and no shape-key blocks."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback id_ snapshot of opengameart.org/content/rigged-textured-reptile 20260309211331 and CDX list back to 2025-08-11 (read 2026-09-23); live page 2026-09-23",
+     "evidence": "2026-03-09 snapshot: \"License(s): CC-BY 3.0 CC-BY-SA 3.0 GPL 3.0 GPL 2.0\"; \"Attribution info: Model by thecubber, commissioned by the OpenGameArt.org community You must include a link to http://opengameart.org with your attribution of this model\" (same as today).",
+     "notes": "Licence list and attribution text unchanged. The claim keeps the multi-licence offer and the OGA attribution request apart. The Downrain price is today's; the page reads \"Updated 3 days ago\", with no sale shown."
+    }
+   ]
+  },
+  {
+   "id": "CAS-040",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Sketchfab search API, downloadable models, every page walked on 2026-09-23 (results returned; distinct models in brackets where the walk repeated some; animated = animationCount above 0, a proxy for rigged): lizard CC0 20 (0 animated), CC BY 982 (979 distinct, 169 animated); reptile CC0 13 (0), CC BY 773 (766 distinct, 98 animated); lizardfolk CC0 0, CC BY 10 (4 animated); lizardman CC0 0, CC BY 516 (503 distinct, 437 animated); snake CC0 45 (3), CC BY 1,301 (1,289 distinct, 191 animated); dragon CC0 56 (4), CC BY 7,396 (7,159 distinct, 759 animated); orc CC0 2, CC BY 1,316 (1,254 distinct, 116 animated); goblin CC0 0, CC BY 1,044 (1,032 distinct, 105 animated); medieval armor CC0 2, CC BY 853 (847 distinct, 26 animated). CC0 hits are mostly museum scans and real animals; CC BY results include fan art of third-party IP, which CC BY does not clear.",
+   "sources": [
+    "https://sketchfab.com/search?q=medieval+armor&type=models&features=downloadable"
+   ],
+   "as_first_reported": "Sketchfab search API, downloadable models, every page walked on 2026-09-23 (animated in brackets, a proxy for rigged): lizard CC0 20 (0), CC BY 982 (169); reptile CC0 13 (0), CC BY 773 (96); lizardfolk CC0 0, CC BY 10 (4); lizardman CC0 0, CC BY 516 (437); snake CC0 45 (3), CC BY 1,301 (192); dragon CC0 56 (4), CC BY 7,396 (768); orc CC0 2, CC BY 1,316 (117); goblin CC0 0, CC BY 1,044 (104); medieval armor CC0 2, CC BY 853. CC0 hits are mostly museum scans and real animals; CC BY results include fan art of third-party IP, which CC BY does not clear.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "Sketchfab search API https://api.sketchfab.com/v3/search?type=models&downloadable=true&license=cc0|by&count=24&q=..., every 'next' page followed, 2026-09-23 13:54 to 14:50 UTC (script chk_free/sfc.py, sfc2.py; outputs sf_results.txt, sfc2_out.txt); sample result names for CC0 lizard/reptile/snake/dragon and CC BY spyro/alduin/solid snake, same day",
+     "evidence": "Results returned by walking every page (CC BY, animated in brackets): lizard 982 (169); reptile 773 (98); lizardfolk 10 (4); lizardman 516 (437); snake 1,301 (191); dragon 7,396 (759); orc 1,316 (116); goblin 1,044 (105); medieval armor 853 (26). CC0: lizard 20 (0), reptile 13 (0), lizardfolk 0, lizardman 0, snake 45 (3), dragon 56 (4), orc 2, goblin 0, medieval armor 2. Distinct uids: dragon 7,159 (741), orc 1,254 (112), lizardman 503 (424), snake 1,289 (189), goblin 1,032 (104), reptile 766 (97), lizard 979, medieval armor 847.",
+     "notes": "All result totals reproduce exactly. Animated counts: dragon 759 vs 768 (1.2%), snake 191 vs 192, orc 116 vs 117, goblin 105 vs 104 are within 2%; reptile 98 vs 96 is 2.1%, just outside, so the check is refuted on the rule. A bigger point: the paged walk returns some models more than once (dragon 237 repeats, orc 62), so the page totals overstate distinct models by up to 4.7% (orc). CC0 hits sampled are museum and heritage scans, real animals, dragonflies and lizardfish; CC BY searches return Spyro, Alduin and Solid Snake models, so the qualitative sentence holds. The API rate-limited (HTTP 429) for about 25 minutes mid-walk; the walks resumed and completed."
+    }
+   ]
+  },
+  {
+   "id": "CAS-041",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Free and open catalogue counts read 2026-09-23: the MakeHuman repository (assets.json) holds 3,421 assets, including 82 model presets (45 CC0, 37 CC-BY), 1,360 clothes (556 CC0, 804 CC-BY; 89 Uniform/Armor, 105 Hat/Helmet), 106 hair (38 CC0, 68 CC-BY) and 18 facial hair; quaternius.com links 83 packs; Mixamo 108 characters, none a dragon, lizardfolk or snake. OpenGameArt 3D (CC0 / CC-BY): armor 21 / 15, hair 20 / 14, dragon 15 / 7, lizardman 0 / 2, orc 2 / 4, goblin 8 / 6. itch.io free 3D: Dragons 20, Monsters 94, lizard, snake and reptile tags 0.",
+   "sources": [
+    "http://www.makehumancommunity.org/sites/default/files/assets.json",
+    "https://opengameart.org/art-search-advanced?keys=armor&field_art_type_tid%5B%5D=10",
+    "https://www.mixamo.com/api/v1/products?type=Character"
+   ],
+   "as_first_reported": "Free and open catalogue counts read 2026-09-23: the MakeHuman repository (assets.json) holds 3,421 assets, including 82 model presets (45 CC0, 37 CC-BY), 1,360 clothes (556 CC0, 804 CC-BY; 89 Uniform/Armor, 105 Hat/Helmet), 106 hair (38 CC0, 68 CC-BY) and 18 facial hair; quaternius.com links 83 packs; Mixamo 108 characters, none a dragon, lizardfolk or snake. OpenGameArt 3D (CC0 / CC-BY): armor 21 / 15, hair 20 / 14, dragon 15 / 7, lizardman 0 / 2, orc 2 / 4, goblin 8 / 6. itch.io free 3D: Dragons 20, Monsters 94, lizard, snake and reptile tags 0.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "http://www.makehumancommunity.org/sites/default/files/assets.json (curl, 2026-09-23); https://quaternius.com/index.html (curl, 2026-09-23); https://www.mixamo.com/api/v1/products?type=Character pages 1-2 with header X-Api-Key: mixamo2 (2026-09-23); OGA art-search-advanced, type 3D Art, licence filters CC0 (4) and CC-BY 3.0 + 4.0 (2, 17981), every page (2026-09-23); itch.io free 3D tag pages via Playwright (2026-09-23)",
+     "evidence": "assets.json: 3,421 assets; model 82 (45 CC0, 37 CC-BY); clothes 1,360 (556 CC0, 804 CC-BY); Uniform/Armor 89; Hat/Helmet 105; Hair 106 (38 CC0, 68 CC-BY); Facialhair 18. quaternius.com: 83 distinct packs/ links. Mixamo: \"num_results\": 108, all character_type human. OGA: armor 21/15, hair 20/14, dragon 15/7, lizardman 0/2, orc 2/4, goblin 8/6. itch: Dragons (20 results), Monsters (94 results), lizard/snake/reptile 0.",
+     "notes": "Every figure reproduced exactly. The Mixamo API now answers 403 \"Api Key is required\" without the X-Api-Key header the Mixamo web app sends. Mixamo names include 'Drake' and 'Goblin D Shareyko', but all 108 are typed human. The OGA CC-BY figure covers CC-BY 3.0 and 4.0 only, not OGA-BY. assets.json latest change 2026-07-19."
+    }
+   ]
+  },
+  {
+   "id": "CAS-042",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Paid tiers around the free sellers, read 2026-09-23: Quaternius Patreon Silver US$10 a month gives one Source key a month ('worth $15') and pledges return '1.5x' in claim credits; the Complete KayKit Collection is US$150.00 or more for every pack at Source tier plus future ones; Kenney All-in-1 is US$19.95 or more, though every asset in it is free individually; Blender Studio is US$17 a month or US$34.50 a quarter. No sale was shown on the itch pages, and no seller's sale history was found.",
+   "sources": [
+    "https://quaternius.com/packs/ultimatemonsters.html",
+    "https://kaylousberg.itch.io/kaykit-complete",
+    "https://kenney.itch.io/kenney-game-assets",
+    "https://studio.blender.org/join/"
+   ],
+   "as_first_reported": "Paid tiers around the free sellers, read 2026-09-23: Quaternius Patreon Silver US$10 a month gives one Source key a month ('worth $15') and pledges return '1.5x' in claim credits; the Complete KayKit Collection is US$150.00 or more for every pack at Source tier plus future ones; Kenney All-in-1 is US$19.95 or more, though every asset in it is free individually; Blender Studio is US$17 a month or US$34.50 a quarter. No sale was shown on the itch pages, and no seller's sale history was found.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://quaternius.com/packs/ultimatemonsters.html, https://kaylousberg.itch.io/kaykit-complete, https://kenney.itch.io/kenney-game-assets, https://studio.blender.org/join/, quaternius UBC and Outfits itch pages (curl, 2026-09-23)",
+     "evidence": "Quaternius: \"Silver Tier Your $10 pledge gets you ONE Source key every month. (worth $15)\"; \"Get 1.5x your pledge each month in credits\". KayKit: \"$150.00 USD or more\"; \"includes all KayKit asset packs (SOURCE tier) currently released, and every pack that will be released on itch in the future\". Kenney: \"$19.95 USD or more\"; \"a collection of all our freely available content\". Blender Studio: \"$ 17 every month\"; \"$ 34 50 every three months\".",
+     "notes": "Prices unchanged today. KayKit page also says \"Legacy content is not included\", so 'every pack' means every current (non-legacy) pack. No sale markup (sale_rate, original price, % off) on any of the four itch pages today. Sale history was not searched by me; the claim reports none found, which I cannot confirm or refute."
+    }
+   ]
+  },
+  {
+   "id": "CAS-043",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "The cheapest free and open cast found (2026-09-23): 4 humans from Quaternius Universal Base Characters Standard with Modular Character Outfits Fantasy Standard and the 5 free hairstyles and beard (or MPFB2 with CC0 MakeHuman packs); 2 lizardfolk from OpenGameArt's CC-BY 3.0 'Rigged, textured Reptile', recoloured for the second, with a credit line; 1 dragon, Quaternius Dragon_Evolved (CC0). Total US$0; US$39.99 with the Quaternius Source tiers; US$48.98 adding Downrain Lizardmen. All of it may ship as 3D; styles do not match across sellers, and only the MPFB route has facial shapes.",
+   "sources": [
+    "https://quaternius.itch.io/universal-base-characters",
+    "https://opengameart.org/content/rigged-textured-reptile",
+    "https://quaternius.com/packs/ultimatemonsters.html"
+   ],
+   "as_first_reported": "The cheapest free and open cast found (2026-09-23): 4 humans from Quaternius Universal Base Characters Standard with Modular Character Outfits Fantasy Standard and the 5 free hairstyles and beard (or MPFB2 with CC0 MakeHuman packs); 2 lizardfolk from OpenGameArt's CC-BY 3.0 'Rigged, textured Reptile', recoloured for the second, with a credit line; 1 dragon, Quaternius Dragon_Evolved (CC0). Total US$0; US$39.99 with the Quaternius Source tiers; US$48.98 adding Downrain Lizardmen. All of it may ship as 3D; styles do not match across sellers, and only the MPFB route has facial shapes.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://quaternius.itch.io/universal-base-characters and /modular-character-outfits-fantasy (curl, 2026-09-23); UBC [Standard].zip downloaded through the itch free download flow and listed (2026-09-23); OGA reptile page and its raptile_rig_fin.blend_.7z (byte-scanned, 2026-09-23); Downrain page; Ultimate Monsters glTFs (see CAS-038)",
+     "evidence": "UBC Source \"if you pay $19.99 USD or more\"; Outfits Source \"if you pay $20 USD or more\"; Downrain \"$8.99 USD or more\". Standard zip: Superhero_Female_FullBody and Superhero_Male_FullBody, Hair_Buns, Hair_Buzzed, Hair_BuzzedFemale, Hair_Long, Hair_SimpleParted, Hair_Beard, Eyebrows_Female, Eyebrows_Regular. Both itch pages: \"Asset license Creative Commons Zero v1.0 Universal\".",
+     "notes": "Arithmetic holds: 19.99 + 20 = 39.99; + 8.99 = 48.98. Standard has only 2 bodies (Superhero male and female), so 4 humans means reusing them with different hair and outfits. Facial shapes: Dragon_Evolved 0 morph targets and the OGA reptile .blend has no shape-key blocks (both measured today); I did not re-open the UBC Standard glTFs, and DAZ-119 records 0 targets there. The OGA reptile needs its credit line and a link to opengameart.org, per its page. 'Styles do not match' is a judgement and was not checked."
+    }
+   ]
+  }
+ ]
+}

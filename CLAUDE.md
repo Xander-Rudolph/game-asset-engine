@@ -51,7 +51,7 @@ A backlog, not a guide. List it with `grep '^### ' AUDIT.md` and read only the f
 
 Open, and not to be settled in passing (ask in one line, or open an issue): the face budget (18,000 in the docs, 48,000 in the graphs, per AUDIT.md "Read this one first"), the Meshy MCP server at the plugin root, the address compose publishes port 8188 on, the AGPL question for a hosted image, and whether the TripoSG and TripoSR graphs stay.
 
-Settled: Claude may read a Daz render from `output/daz/` into a conversation (the owner, 2026-09-22). Judge a render by looking at it as well as by its numbers. Nothing else about `output/daz/` changed: none of it is committed, and none of it goes near an AI stage.
+Settled: Claude may read a Daz render from `output/daz/` into a conversation (the owner, 2026-09-22). Judge a render by looking at it as well as by its numbers. Nothing else about `output/daz/` changed: none of it is committed, and none of it goes near an AI stage. Claude may read a Reallusion render into a conversation too (the owner, 2026-09-23), on the same terms.
 
 ## Before a commit
 

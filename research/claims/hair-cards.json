@@ -1,10 +1,10 @@
 {
  "note": "docs/reference/hair-cards.md",
- "researched": "2026-09-22",
+ "researched": "2026-09-22, and 2026-09-23 for HAIR-153 to HAIR-159",
  "checked": "2026-09-22",
  "statuses": {
   "corrected": 32,
-  "unchecked": 98,
+  "unchecked": 105,
   "confirmed": 21,
   "unsettled": 1
  },
@@ -2824,6 +2824,88 @@
     "https://api.sketchfab.com/v3/search?type=models&q=hair%20cards&downloadable=true&license=cc0&count=24",
     "https://sketchfab.com/3d-models/hair-cards-fbx-ad1ac6f162ff43a3ae175982bf770c3e",
     "https://sketchfab.com/3d-models/hair-cards-parts-1dac45f5ada946e1a16a5d069fde2474"
+   ],
+   "topic": "assets"
+  },
+  {
+   "id": "HAIR-153",
+   "status": "unchecked",
+   "kind": "recommendation",
+   "load_bearing": false,
+   "claim": "On 2026-09-23 the owner called off the procedural hair generator as the route for hair and beards, after looking at the settled generator on the figure beside a Virt-A-Mate groom on the same figure at the same framing. The owner's words: the procedural results \"still look terrible\", and the route is now \"hair objs instead. same with beards\". This is the owner's decision and not a measurement. The generator is not deleted and scripts/make_hair.py still runs.",
+   "sources": [
+    "the owner, in conversation on 2026-09-23",
+    "output/daz/h_cards_vs_strands.png"
+   ],
+   "topic": "procedural"
+  },
+  {
+   "id": "HAIR-154",
+   "status": "unchecked",
+   "kind": "capability",
+   "load_bearing": false,
+   "claim": "Probed per node on 2026-09-23 in Blender 4.5.9 in the comfyui-packaged container: Shrinkwrap Hair Curves is a projection, not a collision. It wrapped a straight 17 cm strand down to a median of 2.72 cm on the first pass, and a Restore Curve Segment Length after it re-extended a crumpled strand, so the turning angle climbed 4 to 12 to 38 degrees over successive passes and the reach over length fell to 0.44. A strand groom built on the bundled CC0 hair node groups was rejected on that measurement.",
+   "sources": [
+    "file:///usr/local/lib/python3.11/dist-packages/bpy/4.5/datafiles/assets/geometry_nodes/procedural_hair_node_assets.blend",
+    "the per-node probe run on 2026-09-23 in the comfyui-packaged container's Blender 4.5.9"
+   ],
+   "topic": "blender"
+  },
+  {
+   "id": "HAIR-155",
+   "status": "unchecked",
+   "kind": "recommendation",
+   "load_bearing": false,
+   "claim": "The comb is the styled pose, not the gravity: a solver refines an authored pose and does not replace the authoring, the way a Virt-A-Mate creator combs the guides and the solver only refines them. Measured on the bob on 2026-09-23 by running all three combinations: comb only, the behaviour before that session, spans 27.58 x 23.18 x 25.03 cm; comb then settle spans 26.42 x 23.78 x 24.07 cm at 13.8 degrees of turn; settle alone with the comb removed spans 31.00 x 23.92 x 28.15 cm at 23.9 degrees, which failed the generator's own acceptance test because the bounding box grew. Dropping main rigidity to 0.10 brought the span under the baseline but took the turning angle to 10.1 degrees, which is the wave ironed flat.",
+   "sources": [
+    "scripts/make_hair.py, run on the host python3 with numpy 2.3.5 on 2026-09-23",
+    "docs/reference/vam-assets.md"
+   ],
+   "topic": "procedural"
+  },
+  {
+   "id": "HAIR-156",
+   "status": "unchecked",
+   "kind": "recommendation",
+   "load_bearing": false,
+   "claim": "A solver cannot fix a representation problem. At the same camera and framing on 2026-09-23 the settled procedural hair is 310 cards and the settled procedural beard 160 cards, against a Virt-A-Mate hair of 4,005 curves from 267 guides and a Virt-A-Mate beard of 12,969 curves from 1,179 guides, so every silhouette edge is a card edge and a card is centimetres wide on an 18 cm head.",
+   "sources": [
+    "output/daz/h_cards_vs_strands.png",
+    "docs/reference/vam-assets.md"
+   ],
+   "topic": "procedural"
+  },
+  {
+   "id": "HAIR-157",
+   "status": "unchecked",
+   "kind": "recommendation",
+   "load_bearing": false,
+   "claim": "Judge hair by looking at it on the figure, not by its numbers: every acceptance test passed on the run the owner rejected on 2026-09-23.",
+   "sources": [
+    "the owner, in conversation on 2026-09-23",
+    "output/daz/h_cards_vs_strands.png"
+   ],
+   "topic": "procedural"
+  },
+  {
+   "id": "HAIR-158",
+   "status": "unchecked",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "The MakeHuman system assets pack, CC0 by HAIR-137, is extracted to input/_devtools/makehuman/hair/ on this machine, which is gitignored and not in the repo: ten styles, each an .obj with an .mhclo, an .mhmat and an RGBA diffuse, named afro01, bob01, bob02, braid01, long01, ponytail01, short01, short02, short03 and short04.",
+   "sources": [
+    "input/_devtools/makehuman/hair/ on this machine, read on 2026-09-23"
+   ],
+   "topic": "assets"
+  },
+  {
+   "id": "HAIR-159",
+   "status": "unchecked",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "Learned while fitting a MakeHuman hair OBJ to a Genesis 9 figure on 2026-09-23 and not re-measured since: the OBJ is not in the body's frame and needs its .mhclo weights and offsets applied, which moved bob02 up 5.2 cm; MakeHuman helper geometry skews a sphere fit, so the fit is taken on the g body faces only; and the fitted bob02's fringe intersected the Genesis 9 forehead, which --declip-skip hid but did not fix. The proper fix, a shrinkwrapped donor head with weights, was never built.",
+   "sources": [
+    "input/_devtools/makehuman/hair/ on this machine, fitted on 2026-09-23"
    ],
    "topic": "assets"
   }

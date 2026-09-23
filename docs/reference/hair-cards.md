@@ -1,23 +1,25 @@
 # Hair cards, grown rather than licensed
 
-::: tip Status: researched on 2026-09-22, five experiments run the same day, and the hybrid design built the same day
-Nine research passes read the web on 2026-09-22: how production hair-card assets are built, how stylised games build hair, how cards are shaded, the published card generators and their licences, texture atlases, the scalp cap, free hair assets and their licences, what Blender 4.5 can do headlessly, and the geometry of a card layout as an algorithm. 240 claims came back; the duplicates were folded and every load-bearing or licence claim was then checked twice by independent readers told to refute it. Three redesigns of `scripts/make_hair.py` were written from the checked claims and scored by two judges, and a critic listed what is still missing. The register is [research/claims/hair-cards.json](https://github.com/Xander-Rudolph/game-asset-engine/blob/main/research/claims/hair-cards.json) on GitHub: 152 claims, 21 confirmed, 32 corrected to a narrower wording, 1 unsettled, 98 minor and unchecked.
+::: tip Status: researched on 2026-09-22, five experiments run the same day, the hybrid design built the same day, and the route called off by the owner on 2026-09-23
+Nine research passes read the web on 2026-09-22: how production hair-card assets are built, how stylised games build hair, how cards are shaded, the published card generators and their licences, texture atlases, the scalp cap, free hair assets and their licences, what Blender 4.5 can do headlessly, and the geometry of a card layout as an algorithm. 240 claims came back; the duplicates were folded and every load-bearing or licence claim was then checked twice by independent readers told to refute it. Three redesigns of `scripts/make_hair.py` were written from the checked claims and scored by two judges, and a critic listed what is still missing. The register is [research/claims/hair-cards.json](https://github.com/Xander-Rudolph/game-asset-engine/blob/main/research/claims/hair-cards.json) on GitHub: 159 claims, 21 confirmed, 32 corrected to a narrower wording, 1 unsettled, 105 minor and unchecked. The last seven, HAIR-153 to HAIR-159, are the 2026-09-23 outcome and are unchecked.
 
-Run, not read: five experiments in the container's Blender 4.5.9 (Cycles on the RTX 4070 Ti SUPER) on hair the old `scripts/make_hair.py` wrote that day, driven by an ad hoc script kept at `output/hair/_exp/render_exp.py` on this machine, and two prototype probes the design passes left behind, copied to `output/hair_probe_hybrid/` and `output/hair_probe_blender/`. Every number below that carries no claim id was measured that way and says so. The hybrid design under [What to build](#what-to-build) was then built the same day as `scripts/make_hair.py` and `scripts/bake_hair.py`; [What was built](#what-was-built) says which steps landed and what each measured, and the [script reference](/reference/scripts#make-hair-py) and the [guide](/guide/daz-figures#hair-that-is-not-a-daz-product) describe them.
+Run, not read: five experiments in the container's Blender 4.5.9 (Cycles on the RTX 4070 Ti SUPER) on hair the old `scripts/make_hair.py` wrote that day, driven by an ad hoc script kept at `output/hair/_exp/render_exp.py` on this machine, and two prototype probes the design passes left behind, copied to `output/hair_probe_hybrid/` and `output/hair_probe_blender/`. Every number below that carries no claim id was measured that way and says so. The hybrid design under [What to build](#what-to-build) was then built the same day as `scripts/make_hair.py` and `scripts/bake_hair.py`; [What was built](#what-was-built) says which steps landed and what each measured, and the [script reference](/reference/scripts#make-hair-py) and the [guide](/guide/daz-figures#hair-that-is-not-a-daz-product) describe them. On 2026-09-23 a position-based settle was lifted into `scripts/make_hair.py` on the host `python3` with numpy 2.3.5 and Pillow 12.1.1, with a probe of the Blender node groups in the container's Blender 4.5.9, and the owner then called the route off: [Called off on 2026-09-23](#called-off-on-2026-09-23).
 :::
 
 `scripts/make_hair.py` grows hair the repo owns, as ribbon cards with a diffuse and an opacity atlas, and `scripts/daz_import_probe.py scene --wear-obj` places the result on a Genesis 9 head ([the guide](/guide/daz-figures#hair-that-is-not-a-daz-product)). On 2026-09-22 the owner looked at six styles on the figure and kept one: a 5 cm crop, which "needs a scalp texture". The long styles read as stringy strips. This note is what was read and measured before touching the generator again.
 
+**On 2026-09-23 the owner called this route off**, and hair and beards are to come from OBJ meshes instead. <!-- HAIR-153 --> The note is kept as the record of what was read, built and measured, so read [Called off on 2026-09-23](#called-off-on-2026-09-23) before taking anything below it as a plan. `scripts/make_hair.py` still runs.
+
 ## The answer in brief
 
-- **The generator's faces are wound into the head, and that one bug was most of what looked wrong.** Measured on 2026-09-22 with `output/hair/_exp/render_exp.py`: the default bob rendered alone at mean luma 30.5, and the same file with every triangle's winding reversed at **167.9**, five and a half times as bright, with no other change. The "cylindrical normals" result recorded the day before, 3.12 times as bright, was a partial workaround for inverted faces, not the cause. With the winding fixed the four normal schemes sit within 7 percent of each other.
+- **The generator's faces were wound into the head, and that one bug was most of what looked wrong.** Measured on 2026-09-22 with `output/hair/_exp/render_exp.py`: the default bob rendered alone at mean luma 30.5, and the same file with every triangle's winding reversed at **167.9**, five and a half times as bright, with no other change. The "cylindrical normals" result recorded the day before, 3.12 times as bright, was a partial workaround for inverted faces, not the cause. With the winding fixed the four normal schemes sit within 7 percent of each other.
 - **Neither density nor transparent bounces made the "black mass".** The 8.8-layer hair rendered at luma 27.1 with Cycles' default of 8 transparent bounces and 27.3 at 64; with its winding fixed it rendered at 151.6, as bright as the 3.2-layer bob. The layers number stays a budget guard and nothing more.
 - **Every published card workflow is a layer stack over a scalp cap**, thick to thin outward: a cap mesh with its own darker texture, an opaque base layer that covers the scalp, one or two breakup layers of less opaque cards, hairline transition cards, then flyaways. <!-- HAIR-001, HAIR-008, HAIR-044 --> The generator has one population of equal cards and no cap, which is why skin shows through the crop.
 - **A card is one lock, not one strand.** Production tools cluster strands and fit one card per cluster, deriving the card's width from the cluster's spread. <!-- HAIR-087, HAIR-101, HAIR-117 --> Artists place cards in clusters of two to five, most often three, in a tent. <!-- HAIR-002 -->
 - **The stylised look is opaque shaped geometry, not alpha cards.** The CC0 VRoid sample's hair is 108 primitives, 52 of them closed lens-shaped shells, whose textures have alpha 255 at every pixel. <!-- HAIR-150 --> The ZBrush stylised write-ups block the volume first and cut it into chunks. <!-- HAIR-022 --> The hybrid prototype's lens shells read as chunky locks where the same guides as strips read as spaghetti (`output/hair_probe_hybrid/B_lens.png` against `B_cards.png`, viewed).
 - **Budgets:** 4k to 20k triangles for a game hair, 200 to 400 cards for a realistic style, 3 to 5 segments per card unless it curves. <!-- HAIR-016, HAIR-019 --> The current 320 cards of 14 segments are inside the count and wasteful on segments.
 - **Two CC0 sources can stand in for the atlas and as reference:** MakeHuman's system hair pack, ten OBJ-and-PNG styles released as CC0 in 2020, <!-- HAIR-137 --> and OwlishMedia's 85 hair alpha masks at 2048 px. <!-- HAIR-148 --> Blender's bundled hair node groups are CC0 by their in-file licence field, unsettled only because Blender's other demo files are not. <!-- HAIR-138 -->
-- **Recommended:** the hybrid redesign, [below](#what-to-build). numpy keeps the layout it already knows and grows guide curves in layers plus a cap; headless Blender turns the base layer into closed lens shells, renders a real-strand atlas and transfers normals from a dome. Both judges chose it over a numpy-only rewrite and a Blender-only rewrite.
+- **Recommended on 2026-09-22, and built the same day:** the hybrid redesign, [below](#what-to-build). numpy keeps the layout it already knows and grows guide curves in layers plus a cap; headless Blender turns the base layer into closed lens shells, renders a real-strand atlas and transfers normals from a dome. Both judges chose it over a numpy-only rewrite and a Blender-only rewrite. It was built, and a day later the owner judged the result by looking and called the route off. <!-- HAIR-153 -->
 
 ## What was measured here before anything was read
 
@@ -101,7 +103,7 @@ Hair written by `scripts/make_hair.py` is the repo's own. Hair grown by running 
 
 ## What not to do
 
-- **Do not ship the current OBJ to any engine.** Its faces are wound into the head. Cycles hid it; a back-face-culling renderer would draw nothing.
+- **Do not ship an OBJ whose faces are wound into the head.** Cycles hid that bug; a back-face-culling renderer would have drawn nothing. It was fixed on 2026-09-22 and every run now prints the signed dot of each face normal against the radial ([What was built](#what-was-built)).
 - **Do not tune colours, tilts or lights to fix a dark render** until the winding, the shadow casting and the layer structure are right. Every one of the 2026-09-22 colour changes was chasing the winding bug.
 - **Do not grow one strand per card.** A card is a cluster. <!-- HAIR-087, HAIR-101 -->
 - **Do not use one card population.** Base, breakup, hairline, flyaway, each with its own width, offset and atlas band, over a cap. <!-- HAIR-001, HAIR-044 -->
@@ -111,7 +113,7 @@ Hair written by `scripts/make_hair.py` is the repo's own. Hair grown by running 
 
 ## What to build
 
-The hybrid redesign, as scored by both judges. numpy keeps what it already does well and Blender does what numpy cannot.
+The hybrid redesign, as scored by both judges, and as it stood on 2026-09-22. numpy keeps what it already does well and Blender does what numpy cannot. Every step below was built that day, and on 2026-09-23 the owner called the route off, <!-- HAIR-153 --> so this is a record of the plan that was carried out and not a list of work to pick up.
 
 1. **Fix the winding** in `build()`: emit `(a, d, b), (a, c, d)`, and have the report print the signed dot of face normal against the radial so it can never regress. Re-measure findings (a) and (b) with the instrument in `output/hair/_exp/render_exp.py` and replace the numbers in the guide, the reference and the skill.
 2. **Layers, not a population.** `LAYERS`: cap, base, breakup, hairline, flyaway, each with its own count, width, offset from the scalp, segment count and atlas band, written inside-to-outside in one OBJ under one `usemtl` per layer. <!-- HAIR-001, HAIR-013, HAIR-044 --> Segments 4 to 6 on straight cards, more only on curls. <!-- HAIR-019 -->
@@ -143,6 +145,87 @@ The same day, as `scripts/make_hair.py` (numpy, the layout) and `scripts/bake_ha
 
 Four things the build found that the research had not said, each measured on the bob before it was changed: a flat shell colour reads as beige plastic, so shells wear the atlas's base slot; laying `u` straight round a closed profile puts only the slot's edge quarters on the outward face and every shell wore a dark band down each flank, checked by the outward face sitting 0.63 cm further from the head centre than the back; smooth shading across the lens crease smears it into a dark band at any dome mix; and a 12-point profile doubled the shell triangles (20,196 on the bob, 37,776 on the curls). The whole pipeline, six styles generated, baked, placed and rendered, took 73 s wall. What is still untested is in `research/untested.md`.
 
+## Called off on 2026-09-23
+
+::: warning The owner called this route off
+On 2026-09-23 the owner called off the procedural hair generator as the route for hair and beards, after looking at the settled generator on the figure beside a Virt-A-Mate groom on the same figure at the same framing (`output/daz/h_cards_vs_strands.png`). The owner's words: the procedural results "still look terrible", and the route is now "hair objs instead. same with beards". <!-- HAIR-153 --> That is a decision, not a measurement. The generator is not deleted, `scripts/make_hair.py` still runs and still carries the settle described below, and nothing above this section was withdrawn.
+:::
+
+Everything in this section was run on 2026-09-23 on the reference machine, on the host `python3` with numpy 2.3.5 and Pillow 12.1.1 and in Blender 4.5.9 in the container `comfyui-packaged`, Cycles on the RTX 4070 Ti SUPER.
+
+### What was tried that day
+
+1. **A strand groom in Blender on the bundled CC0 hair node groups**, rejected on measurement. `Shrinkwrap Hair Curves` is a projection, not a collision: the per-node probe wrapped a straight 17 cm strand down to a median of 2.72 cm on the first pass, and a `Restore Curve Segment Length` after it re-extended a crumpled strand, so the turning angle climbed 4 to 12 to 38 degrees over successive passes and the reach over length fell to 0.44. <!-- HAIR-154, HAIR-109 -->
+2. **A position-based settle in numpy**, in the solver order a third-party reimplementation attributes to Virt-A-Mate: a Verlet step with drag, a rigidity pull toward a rest pose with a root-to-tip rolloff, inextensible segments solved root first, then a one-sided collision with friction. This worked, and is what [the Virt-A-Mate note](/reference/vam-assets#the-settle-and-the-clump-spike) records.
+3. **That settle lifted into `scripts/make_hair.py`**, against the generator's own analytic stand-ins (the scalp sphere, the five body capsules, the jaw ellipsoid) rather than a KD-tree of the Daz figure's skin, so it needs neither scipy nor Blender nor the figure. What it measured is below.
+4. **A card density change**, proposed and costed but not built: [the density lever](#the-density-lever-costed-but-never-built).
+
+### The settle lift, and the design error it exposed
+
+The plan said to remove the fake gravity from `strand_path()`, which blends the strand heading toward straight down, so that the solver does the falling. Built that way it failed its own acceptance test: the wavy bob's bounding box grew. Measured on the bob:
+
+| rest pose and solver | span, cm | turn, deg |
+|---|---|---|
+| comb only, the behaviour before this session | 27.58 x 23.18 x 25.03 | |
+| comb, then settle | 26.42 x 23.78 x 24.07 | 13.8 |
+| settle alone, comb removed | 31.00 x 23.92 x 28.15 | 23.9 |
+
+The cause is the opposite of hair falling twice: with the comb gone the rest pose is a spike standing off the scalp, and a main rigidity of 0.75 holds it there. Dropping main rigidity to 0.10 brought the span under the baseline but took the turning angle to 10.1 degrees, which is the wave ironed flat. In a Virt-A-Mate groom the creator combs the guides and the solver only refines them, so the comb is the styled pose, not the gravity. <!-- HAIR-155 --> Once `--comb` and `--settle` were separated and both left on, every acceptance test passed. That was settled by measurement: two separate agents had stopped at the same fork and declined to guess.
+
+What landed in `scripts/make_hair.py`, which went from 1,979 to 2,331 lines, all defaults on:
+
+- `--comb/--no-comb` and `--settle/--no-settle` as separate flags, plus `--root-rigidity` 0.2, `--main-rigidity` 0.75, `--tip-rigidity` 0.0, `--rigidity-rolloff` 2.0 and `--settle-frames` 240.
+- Acceptance across all six shipped styles and the full beard: the early-out fires everywhere, between 32 and 91 frames of 240; the settled median length matches the authored length within a few per cent; the winding figure stays positive on every layer; and `--no-settle` reproduces the committed baseline exactly, with every array in the guides file identical element for element.
+- **The bake is unchanged in topology.** The bob is 8,853 vertices and 14,436 triangles before and after, shells manifold, round trip clean. No documented triangle count was invalidated.
+- `scripts/check_docs_sync.py` and `scripts/check_vendored_licences.py` both pass.
+
+The rigidity defaults are carried over from a 24-point strand onto this file's 8, 6, 4 and 5 point layers. That is a judgement, not a measurement, and the argparse help says so.
+
+### Why it was called off anyway
+
+The settle improved the numbers and the silhouette and did not fix the look. On the figure the cards read as slats. The gap against the Virt-A-Mate groom is filament count, at the same camera and framing:
+
+| | visible filaments |
+|---|---|
+| procedural hair, settled | 310 cards |
+| procedural beard, settled | 160 cards |
+| Virt-A-Mate hair | 4,005 curves from 267 guides |
+| Virt-A-Mate beard | 12,969 curves from 1,179 guides |
+
+<!-- HAIR-156 -->
+
+Where the two Virt-A-Mate rows come from, how those grooms were fitted, and the licence that keeps them out of the repo as 3D data are all in [Virt-A-Mate hair packages](/reference/vam-assets). At 310 pieces every silhouette edge is a card edge, and a card is centimetres wide on an 18 cm head. No solver changes that, because it is the representation and not the physics. And every acceptance test above passed on the run the owner rejected.
+
+### The density lever, costed but never built
+
+Breaking down the settled bob's 14,436 baked triangles:
+
+- 90 closed lens shells: **11,160 triangles, 77 per cent of the budget for 29 per cent of the pieces**, at 124 triangles each
+- 220 flat cards, being breakup, hairline and flyaway: 1,980 triangles, at 20 triangles each
+- the cap: 1,296 triangles
+
+Spending the shells' 11,160 triangles on flat cards instead buys about 558 more of them, so roughly 870 cards in place of 310 at the same triangle count and inside the same 4,000 to 20,000 budget. <!-- HAIR-016 --> That is a 2.8 times density increase available without any change of representation. It was proposed to the owner and the owner called the route off instead, so **it was never built and never measured**. The shells are the stylised-lock construction the earlier research chose, <!-- HAIR-150 --> so dropping them would have been a real design change rather than a free win.
+
+### Lessons worth keeping
+
+The most useful thing on this page for whoever picks hair up next.
+
+1. **The comb is the styled pose, not the gravity.** A solver refines an authored pose; it does not replace the authoring. <!-- HAIR-155 -->
+2. **A solver cannot fix a representation problem.** The settle did everything asked of it and the result still read as slats, because 310 cards cannot look like hair. <!-- HAIR-156 -->
+3. **`Shrinkwrap Hair Curves` is a projection, not a collision.** It wrapped a 17 cm strand to a median 2.72 cm. If hair must be kept off a body, use a real one-sided collision. <!-- HAIR-154 -->
+4. **Closed lens shells are expensive.** 124 triangles against 20 for a flat card, so 29 per cent of the pieces ate 77 per cent of the budget.
+5. **Judge hair by looking at it on the figure, not by its numbers.** Every acceptance test passed on the run the owner rejected. The numbers were necessary and nowhere near sufficient. <!-- HAIR-157 -->
+6. **When two agents stop at the same fork, the fork is usually measurable.** The comb question was answered by running all three combinations, not by arguing about it.
+
+### What exists for the route the owner chose
+
+Hair and beard meshes already on this machine, none of them in the repo. This is an inventory, not a design: how the OBJ route should work has not been worked out here.
+
+- **The MakeHuman system assets pack**, CC0, <!-- HAIR-137 --> extracted to the gitignored `input/_devtools/makehuman/hair/`: ten styles, each an `.obj` with an `.mhclo`, an `.mhmat` and an RGBA diffuse, named afro01, bob01, bob02, braid01, long01, ponytail01, short01, short02, short03 and short04. <!-- HAIR-158 -->
+- **Six Virt-A-Mate `.var` packages** in `~/Downloads`, all CC BY, which hold guide curves rather than meshes. [Virt-A-Mate hair packages](/reference/vam-assets#licences) covers them and the licence limit on them.
+
+What was already learned about fitting a hair OBJ, earlier in the same session and not re-measured since: a MakeHuman hair OBJ is not in the body's frame and needs its `.mhclo` weights and offsets applied, which moved bob02 up 5.2 cm; MakeHuman helper geometry skews a sphere fit, so fit on the `g body` faces only; and the fitted bob02's fringe intersected the Genesis 9 forehead, which `--declip-skip` hid but did not fix. The proper fix, a shrinkwrapped donor head with weights, was never built. <!-- HAIR-159 -->
+
 ## Honest uncertainty
 
 - **Nothing stylised was found at its source.** No breakdown from Riot, Blizzard, Epic, miHoYo, Rare, Nintendo or Fortiche was reachable; the stylised construction rests on one CC0 VRoid file and three ZBrush tutorials. <!-- HAIR-150, HAIR-022 -->
@@ -152,6 +235,9 @@ Four things the build found that the research had not said, each measured on the
 - **Whether the repo's own `bpy` scripts must be GPL** is a licence question for the owner. <!-- HAIR-090 -->
 - **The Blender node groups' CC0** rests on their in-file licence field and the assets repository, against demo files licensed otherwise. <!-- HAIR-138 -->
 - **The MakeHuman community pack** is labelled CC0 by its page and contradicted by its own headers. <!-- HAIR-137 --> Only the system pack is relied on.
+- **The card density lever was never built or measured.** The 2.8 times figure is arithmetic on the triangle budget, not a render. <!-- HAIR-016 -->
+- **The settle's rigidity defaults are a judgement.** They come from a 24-point strand and are used on 8, 6, 4 and 5 point layers, and nothing measured them on those layers.
+- **The 2026-09-23 claims are unchecked.** HAIR-153 to HAIR-159 record a decision, one node-group probe, two lessons and what is on disk; none has been through a second reader.
 - **The 'reads as hair' criterion is still an eye.** The arXiv extractor scores cards against strand renders with PSNR and LPIPS; <!-- HAIR-101 --> the repo could score its cards against a Cycles render of hair curves grown from the same guides, and has not.
 
 ## Sources worth reading
@@ -165,3 +251,4 @@ Four things the build found that the research had not said, each measured on the
 - Kajiya and Kay 1989 and Scheuermann's GDC 2004 slides, for tangent shading. <!-- HAIR-082 -->
 - The MakeHuman system asset pack and OwlishMedia's alphas, both CC0. <!-- HAIR-137, HAIR-148 -->
 - The VRoid CC0 sample, as the one measured piece of stylised hair. <!-- HAIR-150 -->
+- [Virt-A-Mate hair packages](/reference/vam-assets), for the groom this generator was compared against, the filament counts behind that comparison and the licence limit on the packages.

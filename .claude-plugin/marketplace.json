@@ -12,11 +12,11 @@
     {
       "name": "game-asset-engine",
       "source": "./",
-      "description": "Skills for driving a local ComfyUI install through the whole asset pipeline: concept art, 3D mesh, textures, rigging, sprite sheets, tileable ground, looping music, lip-synced talking portraits and Daz Genesis figures rendered in Blender.",
+      "description": "Skills for driving a local ComfyUI install through the whole asset pipeline: concept art, 3D mesh, textures, rigging, sprite sheets, tileable ground, looping music, lip-synced talking portraits, Daz Genesis figures rendered in Blender, and what commercial character tools let you ship.",
       "version": "0.1.0",
       "author": { "name": "Xanderu" },
       "homepage": "https://xander-rudolph.github.io/game-asset-engine/",
-      "keywords": ["comfyui", "3d", "game-assets", "rigging", "sprites", "textures", "music", "lip-sync", "daz", "genesis", "visemes"]
+      "keywords": ["comfyui", "3d", "game-assets", "rigging", "sprites", "textures", "music", "lip-sync", "daz", "genesis", "visemes", "character-creator", "poser", "licensing"]
     }
   ]
 }
