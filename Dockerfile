@@ -240,6 +240,33 @@ RUN for req in /app/custom_nodes/*/requirements.txt; do \
         pip install --no-cache-dir -r "$req" || true; \
     done
 
+# Python deps for node packs that are NOT baked but are commonly bind mounted
+# over /app/custom_nodes: ComfyUI-GGUF, ComfyUI-WanVideoWrapper, Impact and
+# Inspire packs, Lora-Manager, RES4LYF, wlsh_nodes, comfyui-various,
+# comfyui-mmaudio, ComfyUI-MelBandRoFormer, ComfyUI-NovaSR, comfyui-ollama and
+# comfyui_fill-nodes.  The mount brings their source but not their deps, so on
+# 0.1.1 all thirteen failed to import on boot with ModuleNotFoundError (gguf,
+# piexif, webcolors, soundfile, pywt, torchdiffeq, rotary_embedding_torch,
+# ollama, fal_client), read from comfyui.log on 2026-09-27.
+#
+# This is the union of those packs' requirements.txt, minus Impact's sam2 (a
+# git build) and opencv-python (opencv-python-headless is already here, and the
+# two collide on cv2).  numpy and huggingface-hub are held where they are: an
+# unpinned resolve here would drag numpy to 2.x.  The import check makes a
+# missing one a red build rather than a red node in the browser.
+RUN printf '%s\n' "numpy==1.26.4" "huggingface-hub==0.36.2" > /tmp/node-pack-pins.txt && \
+    pip install --no-cache-dir -c /tmp/node-pack-pins.txt \
+        "gguf>=0.17.1" piexif webcolors soundfile PyWavelets "torchdiffeq>=0.2.3" \
+        rotary-embedding-torch "ollama==0.6.0" fal-client python-dotenv librosa \
+        einops matplotlib sounddevice glitch_this PyOpenGL glfw requests aiohttp \
+        "moviepy==1.0.3" reportlab openai PyPDF2 pdf2image PyMuPDF kornia gdown \
+        open_clip_torch google-genai google-cloud-storage runwayml httpx timm \
+        omegaconf accelerate scikit-image dill cachetools sentencepiece protobuf \
+        ftfy peft pyloudnorm jinja2 olefile toml natsort aiosqlite beautifulsoup4 && \
+    rm /tmp/node-pack-pins.txt && \
+    python -c "import gguf, piexif, webcolors, soundfile, pywt, torchdiffeq, \
+rotary_embedding_torch, ollama, fal_client; print('bind-mounted node pack deps OK')"
+
 # The compatibility patches, applied to the source that ships.  They lived in
 # scripts/patch_nodes.py precisely because the bind mount hid whatever the
 # image did to its own copy; with the source baked, the right time to apply
