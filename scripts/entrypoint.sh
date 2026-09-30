@@ -134,23 +134,42 @@ fetch_controlnet_aux
 # spconv, cumm and flash-attn. Its comfy-kitchen comes from UniRig's
 # comfy-env.toml, which scripts/patch_nodes.py pins to 0.2.26.
 #
-# The test imports the two things that broke: comfy_kitchen, which a version
-# torch 2.6 rejects fails to import, and the CUDA wheels. It takes about 5 s. An
-# environment that fails it is removed and rebuilt, so a half-built one, or one
-# built unpinned by an older image, heals itself. ASSET_ENGINE_UNIRIG_ENV=0
-# skips all of it, and UniRig with it.
+# install.py's spconv and cumm are swapped for the pair the main image uses.
+# comfy-env's wheel index has only cumm 0.8.2 for cu124, torch 2.6 and Python
+# 3.11, beside spconv 2.3.8, which requires cumm<0.8.0; Auto Rig then died in
+# cumm's runtime CUDA compile ("nvrtc compile failed", 2026-09-30). With
+# spconv-cu124 and cumm-cu124 at the main image's versions, pip check was clean
+# and Auto Rig rigged a mesh in 45 s. The versions are read from the main image
+# at start-up, so the two cannot drift apart.
+#
+# The test imports what broke: comfy_kitchen, which a version torch 2.6 rejects
+# fails to import, and the CUDA wheels; and it checks that cumm-cu124, not the
+# index's cumm, is installed. It takes about 5 s. An environment that fails it
+# is removed and rebuilt, so a half-built one, or one an older image built,
+# heals itself. ASSET_ENGINE_UNIRIG_ENV=0 skips all of it, and UniRig with it.
+UNIRIG_ENV_TEST='
+import comfy_kitchen, torch_cluster, torch_scatter, spconv.pytorch
+from importlib.metadata import version, PackageNotFoundError
+version("cumm-cu124")
+try:
+    version("cumm")
+except PackageNotFoundError:
+    pass
+else:
+    raise SystemExit("the index cumm is installed")
+'
 build_unirig_env() {
     local node=/app/custom_nodes/ComfyUI-UniRig
     local env="${HOME:-/app/.home}/.ce/envs/unirig-nodes"
+    local py="$env/.pixi/envs/default/bin/python"
     local log="${HOME:-/app/.home}/.ce/unirig-install.log"
+    local pair
     [ -f "$node/install.py" ] || return 0
     [ "${ASSET_ENGINE_UNIRIG_ENV:-1}" = "1" ] || {
         say "skipping UniRig's environment (ASSET_ENGINE_UNIRIG_ENV=${ASSET_ENGINE_UNIRIG_ENV})"
         return 0
     }
-    if [ -x "$env/.pixi/envs/default/bin/python" ] &&
-        "$env/.pixi/envs/default/bin/python" -c \
-            "import comfy_kitchen, torch_cluster, torch_scatter, spconv.pytorch" >/dev/null 2>&1; then
+    if [ -x "$py" ] && "$py" -c "$UNIRIG_ENV_TEST" >/dev/null 2>&1; then
         return 0
     fi
     if [ -e "$env" ]; then
@@ -159,10 +178,14 @@ build_unirig_env() {
     fi
     say "building UniRig's environment, once (about 10GB under ${HOME:-/app/.home}/.ce)"
     mkdir -p "$(dirname "$log")" 2>/dev/null || true
+    pair="$(python3 -c 'from importlib.metadata import version as v
+print("spconv-cu124==" + v("spconv-cu124"), "cumm-cu124==" + v("cumm-cu124"))' 2>/dev/null)"
     if (cd "$node" && python3 install.py) >"$log" 2>&1 &&
-        "$env/.pixi/envs/default/bin/python" -c \
-            "import comfy_kitchen, torch_cluster, torch_scatter, spconv.pytorch" >/dev/null 2>&1; then
-        say "  UniRig's environment is ready"
+        [ -n "$pair" ] &&
+        "$py" -m pip uninstall -y spconv cumm >>"$log" 2>&1 &&
+        "$py" -m pip install $pair >>"$log" 2>&1 &&
+        "$py" -c "$UNIRIG_ENV_TEST" >>"$log" 2>&1; then
+        say "  UniRig's environment is ready ($pair)"
     else
         warn "could not build UniRig's environment; its nodes will fail. Log: $log"
     fi
