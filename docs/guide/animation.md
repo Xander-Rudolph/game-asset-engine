@@ -47,7 +47,10 @@ On a `mixamo`-template rig, download the cycles you want as FBX for Unity, drop
 them in `input/animation_templates/mixamo/`, and they appear in the animation
 dropdown on the next node refresh. Give the node the rig as an absolute container
 path, such as `/app/output/rigged/name.fbx`: it runs in UniRig's own environment,
-where a relative path is not found.
+where a relative path is not found. On 0.1.4, Capoeira onto `input/3d/mixamo.fbx`,
+a character with 65 `mixamorig:` bones, took about a second and gave a 250-frame
+action in which the hips, left hand and right foot travel 1.5 to 2.2 units
+(2026-09-30).
 
 ## Posing bones yourself
 

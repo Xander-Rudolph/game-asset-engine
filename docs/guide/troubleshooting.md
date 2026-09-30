@@ -181,34 +181,47 @@ Use `articulationxl` instead.
 
 Both mean UniRig's own environment is missing or broken. UniRig runs its nodes in
 an isolated pixi environment under `/app/.home/.ce`, which the packaged service
-keeps in the `unirig-home` volume. The image does not build it.
+keeps in the `unirig-home` volume. From 0.1.4, `scripts/entrypoint.sh` builds it
+before ComfyUI starts, checks it on every start (about 5 s), and rebuilds it if it
+fails the check; the log says `building UniRig's environment` and then `UniRig's
+environment is ready`. If it says `could not build`, read
+`/app/.home/.ce/unirig-install.log`. `ASSET_ENGINE_UNIRIG_ENV=0` skips it.
 
-Without it, ComfyUI's log says `pixi has not materialized unirig-nodes; using
-in-process import`. The nodes then load in the main environment, and Apply
-Animation, the one run on 2026-09-30, died loading Blender with `undefined symbol:
-rtcGetSceneTraversable`, the Embree mismatch between the image's bpy 4.5.9 and
-UniRig's that the compose file already names. Build it once,
-in the running container (58.6 s and 9.7GB, measured 2026-09-30):
+Up to 0.1.3 nothing built it, and building it by hand ran into three faults in
+turn, all found on 2026-09-30. The entrypoint now handles each:
+
+- **No environment.** ComfyUI's log says `pixi has not materialized unirig-nodes;
+  using in-process import`. The nodes load in the main environment, and Apply
+  Animation died loading Blender with `undefined symbol: rtcGetSceneTraversable`,
+  the Embree mismatch between the image's bpy 4.5.9 and UniRig's that the compose
+  file names.
+- **No nodes.** Built as it comes, UniRig registered 0 nodes, and the log's
+  metadata scan ended in `infer_schema(func): Parameter stride has unsupported type
+  list[int]`. UniRig's `nodes/comfy-env.toml` asks for `comfy-kitchen = "*"`,
+  which resolved to 0.2.36, and nothing past 0.2.26 works on this image's torch 2.6.
+  `scripts/patch_nodes.py` pins it to 0.2.26.
+- **Auto Rig dies in `nvrtc compile failed`**, with errors in cumm's tensorview
+  headers. comfy-env's wheel index has only cumm 0.8.2 for this stack, beside
+  spconv 2.3.8, which requires cumm below 0.8. The entrypoint swaps in
+  spconv-cu124 and cumm-cu124 at the main image's versions, 2.3.8 and 0.7.11.
+  comfy-env's own `COMFY_ENV_AUTO_INSTALL` is left off, because its manifest leaves
+  out the CUDA wheels altogether, and Auto Rig then died on `No module named
+  'torch_cluster'`.
+
+Built this way from an empty volume, UniRig registered all 16 nodes, and
+`scripts/rig_units.sh` rigged a TRELLIS mesh in 36 s. Inside the environment the
+nodes do not run from `/app`, so give them absolute container paths, such as
+`/app/output/rigged/name.fbx`: a relative one is not found.
+
+On an image before 0.1.4, delete the environment and let a 0.1.4 container build
+it, or build it by hand with UniRig's installer and then make the same two fixes
+inside it:
 
 ```sh
 docker exec comfyui-packaged bash -c 'cd /app/custom_nodes/ComfyUI-UniRig && python3 install.py'
+docker exec comfyui-packaged bash -c 'P=/app/.home/.ce/envs/unirig-nodes/.pixi/envs/default/bin/python; $P -m pip install --no-deps "comfy-kitchen==0.2.26" && $P -m pip uninstall -y spconv cumm && $P -m pip install "spconv-cu124==2.3.8" "cumm-cu124==0.7.11"'
+docker restart comfyui-packaged     # once /queue is empty
 ```
-
-Built as it comes, UniRig then registers 0 nodes, and the log's metadata scan
-ends in `infer_schema(func): Parameter stride has unsupported type list[int]`.
-UniRig's `nodes/comfy-env.toml` asks for `comfy-kitchen = "*"`, which resolved to
-0.2.36, and nothing past 0.2.26 works on this image's torch 2.6 (the Dockerfile's
-header says why). Pin it inside the environment, without dependencies so torch
-stays where it is, then restart once `/queue` is empty:
-
-```sh
-docker exec comfyui-packaged bash -c '/app/.home/.ce/envs/unirig-nodes/.pixi/envs/default/bin/python -m pip install --no-deps "comfy-kitchen==0.2.26"'
-docker restart comfyui-packaged
-```
-
-The log then says `Registered 16 total nodes`. Inside the environment the nodes do
-not run from `/app`, so give them absolute container paths, such as
-`/app/output/rigged/name.fbx`: a relative one is not found.
 
 ## The sprite sheet is the rest pose four times
 

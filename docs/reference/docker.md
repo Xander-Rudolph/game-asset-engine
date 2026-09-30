@@ -121,6 +121,7 @@ because only the empty host folder case runs the seeding.
 | `HF_TOKEN` | For the gated weight group. |
 | `ASSET_ENGINE_FETCH_MODELS` | Set to 1 to have the container fetch missing weights on boot. |
 | `ASSET_ENGINE_CONTROLNET_AUX` | 1 by default: fetch comfyui_controlnet_aux from GitHub on boot, since the image may not carry it. 0 skips it, and Pose Transfer with it. |
+| `ASSET_ENGINE_UNIRIG_ENV` | 1 by default: build UniRig's own environment on boot if it is missing or fails its check, about 10GB into the `unirig-home` volume. 0 skips it, and every UniRig node with it. |
 
 ## Port 8188 answers anyone who can reach it
 
