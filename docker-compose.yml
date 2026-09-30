@@ -72,7 +72,7 @@ services:
   # No source checkout, no clones, no post-install: the node packs are baked
   # at pinned commits with their patches applied and the Hunyuan TexGen
   # extension compiled, and the workflows are already in ComfyUI's sidebar.
-  # The two mounts left are the two things an image cannot carry: ~200GB of
+  # The two mounts left are the two things an image cannot carry: ~274GB of
   # weights, and the output you want to keep. The container names any missing
   # weights on boot, and fetches them if ASSET_ENGINE_FETCH_MODELS=1.
   #
@@ -92,6 +92,10 @@ services:
       - PYOPENGL_PLATFORM=egl
       - HF_HOME=/app/models/.hf
       - ASSET_ENGINE_FETCH_MODELS=${ASSET_ENGINE_FETCH_MODELS:-0}
+      # comfyui_controlnet_aux is fetched from GitHub on start, not baked: its
+      # CMU-licensed pose code forbids distribution. 0 skips it, and with it
+      # complete_workflow.json's Pose Transfer flow. See scripts/entrypoint.sh.
+      - ASSET_ENGINE_CONTROLNET_AUX=${ASSET_ENGINE_CONTROLNET_AUX:-1}
     command: python3 main.py --listen 0.0.0.0 --enable-manager --disable-pinned-memory --cache-none
     volumes:
       - ${MODELS_DIR}:/app/models

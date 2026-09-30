@@ -120,6 +120,7 @@ because only the empty host folder case runs the seeding.
 | `COMFY_URL` | Where the server answers. Defaults to `http://127.0.0.1:8188`. |
 | `HF_TOKEN` | For the gated weight group. |
 | `ASSET_ENGINE_FETCH_MODELS` | Set to 1 to have the container fetch missing weights on boot. |
+| `ASSET_ENGINE_CONTROLNET_AUX` | 1 by default: fetch comfyui_controlnet_aux from GitHub on boot, since the image may not carry it. 0 skips it, and Pose Transfer with it. |
 
 ## Port 8188 answers anyone who can reach it
 

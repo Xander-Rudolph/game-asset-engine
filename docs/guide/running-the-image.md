@@ -85,7 +85,7 @@ profile doesn't mount source for this reason.
 
 ## Weights are separate
 
-The weight set is around 200GB and stays on your disk under `MODELS_DIR`. The
+The weight set is around 274GB and stays on your disk under `MODELS_DIR`. The
 container reads `models.json` on boot and names anything missing **before** the
 server starts, rather than letting it turn up as a red node an hour later.
 

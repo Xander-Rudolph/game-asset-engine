@@ -158,6 +158,9 @@
     {
      "name": "fbx_output_path",
      "type": "STRING",
+     "widget": {
+      "name": "fbx_output_path"
+     },
      "link": 3
     }
    ],

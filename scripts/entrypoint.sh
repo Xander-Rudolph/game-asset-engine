@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # What the packaged image does before it hands over to ComfyUI.
 #
-# Three jobs, in order:
+# Four jobs, in order:
 #
 #   1. Seed any bind mount that arrived empty. The image carries a pristine
 #      copy of the node source, the workflows, the poses and the prompts at
@@ -12,12 +12,15 @@
 #      skipped the moment a directory has anything in it, so a host copy the
 #      user has edited is never overwritten.
 #
-#   2. Say what weights are missing, by name, before the server starts.
-#      Models are the one thing too large to bake (the set is ~200GB), so
+#   2. Fetch comfyui_controlnet_aux, the one node pack the image must not
+#      carry, because its licence forbids distributing part of it (1b below).
+#
+#   3. Say what weights are missing, by name, before the server starts.
+#      Models are the one thing too large to bake (the set is ~274GB), so
 #      the next best thing is refusing to be quiet about it: a missing
 #      checkpoint otherwise shows up as a red node an hour later.
 #
-#   3. exec the command, so ComfyUI is PID 1 and signals reach it.
+#   4. exec the command, so ComfyUI is PID 1 and signals reach it.
 #
 # Nothing here is fatal. A missing model is worth saying loudly and worth
 # starting anyway: most of the graphs do not need most of the weights.
@@ -71,6 +74,50 @@ if [ -d "$SEED/user/default/workflows" ]; then
             say "added workflow $(basename "$f" .json)" || true
     done
 fi
+
+# --- 1b. fetch the pack the image may not carry ----------------------------
+
+# comfyui_controlnet_aux is not in the image (the owner's decision, 2026-09-30):
+# its dwpose/ and open_pose/ folders carry CMU's OpenPose licence, which
+# forbids distributing them, and a published image would. So each container
+# fetches it for itself from GitHub, at the commit the Dockerfile pins, the
+# first time it starts. The container's own layer holds it, so a
+# --force-recreate fetches it again: 87MB, 2.5s on the reference machine
+# (2026-09-30).
+#
+# Downloading it is accepting CMU's terms, which is why this says so, and why
+# ASSET_ENGINE_CONTROLNET_AUX=0 skips it. Without it, complete_workflow.json's
+# Pose Transfer flow has no preprocessor; nothing else here uses the pack.
+#
+# Cloned into /app/temp and moved into place only once complete, so a fetch
+# cut short never leaves a half pack for ComfyUI to import. A source build's
+# ./custom_nodes mount usually has it already, from scripts/setup.sh, and an
+# existing copy is always left alone.
+fetch_controlnet_aux() {
+    local url="${ASSET_ENGINE_CONTROLNET_AUX_URL:-}" ref="${ASSET_ENGINE_CONTROLNET_AUX_REF:-}"
+    local dest=/app/custom_nodes/comfyui_controlnet_aux tmp
+    [ -n "$url" ] && [ -n "$ref" ] || return 0      # an image from before this
+    [ "${ASSET_ENGINE_CONTROLNET_AUX:-1}" = "1" ] || {
+        say "skipping comfyui_controlnet_aux (ASSET_ENGINE_CONTROLNET_AUX=${ASSET_ENGINE_CONTROLNET_AUX})"
+        return 0
+    }
+    [ -e "$dest" ] && return 0
+    say "fetching comfyui_controlnet_aux at ${ref:0:7}, which the image does not carry"
+    say "  its dwpose/ and open_pose/ code is CMU's OpenPose licence: noncommercial"
+    say "  research use only. Set ASSET_ENGINE_CONTROLNET_AUX=0 to skip it."
+    tmp="$(mktemp -d /app/temp/controlnet_aux.XXXXXX 2>/dev/null)" || {
+        warn "no writable /app/temp; comfyui_controlnet_aux not fetched"; return 0; }
+    if git init -q "$tmp" &&
+        git -C "$tmp" fetch -q --depth 1 "$url" "$ref" &&
+        git -C "$tmp" checkout -q FETCH_HEAD &&
+        mv "$tmp" "$dest" 2>/dev/null; then
+        say "  comfyui_controlnet_aux ready at $(git -C "$dest" rev-parse --short HEAD)"
+    else
+        rm -rf "$tmp"
+        warn "could not fetch comfyui_controlnet_aux; Pose Transfer will be missing its node"
+    fi
+}
+fetch_controlnet_aux
 
 # --- 2. report on the weights ---------------------------------------------
 

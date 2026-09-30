@@ -19,6 +19,14 @@ Where CLAUDE.md's Owner decisions line names one, update it too.
 | AGPL for a hosted image | Analyse it, or keep the warning | `docs/guide/redistributing.md` |
 | TripoSG and TripoSR graphs | Keep or remove | `meshes.md` says neither works as shipped |
 | Daz guards, What to build item 6 | `keep` licence override, `sources.json` licence fields, `run_workflow.py` refusal | Nothing stops a Daz render reaching TRELLIS. Refuse before `upload_image`, which runs even on `--dry-run` |
+| comfyui_controlnet_aux in a published image | Settled 2026-09-30: not in the image. The owner said not to carry it but to download it at start-up; `scripts/entrypoint.sh` fetches it from GitHub at the commit the Dockerfile pins, and `ASSET_ENGINE_CONTROLNET_AUX=0` skips it | Its `dwpose/` and `open_pose/` folders carry CMU's OpenPose licence, which forbids distribution. Downloading it accepts those terms, so the entrypoint says so. `docs/guide/redistributing.md` |
+
+## Editor graphs (2026-09-30)
+
+- **Four asset_workflow.json stages have never been queued.** Concept, fast, Edit, TRELLIS and Turntable ran on 2026-09-30, alone and chained (`docs/guide/asset-workflow.md`, Measured runs). Concept, full, Simplify, the Hunyuan3D mesh and Texture did not, nor Concept, full, with Edit in one queue. Cost: GPU minutes per stage.
+- **complete_workflow.json has never been run here.** The Rapid AIO checkpoint is one 26.5GB file loaded whole, and the Wan 2.2 flow loads two 13.3GB experts and a 6.3GB encoder. Run each flow once on both quants. Cost: GPU minutes, and a possible OOM kill.
+- **comfyui_controlnet_aux without its requirements.txt.** The image installs only `yacs` from it, so MediaPipe Face Mesh and MeshGraphormer do not load. That DWPose needs nothing more was read from its imports, not run. Run the Pose Transfer flow once. Cost: one GPU job.
+- **The five packs on the source-build profiles.** `scripts/setup.sh` clones them at their default branches, not the Dockerfile's pins, and was not run. Cost: a `--no-download --no-build` run.
 
 ## Lip sync
 

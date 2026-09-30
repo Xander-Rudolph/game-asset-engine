@@ -65,6 +65,7 @@ export default defineConfig({
         {
           text: 'Making things',
           items: [
+            { text: 'The whole pipeline in one graph', link: '/guide/asset-workflow' },
             { text: 'Concept art', link: '/guide/concept-art' },
             { text: 'Turning art into a mesh', link: '/guide/meshes' },
             { text: 'TRELLIS', link: '/guide/trellis' },

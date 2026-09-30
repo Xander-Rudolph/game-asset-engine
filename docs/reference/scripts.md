@@ -12,7 +12,7 @@ Everything in `scripts/`. Each takes `--help`.
 | `fetch_tools.py` | Check or download the command-line tools that `tools.json` pins by URL, byte size and sha256, into the gitignored `tools/`. Stdlib only, on the host. Only the files an entry's `keep` list names are unpacked, and a short download keeps its `.part` for the next `--download` to resume. `--licenses` prints each tool's licence, and `--path NAME` prints a binary's path for other scripts. Rhubarb Lip Sync 1.14.0 is the only entry so far. |
 | `postinstall.sh` | Node installs that have to happen inside the running container. |
 | `patch_nodes.py` | Compatibility patches to the cloned node sources. `--check` verifies them. |
-| `entrypoint.sh` | Container entrypoint. Seeds empty mounts, reports missing weights before starting. |
+| `entrypoint.sh` | Container entrypoint. Seeds empty mounts, fetches comfyui_controlnet_aux, which the image may not carry, and reports missing weights before starting. |
 | `publish_image.sh` | Build and push the image to a registry. Local build on purpose, it is 27.6GB. |
 
 ## Running the pipeline
@@ -23,6 +23,7 @@ Everything in `scripts/`. Each takes `--help`.
 | `validate_workflows.py` | Check every graph against a live server's node definitions. |
 | `api_to_ui.py` | Convert graphs into the editor's format. `--check` verifies every value survived. |
 | `build_presets.py` | Generate the drop in presets from base graphs plus the prompt library. |
+| `build_asset_workflow.py` | Join the base graphs into one editor graph, `asset_workflow.json`: a prompt at the top, a panel that switches stages on and off, and a picker per stage for running a step on its own. Run it after `build_presets.py`. `--check` verifies every value survived. See [the guide](/guide/asset-workflow). |
 | `generate_concepts.sh` | Generate a whole prompt folder in the house style. |
 | `simplify_concepts.sh` | Redraw existing art as simpler game ready versions. |
 | `asset_to_mesh.sh` | Concepts to shapes to textures to sheets to curated assets, correctly staged. |

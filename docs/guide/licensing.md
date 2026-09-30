@@ -27,7 +27,8 @@ CC0 is the cleanest source in the stack, because it has no conditions at all.
 
 ## Models are where the constraints are
 
-Most of the stack uses MIT or Apache 2.0 licences. The four below don't.
+Most of the stack uses MIT or Apache 2.0 licences. The six below don't, or
+aren't settled.
 
 ### Hunyuan3D 2 and 2.1
 
@@ -70,6 +71,42 @@ backgrounds.
 
 OpenRAIL-M. Commercial use of the images is permitted. The licence's use
 restrictions travel with the model, not with a mesh you derive from a render.
+
+### Qwen-Image-Edit Rapid AIO and its GGUF quant
+
+`complete_workflow.json` edits with Phr00t's Rapid AIO v19 SFW merge, or the
+v18 SFW Q4_K quant of it, rather than with Qwen-Image-Edit itself. **Their
+licence is unsettled.**
+
+The merge's Hub card declares Apache-2.0 in its metadata, and the repository has
+no licence file (read 2026-09-30 at commit `691024f`). The card calls the model a
+"Merge of accelerators, VAE and CLIP", and its version notes say v17 "Merged 2509
+and 2511 together" and v19 has "New Lightning Edit 2511 8-step mixed in".
+Qwen-Image-Edit and the Lightning accelerators are Apache-2.0. But earlier
+versions' notes also name community LoRAs, "Rebalancing", "Smartphone Photoreal"
+and "InSubject" among them, with no licence for any, and the card does not list
+what v19 keeps. The terms of whatever was merged in are not stated.
+
+The quant, `Novice25/Qwen-Image-Edit-Rapid-AIO-GGUF`, declares no licence at
+all, in metadata or in a file.
+
+`scripts/fetch_models.py --licenses` marks both `!`. For an edit you will sell,
+Qwen-Image-Edit 2509 itself, in `img_edit_qwen.json`, is Apache-2.0.
+
+### Anything2Real
+
+The LoRA behind `complete_workflow.json`'s Image to Real group. **Treated as
+non-commercial until settled**, so `fetch_models.py` refuses it without
+`--accept-noncommercial`, even under `--all`.
+
+Its author publishes the same file in two places with two answers. On the Hub,
+`lrzjason/QwenEdit-Anything2Real_Alpha` declares Apache-2.0 in its card metadata
+and has no licence file. On Civitai, model 2121900, whose version 2400325 has the
+same SHA-256, the author's permissions read `allowCommercialUse []`,
+`allowDerivatives false` and `allowNoCredit false`: no commercial permission of
+any kind, no derivatives, and credit required. The Hub card names that Civitai
+account as the author's. Both were read on 2026-09-30. Until the author says
+which terms govern, take the stricter one.
 
 ## Music and sound
 
@@ -237,6 +274,11 @@ This is a separate question from the model weights, and easy to mix up with them
 | ComfyUI-UniRig | **GPL-3.0** |
 | ComfyUI-mesh2motion | MIT, declared in metadata, no licence file shipped |
 | ComfyUI-CameraPack | MIT, declared in metadata, no licence file shipped |
+| rgthree-comfy | MIT |
+| cg-use-everywhere | Apache-2.0 |
+| ComfyUI-GGUF | Apache-2.0 |
+| Comfyui-QwenEditUtils | Apache-2.0 |
+| comfyui_controlnet_aux | Apache-2.0 for the pack. **Its DWPose and OpenPose folders carry CMU's OpenPose licence, non-commercial research use only** |
 | Blender / bpy | GPL-2.0-or-later |
 | nvdiffrast 0.3.3 | **NVIDIA Source Code License, research and evaluation use only** |
 | diff-gaussian-rasterization | **Inria Gaussian-Splatting License, research and evaluation use only** |
@@ -252,6 +294,33 @@ Its mesh decoder's vertex colours, baked in Blender instead, load neither
 ([the vertex-colour route](/guide/trellis#the-vertex-colour-route-licence-clean-and-just-as-dark)).
 Before trusting any texturing route, read the licence file of every rasteriser
 it imports, not just the model card.
+:::
+
+::: danger The pose preprocessor is non-commercial code
+`complete_workflow.json`'s Pose Transfer group turns its second image into a
+skeleton with comfyui_controlnet_aux's DWPose preprocessor. The folder that code
+lives in, `src/custom_controlnet_aux/dwpose/`, ships CMU's OpenPose licence,
+headed "ACADEMIC OR NON-PROFIT ORGANIZATION NONCOMMERCIAL RESEARCH USE ONLY". It
+grants use "for noncommercial research purposes", and says "You may not
+distribute, copy or use the Software except as explicitly permitted herein". The
+folder's `__init__.py` says its code is "Original from CMU" by way of Hzzone's
+pytorch-openpose, which has no licence file. The DWPose node imports that
+folder's `body.py`, `hand.py`, `face.py` and `util.py`. Read at commit `0cd2904`
+on 2026-09-30; that is a reading of the imports, not a runtime check.
+
+The DWPose weights are Apache-2.0, and so is DWPose's own code upstream. The
+licence file sits on the code that runs and draws them in this pack. Whether
+CMU's terms reach a reimplementation is not answerable from the files. Until it
+is, don't use Pose Transfer for anything you sell. The image does not carry the
+pack: a container fetches it from GitHub when it starts, so downloading it, and
+with it accepting CMU's terms, is each user's own act
+([redistributing](/guide/redistributing)).
+
+The pack vendors more research-only code that no graph here loads: `open_pose/`
+(the same CMU licence), `leres/pix2pix/` ("for academic use only"), `dsine/`
+(Imperial College: "non-commercial, internal or academic research purposes") and
+`pidi/` ("just for research purpose"). AIO_Preprocessor's dropdown can select any
+of them, so check the folder's licence before switching it away from DWPose.
 :::
 
 ::: warning Two corrections to what this page used to say
@@ -416,6 +485,9 @@ realism checkpoints that were on the development machine are not used, and
 `img_refine_sdxl.json` records why: "their licensing is unclear and this
 pipeline ships game assets". Their licence terms were not read. The refine pass
 uses SDXL base instead ([concept art](/guide/concept-art#a-second-pass-for-materials)).
+The one exception is `complete_workflow.json`, which runs a community merge and a
+community LoRA; both are recorded [above](#qwen-image-edit-rapid-aio-and-its-gguf-quant)
+as unsettled.
 
 ## Hunyuan3D is kept here on purpose
 

@@ -248,5 +248,5 @@ authors and the CC0 animation library. Full list in [CREDITS.md](CREDITS.md).
 ## Requirements
 
 A CUDA GPU. Tested on an RTX 4070 Ti SUPER (16GB) with 31GB of RAM; a 12GB card
-is untested. About 200GB of disk for weights, about 28GB for the image, Docker
+is untested. About 274GB of disk for weights, about 28GB for the image, Docker
 with the NVIDIA container toolkit. Linux.
