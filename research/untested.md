@@ -20,6 +20,8 @@ Where CLAUDE.md's Owner decisions line names one, update it too.
 | TripoSG and TripoSR graphs | Keep or remove | `meshes.md` says neither works as shipped |
 | Daz guards, What to build item 6 | `keep` licence override, `sources.json` licence fields, `run_workflow.py` refusal | Nothing stops a Daz render reaching TRELLIS. Refuse before `upload_image`, which runs even on `--dry-run` |
 | comfyui_controlnet_aux in a published image | Settled 2026-09-30: not in the image. The owner said not to carry it but to download it at start-up; `scripts/entrypoint.sh` fetches it from GitHub at the commit the Dockerfile pins, and `ASSET_ENGINE_CONTROLNET_AUX=0` skips it | Its `dwpose/` and `open_pose/` folders carry CMU's OpenPose licence, which forbids distribution. Downloading it accepts those terms, so the entrypoint says so. `docs/guide/redistributing.md` |
+| A BVH retarget onto `articulationxl` rigs | Build it in `scripts/`, keyed on `scripts/bone_roles.py map`'s roles, or not | Every video capture route needs it: UniRig's Apply Animation copies curves by `mixamorig:` bone name only, and `articulationxl` rigs name bones `bone_N`. `docs/reference/video-mocap.md` |
+| Which capture route to trial | A paid hosted plan whose terms were read, such as Rokoko Vision, or SAM 3D Body after Meta approves its checkpoints | The open models read are non-commercial or need SMPL; SAM 3D Body with MHR is the one open route with no non-commercial clause. `docs/reference/video-mocap.md` |
 
 ## Editor graphs (2026-09-30)
 
