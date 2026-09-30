@@ -177,6 +177,39 @@ against their bodies.
 
 Use `articulationxl` instead.
 
+## UniRig dies with rtcGetSceneTraversable, or has no nodes at all
+
+Both mean UniRig's own environment is missing or broken. UniRig runs its nodes in
+an isolated pixi environment under `/app/.home/.ce`, which the packaged service
+keeps in the `unirig-home` volume. The image does not build it.
+
+Without it, ComfyUI's log says `pixi has not materialized unirig-nodes; using
+in-process import`. The nodes then load in the main environment, and Apply
+Animation, the one run on 2026-09-30, died loading Blender with `undefined symbol:
+rtcGetSceneTraversable`, the Embree mismatch between the image's bpy 4.5.9 and
+UniRig's that the compose file already names. Build it once,
+in the running container (58.6 s and 9.7GB, measured 2026-09-30):
+
+```sh
+docker exec comfyui-packaged bash -c 'cd /app/custom_nodes/ComfyUI-UniRig && python3 install.py'
+```
+
+Built as it comes, UniRig then registers 0 nodes, and the log's metadata scan
+ends in `infer_schema(func): Parameter stride has unsupported type list[int]`.
+UniRig's `nodes/comfy-env.toml` asks for `comfy-kitchen = "*"`, which resolved to
+0.2.36, and nothing past 0.2.26 works on this image's torch 2.6 (the Dockerfile's
+header says why). Pin it inside the environment, without dependencies so torch
+stays where it is, then restart once `/queue` is empty:
+
+```sh
+docker exec comfyui-packaged bash -c '/app/.home/.ce/envs/unirig-nodes/.pixi/envs/default/bin/python -m pip install --no-deps "comfy-kitchen==0.2.26"'
+docker restart comfyui-packaged
+```
+
+The log then says `Registered 16 total nodes`. Inside the environment the nodes do
+not run from `/app`, so give them absolute container paths, such as
+`/app/output/rigged/name.fbx`: a relative one is not found.
+
 ## The sprite sheet is the rest pose four times
 
 Look for this line in the output:
@@ -274,6 +307,10 @@ the editor format, and the position depends on the order the node declares its
 inputs, which is only knowable from the running server. Two things shift that
 array and produce a graph that looks perfect and runs with the steps in the
 guidance box: an input that is wired takes no slot in the array, and every seed
-field is followed by an extra value the backend never sees. The check reads each
-converted graph back the way ComfyUI reads it and compares every value against the
-original. It caught five widgets silently dropped across two workflows.
+field is followed by an extra value the backend never sees, whether or not its node
+asks for one. The check reads each converted graph back and compares every value
+against the original. It caught five widgets silently dropped across two
+workflows, but it reads the array with the converter's own idea of its order, so a
+wrong idea passes it: on 2026-09-30 the TRELLIS, Hunyuan3D and TripoSG graphs
+passed while the editor sent their values one place early
+([Workflows](/reference/workflows#editing-graphs-in-the-comfyui-editor)).

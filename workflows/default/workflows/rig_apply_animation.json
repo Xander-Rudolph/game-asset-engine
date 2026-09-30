@@ -23,7 +23,7 @@
     "text": ""
    },
    "widgets_values": [
-    "RIGGED FBX + CLIP -> ANIMATED FBX\n\nUniRig ships five Mixamo clips and none of them are game cycles.  For\nidle/walk/attack, drop clips into input/animation_templates/mixamo/ or\nuse mesh2motion's 176 CC0 clips.  scripts/list_animations.py prints\nboth libraries.\n\n---\n\nApply a Mixamo animation to a rigged FBX from\nmesh_rig_unirig.json. animation_file is a combo built from\ninput/animation_templates/mixamo/, which ships Breakdance,\nCapoeira, Dying, Hip_Hop_Dancing and Mma_Kick \u2014 drop more .fbx\nthere and they appear in the list."
+    "RIGGED FBX + CLIP -> ANIMATED FBX\n\nMIXAMO-NAMED RIGS ONLY.  It copies curves by mixamorig: bone name and\nrefuses an articulationxl rig, whose bones are bone_N: \"Model does not\nhave mixamorig: bone names!\" (run 2026-09-30).  Rig with the mixamo\ntemplate to use it.\n\nmodel_fbx_path must be an absolute container path, such as\n/app/output/rigged/name.fbx.  The node runs in UniRig's own\nenvironment, where a relative path is not found.\n\nUniRig ships five Mixamo clips and none of them are game cycles.  For\nidle/walk/attack, drop clips into input/animation_templates/mixamo/ or\nuse mesh2motion's 176 CC0 clips.  scripts/list_animations.py prints\nboth libraries.\n\n---\n\nApply a Mixamo animation to a rigged FBX whose bones carry\nMixamo names, which means one rigged with\nskeleton_template='mixamo'. It copies curves by mixamorig: bone\nname, with no retargeting, and refuses anything else: on an\narticulationxl rig from mesh_rig_unirig.json it stops with\n'Model does not have mixamorig: bone names!'\n(output/rigged/unit_warrior.fbx with Capoeira, run 2026-09-30).\ndocs/reference/video-mocap.md covers the retarget that would\nclose that gap. model_fbx_path must be an absolute container\npath such as /app/output/rigged/name.fbx: the node runs in\nUniRig's isolated environment, whose working directory is not\n/app, so a relative path is not found (the same run).\nanimation_file is a combo built from\ninput/animation_templates/mixamo/, which ships Breakdance,\nCapoeira, Dying, Hip_Hop_Dancing and Mma_Kick; drop more .fbx\nthere and they appear in the list."
    ],
    "color": "#432",
    "bgcolor": "#653"
@@ -55,7 +55,7 @@
     "Node name for S&R": "UniRigApplyAnimation"
    },
    "widgets_values": [
-    "output/rigged.fbx",
+    "/app/output/rigged.fbx",
     "mixamo",
     "Capoeira.fbx",
     ""

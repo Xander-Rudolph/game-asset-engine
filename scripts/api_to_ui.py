@@ -183,6 +183,15 @@ at all.
 MIA is better than mixamo for humanoids, and much faster.""",
     "rig_apply_animation": """RIGGED FBX + CLIP -> ANIMATED FBX
 
+MIXAMO-NAMED RIGS ONLY.  It copies curves by mixamorig: bone name and
+refuses an articulationxl rig, whose bones are bone_N: "Model does not
+have mixamorig: bone names!" (run 2026-09-30).  Rig with the mixamo
+template to use it.
+
+model_fbx_path must be an absolute container path, such as
+/app/output/rigged/name.fbx.  The node runs in UniRig's own
+environment, where a relative path is not found.
+
 UniRig ships five Mixamo clips and none of them are game cycles.  For
 idle/walk/attack, drop clips into input/animation_templates/mixamo/ or
 use mesh2motion's 176 CC0 clips.  scripts/list_animations.py prints

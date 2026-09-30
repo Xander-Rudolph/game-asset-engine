@@ -102,7 +102,11 @@ services:
       - ${MODELS_DIR}/3d_checkpoints:/app/custom_nodes/ComfyUI-3D-Pack/Checkpoints
       - ./output:/app/output
       - ./input:/app/input
-      # UniRig's pixi environment, which is ~11GB and is built on first use.
+      # UniRig's pixi environment, about 10GB. Nothing builds it automatically:
+      # build it once by hand, and pin comfy-kitchen inside it, as
+      # docs/guide/troubleshooting.md says ("UniRig dies with
+      # rtcGetSceneTraversable"). Without it, Apply Animation died loading
+      # Blender (run 2026-09-30).
       # A named volume rather than a bind mount: nothing on the host needs to
       # read it, and it survives `down` and `--force-recreate` alike.
       - unirig-home:/app/.home
