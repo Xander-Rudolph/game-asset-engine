@@ -13,7 +13,8 @@
 #      user has edited is never overwritten.
 #
 #   2. Fetch comfyui_controlnet_aux, the one node pack the image must not
-#      carry, because its licence forbids distributing part of it (1b below).
+#      carry, because its licence forbids distributing part of it (1b below),
+#      and build UniRig's own environment if it is missing or broken (1c).
 #
 #   3. Say what weights are missing, by name, before the server starts.
 #      Models are the one thing too large to bake (the set is ~274GB), so
@@ -118,6 +119,55 @@ fetch_controlnet_aux() {
     fi
 }
 fetch_controlnet_aux
+
+# --- 1c. build UniRig's environment ----------------------------------------
+
+# UniRig runs its nodes in its own pixi environment, under $HOME/.ce, which the
+# packaged service keeps in the unirig-home volume. Nothing else builds it:
+# without it the nodes load in the main environment, where Apply Animation died
+# loading Blender ("undefined symbol: rtcGetSceneTraversable", 2026-09-30).
+#
+# Built with UniRig's own install.py, not comfy-env's COMFY_ENV_AUTO_INSTALL.
+# The auto-install writes a manifest without the [cuda] wheels, so the
+# environment loads and Auto Rig then dies on "No module named
+# 'torch_cluster'" (2026-09-30); install.py adds torch-scatter, torch-cluster,
+# spconv, cumm and flash-attn. Its comfy-kitchen comes from UniRig's
+# comfy-env.toml, which scripts/patch_nodes.py pins to 0.2.26.
+#
+# The test imports the two things that broke: comfy_kitchen, which a version
+# torch 2.6 rejects fails to import, and the CUDA wheels. It takes about 5 s. An
+# environment that fails it is removed and rebuilt, so a half-built one, or one
+# built unpinned by an older image, heals itself. ASSET_ENGINE_UNIRIG_ENV=0
+# skips all of it, and UniRig with it.
+build_unirig_env() {
+    local node=/app/custom_nodes/ComfyUI-UniRig
+    local env="${HOME:-/app/.home}/.ce/envs/unirig-nodes"
+    local log="${HOME:-/app/.home}/.ce/unirig-install.log"
+    [ -f "$node/install.py" ] || return 0
+    [ "${ASSET_ENGINE_UNIRIG_ENV:-1}" = "1" ] || {
+        say "skipping UniRig's environment (ASSET_ENGINE_UNIRIG_ENV=${ASSET_ENGINE_UNIRIG_ENV})"
+        return 0
+    }
+    if [ -x "$env/.pixi/envs/default/bin/python" ] &&
+        "$env/.pixi/envs/default/bin/python" -c \
+            "import comfy_kitchen, torch_cluster, torch_scatter, spconv.pytorch" >/dev/null 2>&1; then
+        return 0
+    fi
+    if [ -e "$env" ]; then
+        warn "UniRig's environment is incomplete or stale; rebuilding it"
+        rm -rf "$env"
+    fi
+    say "building UniRig's environment, once (about 10GB under ${HOME:-/app/.home}/.ce)"
+    mkdir -p "$(dirname "$log")" 2>/dev/null || true
+    if (cd "$node" && python3 install.py) >"$log" 2>&1 &&
+        "$env/.pixi/envs/default/bin/python" -c \
+            "import comfy_kitchen, torch_cluster, torch_scatter, spconv.pytorch" >/dev/null 2>&1; then
+        say "  UniRig's environment is ready"
+    else
+        warn "could not build UniRig's environment; its nodes will fail. Log: $log"
+    fi
+}
+build_unirig_env
 
 # --- 2. report on the weights ---------------------------------------------
 

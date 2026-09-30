@@ -400,17 +400,12 @@ RUN mkdir -p /app/temp /app/.home && chmod -R 0777 /app/temp /app/.home /app/out
     chmod 0777 /app/custom_nodes
 ENV HOME=/app/.home
 
-# Build UniRig's environment on the first start, since nothing else does.
-# Without it UniRig's nodes load in the main environment, and Apply Animation
-# died loading Blender there ("undefined symbol: rtcGetSceneTraversable", run
-# 2026-09-30).  comfy-env ships this switch off; on, it runs `pixi install` for
-# a missing environment before ComfyUI registers the nodes, which holds up that
-# first start.  The environment lands under $HOME/.ce, the unirig-home volume in
-# the packaged service, so later starts skip it.  It is built from UniRig's
-# nodes/comfy-env.toml, which scripts/patch_nodes.py pins to comfy-kitchen
-# 0.2.26 above: built unpinned, the environment registered no nodes at all.
-# Set it to 0 to skip the build, and UniRig with it.
-ENV COMFY_ENV_AUTO_INSTALL=1
+# UniRig's own environment is built on the first start by scripts/entrypoint.sh,
+# with UniRig's install.py, and not here: it lands under $HOME/.ce, which the
+# packaged service mounts as the unirig-home volume, so a baked copy would be
+# hidden.  comfy-env's COMFY_ENV_AUTO_INSTALL is deliberately left off: its
+# manifest leaves out UniRig's [cuda] wheels, and Auto Rig then died on "No
+# module named 'torch_cluster'" (2026-09-30).
 
 WORKDIR /app
 EXPOSE 8188

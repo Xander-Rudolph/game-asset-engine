@@ -96,17 +96,19 @@ services:
       # CMU-licensed pose code forbids distribution. 0 skips it, and with it
       # complete_workflow.json's Pose Transfer flow. See scripts/entrypoint.sh.
       - ASSET_ENGINE_CONTROLNET_AUX=${ASSET_ENGINE_CONTROLNET_AUX:-1}
+      # UniRig's own environment is built on the first start, about 10GB into
+      # the unirig-home volume. 0 skips it, and every UniRig node with it.
+      - ASSET_ENGINE_UNIRIG_ENV=${ASSET_ENGINE_UNIRIG_ENV:-1}
     command: python3 main.py --listen 0.0.0.0 --enable-manager --disable-pinned-memory --cache-none
     volumes:
       - ${MODELS_DIR}:/app/models
       - ${MODELS_DIR}/3d_checkpoints:/app/custom_nodes/ComfyUI-3D-Pack/Checkpoints
       - ./output:/app/output
       - ./input:/app/input
-      # UniRig's pixi environment, about 10GB. Nothing builds it automatically:
-      # build it once by hand, and pin comfy-kitchen inside it, as
-      # docs/guide/troubleshooting.md says ("UniRig dies with
-      # rtcGetSceneTraversable"). Without it, Apply Animation died loading
-      # Blender (run 2026-09-30).
+      # UniRig's pixi environment, about 10GB. scripts/entrypoint.sh builds it
+      # on the first start, with UniRig's install.py, and rebuilds it if it
+      # stops importing. Without it, Apply Animation died loading Blender
+      # (run 2026-09-30). docs/guide/troubleshooting.md has the rest.
       # A named volume rather than a bind mount: nothing on the host needs to
       # read it, and it survives `down` and `--force-recreate` alike.
       - unirig-home:/app/.home
