@@ -220,11 +220,23 @@ PY
 ARG UNIRIG_REF=69ee59dc459d2da7cb0291930c1f944886c31d7c
 ARG CAMERAPACK_REF=a58268fe5261d07ffeb93de26cc0d2558a5c0110
 ARG MESH2MOTION_REF=11fe6b7aaa5eac60afa3d726389cd9dd870ed1f6
+# The next four are what complete_workflow.json and asset_workflow.json need:
+# rgthree's switches, group muters and LoRA loader, Use Everywhere's broadcast
+# nodes, the GGUF loader and the Qwen edit encoder with its own resize.  Heads
+# of each default branch on 2026-09-30.
+ARG RGTHREE_REF=449c58fcdd612f7733e54c51f6758ead63fa180b
+ARG USE_EVERYWHERE_REF=50ae9f8c5d8b9538589663c90a15d4067a02969c
+ARG GGUF_REF=6ea2651e7df66d7585f6ffee804b20e92fb38b8a
+ARG QWEN_EDIT_UTILS_REF=cdd4d028c6491d27a40092d7795158668cec9189
 RUN set -eux; \
     for spec in \
         "https://github.com/PozzettiAndrea/ComfyUI-UniRig.git|ComfyUI-UniRig|${UNIRIG_REF}" \
         "https://github.com/PozzettiAndrea/ComfyUI-CameraPack.git|ComfyUI-CameraPack|${CAMERAPACK_REF}" \
         "https://github.com/jtydhr88/ComfyUI-mesh2motion.git|ComfyUI-mesh2motion|${MESH2MOTION_REF}" \
+        "https://github.com/rgthree/rgthree-comfy.git|rgthree-comfy|${RGTHREE_REF}" \
+        "https://github.com/chrisgoringe/cg-use-everywhere.git|cg-use-everywhere|${USE_EVERYWHERE_REF}" \
+        "https://github.com/city96/ComfyUI-GGUF.git|ComfyUI-GGUF|${GGUF_REF}" \
+        "https://github.com/lrzjason/Comfyui-QwenEditUtils.git|Comfyui-QwenEditUtils|${QWEN_EDIT_UTILS_REF}" \
     ; do \
         url="${spec%%|*}"; rest="${spec#*|}"; dir="${rest%%|*}"; ref="${rest#*|}"; \
         git clone "$url" "/app/custom_nodes/$dir"; \
@@ -234,11 +246,74 @@ RUN set -eux; \
 # Their Python deps, so the offline profile has everything it needs.  Failures
 # are tolerated one pack at a time: a node that cannot install its extras is a
 # missing node category, not a broken image.
-RUN for req in /app/custom_nodes/*/requirements.txt; do \
+#
+# numpy is frozen first at whatever the stack above settled on (1.26.4 for
+# 0.1.2), because "tolerated" only covers an install that FAILS.  One that
+# succeeds by upgrading numpy breaks the image with a green build: 3D-Pack's
+# gpytoolbox dies on numpy 2 (see above), and that takes the whole pack down.
+#
+# comfyui_controlnet_aux, complete_workflow.json's pose preprocessor, is NOT in
+# the image, by the owner's decision of 2026-09-30.  Its dwpose/ and open_pose/
+# folders carry CMU's OpenPose licence, noncommercial research use only, and
+# "You may not distribute, copy or use the Software except as explicitly
+# permitted herein" (read at 0cd2904).  A published image would distribute
+# them.  So scripts/entrypoint.sh fetches the pack at start-up, from GitHub, at
+# this commit: each user downloads it for themselves, and the image carries
+# none of its code.  What the image does carry is what it needs to run.
+#
+# Its requirements.txt is not installed.  Measured with `pip install --dry-run`
+# in 0.1.2 on 2026-09-30: unconstrained it moves numpy to 2.4.6; with numpy
+# frozen it still downgrades opencv-python 5.0 to 4.11 and adds
+# opencv-contrib-python beside it (for mediapipe), which would put three cv2
+# builds in one cv2/ directory, and swaps albumentations for albumentationsx.
+# Everything DWPose imports is already here except yacs, installed below.  What
+# that costs: the MediaPipe Face Mesh and MeshGraphormer preprocessors, which
+# import mediapipe, do not load.
+ARG CONTROLNET_AUX_REF=0cd290477128d42cdc3e76a826a402d866e8c684
+ENV ASSET_ENGINE_CONTROLNET_AUX_URL=https://github.com/Fannovel16/comfyui_controlnet_aux.git \
+    ASSET_ENGINE_CONTROLNET_AUX_REF=${CONTROLNET_AUX_REF}
+RUN python3 -c "import numpy; print('numpy==' + numpy.__version__)" >> /etc/pip-constraints.txt && \
+    for req in /app/custom_nodes/*/requirements.txt; do \
         [ -f "$req" ] || continue; \
         case "$req" in */ComfyUI-3D-Pack/*) continue;; esac; \
         pip install --no-cache-dir -r "$req" || true; \
-    done
+    done && \
+    pip install --no-cache-dir yacs && \
+    python3 -c "import numpy, cv2; print('numpy', numpy.__version__, 'cv2', cv2.__version__)"
+
+# controlnet_aux downloads its preprocessor weights into its own folder by
+# default, which the packaged service does not mount: gone on every recreate,
+# and never reachable offline.  Under /app/models they persist, and
+# fetch_models.py can fetch them ahead of time (the qwen_rapid group).
+ENV AUX_ANNOTATOR_CKPTS_PATH=/app/models/controlnet_aux
+
+# Python deps for node packs that are NOT baked but are commonly bind mounted
+# over /app/custom_nodes: ComfyUI-GGUF (baked above too, since 2026-09-30, but
+# a mounted copy still needs gguf), ComfyUI-WanVideoWrapper, Impact and
+# Inspire packs, Lora-Manager, RES4LYF, wlsh_nodes, comfyui-various,
+# comfyui-mmaudio, ComfyUI-MelBandRoFormer, ComfyUI-NovaSR, comfyui-ollama and
+# comfyui_fill-nodes.  The mount brings their source but not their deps, so on
+# 0.1.1 all thirteen failed to import on boot with ModuleNotFoundError (gguf,
+# piexif, webcolors, soundfile, pywt, torchdiffeq, rotary_embedding_torch,
+# ollama, fal_client), read from comfyui.log on 2026-09-27.
+#
+# This is the union of those packs' requirements.txt, minus Impact's sam2 (a
+# git build) and opencv-python (opencv-python-headless is already here, and the
+# two collide on cv2).  numpy and huggingface-hub are held where they are: an
+# unpinned resolve here would drag numpy to 2.x.  The import check makes a
+# missing one a red build rather than a red node in the browser.
+RUN printf '%s\n' "numpy==1.26.4" "huggingface-hub==0.36.2" > /tmp/node-pack-pins.txt && \
+    pip install --no-cache-dir -c /tmp/node-pack-pins.txt \
+        "gguf>=0.17.1" piexif webcolors soundfile PyWavelets "torchdiffeq>=0.2.3" \
+        rotary-embedding-torch "ollama==0.6.0" fal-client python-dotenv librosa \
+        einops matplotlib sounddevice glitch_this PyOpenGL glfw requests aiohttp \
+        "moviepy==1.0.3" reportlab openai PyPDF2 pdf2image PyMuPDF kornia gdown \
+        open_clip_torch google-genai google-cloud-storage runwayml httpx timm \
+        omegaconf accelerate scikit-image dill cachetools sentencepiece protobuf \
+        ftfy peft pyloudnorm jinja2 olefile toml natsort aiosqlite beautifulsoup4 && \
+    rm /tmp/node-pack-pins.txt && \
+    python -c "import gguf, piexif, webcolors, soundfile, pywt, torchdiffeq, \
+rotary_embedding_torch, ollama, fal_client; print('bind-mounted node pack deps OK')"
 
 # The compatibility patches, applied to the source that ships.  They lived in
 # scripts/patch_nodes.py precisely because the bind mount hid whatever the
@@ -283,7 +358,7 @@ print('3D-Pack canary OK — numpy', numpy.__version__, '+ gpytoolbox + StableFa
 # Everything a fresh machine needed from the repo, carried by the image so a
 # `docker run` is the whole install.  models.json comes along so the container
 # can say which weights are missing by name, which is the one part of the set
-# too large to bake (~200GB of checkpoints).
+# too large to bake (~274GB of checkpoints).
 COPY scripts /opt/asset-engine/scripts
 COPY poses /opt/asset-engine/poses
 COPY prompts /opt/asset-engine/prompts
@@ -319,8 +394,18 @@ ENV MODELS_DIR=/app/models \
 # These are the paths ComfyUI writes to that are NOT bind mounts, plus a HOME the
 # non-root user can actually use: comfy-env builds UniRig's pixi environment under
 # $HOME, and /root is unreadable to uid 1000.
-RUN mkdir -p /app/temp /app/.home && chmod -R 0777 /app/temp /app/.home /app/output /app/input /app/user 2>/dev/null || true
+# /app/custom_nodes itself, not what is in it, so the entrypoint can add the
+# pack it fetches at start-up (comfyui_controlnet_aux, see above) as that user.
+RUN mkdir -p /app/temp /app/.home && chmod -R 0777 /app/temp /app/.home /app/output /app/input /app/user 2>/dev/null || true; \
+    chmod 0777 /app/custom_nodes
 ENV HOME=/app/.home
+
+# UniRig's own environment is built on the first start by scripts/entrypoint.sh,
+# with UniRig's install.py, and not here: it lands under $HOME/.ce, which the
+# packaged service mounts as the unirig-home volume, so a baked copy would be
+# hidden.  comfy-env's COMFY_ENV_AUTO_INSTALL is deliberately left off: its
+# manifest leaves out UniRig's [cuda] wheels, and Auto Rig then died on "No
+# module named 'torch_cluster'" (2026-09-30).
 
 WORKDIR /app
 EXPOSE 8188
@@ -344,6 +429,9 @@ ARG CUDA_TAG=12.4.1-cudnn-devel-ubuntu22.04
 # repo's Apache-2.0 scripts, GPL-3.0-only ComfyUI and UniRig, GPL-2.0-or-later
 # Blender, MIT node-pack code, and Tencent community licences that carry a
 # territorial exclusion and have no SPDX identifier -- hence the LicenseRef.
+# comfyui_controlnet_aux is left out of the image, and so out of this label,
+# because its CMU-licensed folders forbid distribution; the entrypoint fetches
+# it at start-up instead.  See docs/guide/redistributing.md.
 # An SPDX expression is the honest form here; a single permissive id is not.
 # See docs/guide/redistributing.md before publishing this anywhere.
 # maintainer and ref.name are inherited from the NVIDIA/Ubuntu base and are
@@ -351,7 +439,7 @@ ARG CUDA_TAG=12.4.1-cudnn-devel-ubuntu22.04
 LABEL maintainer="Xanderu" \
       org.opencontainers.image.ref.name="game-asset-engine-comfy" \
       org.opencontainers.image.title="Game Asset Engine ComfyUI" \
-      org.opencontainers.image.description="ComfyUI with 3D-Pack, UniRig, CameraPack and mesh2motion pinned and built, plus the Asset Engine pipeline workflows and scripts. Model weights are NOT included; the container names the missing ones on boot." \
+      org.opencontainers.image.description="ComfyUI with 3D-Pack, UniRig, CameraPack, mesh2motion, rgthree, Use Everywhere, GGUF and QwenEditUtils pinned and built, plus the Asset Engine pipeline workflows and scripts. Model weights are NOT included; the container names the missing ones on boot. comfyui_controlnet_aux is NOT included either: its CMU-licensed code forbids distribution, so the container fetches it from GitHub at start-up." \
       org.opencontainers.image.source="https://github.com/Xander-Rudolph/game-asset-engine" \
       org.opencontainers.image.url="https://xander-rudolph.github.io/game-asset-engine/" \
       org.opencontainers.image.documentation="https://xander-rudolph.github.io/game-asset-engine/guide/install" \

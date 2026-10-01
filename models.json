@@ -28,6 +28,8 @@
     "noncommercial": "Models whose licence forbids commercial use, ~0.5GB. Never fetched by --all",
     "qwen": "Qwen-Image text-to-image, ~48GB. Apache-2.0, far better prompt adherence than SDXL base. The concept presets need it",
     "qwen_edit": "Qwen-Image-Edit 2509, ~19GB. Change one element of a concept without rerolling it",
+    "qwen_rapid": "Phr00t's Qwen-Image-Edit Rapid AIO for complete_workflow.json: the v19 SFW checkpoint with its text encoder and VAE merged in (~26GB), the v18 SFW Q4_K GGUF (~12GB), which reuses the qwen group's text encoder and VAE, and the Anything2Real LoRA, which is fetched only with --accept-noncommercial. Licences unsettled: see --licenses",
+    "wan_i2v": "WAN 2.2 image-to-video 14B for complete_workflow.json's video group: the high- and low-noise fp8 experts, the umT5 text encoder, the 2.1 VAE and the lightx2v 4-step LoRAs, ~35GB. Apache-2.0",
     "music": "ACE-Step 1.5 turbo text-to-music, ~10GB. MIT, and its model card allows commercial use of the music it makes"
   },
   "models": [
@@ -533,6 +535,136 @@
       "license": "MIT",
       "license_url": "https://huggingface.co/ACE-Step/Ace-Step1.5",
       "commercial": "yes"
+    },
+    {
+      "name": "Qwen-Image-Edit Rapid AIO v19 SFW (fp8, all in one)",
+      "group": "qwen_rapid",
+      "kind": "file",
+      "repo": "Phr00t/Qwen-Image-Edit-Rapid-AIO",
+      "file": "v19/Qwen-Rapid-AIO-SFW-v19.safetensors",
+      "dest": "checkpoints/Qwen-Rapid-AIO-SFW-v19.safetensors",
+      "license": "Apache-2.0, declared in the Hub card metadata; no licence file",
+      "license_url": "https://huggingface.co/Phr00t/Qwen-Image-Edit-Rapid-AIO",
+      "commercial": "unsettled (a merge that folds in community LoRAs: the card names some in earlier versions' notes, lists none for v19, and gives no licence for any)",
+      "note": "Read 2026-09-30 at commit 691024f. The card says v19 merges Qwen-Image-Edit 2509 and 2511 with Lightning accelerators, and earlier versions' notes name community 'realism' LoRAs without their licences. One 28.4GB file holding the diffusion model, text encoder and VAE: load it with Load Checkpoint, 4 steps at cfg 1. Not yet run on the 31GB reference machine."
+    },
+    {
+      "name": "Qwen-Image-Edit Rapid AIO v18 SFW (GGUF Q4_K)",
+      "group": "qwen_rapid",
+      "kind": "file",
+      "repo": "Novice25/Qwen-Image-Edit-Rapid-AIO-GGUF",
+      "file": "v18/Qwen-Rapid-SFW-v18_Q4_K.gguf",
+      "dest": "diffusion_models/Qwen-Rapid-SFW-v18_Q4_K.gguf",
+      "license": "none declared on the quant; it quantises Phr00t/Qwen-Image-Edit-Rapid-AIO",
+      "license_url": "https://huggingface.co/Novice25/Qwen-Image-Edit-Rapid-AIO-GGUF",
+      "commercial": "unsettled (no licence on the quant, and the merge it quantises is unsettled)",
+      "note": "v18, because v19 has no SFW GGUF. Diffusion model only: it needs the qwen group's qwen_2.5_vl_7b_fp8_scaled text encoder and qwen_image_vae. complete_workflow.json switches to it with its Switch Quants panel. The repo moved from Arunk25/ to Novice25/; the Hub answers the old path with a 307 (checked 2026-09-30)."
+    },
+    {
+      "name": "WAN 2.2 I2V 14B high-noise expert (fp8)",
+      "group": "wan_i2v",
+      "kind": "file",
+      "repo": "Comfy-Org/Wan_2.2_ComfyUI_Repackaged",
+      "file": "split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors",
+      "dest": "diffusion_models/wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors",
+      "license": "Apache-2.0",
+      "license_url": "https://github.com/Wan-Video/Wan2.2/blob/main/LICENSE.txt",
+      "commercial": "yes",
+      "note": "Runs the first half of the steps; the low-noise expert runs the rest. Licence read 2026-09-30: the Wan-AI/Wan2.2-I2V-A14B card says 'The models in this repository are licensed under the Apache 2.0 License. We claim no rights over the your generated contents', and links a LICENSE.txt the Hub repo does not contain; the text is Apache-2.0 in the Wan-Video/Wan2.2 GitHub repo."
+    },
+    {
+      "name": "WAN 2.2 I2V 14B low-noise expert (fp8)",
+      "group": "wan_i2v",
+      "kind": "file",
+      "repo": "Comfy-Org/Wan_2.2_ComfyUI_Repackaged",
+      "file": "split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors",
+      "dest": "diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors",
+      "license": "Apache-2.0",
+      "license_url": "https://github.com/Wan-Video/Wan2.2/blob/main/LICENSE.txt",
+      "commercial": "yes"
+    },
+    {
+      "name": "umT5-XXL text encoder (fp8, for WAN)",
+      "group": "wan_i2v",
+      "kind": "file",
+      "repo": "Comfy-Org/Wan_2.1_ComfyUI_repackaged",
+      "file": "split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "dest": "text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "license": "Apache-2.0",
+      "license_url": "https://huggingface.co/google/umt5-xxl",
+      "commercial": "yes",
+      "note": "google/umt5-xxl declares apache-2.0 in its card metadata only, with no licence text. Wan also ships a umT5-XXL encoder in its own Hub repos (models_t5_umt5-xxl-enc-bf16.pth) under the Wan card's Apache-2.0 statement. Which of the two this repackage was converted from is not stated. Read 2026-09-30."
+    },
+    {
+      "name": "WAN 2.1 VAE (used by WAN 2.2 14B)",
+      "group": "wan_i2v",
+      "kind": "file",
+      "repo": "Comfy-Org/Wan_2.2_ComfyUI_Repackaged",
+      "file": "split_files/vae/wan_2.1_vae.safetensors",
+      "dest": "vae/wan_2.1_vae.safetensors",
+      "license": "Apache-2.0",
+      "license_url": "https://github.com/Wan-Video/Wan2.2/blob/main/LICENSE.txt",
+      "commercial": "yes",
+      "note": "The 14B experts use the 2.1 VAE, not wan2.2_vae, which belongs to the 5B model."
+    },
+    {
+      "name": "WAN 2.2 I2V lightx2v 4-step LoRA (high noise)",
+      "group": "wan_i2v",
+      "kind": "file",
+      "repo": "Comfy-Org/Wan_2.2_ComfyUI_Repackaged",
+      "file": "split_files/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors",
+      "dest": "loras/wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors",
+      "license": "Apache-2.0",
+      "license_url": "https://github.com/ModelTC/LightX2V-Wan2.2-Lightning/blob/main/LICENSE.txt",
+      "commercial": "yes",
+      "note": "Off in complete_workflow.json. Switch on both halves together, then set both samplers to 4 steps, cfg 1, split at step 2."
+    },
+    {
+      "name": "WAN 2.2 I2V lightx2v 4-step LoRA (low noise)",
+      "group": "wan_i2v",
+      "kind": "file",
+      "repo": "Comfy-Org/Wan_2.2_ComfyUI_Repackaged",
+      "file": "split_files/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors",
+      "dest": "loras/wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors",
+      "license": "Apache-2.0",
+      "license_url": "https://github.com/ModelTC/LightX2V-Wan2.2-Lightning/blob/main/LICENSE.txt",
+      "commercial": "yes"
+    },
+    {
+      "name": "Anything2Real alpha LoRA (Qwen-Image-Edit 2509)",
+      "group": "qwen_rapid",
+      "kind": "file",
+      "repo": "lrzjason/QwenEdit-Anything2Real_Alpha",
+      "file": "Anything2RealAlpha.safetensors",
+      "dest": "loras/Qwen-Image-Edit-2509-Anything2RealAlpha.safetensors",
+      "license": "unsettled: Apache-2.0 in the Hub card metadata, no licence file; the author's Civitai permissions for the same file allow no commercial use and no derivatives, and require credit",
+      "license_url": "https://civitai.com/models/2121900?modelVersionId=2400325",
+      "commercial": "NO (treated as non-commercial until settled: the author's own Civitai permissions forbid it)",
+      "note": "Read 2026-09-30. Civitai's API for model 2121900 returns allowCommercialUse [], allowDerivatives false, allowNoCredit false, allowDifferentLicense true; the HF card names that Civitai account (xiaozhijason) as the author's. The HF file has the same SHA-256 as Civitai version 2400325's (62ee14b0...aae9), and the Civitai download refuses an anonymous request (HTTP 401) where the HF one does not. The dest renames it to what complete_workflow.json's Image to Real group loads."
+    },
+    {
+      "name": "DWPose person detector (YOLOX-L, onnx)",
+      "group": "qwen_rapid",
+      "kind": "file",
+      "repo": "yzd-v/DWPose",
+      "file": "yolox_l.onnx",
+      "dest": "controlnet_aux/yzd-v/DWPose/yolox_l.onnx",
+      "license": "Apache-2.0",
+      "license_url": "https://github.com/Megvii-BaseDetection/YOLOX/blob/main/LICENSE",
+      "commercial": "yes",
+      "note": "comfyui_controlnet_aux reads its preprocessor weights from $AUX_ANNOTATOR_CKPTS_PATH/<repo>/<file>, and the image points that at /app/models/controlnet_aux so they persist across a recreate. Without this file the pack downloads it on first use, which the offline profile cannot. complete_workflow.json's Pose Transfer group runs DWPose through AIO_Preprocessor, whose defaults are these two files. The weights are Apache-2.0; the code that runs them is not: comfyui_controlnet_aux's src/custom_controlnet_aux/dwpose/ folder ships CMU's OpenPose licence, 'ACADEMIC OR NON-PROFIT ORGANIZATION NONCOMMERCIAL RESEARCH USE ONLY' (read 2026-09-30 at 0cd2904). See docs/guide/licensing."
+    },
+    {
+      "name": "DWPose whole-body pose estimator (TorchScript)",
+      "group": "qwen_rapid",
+      "kind": "file",
+      "repo": "hr16/DWPose-TorchScript-BatchSize5",
+      "file": "dw-ll_ucoco_384_bs5.torchscript.pt",
+      "dest": "controlnet_aux/hr16/DWPose-TorchScript-BatchSize5/dw-ll_ucoco_384_bs5.torchscript.pt",
+      "license": "Apache-2.0",
+      "license_url": "https://github.com/IDEA-Research/DWPose/blob/main/LICENSE",
+      "commercial": "yes",
+      "note": "hr16's TorchScript export of DWPose's dw-ll_ucoco_384; the card declares apache-2.0 in metadata only, and IDEA-Research/DWPose's LICENSE is Apache-2.0. The weights are Apache-2.0; the code that runs them is not: comfyui_controlnet_aux's src/custom_controlnet_aux/dwpose/ folder ships CMU's OpenPose licence, 'ACADEMIC OR NON-PROFIT ORGANIZATION NONCOMMERCIAL RESEARCH USE ONLY' (read 2026-09-30 at 0cd2904). See docs/guide/licensing."
     }
   ]
 }

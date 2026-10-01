@@ -21,6 +21,21 @@ capability comes from other people's work. Here is whose.
   node, and the source of the 176 CC0 animation clips, including every non
   humanoid skeleton available here.
 - **ComfyUI-CameraPack**, pulled in as a declared dependency of UniRig.
+- **[rgthree-comfy](https://github.com/rgthree/rgthree-comfy)** by rgthree
+  (Regis Gaughan, III). MIT. The group muters, switches and LoRA loader that
+  `complete_workflow.json` is built around.
+- **[cg-use-everywhere](https://github.com/chrisgoringe/cg-use-everywhere)** by
+  chrisgoringe. Apache-2.0. Sends one model, CLIP and VAE to every node that
+  needs them.
+- **[comfyui_controlnet_aux](https://github.com/Fannovel16/comfyui_controlnet_aux)**
+  by Fannovel16. Apache-2.0 for the pack. The DWPose code it vendors carries
+  CMU's non-commercial OpenPose licence, covered in the licensing guide. It draws
+  the pose skeleton for Pose Transfer. Not in the image: the container fetches it
+  at start-up.
+- **[ComfyUI-GGUF](https://github.com/city96/ComfyUI-GGUF)** by city96.
+  Apache-2.0. Loads quantised diffusion models.
+- **[Comfyui-QwenEditUtils](https://github.com/lrzjason/Comfyui-QwenEditUtils)**
+  by lrzjason. Apache-2.0. A Qwen edit encoder with its own resizing.
 
 And **[ComfyUI](https://github.com/comfyanonymous/ComfyUI)** by comfyanonymous,
 which all of the above extends.
@@ -37,6 +52,12 @@ which all of the above extends.
 - **TRELLIS** by Microsoft. MIT.
 - **Qwen-Image** and **Qwen-Image-Edit** by Alibaba. Apache 2.0, and the default
   concept generator here.
+- **Qwen-Image-Edit Rapid AIO** by Phr00t, and its GGUF quants by Novice25.
+  Licence unsettled; see the licensing guide.
+- **Anything2Real** by lrzjason. Licence unsettled, treated as non-commercial.
+- **Wan 2.2** by Alibaba's Wan team, with Google's **umT5** text encoder and the
+  **Wan2.2-Lightning** LoRAs by LightX2V. Apache 2.0. Image to video.
+- **DWPose** by IDEA Research, with **YOLOX** by Megvii. Apache 2.0.
 - **Stable Diffusion XL** and **SD 1.5** by Stability AI.
 - **InstantMesh**, **Zero123++**, **MV-Adapter**, **Unique3D**, **CharacterGen**,
   **LGM**, **CRM**, **TriplaneGaussian**, **PartCrafter**, **StableFast3D**.

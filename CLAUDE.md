@@ -23,7 +23,7 @@ Driving the pipeline? The skills carry it, and every one starts with `scripts/do
 
 ## Generated files
 
-Regenerate them, never hand-edit: the presets (`scripts/build_presets.py`, confirmed with `--check`), the editor graphs in `workflows/default/workflows/` (`scripts/api_to_ui.py`, plus a `NOTES` entry for a new graph) and the notebook (`notebooks/build_notebook.py`).
+Regenerate them, never hand-edit: the presets (`scripts/build_presets.py`, confirmed with `--check`), the editor graphs in `workflows/default/workflows/` (`scripts/api_to_ui.py`, plus a `NOTES` entry for a new graph), `asset_workflow.json` there (`scripts/build_asset_workflow.py --check`, after the presets) and the notebook (`notebooks/build_notebook.py`). `complete_workflow.json` is the one hand-built editor graph: the owner edits it in the editor.
 
 ## Writing
 
@@ -49,7 +49,9 @@ A backlog, not a guide. List it with `grep '^### ' AUDIT.md` and read only the f
 
 ## Owner decisions
 
-Open, and not to be settled in passing (ask in one line, or open an issue): the face budget (18,000 in the docs, 48,000 in the graphs, per AUDIT.md "Read this one first"), the Meshy MCP server at the plugin root, the address compose publishes port 8188 on, the AGPL question for a hosted image, whether Claude may read a Daz render from `output/daz/` into a conversation (none is read until then), and whether the TripoSG and TripoSR graphs stay.
+Open, and not to be settled in passing (ask in one line, or open an issue): the face budget (18,000 in the docs, 48,000 in the graphs, per AUDIT.md "Read this one first"), the Meshy MCP server at the plugin root, the address compose publishes port 8188 on, the AGPL question for a hosted image, and whether the TripoSG and TripoSR graphs stay.
+
+Settled: the image never carries comfyui_controlnet_aux, whose CMU-licensed pose code forbids distribution; `scripts/entrypoint.sh` fetches it at start-up (the owner, 2026-09-30). Claude may read a Daz render from `output/daz/` into a conversation (the owner, 2026-09-22). Judge a render by looking at it as well as by its numbers. Nothing else about `output/daz/` changed: none of it is committed, and none of it goes near an AI stage. Claude may read a Reallusion render into a conversation too (the owner, 2026-09-23), on the same terms.
 
 ## Before a commit
 

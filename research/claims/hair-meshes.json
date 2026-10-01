@@ -1,0 +1,1010 @@
+{
+ "note": "docs/reference/hair-meshes.md",
+ "researched": "2026-09-23",
+ "checked": "2026-09-23",
+ "statuses": {
+  "confirmed": 15,
+  "corrected": 21,
+  "unverifiable": 1
+ },
+ "conflicts_found": [],
+ "claims": [
+  {
+   "id": "HM-001",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "MakeHuman's community asset index (assets.json, downloaded 2026-09-23, 3,421 entries) counts, among assets of type 'clothes': Hair 106 (68 CC-BY, 38 CC0), Facialhair 18 (12 CC-BY, 6 CC0), Eyebrows 17 (15 CC0, 2 CC-BY) and Bodyhair 1 (CC0). About 20 hair items were identified as male by title, tag or description. Pack pages: system assets 10 hair (CC0); hair01 25 items labelled CC0; hair02 21 by Elvaerwyn (CC-BY); hair03 14 (CC-BY); bodyparts05 5 beards (CC0); bodyparts06 4 beards (CC-BY); eyebrows01 14 (CC0). No account is needed to download.",
+   "sources": [
+    "http://www.makehumancommunity.org/sites/default/files/assets.json",
+    "https://static.makehumancommunity.org/assets/assetpacks/makehuman_system_assets.html",
+    "https://static.makehumancommunity.org/assets/assetpacks/bodyparts05.html",
+    "https://static.makehumancommunity.org/assets/assetpacks/bodyparts06.html"
+   ],
+   "as_first_reported": "MakeHuman's community asset index (assets.json, downloaded 2026-09-23, 3,421 entries) counts, among assets of type 'clothes': Hair 106 (68 CC-BY, 38 CC0), Facialhair 18 (12 CC-BY, 6 CC0), Eyebrows 17 (15 CC0, 2 CC-BY) and Bodyhair 1 (CC0). About 20 hair items were identified as male by title, tag or description. Pack pages: system assets 10 hair (CC0); hair01 25 items labelled CC0; hair02 21 by Elvaerwyn (CC-BY); hair03 14 (CC-BY); bodyparts05 5 beards (CC0); bodyparts06 4 beards (CC-BY); eyebrows01 14 (CC0). No account is needed to download.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "http://www.makehumancommunity.org/sites/default/files/assets.json (curl, 2026-09-23, 3,421 entries); static.makehumancommunity.org/assets/assetpacks/{makehuman_system_assets,hair01,hair02,hair03,bodyparts05,bodyparts06,eyebrows01}.html (curl, 2026-09-23); pack zips bodyparts05_cc0.zip and bodyparts06_cc-by.zip downloaded without an account, 2026-09-23",
+     "evidence": "assets.json type 'clothes': Hair CC-BY 68, CC0 38; Facialhair CC-BY 12, CC0 6; Eyebrows CC0 15, CC-BY 2; Bodyhair CC0 1. Pack tables: system assets 10 rows 'hair' CC0; hair01 25 rows all CC0; hair02 21 rows all CC-BY, author Elvaerwyn on all 21; hair03 14 rows CC-BY; bodyparts05 5 rows CC0; bodyparts06 4 rows CC-BY; eyebrows01 14 rows CC0.",
+     "notes": "Every count reproduced exactly. 'About 20' male items is a judgement: a keyword pass (male, man, men, boy, fade, Superman, Iroh, excluding 'female') over Hair titles and descriptions found 17, consistent with 'about 20'. No account was needed for assets.json, the pack pages, the node files or the pack zips."
+    }
+   ]
+  },
+  {
+   "id": "HM-002",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "In MakeHuman's repository the licence label (assets.json or pack page) and the asset's own .mhclo header disagree on several hair and beard items, read 2026-09-23. Labelled CC0, header AGPL3: mhair02 (node 2892, submitted by culturalibre 2021-05-29 and last changed 2025-08-19, 'Male hair from an old Makehuman assets (2015).'; header '# author MHteam # license AGPL3 (see also http://www.makehuman.org/node/320)'); Scruffy Beard (WDG) and Beard Sigmund wip (grinsegold) in bodyparts05 (the MakeClothes default header naming external_tools_license.html); male short hair by abumeqbel (node 220, '# author Unknown # license AGPL3'). Labelled CC-BY, header AGPL3: grinsegold's Full beard and Moustache (bodyparts06, header 'author grinsegold') and Hair_male_spiky, Hair_male_half_bald and Hair_male_comb_over ('author grinsegold/cgcookie', 'license AGPL3'). MakeHuman's licence page says 'All core assets are shared under Creative Commons, CC0'; whether that covers mhair02, or any other item here, was not established.",
+   "sources": [
+    "http://www.makehumancommunity.org/sites/default/files/assets.json",
+    "http://www.makehumancommunity.org/node/2892",
+    "http://www.makehumancommunity.org/node/220",
+    "http://www.makehumancommunity.org/node/575",
+    "http://www.makehumancommunity.org/node/576",
+    "http://www.makehumancommunity.org/node/577",
+    "https://static.makehumancommunity.org/assets/assetpacks/bodyparts05.html",
+    "https://static.makehumancommunity.org/assets/assetpacks/bodyparts06.html"
+   ],
+   "as_first_reported": "In MakeHuman's repository the licence label (assets.json or pack page) and the asset's own .mhclo header disagree on several hair and beard items, read 2026-09-23. Labelled CC0, header AGPL3: mhair02 (node 2892, uploaded by culturalibre 2025-08-19 as 'Male hair from an old Makehuman assets (2015)'; header '# author MHteam # license AGPL3 (see also http://www.makehuman.org/node/320)'); Scruffy Beard (WDG) in bodyparts05 (the MakeClothes default header naming external_tools_license.html); male short hair by abumeqbel (node 220, '# author Unknown # license AGPL3'); Beard Sigmund wip. Labelled CC-BY, header AGPL3: grinsegold's Full beard and Moustache (bodyparts06) and Hair_male_spiky, Hair_male_half_bald and Hair_male_comb_over ('author grinsegold/cgcookie, license AGPL3'). Whether the September 2020 CC0 release covers any of these was not established.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "http://www.makehumancommunity.org/node/2892, /node/220 (curl, 2026-09-23); assets.json (2026-09-23); .mhclo files for nodes 2892, 220, 575, 576, 577 fetched from the URLs in assets.json (2026-09-23); bodyparts05_cc0.zip and bodyparts06_cc-by.zip fresh from files.makehumancommunity.org (2026-09-23); pack pages bodyparts05/06 (2026-09-23)",
+     "evidence": "node 2892: 'Submitted by culturalibre on Sat, 05/29/2021 - 23:45'; assets.json 2892 created 2021-05-29, changed 2025-08-19. Headers: 2892 '# author MHteam # license AGPL3 (see also http://www.makehuman.org/node/320)'; 220 '# author Unknown # license AGPL3 (see also ...external_tools_license.html)'; 575-577 '# author grinsegold/cgcookie # license AGPL3'; wdg_scruffy_beard, grinsegold_beard_sigmund_wip, grinsegold_full_beard, grinsegold_moustache '# license AGPL3 (see also http://www.makehuman.org/doc/node/external_tools_license.html)'.",
+     "notes": "Every label and header pairing is as claimed (labels: 2892 and 220 CC0, bodyparts05 rows CC0, bodyparts06 rows CC-BY, 575-577 CC-BY). One fact is wrong: mhair02 was submitted 2021-05-29; 2025-08-19 is its last-changed date in assets.json, not its upload date. Note 577 Hair_male_comb_over is filed under category Facialhair in assets.json. The Full beard and Moustache headers say 'author grinsegold', not 'grinsegold/cgcookie'; the claim's quote attaches only to the three Hair_male items, which is right."
+    },
+    {
+     "lens": "drift",
+     "verdict": "refuted",
+     "read": "Wayback bodyparts05.html 20260626174851 and 20260916192755, bodyparts06.html 20260826163948 (read 2026-09-23); live pages (2026-09-23); static.makehumancommunity.org/about/license.html (2026-09-23); node 2892 had no usable Wayback capture (only 301s, 2025-12-13)",
+     "evidence": "Pack labels identical in June, August/September 2026 and today. Licence page: 'All core assets are shared under Creative Commons, CC0.'",
+     "notes": "Labels have not drifted. The claim runs two dates together: it gives mhair02's last-changed date (2025-08-19) as its upload date; the change on that date may have touched the label or files, and that cannot be seen. On the open question, the site's licence page says core assets are CC0; mhair02 calls itself 'Male hair from an old Makehuman assets (2015)' with author MHteam, so the core-asset statement may bear on it, but whether it does was not established. The 'September 2020 CC0 release' named in the claim was not re-read by this check."
+    }
+   ]
+  },
+  {
+   "id": "HM-003",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "MakeHuman repository items whose label and .mhclo header agree on CC0, read 2026-09-23: Beard Viking and Moustache Viking in bodyparts05 (headers '# license CC0'), Faun beard in bodyparts05 (header '# license CC-0'), and Short Messy Hair by Cortu (node 2809, header '# Cortu Johnstone - CC0'). Hair 05 (node 2445, uploaded by culturalibre) is labelled 'CC0 - Creative Commons Zero', its header reads '# license CC-0' and '# Original by swift502', and its description names the source as 'https://www.blendswap.com/blend/24099'. That Blend Swap page returns HTTP 404 (2026-09-23). Its only Wayback capture, of 2020-09-21, shows 'Low Poly Hair Pack', 'Creator: swift502' and 'License: CC-0', and a comment by mrgolec dated August 29, 2020: 'Hey guys, dont use these models! They are taken from a game called Sudden Attack so I am almost certain they don't have CC-0 license.' The allegation was not verified either way, so Hair 05's CC0 label rests on an upstream upload that can no longer be read and whose rights were disputed on its own page.",
+   "sources": [
+    "http://www.makehumancommunity.org/sites/default/files/assets.json",
+    "https://static.makehumancommunity.org/assets/assetpacks/bodyparts05.html",
+    "https://files.makehumancommunity.org/asset_packs/bodyparts05/bodyparts05_cc0.zip",
+    "http://www.makehumancommunity.org/node/2445",
+    "http://files.makehumancommunity.org/sites/default/files/clothes/4881/946526743/hair_05.mhclo",
+    "http://www.makehumancommunity.org/node/2809",
+    "http://files.makehumancommunity.org/sites/default/files/clothes/4298/515252394/short_messy.mhclo",
+    "https://www.blendswap.com/blend/24099",
+    "https://web.archive.org/web/20200921155149/https://www.blendswap.com/blend/24099"
+   ],
+   "as_first_reported": "MakeHuman repository items whose label and .mhclo header agree on CC0, read 2026-09-23: Beard Viking (long full beard) and Moustache Viking in bodyparts05 (header '# license CC0'); Faun beard in bodyparts05 (header CC0); Short Messy Hair by Cortu (node 2809, header '# Cortu Johnstone - CC0'); and Hair 05 (node 2445, medium tousled, header '# license CC-0'), uploaded by culturalibre from swift502's Blend Swap file 24099, whose original Blend Swap page was not read.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "assets.json (2026-09-23); bodyparts05_cc0.zip fresh (2026-09-23); .mhclo for nodes 2445 and 2809 from assets.json URLs (2026-09-23); hair01 pack page (2026-09-23)",
+     "evidence": "rehmanpolanski_beard_viking and _moustache_viking '# license CC0'; culturalibre_faun_beard '# license CC-0'; 2809 '# Cortu Johnstone - CC0'; 2445 '# author culturalibre # license CC-0 # Original by swift502'; labels CC0 in assets.json and in bodyparts05/hair01 packs; 2445 description 'Original by swift502.License CC-0.Downloaded from: https://www.blendswap.com/blend/24099'.",
+     "notes": "Every label and header agrees as claimed. The Faun beard header reads 'CC-0', which the claim renders as CC0; same meaning. 'Medium tousled' is a visual description, not in the text."
+    },
+    {
+     "lens": "drift",
+     "verdict": "refuted",
+     "read": "https://www.blendswap.com/blend/24099 (curl 2026-09-23: HTTP 404); Wayback https://web.archive.org/web/20200921155149id_/https://www.blendswap.com/blend/24099 (the only capture, read 2026-09-23); Wayback bodyparts05 June and September 2026 (read 2026-09-23)",
+     "evidence": "Wayback 2020-09-21: 'Low Poly Hair Pack' 'Creator: swift502' 'License: CC-0'. Comment by mrgolec, August 29, 2020: 'Hey guys, dont use these models! They are taken from a game called Sudden Attack so I am almost certain they don't have CC-0 license.' Live page today: 404.",
+     "notes": "Repository labels have not drifted. But Hair 05's CC0 rests on an upstream Blend Swap upload that is now gone and was publicly alleged, on its own page, to be ripped from the game Sudden Attack. Listing Hair 05 alongside the clean CC0 items runs the repository label together with the upstream rights. The allegation was not verified. Suggested wording: keep the claim but replace 'whose original Blend Swap page was not read' with the Wayback read and the Sudden Attack comment, and do not treat Hair 05 as clean CC0."
+    },
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "curl 2026-09-23: assets.json; bodyparts05.html; bodyparts05_cc0.zip (unzipped, .mhclo headers); node/2445 and node/2809; hair_05.mhclo and short_messy.mhclo from assets.json URLs; blendswap.com/blend/24099 (HTTP 404); Wayback 20200921155149id_ of that page",
+     "evidence": "beard_viking/moustache_viking: '# license CC0'; faun_beard: '# license CC-0'; short_messy: '# Cortu Johnstone - CC0'; hair_05: '# license CC-0' '# Original by swift502'; node 2445: 'License: CC0 - Creative Commons Zero', 'Downloaded from: https://www.blendswap.com/blend/24099'; pack page labels all CC0. Capture: 'Creator: swift502' 'License: CC-0'; mrgolec, August 29, 2020: 'Hey guys, dont use these models! They are taken from a game called Sudden Attack so I am almost certain they don't have CC-0 license.'",
+     "notes": "Every quote checked verbatim against my own copies (comment text matched as a string, including 'dont' and 'don't'). Dropped the draft's visual descriptors ('long full beard', 'medium tousled'), which are not in any source. The claim states the allegation as an allegation and does not call Hair 05 clean or ripped."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback CDX for blendswap.com/blend/24099* (one capture, 20200921155149) and bodyparts05.html (20230930093524 to 20260916192755); bodyparts05 capture 20230930093524 read 2026-09-23; assets.json 'changed' fields; live pages 2026-09-23",
+     "evidence": "bodyparts05 2023-09-30: 'A set of beards and moustaches shared under CC0' with faun_beard, beard_viking, moustache_viking all 'CC0' (same as live). assets.json: Hair 05 'changed': '2020-04-17'; Short Messy Hair 'changed': '2021-01-07'. Blend Swap CDX: single 200 capture 2020-09-21; live 404.",
+     "notes": "Repository labels have not drifted between 2023 and today. The conflation the first drift check found (repository label run together with upstream rights) is now separated: Hair 05 is set apart, with the missing source and the unverified allegation stated. Node 2445 has only 301 captures in Wayback, so its page could not be compared across dates; assets.json dates it unchanged since 2020-04-17."
+    }
+   ]
+  },
+  {
+   "id": "HM-004",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "MakeHuman repository items labelled CC-BY with a matching 'license: CC-BY' .mhclo header, read 2026-09-23 (neither label nor header states a CC version; the MakeHuman asset FAQ links CC-BY's 'full text' to CC BY 2.5 Sweden): WojackOWL's 2025 uploads Low Taper Fade V2 (node 3729, buzz or fade), Short Hair B (node 3677, tagged unisex, described 'for Male Characters'), Beard (Beard_Short, node 3658), Moustace Light (3654), Moustache Thick (3655), Goatee (3656), Goatee Long (3657) and Mutton Chops (3659), whose headers say 'exported by MakeClothes 2' (basemesh hm08); and Elvaerwyn's Elvs Scruffy Beard1 in bodyparts06. The MakeHuman FAQ, a summary rather than the licence, says CC-BY 'means that you can do whatever you want with the asset as long as you give credit to the author', so a build or render using them credits WojackOWL or Elvaerwyn, in the form the linked licence requires.",
+   "sources": [
+    "http://www.makehumancommunity.org/sites/default/files/assets.json",
+    "http://www.makehumancommunity.org/node/3729",
+    "http://www.makehumancommunity.org/node/3677",
+    "http://www.makehumancommunity.org/node/3654",
+    "http://www.makehumancommunity.org/node/3655",
+    "http://www.makehumancommunity.org/node/3656",
+    "http://www.makehumancommunity.org/node/3657",
+    "http://www.makehumancommunity.org/node/3658",
+    "http://www.makehumancommunity.org/node/3659",
+    "https://static.makehumancommunity.org/assets/assetpacks/bodyparts06.html",
+    "https://creativecommons.org/licenses/by/4.0/"
+   ],
+   "as_first_reported": "MakeHuman repository items labelled CC BY with a matching 'CC-BY' .mhclo header, read 2026-09-23 (no CC version is stated): WojackOWL's 2025 uploads Low Taper Fade V2 (node 3729, buzz or fade), Short Hair B (node 3677, tagged unisex, described 'for Male Characters'), Beard (Beard_Short, node 3658), Moustace Light (3654), Moustache Thick (3655), Goatee (3656), Goatee Long (3657) and Mutton Chops (3659), all MPFB exports; and Elvaerwyn's Elvs Scruffy Beard1 in bodyparts06. The MakeHuman FAQ (as read for HAIR-137) says 'you can do whatever you want with the asset as long as you give credit to the author', so a build or render using them credits WojackOWL or Elvaerwyn.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "assets.json and node pages 3654-3659, 3677, 3729 (curl, 2026-09-23); their .mhclo/.mhmat/.obj headers (2026-09-23); bodyparts06_cc-by.zip (2026-09-23); static.makehumancommunity.org/assets/assetpacks/faq.html (2026-09-23); github makehumancommunity/mpfb2 src/mpfb/entities/clothes/mhclo.py and makehumancommunity/community-plugins-makeclothes (gh api, 2026-09-23)",
+     "evidence": "Headers: '# This is a clothes file for MakeHuman Community, exported by MakeClothes 2 # author: WojackOWL # license: CC-BY'; 3677 'tag unisex', description 'Short Hair Variant for Male Characters'; 3658 'name Beard Short'. Elvs: '# author: Elvaerwyn # license: CC-BY'. FAQ: 'CC-BY (Creative Commons Attribution, see full text ) means that you can do whatever you want with the asset as long as you give credit to the author.' MPFB2 writes '# MHCLO asset for MakeHuman and MPFB, created using MPFB2'.",
+     "notes": "Labels, headers, titles, node numbers and the FAQ quote all match. 'All MPFB exports' is wrong: every WojackOWL file (mhclo, mhmat, obj) says 'exported by MakeClothes 2', the string written by the standalone MakeClothes 2 add-on (community-plugins-makeclothes); MPFB2's mhclo writer, unchanged since 2024-12-11, writes 'created using MPFB2' instead. They are fitted to basemesh hm08."
+    },
+    {
+     "lens": "drift",
+     "verdict": "refuted",
+     "read": "faq.html links (curl, 2026-09-23); Wayback bodyparts06.html 20260826163948 (2026-09-23); assets.json changed dates (2026-09-23)",
+     "evidence": "FAQ 'full text' links: CC0 -> 'https://creativecommons.org/publicdomain/zero/1.0/deed.en'; CC-BY -> 'https://creativecommons.org/licenses/by/2.5/se/deed.en'.",
+     "notes": "Labels unchanged (bodyparts06 Aug 2026 = today; WojackOWL items unchanged since 2025). Conflation: the claim takes its obligation from the FAQ, a non-binding summary, and the register lists CC BY 4.0 as a source, while the FAQ's own 'full text' link for CC-BY is CC BY 2.5 Sweden. Neither label nor header names a version, so the claim's 'no CC version is stated' holds for them, but the site does point at 2.5 SE, whose attribution terms are more than 'give credit'."
+    }
+   ]
+  },
+  {
+   "id": "HM-005",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Open question, not a conclusion: in WojackOWL's MakeHuman uploads, read 2026-09-23, the facial hair items (nodes 3654 to 3659) name the texture 'BHL_FacialHair_Test_BaseColor_Alpha.png', a repository file of 3654 to 3658 but not of Mutton Chops (3659), whose uploader commented on 2026-03-16 that its textures are 'the same as the other facial hair items I made'. Short Hair B's (3677) .mhmat points to '/home/rashad/Pictures/Pictures/Textures/Blender_HairLab/' and names a BHL_StraightHairB_FlowMap normal that is not among its repository files. Low Taper Fade V2 (3729) names no texture in its .mhmat; its repository texture is AfroHairFade_test.png. Both BHL PNGs carry Blender render metadata naming '/home/rashad/3D models/Custom/MakeHuman/MakeHuman Assets/Hair/43_HairLab.blend' (2025-06-01 and 2025-06-07), so the uploader rendered them in Blender; whether a third-party tool or source went into them, and whether the CC BY label can cover them, was not established.",
+   "sources": [
+    "http://www.makehumancommunity.org/node/3729",
+    "http://www.makehumancommunity.org/node/3677",
+    "http://www.makehumancommunity.org/node/3654",
+    "http://www.makehumancommunity.org/node/3659"
+   ],
+   "as_first_reported": "Open question, not a conclusion: in WojackOWL's MakeHuman uploads (nodes 3654 to 3659, 3677, 3729), read 2026-09-23, the texture files are named BHL_* and the .mhmat texture paths point to '/home/rashad/Pictures/Pictures/Textures/Blender_HairLab/'. Short Hair B's .mhmat also names a FlowMap normal that is not among the repository files, and Mutton Chops' .mhmat names the shared facial hair atlas, which is not listed among that item's repository files. Where the atlases came from, and whether the CC BY label can cover them, was not established.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "assets.json file lists and node pages 3654-3659, 3677, 3729 (curl, 2026-09-23); their .mhmat files; BHL_FacialHair_Test_BaseColor_Alpha.png and BHL_StraightHairB_Alpha.png from the repository, PNG chunks parsed (2026-09-23); AfroHairFade_test.png from the earlier kept download",
+     "evidence": "3654-3659 .mhmat: 'diffuseTexture BHL_FacialHair_Test_BaseColor_Alpha.png'. 3677: 'diffuseTexture /home/rashad/Pictures/Pictures/Textures/Blender_HairLab/BHL_StraightHairB_Alpha.png', 'normalmapTexture .../BHL_StraightHairB_FlowMap.png'. 3729 .mhmat: '// Textures' with no entry; repository diffuse 'AfroHairFade_test.png'. PNG tEXt: 'File /home/rashad/3D models/Custom/MakeHuman/MakeHuman Assets/Hair/43_HairLab.blend', dates 2025/06/01 and 2025/06/07. 3659 comment by WojackOWL 2026-03-16: 'The textures for this facial hair is the same as the other facial hair items I made.'",
+     "notes": "Wrong in part: only Short Hair B's .mhmat points to /home/rashad/.../Blender_HairLab/; the six facial hair .mhmat files name a bare 'BHL_FacialHair_Test_BaseColor_Alpha.png'; Low Taper Fade V2 names no texture and its texture is 'AfroHairFade_test.png', not BHL_*. Right: the FlowMap is not a 3677 repository file; Mutton Chops lists no texture file. Origin: both BHL PNGs carry Blender's render stamp naming the uploader's own file '43_HairLab.blend', so they were rendered in Blender on the uploader's machine. A Blender add-on called 'Hair Lab' (NENGHUO Studio, superhivemarket.com/products/hair-painter, read {D}: 'License GPL', Personal and Commercial licences, 'Hair Card Maker') makes hair cards, but nothing in the files names it, so the link is not established."
+    }
+   ]
+  },
+  {
+   "id": "HM-006",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Fan art and real-person names in MakeHuman's repository, read 2026-09-23: Hair 01 (node 2027, topknot) is described as 'Iroh's hairstyle from Avatar series', credits Kavzekenza (Sketchfab) and culturalibre, and is labelled CC0 in the hair01 pack but CC-BY in the repository; Hair 04 (node 2428, short male) is described as 'Superman (Christopher Reeve) hairstyle'. Beard Sigmund wip in bodyparts05 is named after Sigmund Freud, a real person rather than a fictional character.",
+   "sources": [
+    "http://www.makehumancommunity.org/node/2027",
+    "http://www.makehumancommunity.org/node/2428",
+    "https://static.makehumancommunity.org/assets/assetpacks/bodyparts05.html"
+   ],
+   "as_first_reported": "Fan art and real-person names in MakeHuman's repository, read 2026-09-23: Hair 01 (node 2027, topknot) is described as 'Iroh's hairstyle from Avatar series', credits Kavzekenza (Sketchfab) and culturalibre, and is labelled CC0 in the hair01 pack but CC-BY in the repository; Hair 04 (node 2428, short male) is described as 'Superman (Christopher Reeve) hairstyle'. Beard Sigmund wip in bodyparts05 is named after Sigmund Freud, a real person rather than a fictional character.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "http://www.makehumancommunity.org/node/2027 and /node/2428 (curl, 2026-09-23); hair_01.mhclo from assets.json (2026-09-23); hair01 pack page (2026-09-23); bodyparts05_cc0.zip packs/bodyparts05.json (2026-09-23)",
+     "evidence": "2027: 'Iroh's hairstyle from Avatar series.Original model by Kavzekenza cc-by.Downloaded from: https://sketchfab.com/...' License 'CC-BY'; header '#original model \"Iroh\" by Kavzekenza cc-by ... # author culturalibre # license cc-by'; hair01 pack row culturalibre_hair_01 'CC0'. 2428: 'Superman (Christopher Reeve) hairstyle.Tri mesh.Original model by madsoul666.License CC-BY.' Pack json for grinsegold_beard_sigmund_wip: 'Using a face that reminds at the famous analysist Sigmund Freud could help.'",
+     "notes": "All parts hold. The Freud link is stated by the author in the bodyparts05 pack metadata. Extra: Hair 04's source URL is a cults3d 'playmobil-superman-hair-remixed-from-johnmcwgeo-design', so it is also a remix of a Playmobil toy part."
+    }
+   ]
+  },
+  {
+   "id": "HM-007",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "Quaternius Universal Base Characters [Standard], read 2026-09-23, is CC0 on every page and file read: the zip's License_Standard.txt says 'CC0 1.0 Universal (CC0 1.0) Public Domain Dedication', the itch.io page 'Asset license Creative Commons Zero v1.0 Universal', and the quaternius.com pack page 'License CC0' and 'Free to use in personal, educational and commercial projects. (CC0 License)'. The site's licence page now shows the Quaternius Asset License (QAL) v1.0, 'Last updated: 8/28/2026', whose section 7 says 'the version in effect at the time you obtained the Assets governs'; which text governs a download made today is ambiguous, so the zip's licence file is kept with the download. The itch page says 'No generative AI was used' (a disclosure, not a restriction) and showed 'Updated 7 days ago'.",
+   "sources": [
+    "https://quaternius.itch.io/universal-base-characters",
+    "https://quaternius.com/packs/universalbasecharacters.html",
+    "https://quaternius.com/license.html"
+   ],
+   "as_first_reported": "Quaternius Universal Base Characters [Standard], read 2026-09-23, is CC0 on every page and file read: the zip's License_Standard.txt says 'CC0 1.0 Universal (CC0 1.0) Public Domain Dedication', the itch.io page 'Asset license Creative Commons Zero v1.0 Universal', and the quaternius.com pack page 'License CC0' and 'Free to use in personal, educational and commercial projects. (CC0 License)'. The site's licence page now shows the Quaternius Asset License (QAL) v1.0, 'Last updated: 8/28/2026', whose section 7 says 'the version in effect at the time you obtained the Assets governs'; which text governs a download made today is ambiguous, so the zip's licence file is kept with the download. The itch page says 'No generative AI was used' (a disclosure, not a restriction) and showed 'Updated 7 days ago'.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://quaternius.itch.io/universal-base-characters, https://quaternius.com/packs/universalbasecharacters.html, https://quaternius.com/license.html (curl, 2026-09-23); Universal Base Characters[Standard].zip freshly downloaded through itch's free download flow (2026-09-23), License_Standard.txt read",
+     "evidence": "License_Standard.txt: 'CC0 1.0 Universal (CC0 1.0)' / 'Public Domain Dedication'. itch: 'Asset license Creative Commons Zero v1.0 Universal', 'Content No generative AI was used', 'Updated 7 days ago' (title '16 September 2026 @ 09:11 UTC'). Pack page: 'License CC0', 'Free to use in personal, educational and commercial projects. (CC0 License)'. Licence page: 'Quaternius Asset License (QAL) v1.0', 'Last updated: 8/28/2026', section 7 '...the version in effect at the time you obtained the Assets governs your use of them.'",
+     "notes": "Every quote present. The zip quote spans a line break in the file. The zip's licence file has an archive date of 2025-08-18."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback: quaternius.com/license.html 20260913163700 (only capture); itch page 20260413125106 and 20260918220757; pack page 20251206061218 (read 2026-09-23)",
+     "evidence": "license.html 2026-09-13: 'Quaternius Asset License (QAL) v1.0 Last updated: 8/28/2026'. itch April and September 2026: 'Asset license Creative Commons Zero v1.0 Universal'. Pack page Dec 2025: 'License CC0'.",
+     "notes": "No drift in the CC0 labels across 2025 to 2026; the QAL page has one capture, already v1.0. The claim already names the conflict between the per-pack CC0 labels and the site-wide QAL and does not resolve it, which is the right strength. It concerns the Standard tier only; the paid Source tier was not read."
+    }
+   ]
+  },
+  {
+   "id": "HM-008",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "A search of Sketchfab's API (api.sketchfab.com/v3/search, type=models, downloadable=true, count=24, up to 40 pages per query), run 2026-09-23 for 17 queries ('male hair', 'short hair', 'beard', 'hair cards', 'moustache', 'mustache', 'man hair', 'buzz cut', 'hairstyle male', 'ponytail', 'man bun', 'goatee', 'stubble', 'sideburns', 'long hair', 'hair card', 'haircut'), found no CC0 hair or beard asset. With licenses=cc0 each query returned 0 to 9 results (20 distinct), none a hair or beard asset by name: they include 'Male Figure In Ivory', 'The Prophet Simeon', and for 'beard' a goby fish ('CC0 チワラスボ 🐟 Bearded Worm Goby, T. cirratus') and a fern ('CC0 コウヤコケシノブ Bearded Filmy Fern, H. barbatum'). With licenses=by results were many (for example male hair 309, beard 960 capped at 40 pages, long hair 773, stubble 477, man bun 3; 3,495 distinct), of which 900 distinct names contain a hair or facial-hair word; these were not inspected one by one. With licenses=free-st, male hair gave 6 and beard 19; judged by name, description and tags, one is a standalone moustache ('Mustache' by assetfactory, 2,816 faces) and none is a standalone scalp hair asset. Sketchfab's CC BY record reads 'Author must be credited. Commercial use is allowed.' The download endpoint returned HTTP 401 without an API token, so no Sketchfab file was inspected. Other queries, and models that are not downloadable, were not searched.",
+   "sources": [
+    "https://api.sketchfab.com/v3/search",
+    "https://api.sketchfab.com/v3/models/f9ffa8cf88df43409543c476950995b5",
+    "https://api.sketchfab.com/v3/licenses",
+    "http://creativecommons.org/licenses/by/4.0/"
+   ],
+   "as_first_reported": "Sketchfab has no CC0 hair or beard asset: its search API (type=models, downloadable=true), walked on 2026-09-23 to 40 pages of 24 for 17 hair and beard queries, returned 0 to 9 CC0 results per query and none was a hair or beard asset (the CC0 'beard' hits are a goby fish and a fern). CC BY results were many (for example male hair 309, beard 960 capped at 40 pages, stubble 477, man bun 3); 919 distinct results had a hair word in the name, 603 after removing whole characters, busts and heads. The Free Standard licence gave male hair 6, beard 19, none a standalone male hair asset. Sketchfab's CC BY record reads 'Author must be credited. Commercial use is allowed.' Every download endpoint returned HTTP 401 without an API token, so no Sketchfab file was inspected.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "api.sketchfab.com/v3/search (type=models, downloadable=true, count=24, up to 40 pages) for the same 17 queries with licenses=cc0 and licenses=by, and 'male hair' and 'beard' with licenses=free-st (2026-09-23); api.sketchfab.com/v3/licenses (2026-09-23); api.sketchfab.com/v3/models/6a876007.../download without a token (2026-09-23)",
+     "evidence": "CC0 per query 0 to 9; 'beard' CC0 hits include 'CC0 チワラスボ 🐟 Bearded Worm Goby' and 'CC0 コウヤコケシノブ Bearded Filmy Fern', the rest museum figures and objects. BY: male hair 309, beard 960 (40 pages), stubble 477, man bun 3; 3,464 distinct BY results. free-st: male hair 6, beard 19 (one is 'Mustache' by assetfactory, 2,816 faces). Licences API by: 'Author must be credited. Commercial use is allowed.' Download: HTTP 401.",
+     "notes": "Counts reproduce exactly, and no CC0 hit is a hair or beard asset. The headline 'Sketchfab has no CC0 hair or beard asset' says more than a 17-query search of downloadable models can show; it should say the search found none. '919 distinct' and '603' used an unrecorded name filter: a hair and facial-hair word regex gives 930 on the earlier walk and 931 today (within 2 percent of 919); the 603 manual cut was not reproduced. 'None a standalone male hair asset' holds for scalp hair, though the Free Standard beard results include one standalone moustache."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "api.sketchfab.com/v3/licenses (2026-09-23); comparison of this walk with the earlier researcher's sf_results.json from the same day",
+     "evidence": "by: label 'CC Attribution', url 'http://creativecommons.org/licenses/by/4.0/'.",
+     "notes": "Same-day results: 3,443 of 3,464 distinct BY results overlap the earlier walk, so the index has not moved materially. The licence record points to CC BY 4.0, matching the claim's source. The claim does not conflate the record's one-line summary with the licence; the rights question for uploads is handled in HM-009."
+    },
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "My own walk 2026-09-23 (rc_hmfree/sf_walk.py, results in sf_walk.json): 17 queries x cc0 and by, plus male hair and beard x free-st; api.sketchfab.com/v3/models/<uid> for the 23 distinct free-st results; api.sketchfab.com/v3/licenses; /v3/models/f9ffa8cf.../download without a token",
+     "evidence": "cc0: male hair 2, short hair 3, beard 9, moustache 3, man hair 5, buzz cut 1, long hair 4, others 0; 20 distinct, all label 'CC0 Public Domain'. by: male hair 309, short hair 308, beard 960 (40 pages, next link present), long hair 773, stubble 477, man bun 3; 3,495 distinct. free-st: 6 and 19. Mustache: 2816 faces, 'low poly ar filter ready black mustache 3d model'. Licences by: 'Author must be credited. Commercial use is allowed.' Download: HTTP 401.",
+     "notes": "Scoped to the queries run, as the first check asked. Name filter, recorded: case-insensitive regex \\b(hair\\w*|beard\\w*|moustache\\w*|mustache\\w*|stubble|goatee|sideburns?|ponytail|haircut|hairstyle\\w*|man ?bun|buzz ?cut)\\b over the 3,495 distinct BY names gives 900 (list in sf_hairword.json). The unrecorded 919 and 603 are dropped; no figure replaces 603 because that manual cut cannot be reproduced. Every per-query count in the claim reproduced exactly. 'None is a standalone scalp hair asset' rests on metadata, not files, and says so."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Comparison of my walk with the earlier same-day walk (hair/chk/sfby.json, sf_out.txt); api.sketchfab.com/v3/licenses live 2026-09-23; Wayback CDX for api.sketchfab.com/v3/licenses (no captures)",
+     "evidence": "All 17 cc0 counts, all 17 by counts and both free-st counts equal the earlier walk. Distinct BY: earlier 3,464, now 3,495, overlap 3,443. Licences record by: label 'CC Attribution', url 'http://creativecommons.org/licenses/by/4.0/'; cc0: 'Credit is not mandatory. Commercial use is allowed.'",
+     "notes": "The index moves slightly within a day (distinct BY set differs by a few dozen, since results for the same count can reorder), which is why the claim gives the date and the distinct count as of this walk. The licence record has no Wayback history, so its wording cannot be dated before today. The claim quotes the record as Sketchfab's one-line summary and cites CC BY 4.0 as the licence; it does not run the two together. Upload rights (whether an uploader could licence the hair) are HM-009's question, not this claim's."
+    }
+   ]
+  },
+  {
+   "id": "HM-009",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Rips and fan art on Sketchfab, all under a CC BY 4.0 licence record, read from the API 2026-09-23: 'Hair Pack (part 1)' by rendysix says 'Made by CAPCOM' (Monster Hunter); 'M_ Hair_01_01' by Zepeto_Uploads says 'Male Hair from Zepeto ... Mesh is not mine', and the zHairezt '(With Bones)' uploads say 'ALL CREDITS TO ZEPETO'; 'moustache and beard hair mesh' by itstanishqua is 'loosely based off of Captain Jack Sparrow'; 'Hair' by curuata0199 gives 'Reference: Genshin impact: Kaveh'; 'Stylized Fortnite Hair Pack Male' by toriatheo is named after Fortnite. A CC BY label on Sketchfab does not show the uploader held the rights.",
+   "sources": [
+    "https://sketchfab.com/3d-models/41f1709e39e24a3fafdbcd2c2aac72a1",
+    "https://sketchfab.com/3d-models/e5cce7b96e9149ae892e2b6beda016c6",
+    "https://sketchfab.com/3d-models/3cc4d217e7174fd29dd23203d37c6138",
+    "https://sketchfab.com/3d-models/3dc981e38fd84b278034a479410a6aa0",
+    "https://sketchfab.com/3d-models/9011bdbc95b84a8f967c9c98acbeff28"
+   ],
+   "as_first_reported": "Rips and fan art on Sketchfab, all under a CC BY 4.0 licence record, read from the API 2026-09-23: 'Hair Pack (part 1)' by rendysix says 'Made by CAPCOM' (Monster Hunter); 'M_ Hair_01_01' by Zepeto_Uploads says 'Male Hair from Zepeto ... Mesh is not mine', and the zHairezt '(With Bones)' uploads say 'ALL CREDITS TO ZEPETO'; 'moustache and beard hair mesh' by itstanishqua is 'loosely based off of Captain Jack Sparrow'; 'Hair' by curuata0199 gives 'Reference: Genshin impact: Kaveh'; 'Stylized Fortnite Hair Pack Male' by toriatheo is named after Fortnite. A CC BY label on Sketchfab does not show the uploader held the rights.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "api.sketchfab.com/v3/models/<uid> for 41f1709e..., e5cce7b9..., 3cc4d217..., 3dc981e3..., 9011bdbc... and three zHairezt uploads (350dc19a..., 9e23db8b..., 3051c06f...) (2026-09-23); steamcommunity.com/sharedfiles/filedetails/?id=1535287382 (2026-09-23); api.sketchfab.com/v3/licenses (2026-09-23)",
+     "evidence": "rendysix: 'Made by CAPCOM. Monster cut hairs from: https://steamcommunity.com/...id=1535287382' (Steam title 'Monster Hunter World Hunter Hair'). Zepeto_Uploads: 'Male Hair from Zepeto. ... Mesh is not mine.' zHairezt: 'ALL CREDITS TO ZEPETO'. itstanishqua: 'loosely based off of Captain Jack Sparrow'. curuata0199: 'Reference: Genshin impact: Kaveh'. toriatheo: 'Stylized Fortnite Hair Pack Male'. All licence label 'CC Attribution' (licences API: by/4.0).",
+     "notes": "All quotes present; the Monster Hunter attribution is supported by the linked Steam Workshop item. One zHairezt upload writes 'all credits to zepeto' in lower case; others match the claim."
+    }
+   ]
+  },
+  {
+   "id": "HM-010",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "CC BY hair on Sketchfab, read from the API 2026-09-23 and not downloaded (face counts are the API's whole-scene faceCount): VincentFreelance's 'FREE 21 Realtime man Hairstyles collection' (915,434 faces, about 43,600 per style; description links to paid ArtStation libraries) and 'FREE Male Fashion Hair collection' 01 and 02, 'Realtime male Fashion Hair collection 07' and 'Male Fashion Hair collection 08' (623,540 to 694,304 faces), whose descriptions say 'Textures not included'; PolytricityLtd's 'Beard 1' (2,048 faces, '4k texture maps included', also on Fab as CC-BY); KaitlynAndrus's 'Bearded Man', whose head scan was 'provided by instructor'; tatevose's 'White Beard' (11,351) and depa_96's moustache (1,264), both with 0 textures.",
+   "sources": [
+    "https://sketchfab.com/3d-models/6a876007572c464da5184eb99af0c5f7",
+    "https://sketchfab.com/3d-models/2735370f6f764078a18f5d80651050a2",
+    "https://sketchfab.com/3d-models/f4f8c69fc44242b698ebfcc50c8255f0",
+    "https://sketchfab.com/3d-models/60947a1819a1407685cb4332e894e585",
+    "https://sketchfab.com/3d-models/56f7b60a34a5449b875b22236750f038",
+    "https://sketchfab.com/3d-models/3697959ccd3d464fb60e892b48ffff3f"
+   ],
+   "as_first_reported": "CC BY hair on Sketchfab, read from the API 2026-09-23 and not downloaded (face counts are the API's whole-scene faceCount): VincentFreelance's 'FREE 21 Realtime man Hairstyles collection' (915,434 faces, about 43,600 per style; description links to paid ArtStation libraries) and 'FREE Male Fashion Hair collection' 01 and 02, 'Realtime male Fashion Hair collection 07' and 'Male Fashion Hair collection 08' (623,540 to 694,304 faces), whose descriptions say 'Textures not included'; PolytricityLtd's 'Beard 1' (2,048 faces, '4k texture maps included', also on Fab as CC-BY); KaitlynAndrus's 'Bearded Man', whose head scan was 'provided by instructor'; tatevose's 'White Beard' (11,351) and depa_96's moustache (1,264), both with 0 textures.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "api.sketchfab.com/v3/models/<uid> for the six sources plus bd74c3f6... (02), bf63cecf... (07), a60076cc... (08) (2026-09-23); ArtStation /a/ links in the description and api/v2/marketplace/products/oYlPP.json and 5VvBN.json (2026-09-23); Fab listing c86bfaa3-0475-4574-b618-a994c278c5a8 read in a browser tab (2026-09-23)",
+     "evidence": "21 styles: faceCount 915434; 01 694304, 02 623540, 07 667988, 08 657059, each 'Files of sketchfab is free,but Textures not included.' ArtStation links resolve to marketplace products with prices (e.g. 'price': 2490). Beard 1: 2048 faces, '4k texture maps included'; Fab 'Beard 1' by Polytricity, licence 'CC-BY'. Bearded Man: '(Facial scan provided by instructor)'. White Beard 11351, textureCount 0; depa_96 'Mustache Free Model (Bigote)' 1264, textureCount 0.",
+     "notes": "All figures reproduce (915,434 / 21 = 43,592). The 21-styles description itself does not say 'Textures not included'; the claim does not say it does."
+    }
+   ]
+  },
+  {
+   "id": "HM-011",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "Other free sources searched 2026-09-23. OpenGameArt (advanced search, 3D Art): hair 41, beard 2, moustache 1, hairstyle 6; the relevant items are Micket's three male styles (HAIR-142) and Tiko's dread ponytail and short dreads, CC0 on OpenGameArt and itch.io ('CC0 free to use in any project!', 88k tris for the set per itch), while Fab lists the same item as CC-BY and its own description says 'CC0 and free to use'. itch.io free: tag hair 7, tag beard 3, nothing else male 3D hair. Poly Haven API: 521 models, 862 textures, no hair. Blender Studio: no standalone hair asset found (site search is script-rendered); its terms say 3D data is CC BY 4.0 'Unless notified otherwise'.",
+   "sources": [
+    "https://opengameart.org/content/toonlow-poly-dread-ponytail",
+    "https://opengameart.org/content/side-parting-hairstyle-for-male-model",
+    "https://api.polyhaven.com/assets?t=models",
+    "https://studio.blender.org/terms-and-conditions/"
+   ],
+   "as_first_reported": "Other free sources searched 2026-09-23. OpenGameArt (advanced search, 3D Art): hair 41, beard 2, moustache 1, hairstyle 6; the relevant items are Micket's three male styles (HAIR-142) and Tiko's dread ponytail and short dreads, CC0 on OpenGameArt and itch.io ('CC0 free to use in any project!', 88k tris for the set per itch), while Fab lists the same item as CC-BY and its own description says 'CC0 and free to use'. itch.io free: tag hair 7, tag beard 3, nothing else male 3D hair. Poly Haven API: 521 models, 862 textures, no hair. Blender Studio: no standalone hair asset found (site search is script-rendered); its terms say 3D data is CC BY 4.0 'Unless notified otherwise'.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "opengameart.org/art-search-advanced (keys hair, beard, moustache, hairstyle; art type 3D Art; all pages) (2026-09-23); OGA pages toonlow-poly-dread-ponytail, short-dreads, side-parting-hairstyle-for-male-model (2026-09-23); endthegame.itch.io/toon-ponytail-dreadlock-set (2026-09-23); itch.io/game-assets/free/tag-hair and tag-beard (2026-09-23); Fab listing 'Toon/Low Poly Dread Ponytail' by Tiko via browser (2026-09-23); api.polyhaven.com/assets?t=models and t=textures (2026-09-23); studio.blender.org/terms-and-conditions/ (2026-09-23)",
+     "evidence": "OGA counts hair 41, beard 2, moustache 1, hairstyle 6; OGA 'License(s): CC0' on all three pages. itch: 'CC0 free to use in any project!', 'Triangles: 88k'. itch tag-hair '(7 results)', tag-beard '(3 results)'. Fab: licence 'CC-BY', description 'CC0 and free to use for any project you want.' Poly Haven 521 models, 862 textures, none hair. Blender Studio: 'Unless notified otherwise, all digital content (webpages, video, artwork, 3D data) is available under the Creative Commons Attribution 4.0.'",
+     "notes": "All counts reproduce exactly. The other itch tag-hair results are shaders, pixel-art sprites, whole characters or a demo. Blender Studio's script-rendered search was not retried."
+    }
+   ]
+  },
+  {
+   "id": "HM-012",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "BlenderKit search API (asset_type model), 2026-09-23: 'hair' free 146 results (24 with a hair word in the name), all prices 557 (122 hair-named); 'beard' 85, of which 1 free hair-related item, a full base mesh. The free relevant items are 'Short hair card' by Salman Ramezani (6,555 faces per the API), 'Male Character Base Mesh with Hair Cards' by Dr toxic and six female cuts by Ddr Rcs, all under BlenderKit's Royalty Free licence. A free asset's file was served through the API download endpoint without a login (tested on 'Short hair card'); none was used.",
+   "sources": [
+    "https://www.blenderkit.com/api/v1/search",
+    "https://www.blenderkit.com/asset-gallery-detail/4793aff4-5e46-4902-a329-314731ebde09/"
+   ],
+   "as_first_reported": "BlenderKit search API (asset_type model), 2026-09-23: 'hair' free 146 results (24 with a hair word in the name), all prices 557 (122 hair-named); 'beard' 85, of which 1 free hair-related item, a full base mesh. The free relevant items are 'Short hair card' by Salman Ramezani (6,555 faces per the API), 'Male Character Base Mesh with Hair Cards' by Dr toxic and six female cuts by Ddr Rcs, all under BlenderKit's Royalty Free licence; downloads need a BlenderKit login, and none was downloaded.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "www.blenderkit.com/api/v1/search/ (query hair/beard asset_type:model, with and without is_free:true, all pages) (2026-09-23); the API download endpoint for 'Short hair card' (0a91297d...), no API key (2026-09-23)",
+     "evidence": "hair free 146 (24 hair-named), hair all 557 (122 hair-named), beard 85, beard free 3 (1 hair-related: 'Realistic Bearded Male Base MeshRigged', Dr toxic). 'Short hair card' faceCount 6555, licence royalty_free. Download endpoint returned HTTP 200 with a signed filePath; the file served (HTTP 206) begins with a zstd frame holding 'BLENDER'.",
+     "notes": "Counts, faces and licences reproduce. Wrong: 'downloads need a BlenderKit login'; the free asset's .blend was served through the API with no login or key. Free hair-named items not listed in the claim ('Realistic Hair', 4,665,571 faces; 'Stylized Hairstyle', 'for girl') are tagged female, so the relevant list is fair. BlenderKit now calls itself 'Blendkit (formerly BlenderKit)'."
+    }
+   ]
+  },
+  {
+   "id": "HM-013",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "Blendkit (formerly BlenderKit) terms, read 2026-09-23, state 'The Terms & Conditions for users are valid and effective as of 12 June 2026'; the old URL blenderkit.com/terms-and-conditions-2021/ now redirects to blendkit.com/terms-and-conditions-2026/. They restrict a product used in software: 'In this case, the product may only be used if it is made available solely to the users of the software itself and access to the product will be disabled outside the user's software. The product must be used in the project in such a format that it cannot be opened or separated by a third party. At the same time, the software may not contain any functionality that would allow end users to export any 3D model from the software or embed any open-format 3D model in the software.' The same three sentences stand in the earlier terms 'valid and effective as of 20 May 2021' (Wayback, 2026-05-02). For a product whose licence is CC0, the terms add that it 'shall entitle you to use the product in any possible way which does not violate the applicable law, the Terms or good morals'. The licensing FAQ, which is not the terms, reads: 'Can I sell renders and animations made with Blendkit (formerly BlenderKit)? Yes, you can. Can I sell games made with Blendkit models? Yes, if these can't be extracted by the users in an easy way.' The licences page says the Royalty Free licence 'allows commercial use without mentioning the author'. No clause on AI, machine learning or datasets was found in the terms, the licences page or the FAQ.",
+   "sources": [
+    "https://www.blendkit.com/terms-and-conditions-2026/",
+    "https://www.blenderkit.com/terms-and-conditions-2021/",
+    "https://web.archive.org/web/20260502115239/https://www.blenderkit.com/terms-and-conditions-2021/",
+    "https://www.blenderkit.com/docs/licenses/",
+    "https://www.blenderkit.com/docs/licenses/licensing-faq/"
+   ],
+   "as_first_reported": "BlenderKit's Royalty Free terms, read 2026-09-23, allow a model in software only packed: 'the product may only be used if it is made available solely to the users of the software itself and access to the product will be disabled outside the user's software. The product must be used in the project in such a format that it cannot be opened or separated by a third party. At the same time, the software may not contain any functionality that would allow end users to export any 3D model from the software or embed any open-format 3D model in the software.' Renders may be sold (FAQ: 'Can I sell renders and animations made with Blendkit? Yes, you can.'), and the licence 'allows commercial use without mentioning the author'. No AI clause was found.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "https://www.blenderkit.com/terms-and-conditions-2021/ (curl 2026-09-23; canonical https://www.blendkit.com/terms-and-conditions-2026/, same text); https://www.blenderkit.com/docs/licenses/ (2026-09-23); https://www.blenderkit.com/docs/licenses/licensing-faq/ (2026-09-23)",
+     "evidence": "Terms: '...made available solely to the users of the software itself and access to the product will be disabled outside the user's software. ... cannot be opened or separated by a third party. ... export any 3D model from the software or embed any open-format 3D model in the software.' (all three sentences verbatim) Licences: 'allows commercial use without mentioning the author'. FAQ: 'Can I sell renders and animations made with Blendkit (formerly BlenderKit)? Yes, you can.'",
+     "notes": "The terms clause and the licences quote are verbatim. The FAQ quote is not: the live text reads 'made with Blendkit (formerly BlenderKit)?', and the FAQ page is not among the claim's sources. No AI, machine learning or dataset clause was found in the terms, licences page or FAQ."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback blenderkit.com/terms-and-conditions-2021/ 20260502115239 and docs/licenses/ 20260331223358 (read 2026-09-23); live terms (2026-09-23)",
+     "evidence": "May 2026 terms: 'valid and effective as of 20 May 2021', with the same three clause sentences. Live: 'The Terms & Conditions for users are valid and effective as of 12 June 2026'; 'Blendkit (formerly BlenderKit)'. Licences page March 2026 already has 'allows commercial use without mentioning the author'.",
+     "notes": "The terms were replaced on 12 June 2026 (rebrand to Blendkit), and the '-2021' URL now serves the 2026 text. The quoted clause is unchanged across both versions, so the substance has not drifted, but the register should cite the 2026 terms (blendkit.com/terms-and-conditions-2026/) and its effective date, not the 2021 URL. Suggested fix: quote the FAQ as 'Can I sell renders and animations made with Blendkit (formerly BlenderKit)? Yes, you can.' and add the FAQ URL."
+    },
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "curl 2026-09-23: blenderkit.com/terms-and-conditions-2021/ (redirects, final URL blendkit.com/terms-and-conditions-2026/, identical bytes to a direct fetch); blenderkit.com/docs/licenses/ (redirects to blendkit.com/docs/licenses/); blenderkit.com/docs/licenses/licensing-faq/ (redirects to blendkit.com/docs/licenses/licensing-faq/)",
+     "evidence": "Every quoted string found verbatim by exact string match in my extracted text: the three-sentence clause starting 'In this case, the product may only be used'; 'shall entitle you to use the product in any possible way which does not violate the applicable law, the Terms or good morals'; 'valid and effective as of 12 June 2026'; FAQ 'Can I sell renders and animations made with Blendkit (formerly BlenderKit)? Yes, you can. Can I sell games made with Blendkit models? Yes, if these can't be extracted by the users in an easy way.'; licences 'allows commercial use without mentioning the author'.",
+     "notes": "The clause sits in the terms' general licence article, followed by the CC0 sentence; the claim quotes both rather than labelling the clause 'Royalty Free terms', which the text does not do. The terms say the licence type is 'either \"Royalty-free licence\" or \"CC0 licence\"'. AI search (AI, artificial, machine learning, train, dataset, neural, generative, scraping, text and data mining) on all three pages: only hit is the nav link 'Blender 3D Training'."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback (id_) read 2026-09-23: terms-and-conditions-2021/ 20260502115239; licensing-faq/ 20260603105050; docs/licenses/ 20260610082726; CDX for blendkit.com/terms-and-conditions-2026/ (first capture 20260622223317)",
+     "evidence": "May 2026 terms: 'valid and effective as of 20 May 2021'; the three-sentence clause is byte-identical to live (478 characters). June 2026 FAQ: 'Can I sell renders and animations made with BlenderKit? Yes, you ca[n]'. June 2026 licences: 'Royalty Free This license protects the work in the way that it allows commercial use without mentioning t[he author]'.",
+     "notes": "Terms replaced on 12 June 2026 with the rebrand; the packing clause is unchanged, and the claim now cites the 2026 terms and their date, not the 2021 URL. The FAQ's only change is the name ('BlenderKit' to 'Blendkit (formerly BlenderKit)'); the claim quotes today's wording. Conflation: the FAQ and licences page are non-binding summaries and the claim now labels the FAQ as not the terms, and keeps the binding clause as the terms' own text."
+    }
+   ]
+  },
+  {
+   "id": "HM-014",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "The Fab End User License Agreement ('Last updated: October 1st, 2024', read 2026-09-23) lets a buyer 'Distribute software applications (such as video games) that include Content', but 'you may, however, only authorize end users to make use of Content solely as incorporated in the Project in object code and you must restrict end users from extracting or otherwise using Content outside of the Project.' Images may ship: 'you may freely Distribute ... images created using Content'. Its summary says 'You are not required to give credit to the publisher' (not the binding text). Listings flagged NoAI (isAiForbidden in the listing API) may not be used in datasets for, the development of, or as training inputs to Generative AI Programs.",
+   "sources": [
+    "https://www.fab.com/eula"
+   ],
+   "as_first_reported": "The Fab End User License Agreement ('Last updated: October 1st, 2024', read 2026-09-23) lets a buyer 'Distribute software applications (such as video games) that include Content', but 'you may, however, only authorize end users to make use of Content solely as incorporated in the Project in object code and you must restrict end users from extracting or otherwise using Content outside of the Project.' Images may ship: 'you may freely Distribute ... images created using Content'. Its summary says 'You are not required to give credit to the publisher' (not the binding text). Listings flagged NoAI (isAiForbidden in the listing API) may not be used in datasets for, the development of, or as training inputs to Generative AI Programs.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.fab.com/eula rendered with headless Chrome --dump-dom (curl got a Cloudflare 403), read 2026-09-23; listing API https://www.fab.com/i/listings/<uid> for ba7e7768, addbd1ce, f8c401fb via headless Chrome, 2026-09-23",
+     "evidence": "'Last updated: October 1st, 2024'; 4(c) 'you may, however, only authorize end users to make use of Content solely as incorporated in the Project in object code and you must restrict end users from extracting or otherwise using Content outside of the Project.' ... 'you may Distribute software applications (such as video games) that include Content'; 4(b) 'you may freely Distribute: ... ii. images created using Content.'; summary: 'This summary of license terms is for your convenience only and is not legally binding' ... 'You are not required to give credit to the publisher'.",
+     "notes": "Every quote is verbatim. The EULA defines NoAI Content as Content 'tagged with \"NoAI\" in the Epic Marketplace at the time of your Transaction'; the isAiForbidden name comes from the listing API, not the EULA (the field is present and true on the three listings read today). The images clause is 'Subject to any applicable restrictions in Section 6', which the claim leaves out but does not contradict."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback id_ captures of https://www.fab.com/eula: 20241012002131 (binding text in the page JSON), 20251114012637, 20260311214222, 20260910100624 (summary only server-rendered); CDX shows 44 distinct digests 2024-10-02 to 2026-09-10; read 2026-09-23",
+     "evidence": "2024-10-12 capture already carries 'you must restrict end users from extracting or otherwise using Content outside of the Project', 'ii.\\timages created using Content.' and 'vii.\\tuse NoAI Content (i) in datasets utilized by Generative AI Programs; (ii) in the development of Generative AI Programs; or (iii) as training inputs to Generative AI Programs.' Summary line 'You are not required to give credit' present in every capture from 2025-11-14.",
+     "notes": "The quoted binding clauses match between the 2024-10-12 capture and today. Later captures render only the summary server side, so the body could not be diffed clause by clause after 2024-10, but today's text matches the 2024 wording for every quoted clause. The claim keeps the non-binding summary apart from the binding text, so no conflation."
+    }
+   ]
+  },
+  {
+   "id": "HM-015",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "Fab's EULA ('Last updated: October 1st, 2024', read 2026-09-23) offers three License Tiers: 'a Personal - Reference Only tier, a Personal tier, and a Professional tier'. A buyer is 'only eligible for a Personal - Reference Only tier or Personal tier if, at the time of the Transaction you, together with any controlling entity and other entities under common control with you, have not generated more than $100,000 USD in gross revenue from your commercial activity in the digital content industry in the last 12 months'. The page's non-binding summary adds that 'Both pricing tiers (Personal and Professional) grant you the same scope of rights'. A Fab listing shown as free is therefore free only to a buyer under that limit when its Professional price is above zero.",
+   "sources": [
+    "https://www.fab.com/eula"
+   ],
+   "as_first_reported": "Fab's two pricing tiers, per the same EULA read 2026-09-23: 'Both pricing tiers (Personal and Professional) grant you the same scope of rights', but the Personal tier is open only if at the time of the Transaction you 'have not generated more than $100,000 USD in gross revenue from your commercial activity in the digital content industry in the last 12 months'. A Fab listing shown as free is therefore free only to a buyer under that limit when its Professional price is above zero.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "https://www.fab.com/eula rendered with headless Chrome --dump-dom (curl got a Cloudflare 403), read 2026-09-23",
+     "evidence": "Summary ('not legally binding'): 'Both pricing tiers (Personal and Professional) grant you the same scope of rights.'. 2(a): 'you may be required to select between a Personal - Reference Only tier, a Personal tier, and a Professional tier' ... 'You are only eligible for a Personal - Reference Only tier or Personal tier if, at the time of the Transaction you, together with any controlling entity and other entities under common control with you, have not generated more than $100,000 USD ...'",
+     "notes": "Quotes are verbatim, but (1) the 'Both pricing tiers' sentence is from the non-binding summary, not the EULA the claim cites; (2) the binding text names three tiers, not two (Personal - Reference Only as well); (3) the revenue test counts 'any controlling entity and other entities under common control with you', which the claim drops, so it states a narrower test than the text; the limit also governs the Reference Only tier."
+    },
+    {
+     "lens": "drift",
+     "verdict": "refuted",
+     "read": "Wayback id_ captures of https://www.fab.com/eula 20241012002131 and 20251114012637, read 2026-09-23",
+     "evidence": "2024-10-12: 'You are only eligible for a Personal - Reference Only tier or Personal tier if, at the time of the Transaction you, together with any controlling entity and other entities under common control with you, have not generated more than $100,000 USD'. 2025-11-14 summary: 'Both pricing tiers (Personal and Professional) grant you the same scope of rights.'",
+     "notes": "No change to the binding tier clause since 2024-10-12. The claim runs together the non-binding summary ('Both pricing tiers ...') and the binding text ('per the same EULA'), which is the conflation this lens looks for."
+    }
+   ]
+  },
+  {
+   "id": "HM-016",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "Fab search (fab.com/i/listings/search, is_free=1, 15 pages of 24 per query, read through a browser 2026-09-23; curl gets a Cloudflare 403): nine queries (hair, male hair, beard, male hair cards, mustache, man bun, buzz cut, goatee, stubble) gave 1,492 distinct listings, 71 with 'hair' in the title, mostly MetaHuman strand grooms (Unreal only) or female styles. Paid beard hits are mostly MetaHuman grooms too: KhitrovArt's 'Short Boxed Beard Groom for MetaHuman' (MetaHuman package plus two source Alembic .abc files; 'Hair cards and card-based LODs are not included') at US$9.99 Personal, US$14.99 Professional, and Chamiseul Studio Ci's 'Rugged Stubble Beard' (MetaHuman package only) at US$3.99 and US$9.99. allpolovinkina's 'Stylized Hair Basemesh FREE Sample' (one male and one female basemesh, 1,138 and 1,334 faces at the first subdivision level per the listing) is US$0 at both tiers and flagged NoAI.",
+   "sources": [
+    "https://www.fab.com/listings/ba7e7768-e3a1-4ad1-83e0-9944dd31c669",
+    "https://www.fab.com/listings/addbd1ce-f745-4f84-bb2f-a1d4865ec16f",
+    "https://www.fab.com/listings/f8c401fb-ebf0-4880-887e-32cec05aeba2"
+   ],
+   "as_first_reported": "Fab search, read in a browser 2026-09-23 (curl got a Cloudflare 403): is_free=1 across 9 queries gave 80 distinct hair-titled listings, mostly MetaHuman strand grooms (Unreal only) or female styles. Paid beard hits are mostly MetaHuman grooms too: KhitrovArt's 'Short Boxed Beard Groom for MetaHuman' (.mhpkg only, 'Hair cards and ... not' included) at US$9.99 Personal, US$14.99 Professional, and Chamiseul Studio Ci's 'Rugged Stubble Beard' (MetaHuman package only) at US$3.99 and US$9.99. allpolovinkina's 'Stylized Hair Basemesh FREE Sample' (one male and one female blockout, 1,138 to 1,335 polygons per the listing) is free at both tiers and flagged NoAI.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "Fab listing API https://www.fab.com/i/listings/{ba7e7768-e3a1-4ad1-83e0-9944dd31c669, addbd1ce-f745-4f84-bb2f-a1d4865ec16f, f8c401fb-ebf0-4880-887e-32cec05aeba2} and /i/listings/search?is_free=1&count=24 (15 pages each), all via headless Chrome, 2026-09-23",
+     "evidence": "ba7e7768: KhitrovArt, Personal 9.99, Professional 14.99, formats ['metahuman','additional-files'], 'Hair cards and card-based LODs are not included.', 'Optional (Additional files) 2 Source Alembic .abc files'. addbd1ce: Chamiseul Studio Ci, formats ['metahuman'], 3.99 and 9.99. f8c401fb: allpolovinkina, Personal 0.0, Professional 0.0, isAiForbidden true, 'Polycount (faces, 1st subdivision level): Female Hair_01 - 1,334 Male Hair_01 - 1,138'.",
+     "notes": "Prices, sellers, NoAI and MetaHuman-only for the stubble beard match. Wrong: the boxed beard is not '.mhpkg only' (it also ships two source Alembic .abc files as Additional files); the basemesh counts are faces at the first subdivision level, 1,138 to 1,334, not 1,335 polygons. The 80 count cannot be reproduced by the same method: the 9 queries were not recorded (free.json keeps only the method). A walk of 9 plausible queries (hair, male hair, beard, male hair cards, mustache, man bun, buzz cut, goatee, stubble; 15 pages of 24, is_free=1) gave 1,492 distinct listings, 71 with 'hair' in the title and 100 with any hair or facial-hair word, neither within 2 percent of 80."
+    }
+   ]
+  },
+  {
+   "id": "HM-017",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "TurboSquid's 3D Model License, read 2026-09-23 ('effective for use with 3D Models for use on or after March 16, 2023'), allows 3D Models in 'Computer Games, virtual worlds, simulation and training environments', but '3D Models must be contained in proprietary formats so that they cannot be opened or imported in a publicly available software application or framework, or extracted without reverse engineering. WebGL exports from Unity, Unreal, and Lumberyard are permitted. Any other open format or format encrypted with decryptable open standards (such as an encrypted compression archive ...) are prohibited', so a build shipping plain glTF or OBJ would breach it. It says 'You may NOT use Imagery in machine learning programs without prior authorization from TurboSquid', where Imagery means rendered images. Models labelled 'Editorial Uses Only' are limited to news reporting and academic use (II.4), and the page's non-binding explainer lists 'video game' among editorial uses not allowed.",
+   "sources": [
+    "https://blog.turbosquid.com/turbosquid-3d-model-license/"
+   ],
+   "as_first_reported": "TurboSquid's 3D Model License, read 2026-09-23 (no date found), allows 3D Models in 'Computer Games, virtual worlds, simulation and training environments', but '3D Models must be contained in proprietary formats so that they cannot be opened or imported in a publicly available software application or framework, or extracted without reverse engineering. WebGL exports from Unity, Unreal, and Lumberyard are permitted. Any other open format or format encrypted with decryptable open standards (such as an encrypted compression archive ...) are prohibited', so a build shipping plain glTF or OBJ would breach it. It says 'You may NOT use Imagery in machine learning programs without prior authorization from TurboSquid', and Editorial Uses Only models exclude 'video game'.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "https://blog.turbosquid.com/turbosquid-3d-model-license/ with curl (browser User-Agent), visible text, 2026-09-23",
+     "evidence": "7(b): '3D Models must be contained in proprietary formats ... WebGL exports from Unity, Unreal, and Lumberyard are permitted. Any other open format or format encrypted with decryptable open standards (such as an encrypted compression archive or other WebGL programs not listed here) are prohibited'; 6(d) 'You may NOT use Imagery in machine learning programs without prior authorization from TurboSquid.'; last line: 'This 3D Model License is effective for use with 3D Models for use on or after March 16, 2023.'",
+     "notes": "All quotes are verbatim, but the claim says 'no date found' and the page ends with an effective date of March 16, 2023. 'Imagery' is defined as 'a Creation made of any single image or sequence of images', so the ML sentence covers renders, not the model files; the claim quotes it without saying so. 'video game' is not in the binding Editorial clause (II.4); it comes from the page's explanatory 'Types of Editorial Uses Not Allowed' list ('Merchandising. No physical product for resale, video game, etc.')."
+    },
+    {
+     "lens": "drift",
+     "verdict": "refuted",
+     "read": "Wayback id_ captures 20230601 and 20240601 (resolved to nearest) and 20260802191250 of the same URL, compared with today's text, 2026-09-23",
+     "evidence": "Licence text from 'TurboSquid 3D Model License' to the effective-date line differs between the 2023-06 capture and today only in the notice addresses ('643 Magazine St.' removed, 'Fl. 21' to 'Fl. 20'). 'No physical product for resale, video game, etc.' sits under 'Types of Editorial Uses Not Allowed', above 'TurboSquid 3D Model License / This is a legally binding agreement'.",
+     "notes": "No drift in the quoted clauses since June 2023. But the claim runs together the binding Editorial clause (II.4, label 'Editorial Uses Only', permitted use 'limited to news reporting' and academic use) with the non-binding explainer, which is where 'video game' appears."
+    }
+   ]
+  },
+  {
+   "id": "HM-018",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "CGTrader's General Terms and Conditions, read 2026-09-23 (no date on the page other than '© CGTrader 2011-2026'): the Royalty Free licence (21A) permits Incorporated Product use 'as purchased by a game’s creators as part of a game if the Product is contained inside a proprietary format and displays inside the game during play' and 'as rendered still images or moving images'; 21A.3 says 'If you use any Product in software products (such as video games, simulations, or VR-worlds) you must take all commercially reasonable measures to prevent the end user from gaining access to the Product'. Clause 21A.7, added between the Wayback captures of 2026-03-02 and 2026-05-01, says 'Products uploaded by Sellers with a Royalty Free License may be made available for purchase on the Site under Royalty Free License, No AI. Products with a Royalty Free License may be available for the Buyers only if purchased as part of Bulk Enterprise Sales, as per section 18.11, or Custom Enterprise Deals, as per section 18.12.' A buyer outside those enterprise deals can therefore get a Royalty Free product only under the Royalty Free License, No AI (21B), where 'The same licensing terms apply as for Royalty Free License, except that Product use for machine learning or training of neural network models, including generative AI models, is not permitted.' Editorial products (22.2) may be used only 'for legitimate, editorial purposes'.",
+   "sources": [
+    "https://www.cgtrader.com/pages/terms-and-conditions",
+    "https://web.archive.org/web/20260302041205id_/https://www.cgtrader.com/pages/terms-and-conditions",
+    "https://web.archive.org/web/20260501085855id_/https://www.cgtrader.com/pages/terms-and-conditions"
+   ],
+   "as_first_reported": "CGTrader's General Terms and Conditions, read 2026-09-23 (no date found): Royalty Free (21A) Incorporated Product use includes use 'as part of a game if the Product is contained inside a proprietary format and displays inside the game during play' and 'as rendered still images or moving images'; 21A.3 says 'If you use any Product in software products (such as video games, simulations, or VR-worlds) you must take all commercially reasonable measures to prevent the end user from gaining access to the Product'. Under the No AI variant (21B), 'Product use for machine learning or training of neural network models, including generative AI models, is not permitted'. Editorial products (22.2) are only 'for legitimate, editorial purposes'.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.cgtrader.com/pages/terms-and-conditions with curl (browser User-Agent), visible text, 2026-09-23",
+     "evidence": "21A.2 list: '- as rendered still images or moving images' and '- as purchased by a game's creators as part of a game if the Product is contained inside a proprietary format and displays inside the game during play'; '21A.3. If you use any Product in software products (such as video games, ...) you must take all commercially reasonable measures to prevent the end user from gaining access to the Product.'; '21B.1 ... Product use for machine learning or training of neural network models, including generative AI models, is not permitted.'; 22.2 '... for legitimate, editorial purposes'.",
+     "notes": "All quotes verbatim and in the sections named; no date on the page other than '(c) CGTrader 2011-2026'. The game clause continues 'but not for users to re-package as goods distributed or sold inside a virtual world', which the claim omits without contradiction."
+    },
+    {
+     "lens": "drift",
+     "verdict": "refuted",
+     "read": "Wayback id_ captures of the same URL: 20240901, 20250901, 20251102205643, 20260101064932, 20260302041205, 20260501085855, 20260709041723, 20260810014325, 20260919133031; read 2026-09-23",
+     "evidence": "Today: '21A.7. Products uploaded by Sellers with a Royalty Free License may be made available for purchase on the Site under Royalty Free License, No AI. Products with a Royalty Free License may be available for the Buyers only if purchased as part of Bulk Enterprise Sales, as per section 18.11, or Custom Enterprise Deals, as per section 18.12.' Absent in the 2026-03-02 capture, present from 2026-05-01.",
+     "notes": "The quoted clauses are unchanged since 2024-09 (22.2 had 'Buyer's' before 2026). But 21A.7, added between 2026-03-02 and 2026-05-01, means an ordinary site buyer now receives the 'Royalty Free License, No AI' (21B); the plain Royalty Free licence (whose 21A.2 list includes machine learning input) is only for enterprise deals. The claim presents 21A as the licence and 21B as a variant, which runs the two together. Suggested wording: add that under 21A.7 non-enterprise purchases are under 21B, so no ML use is licensed."
+    },
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.cgtrader.com/pages/terms-and-conditions with curl (browser User-Agent), tags stripped, 2026-09-23",
+     "evidence": "21A.2: '- as rendered still images or moving images; ...'; '- as purchased by a game’s creators as part of a game if the Product is contained inside a proprietary format and displays inside the game during play, but not for users to re-package...'; '21A.7. Products uploaded by Sellers with a Royalty Free License may be made available for purchase on the Site under Royalty Free License, No AI. Products with a Royalty Free License may be available for the Buyers only if purchased as part of Bulk Enterprise Sales...'; '© CGTrader 2011-2026'.",
+     "notes": "All quotes verbatim, including 21A.3, 21B.1 and 22.2. 21A.7 says Royalty Free products 'may be made available' under 21B, so the wording says a non-enterprise buyer can get such a product 'only under' 21B, not that every product is offered. 21B is presented as the licence an ordinary buyer receives, not a variant. Other licences exist (Editorial 22, Custom 23A, Custom No AI 23B, and 19A.19 puts subscribers on 21B), which the claim does not deny. The 21A.2 list's machine-learning input line is left out, since 21A.7 keeps plain 21A to enterprise deals."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback id_ captures of the same URL 20260302041205 and 20260501085855, tags stripped and grepped, 2026-09-23; the 20260919133031 capture came back gzip-encoded and was not read",
+     "evidence": "2026-03-02: 21A.2 game and rendered-image lines, 21A.3, 21B.1 present; no 21A.7; 22.2 reads 'Buyer’s may only use'. 2026-05-01: '21A.7. Products uploaded by Sellers with a Royalty Free License may be made available for purchase on the Site under Royalty Free License, No AI...' present; '19A.19. The “Royalty Free License, No AI” shall always apply to the use or download of the Products by subscribers.'; 22.2 'Buyers may only use'.",
+     "notes": "Confirms the 2026-03-02 to 2026-05-01 window for 21A.7 stated in the claim. The first drift check (captures back to 2024-09) found the other quoted clauses unchanged, and the two captures read today agree. The claim now keeps 21A (enterprise only) and 21B (ordinary purchase) apart rather than running them together as licence and variant."
+    }
+   ]
+  },
+  {
+   "id": "HM-019",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "Superhive's Royalty Free License, read 2026-09-23, grants 'the ability to make use of the purchased product for personal, educational, and or commercial purposes' unless you 'resell, redistribute, or repackage the purchased product without explicit permission' or use it in a logo. It has no games clause and no protection clause, and does not define 'redistribute', so whether mesh data may ship in a game build is unclear. Sellers add tiers the page does not define: Meta Studio sells 'Personal License For use in personal or student or freelance projects' US$15, 'Commercial license ... Up to 5 users' US$59 and 'Studio License For studios under 20 users' US$159, while the same page's Details box says 'License Royalty Free'.",
+   "sources": [
+    "https://superhivemarket.com/page/royalty-free-license",
+    "https://superhivemarket.com/products/professional-realtime-hair-card---male-hair--part-1--"
+   ],
+   "as_first_reported": "Superhive's Royalty Free License, read 2026-09-23, grants 'the ability to make use of the purchased product for personal, educational, and or commercial purposes' unless you 'resell, redistribute, or repackage the purchased product without explicit permission' or use it in a logo. It has no games clause and no protection clause, and does not define 'redistribute', so whether mesh data may ship in a game build is unclear. Sellers add tiers the page does not define: Meta Studio sells 'Personal License For use in personal or student or freelance projects' US$15, 'Commercial license ... Up to 5 users' US$59 and 'Studio License For studios under 20 users' US$159, while the same page's Details box says 'License Royalty Free'.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://superhivemarket.com/page/royalty-free-license and https://superhivemarket.com/products/professional-realtime-hair-card---male-hair--part-1-- with curl, visible text; also /policies/terms-of-service ('Last Updated June 22, 2026') and support article 54-available-licensing-options ('Last updated on April 7, 2025'), 2026-09-23",
+     "evidence": "'This license grants you, the purchaser, the ability to make use of the purchased product for personal, educational, and or commercial purposes ... - You may not resell, redistribute, or repackage the purchased product without explicit permission from the original creator, - You may not use the purchased product in a logo, watermark, or trademark'. Product: 'Personal License For use in personal or student or freelance projects $15', 'Commercial license For use in commercial projects - Up to 5 users $59', 'Studio License For studios under 20 users $159', 'License Royalty Free'.",
+     "notes": "Quotes and prices match today. The page has no games or protection clause and does not define 'redistribute'. The help article lists only Standard Royalty Free, CC-BY 4.0 and Editorial for assets, so the seller's Personal/Commercial/Studio tiers are indeed not defined by Superhive."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback id_ captures: superhivemarket.com/page/royalty-free-license 20260626024543; blendermarket.com/page/royalty-free-license 20240601 and 20200601; read 2026-09-23",
+     "evidence": "2024-06 and 2026-06 captures carry the same 'personal, educational, and or commercial purposes' grant. 2020-06 Blender Market wording: 'The Royalty Free license grants you ... personal, educational, or commercial purposes' ... 'without explicit permission from the original author'.",
+     "notes": "No change since at least June 2024; the 2020 wording differed only slightly. The claim keeps the licence page and the seller's tier labels apart, so no conflation."
+    }
+   ]
+  },
+  {
+   "id": "HM-020",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "Gumroad sets no content licence of its own: its Terms ('Last Updated Date: September 14, 2026', read 2026-09-23) say each seller's Product 'is licensed by you through Gumroad to the relevant Buyer' and 'You shall provide Gumroad with the end user license terms and Product Documentation applicable to your Products' (6.7). Two hair products were read with curl (page and .json) on 2026-09-23. Meta Studio's 'Beard and Mustache Part 10 - Professional Realtime Hair card' (US$15+) shows two seller options, 'Personal License' ('For use in personal or student or freelance projects') and 'Commercial license' ('For use in commercial projects - Up to 5 users', US$40 more), with no further licence text. Alina Polovinkina's 'Hair - Low Poly Male Hairstyle Kitbash' (US$8+) has no options and no licence text; its description calls it 'Game-ready' and 'Suitable for any 3d software'. Neither page states games, redistribution, attribution or AI terms. For an item also sold on a store with a written licence, the survey buys it there instead.",
+   "sources": [
+    "https://gumroad.com/terms",
+    "https://meta0studio.gumroad.com/l/olgmk",
+    "https://allpolovinkina.gumroad.com/l/hfyfm"
+   ],
+   "as_first_reported": "Gumroad has no platform licence for 3D content: the product JSON of three hair products read with curl on 2026-09-23 carried only seller option labels, with no games, redistribution, attribution or AI terms. For an item also sold on a store with a written licence, the survey buys it there instead.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "curl <product>.json for https://allpolovinkina.gumroad.com/l/hfyfm, https://meta0studio.gumroad.com/l/olgmk (plus siblings /l/dmeba and /l/qdpts), and https://gumroad.com/terms ('Last Updated Date: September 14, 2026'), 2026-09-23",
+     "evidence": "olgmk options: 'Personal License' 'For use in personal or student or freelance projects' (+0), 'Commercial license' 'For use in commercial projects - Up to 5 users' (+4000 cents). hfyfm options: [] and description 'game ready haircuts for your men characters'. Terms 6.7: 'You shall provide Gumroad with the end user license terms and Product Documentation applicable to your Products, and you hereby authorize Gumroad to present the same to each Buyer'.",
+     "notes": "Supported: Gumroad sets no content licence (sellers supply it, 6.7), and no JSON read carries games, redistribution, attribution or AI terms. Wrong: the sources name two products, not three, and the third cannot be identified; hfyfm's JSON carries no option labels at all, only a description (which calls it 'Game-ready' as marketing, not as licence terms), so 'carried only seller option labels' is not true of it."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback id_ captures of https://gumroad.com/terms 20250601003155 ('Last Updated Date: December 10, 2024') and 20260811083343 ('Last Updated Date: August 3, 2026'); product JSON updated_at fields; read 2026-09-23",
+     "evidence": "Both captures contain 'You shall provide Gumroad with the end user license terms and Product Documentation applicable to your Products'. hfyfm updated_at 2026-04-20T09:59:08Z; olgmk 2024-03-08T02:52:58Z.",
+     "notes": "The seller-supplies-licence clause is stable across the 2025 and 2026 terms. No conflation of platform terms and seller labels in the claim."
+    },
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "curl (browser User-Agent) of https://meta0studio.gumroad.com/l/olgmk and https://allpolovinkina.gumroad.com/l/hfyfm, each page and its .json; https://gumroad.com/terms; all 2026-09-23",
+     "evidence": "olgmk.json: name 'Beard and Mustache Part 10 - Professional Realtime Hair card', '$15+', usd, seller 'Meta Studio', options 'Personal License' / 'For use in personal or student or freelance projects' (+0), 'Commercial license' / 'For use in commercial projects - Up to 5 users' (+4000 cents). hfyfm.json: 'Hair - Low Poly Male Hairstyle Kitbash', '$8+', seller 'Alina Polovinkina', options [], description 'Low Poly / High Poly / Kitbash / UV / Game-ready ... Suitable for any 3d software.' Terms 6.7 as quoted.",
+     "notes": "Both descriptions and page HTML were searched for licence, redistribution, credit, attribution, AI, training and machine learning: the only licence strings are olgmk's two option labels (and a Gumroad 'is_licensed' field set to false, a licence-key feature, not terms). The third product in the old wording is dropped. 'Game-ready' is marketing copy, not a licence term; the claim reports it as description text only. The last sentence is survey policy, not a sourced fact."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback id_ captures of https://gumroad.com/terms 20250601003155 and 20260811083343; CDX and captures of both product URLs (olgmk 20250321133749, hfyfm 20240323034912); product JSON updated_at; 2026-09-23",
+     "evidence": "Terms 2025-06-01 ('Last Updated Date: December 10, 2024') and 2026-08-11 ('Last Updated Date: August 3, 2026') both contain 'is licensed by you through Gumroad to the relevant Buyer' and 'You shall provide Gumroad with the end user license terms and Product Documentation applicable to your Products'. updated_at: olgmk 2024-03-08T02:52:58Z, hfyfm 2026-04-20T09:59:08Z.",
+     "notes": "The platform clause is stable across three terms versions. The archived product captures are small script shells without the option data, so the seller labels could not be compared over time; the updated_at fields are the only dating. The claim keeps the platform terms and the seller labels apart."
+    }
+   ]
+  },
+  {
+   "id": "HM-021",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "ArtStation's Marketplace End User Agreement (read 2026-09-23) 'applies to all downloadable products ... sold via the ArtStation Marketplace, unless a custom agreement or license is provided by the seller'. Its Standard Commercial Licence covers unlimited personal projects and 'one commercial Work, with up to a maximum of, as applicable, 2,000 sales of the Work or 20,000 monthly views of the Work'; its Extended Commercial Licence covers 'any number of commercial Works, with no limit on sales or views'. Product pages show the Standard tier as 'For personal use and one commercial project (up to 2,000 sales or 20,000 views)', but sellers name and describe tiers their own way: Verta 3D's 'Men's Realtime Haircard Collection - v5' has a 'Standard License' tier at US$9.50 whose description reads 'For Personal Use', plus a 'Commercial License' (US$35.00) and a 'Studio License' (US$69.00), both Extended Commercial; 'Alma Studio Free Hair Cards ( Male And Female )' has a Standard tier named 'Personal Use' at no charge and an Extended Commercial tier named 'Commercial License' at US$5.00. No source read says whether a seller's tier name or description counts as 'a custom agreement or license'. A game past 2,000 sales or 20,000 monthly views is outside what the Standard Commercial Licence covers. The EULA has no clause requiring a proprietary or encrypted format.",
+   "sources": [
+    "https://www.artstation.com/marketplace-product-eula",
+    "https://www.artstation.com/marketplace/p/j7Pog/men-s-realtime-haircard-collection-v5",
+    "https://www.artstation.com/marketplace/p/Km6xg/alma-studio-free-hair-cards-male-and-female"
+   ],
+   "as_first_reported": "ArtStation's EULA applies 'unless a custom agreement or license is provided by the seller' (read 2026-09-23), and hair sellers relabel its tiers: Verta 3D labels Standard 'For Personal Use' and sells separate Commercial and Studio licences, although the EULA's Standard covers one commercial Work (CAS-033); Alma's 'Free Hair Cards (Male And Female)' is US$0 for 'Personal Use' and US$5.00 for a 'Commercial License'. Where a seller labels Standard as personal, a commercial game needs that seller's commercial tier. The EULA itself has no clause requiring a proprietary or encrypted format.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "https://www.artstation.com/marketplace-product-eula and the two product pages rendered with headless Chrome --dump-dom (curl got 403), 2026-09-23",
+     "evidence": "EULA: 'unless a custom agreement or license is provided by the seller.'; 'Standard Commercial Licence ... respect to one commercial Work, with up to a maximum of, as applicable, 2,000 sales of the Work or 20,000 monthly views of the Work.' Verta 3D: 'Standard License USD $9.50 ... License: Standard License ... For personal use and one commercial project (up to 2,000 sales or 20,000 views) ... For Personal Use'; 'Commercial License USD $35.00', 'Studio License USD $69.00' (both Extended). Alma: 'Personal Use Free' (Standard); 'Commercial License USD $5.00'.",
+     "notes": "Quotes, labels and prices match, and the EULA has no format or encryption clause. But 'Where a seller labels Standard as personal, a commercial game needs that seller's commercial tier' says more than the text: the product page itself states the Standard tier covers 'one commercial project', and a seller label is not 'a custom agreement or license'. The claim also omits the 2,000 sales / 20,000 monthly views cap, which is what forces an Extended tier for most commercial games regardless of the label."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback id_ captures of https://www.artstation.com/marketplace-product-eula 20230212224436, 20240319181806, 20250301, 20260711181929; read 2026-09-23",
+     "evidence": "All captures contain 'unless a custom agreement or license is provided by the seller', 'respect to one commercial Work' and '2,000 sales of the Work or 20,000 monthly views'; no 'encrypt' in any. Sections from the opening paragraph to '6. Proprietary Rights' identical between 2025-03 and today. Today's page shows 'Notice: We'll be updating these terms starting April 6, 2025 Read New Terms', linking to artstation-terms-of-service-eu PDF (the site Terms of Service, not a new EUA).",
+     "notes": "No drift in the EUA since at least Feb 2023. The April 2025 banner concerns the site Terms of Service, not this agreement. The claim keeps the EULA apart from seller labels."
+    },
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.artstation.com/marketplace-product-eula and the two product pages rendered with headless Chrome (--dump-dom, 15 s virtual time), tags stripped, 2026-09-23",
+     "evidence": "EULA: 'unless a custom agreement or license is provided by the seller.'; 'respect to one commercial Work, with up to a maximum of, as applicable, 2,000 sales of the Work or 20,000 monthly views of the Work.'; 'with respect to any number of commercial Works, with no limit on sales or views.' Verta: 'Standard License USD $9.50 ... For personal use and one commercial project ... For Personal Use'; 'Commercial License USD $35.00'; 'Studio License USD $69.00'. Alma: 'Personal Use Free ... Standard License'; 'Commercial License USD $5.00'.",
+     "notes": "Quotes and prices match; both Verta paid tiers and Alma's US$5.00 tier show 'License: Extended Commercial License'. The EULA's only seller-licence hook is the 'custom agreement or license' sentence (plus 'The EUA is an agreement between the buyer and the seller'); neither it nor the product pages say whether a tier label is such an agreement, and the claim says so rather than deciding it. 'proprietary' occurs only in 5(h) 'proprietary notice' and '6. Proprietary Rights'; no 'encrypt'. The old sentence 'a commercial game needs that seller's commercial tier' and the CAS-033 cross-reference are removed."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Wayback id_ captures of https://www.artstation.com/marketplace-product-eula 20230212224436 and 20260711181929; CDX and captures of the product pages (Verta 20260527182900, Alma 20251219133037); 2026-09-23",
+     "evidence": "Both EULA captures contain 'unless a custom agreement or license is provided by the seller', 'respect to one commercial Work, with up to a maximum of, as applicable, 2,000 sales of the Work or 20,000 monthly views of the Work', 'with respect to any number of commercial Works, with no limit on sales or views' and 'for personal use on an unlimited number of personal projects that are not used or distributed in any commercial manner'; neither contains 'encrypt'.",
+     "notes": "No drift in the quoted EULA text since February 2023. The archived product pages are client-rendered shells with no tier data, so the seller labels and prices rest on today's render only. The claim keeps the EULA's tiers, ArtStation's page summary and the sellers' own names apart, and does not treat a label as a custom licence."
+    }
+   ]
+  },
+  {
+   "id": "HM-022",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "'Hair - Low Poly Male Hairstyle Kitbash' by allpolovinkina, read 2026-09-23: Gumroad's product JSON gives US$8.00 for 6 short male styles, a beard and a moustache, combinable, as stylised solid meshes in ZTL, ZPR, FBX, OBJ and .blend, with the seller's face counts of 956 to 2,852 per hair, 762 for the beard and 422 for the moustache, and stylised 2048x2048 textures in 7 colours. The same pack is listed on TurboSquid at US$14.99 (search listing only, product page not read), where the survey notes a free sample. Buying it on TurboSquid gives a written games licence and its proprietary-format rule.",
+   "sources": [
+    "https://allpolovinkina.gumroad.com/l/hfyfm",
+    "https://www.turbosquid.com/3d-models/hair-low-poly-male-hairstyle-kitbash-3d-model-1832507"
+   ],
+   "as_first_reported": "'Hair - Low Poly Male Hairstyle Kitbash' by allpolovinkina, read 2026-09-23: Gumroad's product JSON gives US$8.00 for 6 short male styles, a beard and a moustache, combinable, as stylised solid meshes in ZTL, ZPR, FBX, OBJ and .blend, with the seller's face counts of 956 to 2,852 per hair, 762 for the beard and 422 for the moustache, and stylised 2048x2048 textures in 7 colours. The same pack is listed on TurboSquid at US$14.99 (search listing only, product page not read), where the survey notes a free sample. Buying it on TurboSquid gives a written games licence and its proprietary-format rule.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://allpolovinkina.gumroad.com/l/hfyfm product props via curl, 2026-09-23; https://www.turbosquid.com/3d-models/hair-low-poly-male-hairstyle-kitbash-3d-model-1832507 rendered in Playwright, 2026-09-23",
+     "evidence": "Gumroad price_cents 800; 'You can combine mustache, beard and hairstyles'; ZTL, ZPR, FBX, OBJ, 'Blender with all files'; 'simple stylized textures 2048x2048 with different colors - Black, Brown, Dark Brown, Blond, Ginger, Rose, Gray'; 'Polycount (faces): ... Hair_03 - 956 ... Hair_06 - 2 852 Mustache - 422 Beard - 762'. TurboSquid: '$14.99 Add to Cart Standard License'; description 'FREE Sample - Low Poly Hairstyles'.",
+     "notes": "All figures match today. The product page on TurboSquid was read today (the claim says it was not); it confirms US$14.99 under the Standard License and mentions a free sample, and Gumroad also links a 'FREE sample' (allpolovinkina.gumroad.com/l/dmeba). 'Short' for the six styles is not stated in the text. The licence part rests on the TurboSquid licence register, not re-read here."
+    }
+   ]
+  },
+  {
+   "id": "HM-023",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Mariia Zatorska's 'Low Poly Male Hair \"Style M01\"' on ArtStation (product API JSON, 2026-09-23): US$15.00 Standard Use License, US$80.00 Extended Commercial License; one short male style as alpha cards plus a head cap mesh, 'Low poly (8k triangles)' by the seller; FBX, OBJ, Blender 2.9 .blend and Substance .sbs; 4k TGA and 2k PNG maps (Mask, Alpha, Depth, Flow, Gradient/Root, Id, Diffuse, Normal, AO) with diffuse in brown, blond and purple; 'This model fits the Genesis 8 Base male model'. The noai flag is false.",
+   "sources": [
+    "https://www.artstation.com/marketplace/p/req2/low-poly-male-hair-style-m01-fbx-obj-blender-source-file-4k-textures"
+   ],
+   "as_first_reported": "Mariia Zatorska's 'Low Poly Male Hair \"Style M01\"' on ArtStation (product API JSON, 2026-09-23): US$15.00 Standard Use License, US$80.00 Extended Commercial License; one short male style as alpha cards plus a head cap mesh, 'Low poly (8k triangles)' by the seller; FBX, OBJ, Blender 2.9 .blend and Substance .sbs; 4k TGA and 2k PNG maps (Mask, Alpha, Depth, Flow, Gradient/Root, Id, Diffuse, Normal, AO) with diffuse in brown, blond and purple; 'This model fits the Genesis 8 Base male model'. The noai flag is false.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://www.artstation.com/api/v2/marketplace/products/req2.json (curl, 2026-09-23)",
+     "evidence": "variants: 'Standard Use License' 1500, 'Extended Commercial License' 8000 (usd); 'Low poly (8k triangles)'; 'FBX, OBJ head cap mesh'; 'Blender 2.9 source file'; 'Texture source file .sbs'; '4k textures TGA: Mask/ Alpha / Depth / Flow / Gradient Ramp or Root / Id / Diffuse / Normal / AO'; '2k textures PNG'; '3 colors Diffuse map: Brown (default), Blond, Purple'; 'This model fits the Genesis 8 Base male model'; noai false.",
+     "notes": "Every item matches. 'Short' and 'alpha cards' are the survey's reading of the title and images; the text says 'hair cards' and lists an Alpha map."
+    }
+   ]
+  },
+  {
+   "id": "HM-024",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "KhitrovArt's 'Buzz Cut Fade - Game-Ready Real-Time Hair' on Fab (listing API, 2026-09-23): US$19.99 Personal, US$29.99 Professional; alpha cards plus a haircap, no head; 29,502 tris and 31,587 verts by the seller, above the 4k to 20k range in HAIR-016; FBX, OBJ and .ma per the description; 4K TGA and PNG albedo, AO, normal, ID, depth, directional, roots, tips and alpha. Flagged NoAI.",
+   "sources": [
+    "https://www.fab.com/listings/eb116269-4524-4982-b019-cc857bd35af8"
+   ],
+   "as_first_reported": "KhitrovArt's 'Buzz Cut Fade - Game-Ready Real-Time Hair' on Fab (listing API, 2026-09-23): US$19.99 Personal, US$29.99 Professional; alpha cards plus a haircap, no head; 29,502 tris and 31,587 verts by the seller, above the 4k to 20k range in HAIR-016; FBX, OBJ and .ma per the description; 4K TGA and PNG albedo, AO, normal, ID, depth, directional, roots, tips and alpha. Flagged NoAI.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://www.fab.com/i/listings/eb116269-4524-4982-b019-cc857bd35af8 (fetched inside a fresh Playwright tab on fab.com, 2026-09-23)",
+     "evidence": "licenses Personal 19.99, Professional 29.99, no discount; isAiForbidden true; 'Hair and haircap meshes: .fbx, .obj, .ma'; '4K PBR textures: .tga, .png'; 'No eyebrows, eyelashes, or head mesh included'; maps 'Albedo AO ... Normal ID Depth Directional Roots Tips Alpha'; 'Polycount: 31,587 verts, 29,502 tris'.",
+     "notes": "Matches. Fab's own format badges list only FBX and additional files; OBJ and .ma come from the description, as the claim says."
+    }
+   ]
+  },
+  {
+   "id": "HM-025",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "KhitrovArt goatees on Fab (listing API, 2026-09-23), alpha cards in FBX, OBJ and .ma for a generic head, both flagged NoAI: 'Extended Goatee Beard with Soul Patch Real Time Facial Hair' US$9.99 Personal, US$19.99 Professional, 5,984 tris by the seller, 512 to 1K PBR maps; 'Goatee Beard Pack Vol. 1 - 5 Real-Time Facial Hair Styles' US$29.99 Personal, US$59.99 Professional, five goatees from 5,200 tris (Goatee_01), 2K to 4K maps (albedo, AO, normal, ID, depth, directional, roots, tips, alpha).",
+   "sources": [
+    "https://www.fab.com/listings/c694be34-a199-4162-b83d-a7cba2d91280",
+    "https://www.fab.com/listings/3e1557a3-a81c-4a4f-8da3-8799e5aa5f31"
+   ],
+   "as_first_reported": "KhitrovArt goatees on Fab (listing API, 2026-09-23), alpha cards in FBX, OBJ and .ma for a generic head, both flagged NoAI: 'Extended Goatee Beard with Soul Patch Real Time Facial Hair' US$9.99 Personal, US$19.99 Professional, 5,984 tris by the seller, 512 to 1K PBR maps; 'Goatee Beard Pack Vol. 1 - 5 Real-Time Facial Hair Styles' US$29.99 Personal, US$59.99 Professional, five goatees from 5,200 tris (Goatee_01), 2K to 4K maps (albedo, AO, normal, ID, depth, directional, roots, tips, alpha).",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://www.fab.com/i/listings/c694be34-a199-4162-b83d-a7cba2d91280 (fetched inside a fresh Playwright tab on fab.com, 2026-09-23); https://www.fab.com/i/listings/3e1557a3-a81c-4a4f-8da3-8799e5aa5f31 (fetched inside a fresh Playwright tab on fab.com, 2026-09-23)",
+     "evidence": "Soul Patch: Personal 9.99, Professional 19.99; '512-1K PBR textures'; 'Polycount: 8004 verts, 5984 tris'. Pack: Personal 29.99, Professional 59.99; 'Goatee_01 ... Triangles: 5,200'; '2-4K PBR textures'; maps 'Albedo AO ... Normal ID Depth Directional Roots Tips Alpha'; both '.fbx, .obj, .ma', 'No ... head mesh included', isAiForbidden true.",
+     "notes": "Matches. Note the pack's lowest count is Goatee_03 at 3,978 tris; the claim's 'from 5,200 tris (Goatee_01)' reads as the first item, not the minimum, so it is not wrong but could mislead."
+    }
+   ]
+  },
+  {
+   "id": "HM-026",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "NoEdge's male hair cards on Fab (listing API, 2026-09-23), all for a generic head and flagged NoAI, with no triangle count or texture list published: 'Realistic Short Male Hair Cards', 'Classic Male Hair - Beard - Mustache', 'Realistic Male Hair-Man Bun', 'Man Ponytail Hair Realistic Card' and 'Realistic Long Male Hair' at US$18.99 on both tiers, in OBJ, FBX, Maya and .blend, all five also as Fab-converted files (glTF, GLB, USDZ); 'Classic Side Part Male Hair Cards Real Time' at US$18.99 Personal, US$38.99 Professional, as a MetaHuman package and FBX only.",
+   "sources": [
+    "https://www.fab.com/listings/103b701d-48dd-4677-a0e4-e8ef9a9e6ccd",
+    "https://www.fab.com/listings/be1cfc18-f90f-4fe0-a9d9-502424d85b16",
+    "https://www.fab.com/listings/55c175da-7436-4be9-b897-dbaee89e1b4a",
+    "https://www.fab.com/listings/0322f949-ec2a-4641-85e5-6913d52a86bd",
+    "https://www.fab.com/listings/95cb2cac-8895-4cfb-b584-acd474b03404",
+    "https://www.fab.com/listings/8f360d2d-9153-43f2-8467-39dd3358e85a"
+   ],
+   "as_first_reported": "NoEdge's male hair cards on Fab (listing API, 2026-09-23), all for a generic head and flagged NoAI, with no triangle count or texture list published: 'Realistic Short Male Hair Cards', 'Classic Male Hair - Beard - Mustache', 'Realistic Male Hair-Man Bun', 'Man Ponytail Hair Realistic Card' and 'Realistic Long Male Hair' at US$18.99 on both tiers, in OBJ, FBX, Maya and .blend (the first two also as Fab-converted glTF); 'Classic Side Part Male Hair Cards Real Time' at US$18.99 Personal, US$38.99 Professional, as a MetaHuman package and FBX only.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "https://www.fab.com/i/listings/103b701d-48dd-4677-a0e4-e8ef9a9e6ccd (fetched inside a fresh Playwright tab on fab.com, 2026-09-23); https://www.fab.com/i/listings/be1cfc18-f90f-4fe0-a9d9-502424d85b16 (fetched inside a fresh Playwright tab on fab.com, 2026-09-23); https://www.fab.com/i/listings/55c175da-7436-4be9-b897-dbaee89e1b4a (fetched inside a fresh Playwright tab on fab.com, 2026-09-23); https://www.fab.com/i/listings/0322f949-ec2a-4641-85e5-6913d52a86bd (fetched inside a fresh Playwright tab on fab.com, 2026-09-23); https://www.fab.com/i/listings/95cb2cac-8895-4cfb-b584-acd474b03404 (fetched inside a fresh Playwright tab on fab.com, 2026-09-23); https://www.fab.com/i/listings/8f360d2d-9153-43f2-8467-39dd3358e85a (fetched inside a fresh Playwright tab on fab.com, 2026-09-23)",
+     "evidence": "First five: Personal 18.99, Professional 18.99; formats obj, additional-files, converted-files, fbx, maya, blender on every one of the five. Side Part: Personal 18.99, Professional 38.99; formats metahuman, fbx. All isAiForbidden true; no triangle count or map list in any description.",
+     "notes": "Prices, tiers, NoAI flags and the missing counts match. Wrong: Fab's 'converted-files' (glTF/GLB/USDZ) format appears on all five 18.99 listings, not only the first two."
+    }
+   ]
+  },
+  {
+   "id": "HM-027",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "One hair, beard and moustache card set by hamza khaloui (NoEdge on Fab, Le baron on Superhive), read 2026-09-23, was priced four ways on the same day: 'Realistic 3D Male Hair Beard Mustache Game CGI Ready' on Fab (listed 2025-04-16) US$0 Personal, US$9.99 Professional, isAiForbidden false; ArtStation US$1.00 Standard Use License, noai true; Superhive US$2.00 and TurboSquid US$30.00 (search listings). Formats OBJ, FBX, Maya, .blend and an Unreal project; textures.zip 120 MB with the maps not listed; no triangle count published.",
+   "sources": [
+    "https://www.fab.com/listings/f571a27d-a14b-421a-a850-0a64332d5664",
+    "https://www.artstation.com/marketplace/p/pRvKn/realistic-3d-male-hair-beard-mustache-game-cgi-ready-free"
+   ],
+   "as_first_reported": "One hair, beard and moustache card set by hamza khaloui (NoEdge on Fab), read 2026-09-23, was priced four ways on the same day: 'Realistic 3D Male Hair Beard Mustache Game CGI Ready' on Fab (listed 2025-04-16) US$0 Personal, US$9.99 Professional, isAiForbidden false; ArtStation US$1.00 Standard Use License, noai true; Superhive US$2.00 and TurboSquid US$30.00 (search listings). Formats OBJ, FBX, Maya, .blend and an Unreal project; textures.zip 120 MB with the maps not listed; no triangle count (Fab's polygon range reads 0 to 1).",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "https://www.fab.com/i/listings/f571a27d-a14b-421a-a850-0a64332d5664 (fetched inside a fresh Playwright tab on fab.com, 2026-09-23) and the rendered listing page; https://www.artstation.com/api/v2/marketplace/products/pRvKn.json (curl, 2026-09-23); https://www.turbosquid.com/Search/3D-Models/realistic-3d-male-hair-beard-mustache-game-cgi-ready (Playwright, 2026-09-23); https://superhivemarket.com/search?search[q]=Realistic+3D+Male+Hair+Beard+Mustache (curl, 2026-09-23)",
+     "evidence": "Fab: Personal 0, Professional 9.99, isAiForbidden false, publishedAt 2025-04-16, formats fbx, blender, maya, obj, additional-files, unreal-engine. ArtStation: 'Standard Use License' 100 cents, noai true, files 'textures.zip' 125129889 bytes. TurboSquid: '$30 Realistic 3D Male Hair Beard Mustache Game CGI Ready'. Superhive: 'Realistic 3D Male Hair Beard Mustache Game Cgi Ready Free $2 Le baron'.",
+     "notes": "Four prices, flags, date, formats and the 120 MB textures zip (119 MiB) all match. Not reproduced: 'Fab's polygon range reads 0 to 1'; neither the listing API nor the rendered page shows any polygon, triangle or vertex field today. On Superhive the seller name is 'Le baron'."
+    }
+   ]
+  },
+  {
+   "id": "HM-028",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Verta 3D on ArtStation (product API JSON, 2026-09-23), OBJ alpha cards for a generic head, noai true, with no triangle count and textures described only as high resolution: 'Men's Realtime Haircard Collection - v5' (long, rugged and natural modern styles, 'Viking-inspired' and 'Native American styles', short styles not stated; one 380 MB zip) and 'Men's Realtime Beard & Mustache Haircard Collection - v5' (Viking-style, 'Fantasy & Hobbit-inspired', long Santa-style and everyday beards and moustaches), each US$9.50 Standard (labelled 'For Personal Use'), US$35.00 Commercial License, US$69.00 Studio License. The v6 beard collection (250 MB zip, not itemised) has the same prices.",
+   "sources": [
+    "https://www.artstation.com/marketplace/p/j7Pog/men-s-realtime-haircard-collection-v5",
+    "https://www.artstation.com/marketplace/p/6elLa/men-s-realtime-beard-mustache-haircard-collection-v5",
+    "https://www.artstation.com/marketplace/p/3LzdK/men-s-realtime-beard-mustache-haircard-collection-v6"
+   ],
+   "as_first_reported": "Verta 3D on ArtStation (product API JSON, 2026-09-23), OBJ alpha cards for a generic head, noai true, with no triangle count and textures described only as high resolution: 'Men's Realtime Haircard Collection - v5' (long, rugged and natural modern styles, 'Viking-inspired' and 'Native American styles', short styles not stated; one 380 MB zip) and 'Men's Realtime Beard & Mustache Haircard Collection - v5' (Viking-style, 'Fantasy & Hobbit-inspired', long Santa-style and everyday beards and moustaches), each US$9.50 Standard (labelled 'For Personal Use'), US$35.00 Commercial License, US$69.00 Studio License. The v6 beard collection (250 MB zip, not itemised) has the same prices.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://www.artstation.com/api/v2/marketplace/products/j7Pog.json (curl, 2026-09-23); https://www.artstation.com/api/v2/marketplace/products/6elLa.json (curl, 2026-09-23); https://www.artstation.com/api/v2/marketplace/products/3LzdK.json (curl, 2026-09-23)",
+     "evidence": "All three: 'Standard License' 950 'For Personal Use', 'Commercial License' 3500, 'Studio License' 6900; noai true. v5 hair: 'rugged Viking-inspired looks to Native American styles and natural modern hairstyles'; '✔️ OBJ Files✔️ High-Resolution Texture Files'; one zip 394304933 bytes. v5 beard: '• Viking-style beards• Fantasy & Hobbit-inspired facial hair• Classic long beards similar to Santa-style characters• Natural and stylized everyday beard & mustache'. v6: one zip 263390970 bytes.",
+     "notes": "Matches; the word 'short' does not appear in the v5 hair text. Zip sizes are 376 MiB (394 MB) and 251 MiB (263 MB), so the claim's 380 MB and 250 MB are binary megabytes, rounded."
+    }
+   ]
+  },
+  {
+   "id": "HM-029",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "TEAM FROM EARTH on ArtStation (product API JSON, 2026-09-23): 'Game ready middle length hairstyle male with short beard' is US$10.49 Standard, US$19.49 Extended Commercial; Maya XGen cards in .ma and .fbx (no OBJ), 36,960 tris for both meshes by the seller, two 4096x4096 sets (normal, alpha, height, ID, AO, root), head sold separately. Its 'Old man realtime hair' is US$9.50 and US$24.50 with hair 44,250, beard 60,604 and brows and lashes 3,392 tris. Both are flagged noai.",
+   "sources": [
+    "https://www.artstation.com/marketplace/p/kk09q/game-ready-middle-length-hairstyle-male-with-short-beard",
+    "https://www.artstation.com/marketplace/p/1RAnd/old-man-realtime-hair"
+   ],
+   "as_first_reported": "TEAM FROM EARTH on ArtStation (product API JSON, 2026-09-23): 'Game ready middle length hairstyle male with short beard' is US$10.49 Standard, US$19.49 Extended Commercial; Maya XGen cards in .ma and .fbx (no OBJ), 36,960 tris for both meshes by the seller, two 4096x4096 sets (normal, alpha, height, ID, AO, root), head sold separately. Its 'Old man realtime hair' is US$9.50 and US$24.50 with hair 44,250, beard 60,604 and brows and lashes 3,392 tris. Both are flagged noai.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://www.artstation.com/api/v2/marketplace/products/kk09q.json (curl, 2026-09-23); https://www.artstation.com/api/v2/marketplace/products/1RAnd.json (curl, 2026-09-23)",
+     "evidence": "kk09q: variants 10.49 standard, 19.49 extended; 'Created using Maya XGen hair cards'; 'Polycount - 36,960 Tris2 meshes'; 'Files formats:.ma .fbx'; 'x2 texturessize 4096 x 4096PBR cards: normal alpha height ID ao root'; head 'also available or purchase'. 1RAnd: 9.50 and 24.50; 'Eyebrows and eyelashes - 3,392 tris Hair - 44,250 tris Beard - 60,604 tris'. Both noai true.",
+     "notes": "Matches."
+    }
+   ]
+  },
+  {
+   "id": "HM-030",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Genesis 9 male hair outside Daz's store, read 2026-09-23. lightBLUE's 'Hair Pack G9 Men' on RenderHub has 5 hairstyles, 5 eyebrow styles, 10 facial hair styles and 20 material presets as strand-based Daz hair props; its page shows US$11.00 Extended Use License while its JSON-LD offer says 8.80, valid until 2026-12-23. Muwawya's Takuma and Mika Hair for G9 (RenderHub) are US$12.00 list, US$8.40 sale. ATG Short Hair 001 (Renderosity) is US$15.99 Standard, US$47.97 Extended, with 'AI Use: No AI was used'. Uncanny Valet's 'Brush Cut Hair for Genesis 9 and 8 Male' (ArtStation US$5.99) is Iray Curves strand hair shipped as Daz Studio .DUF content. Converting any of these to a mesh was not tested.",
+   "sources": [
+    "https://www.renderhub.com/lightblue/hair-pack-g9-men",
+    "https://www.renderhub.com/muwawya/takuma-hair-for-g9",
+    "https://www.renderosity.com/marketplace/products/172580/atg-short-hair-001-for-genesis-9-and-8x-malefemale",
+    "https://www.artstation.com/marketplace/p/AYbOX/brush-cut-hair-for-genesis-9-and-8-male-daz-studio"
+   ],
+   "as_first_reported": "Genesis 9 male hair outside Daz's store, read 2026-09-23. lightBLUE's 'Hair Pack G9 Men' on RenderHub has 5 hairstyles, 5 eyebrow styles, 10 facial hair styles and 20 material presets as strand-based Daz hair props; its page shows US$11.00 Extended Use License while its JSON-LD offer says 8.80, valid until 2026-12-23. Muwawya's Takuma and Mika Hair for G9 (RenderHub) are US$12.00 list, US$8.40 sale. ATG Short Hair 001 (Renderosity) is US$15.99 Standard, US$47.97 Extended, with 'AI Use: No AI was used'. Uncanny Valet's 'Brush Cut Hair for Genesis 9 and 8 Male' (ArtStation US$5.99) is Iray curves that render only in Daz Studio. Converting any of these to a mesh was not tested.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "https://www.renderhub.com/lightblue/hair-pack-g9-men, https://www.renderhub.com/muwawya/takuma-hair-for-g9, https://www.renderhub.com/muwawya/mika-hair-for-g9, https://www.renderosity.com/marketplace/products/172580/atg-short-hair-001-for-genesis-9-and-8x-malefemale (curl, visible text and JSON-LD, 2026-09-23); https://www.artstation.com/api/v2/marketplace/products/AYbOX.json (curl, 2026-09-23)",
+     "evidence": "lightBLUE: 'set of conforming strand-based hair props for Genesis 9 man ... 5 Hairstyles, 5 Eyebrow styles, and 10 Facial Hair styles ... 20 material presets'; page '$11.00', 'Extended Use License'; JSON-LD offer price '8.80', priceValidUntil '2026-12-23'. Takuma and Mika: '$12.00 $8.40 30% OFF'. ATG: 'Standard ... $15.99 Extended ... $47.97'; 'AI Use: No AI was used'. Uncanny Valet: 5.99; 'employs Iray Curves'; 'With older version of Daz Studio, and other render engines, you will need to increase Tessellation Sides parameter to at least 3'.",
+     "notes": "All prices and contents match. Says more than the source: the Uncanny Valet page never says the hair renders only in Daz Studio; it ships as Daz Studio .DUF content and mentions 'other render engines'. The Takuma and Mika sale shows 'ENDS IN 7d'."
+    }
+   ]
+  },
+  {
+   "id": "HM-031",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Fan art on ArtStation, read 2026-09-23 (product API JSON): Verta 3D's 'Realtime Beard & Mustache Haircard Collection - v1' includes \"the iconic Captain Jack Sparrow's facial hair\", and its free tier is labelled 'Free Sample For Personal Use'; 'Men's Realtime Haircard Collection - v1' includes \"Captain Jack Sparrow's hair\"; the v5 beard collection names 'Fantasy & Hobbit-inspired facial hair'.",
+   "sources": [
+    "https://www.artstation.com/marketplace/p/m71aq/realtime-beard-mustache-haircard-collection-v1",
+    "https://www.artstation.com/marketplace/p/nDJe7/men-s-realtime-haircard-collection-v1",
+    "https://www.artstation.com/marketplace/p/6elLa/men-s-realtime-beard-mustache-haircard-collection-v5"
+   ],
+   "as_first_reported": "Fan art on ArtStation, read 2026-09-23 (product API JSON): Verta 3D's 'Realtime Beard & Mustache Haircard Collection - v1' includes \"the iconic Captain Jack Sparrow's facial hair\", and its free tier is labelled 'Free Sample For Personal Use'; 'Men's Realtime Haircard Collection - v1' includes \"Captain Jack Sparrow's hair\"; the v5 beard collection names 'Fantasy & Hobbit-inspired facial hair'.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://www.artstation.com/api/v2/marketplace/products/m71aq.json (curl, 2026-09-23); https://www.artstation.com/api/v2/marketplace/products/nDJe7.json (curl, 2026-09-23); https://www.artstation.com/api/v2/marketplace/products/6elLa.json (curl, 2026-09-23)",
+     "evidence": "m71aq: 'including the iconic Captain Jack Sparrow’s facial hair'; variant 'Free Sample For Personal Use' price 0. nDJe7: 'including iconic looks like Captain Jack Sparrow’s hair'. 6elLa: 'Fantasy & Hobbit-inspired facial hair'.",
+     "notes": "All three quotes are verbatim (curly apostrophes in the source)."
+    }
+   ]
+  },
+  {
+   "id": "HM-032",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Fan art from Meta Studio on Superhive and Gumroad, read 2026-09-23: 'Professional Realtime Hair Card - Male Hair (Part 1)' lists \"Captain Jack Sparrow's Hair\", as Verta 3D's ArtStation v1 does in different wording; 'Beard And Mustache Part 10 - Professional Realtime Hair Card' is 'Inspired by different movies characters for example Vikings movie' (Gumroad US$15.00 Personal, US$55.00 Commercial).",
+   "sources": [
+    "https://superhivemarket.com/products/professional-realtime-hair-card---male-hair--part-1--",
+    "https://meta0studio.gumroad.com/l/olgmk"
+   ],
+   "as_first_reported": "Fan art from Meta Studio on Superhive and Gumroad, read 2026-09-23: 'Professional Realtime Hair Card - Male Hair (Part 1)' lists \"Captain Jack Sparrow's Hair\" and carries the same description text as Verta 3D's ArtStation v1; 'Beard And Mustache Part 10 - Professional Realtime Hair Card' is 'Inspired by different movies characters for example Vikings movie' (Gumroad US$15.00 Personal, US$55.00 Commercial).",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "https://superhivemarket.com/products/professional-realtime-hair-card---male-hair--part-1-- (curl, 2026-09-23); https://meta0studio.gumroad.com/l/olgmk product props (curl, 2026-09-23); https://www.artstation.com/api/v2/marketplace/products/nDJe7.json (curl, 2026-09-23)",
+     "evidence": "Superhive: 'This product includes several different models of Male Hair , such as Captain Jack Sparrow's Hair'. ArtStation v1: 'This pack features a variety of male hairstyles, including iconic looks like Captain Jack Sparrow’s hair'. Gumroad: 'Inspired by different movies characters for example Vikings movie'; price_cents 1500; 'Commercial license' price_difference_cents 4000.",
+     "notes": "Quotes and Gumroad prices (US$15.00, US$55.00) match. Wrong: the Superhive text is not the same as Verta 3D's ArtStation v1 text; both name Captain Jack Sparrow's hair and describe years of experience, but the wording differs."
+    }
+   ]
+  },
+  {
+   "id": "HM-033",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "A real-person name on Fab, read 2026-09-23 (listing API): Argentum Studio's 'Elvis Hair - Argentum - M002' (groom with a beard and eyebrows as extras, MetaHuman .mhpkg and Alembic strands, US$22.99 Personal, US$39.99 Professional) carries the name Elvis in its title, which reads as a reference to Elvis Presley though the listing does not name him, and the seller writes 'Only for cinematics productions'.",
+   "sources": [
+    "https://www.fab.com/listings/81f46c87-9469-454d-afcc-a81605fc7425"
+   ],
+   "as_first_reported": "A real-person name on Fab, read 2026-09-23 (listing API): Argentum Studio's 'Elvis Hair - Argentum - M002' (quiff with beard and brows, MetaHuman .mhpkg and Alembic strands, US$22.99 Personal, US$39.99 Professional) is named after Elvis Presley, and the seller writes 'Only for cinematics productions'.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "https://www.fab.com/i/listings/81f46c87-9469-454d-afcc-a81605fc7425 (fetched inside a fresh Playwright tab on fab.com, 2026-09-23)",
+     "evidence": "title 'Elvis Hair - Argentum - M002'; 'Only for cinematics productions.'; 'This asset includes the mhpkg file and original alembic file. Also included is a beard and eyebrows as extras.'; Personal 22.99, Professional 39.99; formats metahuman, additional-files.",
+     "notes": "Prices, formats and the quote match. Says more than the source: the listing never names Elvis Presley (only 'Elvis' in the title), and 'quiff' is not in the text (images not assessed)."
+    }
+   ]
+  },
+  {
+   "id": "HM-034",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Gaps on 2026-09-23: no free source searched (MakeHuman's repository, Sketchfab CC0 and CC BY, OpenGameArt, BlenderKit, Fab free listings, Poly Haven, itch.io, Blender Studio) gave a usable man bun mesh or a stubble or shadow mesh, and no realistic crew cut was found outside MakeHuman. Sketchfab's CC BY searches returned 3 'man bun' and 477 'stubble' results, none identified as a usable standalone asset, and none could be downloaded without an account. The survey reads stubble as normally a skin texture rather than a mesh. Paid, NoEdge's 'Realistic Male Hair-Man Bun' is US$18.99 on Fab, and the stubble found on Fab (three listings) was all MetaHuman grooms.",
+   "sources": [
+    "https://api.sketchfab.com/v3/search",
+    "http://www.makehumancommunity.org/sites/default/files/assets.json",
+    "https://www.fab.com/listings/55c175da-7436-4be9-b897-dbaee89e1b4a",
+    "https://www.fab.com/listings/addbd1ce-f745-4f84-bb2f-a1d4865ec16f"
+   ],
+   "as_first_reported": "Gaps on 2026-09-23: no free source searched (MakeHuman's repository, Sketchfab CC0 and CC BY, OpenGameArt, BlenderKit, Fab free listings, Poly Haven, itch.io, Blender Studio) gave a usable man bun mesh or a stubble or shadow mesh, and no realistic crew cut was found outside MakeHuman. Sketchfab's CC BY searches returned 3 'man bun' and 477 'stubble' results, none identified as a usable standalone asset, and none could be downloaded without an account. The survey reads stubble as normally a skin texture rather than a mesh. Paid, NoEdge's 'Realistic Male Hair-Man Bun' is US$18.99 on Fab, and the only stubble found on Fab was a MetaHuman groom.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "Sketchfab API /v3/search type=models downloadable=true licenses cc0 and by, full page walk (python urllib, 2026-09-23); http://www.makehumancommunity.org/sites/default/files/assets.json (curl, 2026-09-23); BlenderKit /api/v1/search, OpenGameArt art-search, itch.io search, Poly Haven /assets?t=models (curl, 2026-09-23); Fab /i/listings/search?q=stubble and q=man bun, and listings 55c175da..., addbd1ce... (Playwright tab, 2026-09-23)",
+     "evidence": "Sketchfab 'man bun' cc0 0, by 3 (names 'male head with hair', 'Ice Fishing - 3December', 'model'); 'stubble' cc0 0, by 477 (only name hit: 'Stubble Mutation Female Drosophila Melanogaster'). MakeHuman: bun items 'Messy Bun' (CC0, 'a messy bun'), 'Elvs Braid Bun 1' ('for female makehuman models'), none titled stubble. BlenderKit free 'man bun' 0, 'stubble' 0; OGA and itch.io no man bun or stubble mesh; Poly Haven no hair. Fab stubble: 'Rugged Stubble Beard' (metahuman), 'Short Boxed Stubble Beard & Chevron Moustache [dash] MetaHuman Groom', 'Messy Side Swept Haircut, Brows, Stubble & Mustache - Metahuman Groom'. Man Bun US$18.99.",
+     "notes": "Counts reproduce exactly and no free man bun or stubble mesh turned up. Wrong: Fab has at least three stubble listings, all MetaHuman grooms, not one. Blender Studio was not re-searched. MakeHuman's CC0 'Messy Bun' is not stated to be male and was not assessed. NoEdge's Man Bun is one of several paid man buns on Fab (NoEdge 'Man Bun -Low Fade Hair Cut' US$18.99, LeBaronMarket US$19.99 items)."
+    }
+   ]
+  },
+  {
+   "id": "HM-035",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "CGTrader and TurboSquid hair, read 2026-09-23. CGTrader during a site sale ('UP TO 70% OFF'): Viirtuals 'Game Male Hair Style M01' US$10.00 and 'Realtime Male Hair - Short Haircut' US$15.00 (no discount shown); Le-Baron-Sup 'Classic Male Hair - Beard - Mustache Low Poly' and noedge-sup 'Berber Male Hair - Messy long Beard Mustache' each US$19.00 list, US$13.30 on sale (JSON-LD offer 19.00, priceValidUntil 2026-09-25). TurboSquid: 'Facial Hair Cards Style 1 - Full Beard 1' (one of 9 CG StudioX beards and moustaches) US$24.00; 'Short Parted Hair - Male Hair 2' US$10.00; 'Male Hair Short01 Style Low Poly Game Ready' US$9.99; an undercut US$30.00. TurboSquid's store search counted 7,115 'male hair' (all categories), 309 'male hair cards' and 89 'beard hair cards'.",
+   "sources": [
+    "https://www.cgtrader.com/3d-models/character/man/game-male-hair-style01",
+    "https://www.cgtrader.com/3d-models/character/man/classic-male-hair-beard-mustache-low-poly-1c7298d2-3dc3-4261-8984-aa48508666e1",
+    "https://www.turbosquid.com/3d-models/3d-facial-hair-cards-style-1-full-beard-1-model-1983504",
+    "https://www.turbosquid.com/3d-models/hairstyle-hair-male-2-3d-1592918"
+   ],
+   "as_first_reported": "CGTrader and TurboSquid hair, read 2026-09-23. CGTrader offer prices from product JSON-LD during a site sale ('UP TO 70% OFF'; list prices not found): Viirtuals 'Game Male Hair Style M01' US$10.00 and 'Realtime Male Hair - Short Haircut' US$15.00; Le-Baron-Sup 'Classic Male Hair - Beard - Mustache Low Poly' US$19.00 (priceValidUntil 2026-09-25); noedge-sup 'Berber Male Hair - Messy long Beard Mustache' US$19.00. TurboSquid search listings: 'Facial Hair Cards Style 1 - Full Beard 1' (one of 9 CG StudioX beards and moustaches) US$24.00; 'Short Parted Hair - Male Hair 2' US$10.00; 'Male Hair Short01 Style Low Poly Game Ready' US$9.99; an undercut US$30.00. TurboSquid counted 7,115 'male hair' (all people models), 309 'male hair cards' and 89 'beard hair cards'.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "CGTrader product pages rendered in a Playwright tab, visible price and JSON-LD offers, 2026-09-23: game-male-hair-style01, realtime-male-hair-short-haircut, classic-male-hair-beard-mustache-low-poly-1c7298d2..., berber-male-hair-messy-long-beard-mustache; TurboSquid product pages 1983504, 1592918, 1682632, 2414642 and searches male-hair, male-hair-cards, beard-hair-cards (Playwright, 2026-09-23)",
+     "evidence": "CGTrader banner 'UP TO 70% OFF'. JSON-LD offers: 10.00, 15.00, 19.00 (priceValidUntil 2026-09-25T06:00), 19.00 (priceValidUntil 2026-09-25T06:00). Visible: Viirtuals 'One-time purchase $10.00' and '$15.00'; Le-Baron-Sup '$13.30 $19.00 -30%'; noedge-sup '$13.30 $19.00 -30%'. TurboSquid: 'Full Beard 1 $24', 'Short Parted Hair - Male Hair 2 $10', 'Male Hair Short01 ... $9.99', undercut '$30'; 'Explore 7,115 free and premium male hair', '309 ... male hair cards', '89 ... beard hair cards'.",
+     "notes": "JSON-LD figures and all TurboSquid prices and counts match exactly. Wrong: the list prices are visible; the JSON-LD US$19.00 is the list price, and the two Le-Baron-Sup and noedge-sup items sell today at US$13.30 (30% off). The 7,115 is the whole-store 'male hair' search, not a people category filter."
+    }
+   ]
+  },
+  {
+   "id": "HM-036",
+   "status": "corrected",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "Larger or stylised paid packs, read 2026-09-23: Ida Faber's 'Male Hair Collection 01 - Game Ready' (23 base styles plus 3 bangs, rigged cards, 7,904 to 48,960 tris per style by the seller) is US$129.99 on ArtStation Standard and Fab Personal, and US$129.99 list on CGTrader (on sale at US$39.00 that day), US$259.99 ArtStation Extended, US$249.99 Fab Professional; Cold Paws' 'Male Hair 01 - Medium-Length Layered Haircut' on Fab has LODs from 13k to 170k tris and nine 4K maps at US$44.99 and US$90.99 (on sale US$22.49 and US$45.49); CG StudioX's short straight cards on Fab are US$19.99 and US$40.99; Carlos-H's 10 stylised solid styles on Fab are US$9.99 and US$10.99; Verta 3D's 50 stylised beards are US$14.00, US$39.00 and US$79.00 and its 20 stylised male hair meshes US$10.00, US$22.00 and US$36.00.",
+   "sources": [
+    "https://www.artstation.com/marketplace/p/NXMKW/male-hair-collection-01-game-ready",
+    "https://www.fab.com/listings/d1e6e7bb-c4e7-49fc-9846-2e976c1196e1",
+    "https://www.fab.com/listings/f3dacf29-ead1-4dc7-884c-805cf99fd3d1",
+    "https://www.fab.com/listings/412c71e9-91e7-481e-a37f-c1eb2c6f8963",
+    "https://www.artstation.com/marketplace/p/PXvKD/stylized-beard-mustache-pack-v1-50-models",
+    "https://www.artstation.com/marketplace/p/o90kD/20-stylized-male-hair-model-pack-premium-collection"
+   ],
+   "as_first_reported": "Larger or stylised paid packs, read 2026-09-23: Ida Faber's 'Male Hair Collection 01 - Game Ready' (23 base styles plus 3 bangs, rigged cards, 7,904 to 48,960 tris per style by the seller) is US$129.99 on ArtStation Standard, Fab Personal and CGTrader, US$259.99 ArtStation Extended, US$249.99 Fab Professional; Cold Paws' 'Male Hair 01 - Medium-Length Layered Haircut' on Fab has LODs from 13k to 170k tris and nine 4K maps at US$44.99 and US$90.99 (on sale US$22.49 and US$45.49); CG StudioX's short straight cards on Fab are US$19.99 and US$40.99; Carlos-H's 10 stylised solid styles on Fab are US$9.99 and US$10.99; Verta 3D's 50 stylised beards are US$14.00, US$39.00 and US$79.00 and its 20 stylised male hair meshes US$10.00, US$22.00 and US$36.00.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "https://www.artstation.com/api/v2/marketplace/products/NXMKW.json (curl, 2026-09-23); https://www.artstation.com/api/v2/marketplace/products/PXvKD.json (curl, 2026-09-23); https://www.artstation.com/api/v2/marketplace/products/o90kD.json (curl, 2026-09-23); https://www.fab.com/i/listings/5b30dccb-8db7-48da-8408-429d658c9147 (fetched inside a fresh Playwright tab on fab.com, 2026-09-23); https://www.fab.com/i/listings/d1e6e7bb-c4e7-49fc-9846-2e976c1196e1 (fetched inside a fresh Playwright tab on fab.com, 2026-09-23); https://www.fab.com/i/listings/f3dacf29-ead1-4dc7-884c-805cf99fd3d1 (fetched inside a fresh Playwright tab on fab.com, 2026-09-23); https://www.fab.com/i/listings/412c71e9-91e7-481e-a37f-c1eb2c6f8963 (fetched inside a fresh Playwright tab on fab.com, 2026-09-23); https://www.cgtrader.com/3d-models/character/man/male-hair-collection-01-game-ready (Playwright, 2026-09-23)",
+     "evidence": "Ida Faber: '23 base hairstyles + 3 types of bangs. Hairstyles are rigged'; SK_HAIR_M_07 'Tris 7904', SK_HAIR_M_18 'Tris 48960'; ArtStation 129.99 and 259.99; Fab Personal 129.99, Professional 249.99; CGTrader '$39.00 $129.99 -70%', JSON-LD 129.99. Cold Paws: '13k, 26k,37k,59k, 103k,170k triangles'; '9 unique Textures 4k'; 44.99/90.99 discounted 22.49/45.49 until 2026-09-26. CG StudioX 19.99/40.99. Carlos-H '10 different hair models', 9.99/10.99. Verta 3D 14/39/79 and 10/22/36.",
+     "notes": "Everything matches except CGTrader: Ida Faber's pack is US$129.99 list but sells today at US$39.00 (70% off, JSON-LD priceValidUntil 2026-09-25)."
+    }
+   ]
+  },
+  {
+   "id": "HM-037",
+   "status": "unverifiable",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "In a WebSearch on 2026-09-23, a search result shows Daz store Genesis 9 male hair and beards, such as dForce Ultimate Buzzcut Hair for Genesis 9, Masculine Hair for Genesis 9 Bundle, dForce FE Beards Of All Shapes for Genesis 9 and Modern Haircuts for Genesis 9, as dForce strand-based hair in DUF format. None of this was read on Daz's page, and no price was found in the results.",
+   "sources": [
+    "WebSearch results, 2026-09-23 (daz3d.com not fetched, by rule)"
+   ]
+  }
+ ]
+}

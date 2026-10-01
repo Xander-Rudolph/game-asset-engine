@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # What the packaged image does before it hands over to ComfyUI.
 #
-# Three jobs, in order:
+# Four jobs, in order:
 #
 #   1. Seed any bind mount that arrived empty. The image carries a pristine
 #      copy of the node source, the workflows, the poses and the prompts at
@@ -12,12 +12,16 @@
 #      skipped the moment a directory has anything in it, so a host copy the
 #      user has edited is never overwritten.
 #
-#   2. Say what weights are missing, by name, before the server starts.
-#      Models are the one thing too large to bake (the set is ~200GB), so
+#   2. Fetch comfyui_controlnet_aux, the one node pack the image must not
+#      carry, because its licence forbids distributing part of it (1b below),
+#      and build UniRig's own environment if it is missing or broken (1c).
+#
+#   3. Say what weights are missing, by name, before the server starts.
+#      Models are the one thing too large to bake (the set is ~274GB), so
 #      the next best thing is refusing to be quiet about it: a missing
 #      checkpoint otherwise shows up as a red node an hour later.
 #
-#   3. exec the command, so ComfyUI is PID 1 and signals reach it.
+#   4. exec the command, so ComfyUI is PID 1 and signals reach it.
 #
 # Nothing here is fatal. A missing model is worth saying loudly and worth
 # starting anyway: most of the graphs do not need most of the weights.
@@ -71,6 +75,122 @@ if [ -d "$SEED/user/default/workflows" ]; then
             say "added workflow $(basename "$f" .json)" || true
     done
 fi
+
+# --- 1b. fetch the pack the image may not carry ----------------------------
+
+# comfyui_controlnet_aux is not in the image (the owner's decision, 2026-09-30):
+# its dwpose/ and open_pose/ folders carry CMU's OpenPose licence, which
+# forbids distributing them, and a published image would. So each container
+# fetches it for itself from GitHub, at the commit the Dockerfile pins, the
+# first time it starts. The container's own layer holds it, so a
+# --force-recreate fetches it again: 87MB, 2.5s on the reference machine
+# (2026-09-30).
+#
+# Downloading it is accepting CMU's terms, which is why this says so, and why
+# ASSET_ENGINE_CONTROLNET_AUX=0 skips it. Without it, complete_workflow.json's
+# Pose Transfer flow has no preprocessor; nothing else here uses the pack.
+#
+# Cloned into /app/temp and moved into place only once complete, so a fetch
+# cut short never leaves a half pack for ComfyUI to import. A source build's
+# ./custom_nodes mount usually has it already, from scripts/setup.sh, and an
+# existing copy is always left alone.
+fetch_controlnet_aux() {
+    local url="${ASSET_ENGINE_CONTROLNET_AUX_URL:-}" ref="${ASSET_ENGINE_CONTROLNET_AUX_REF:-}"
+    local dest=/app/custom_nodes/comfyui_controlnet_aux tmp
+    [ -n "$url" ] && [ -n "$ref" ] || return 0      # an image from before this
+    [ "${ASSET_ENGINE_CONTROLNET_AUX:-1}" = "1" ] || {
+        say "skipping comfyui_controlnet_aux (ASSET_ENGINE_CONTROLNET_AUX=${ASSET_ENGINE_CONTROLNET_AUX})"
+        return 0
+    }
+    [ -e "$dest" ] && return 0
+    say "fetching comfyui_controlnet_aux at ${ref:0:7}, which the image does not carry"
+    say "  its dwpose/ and open_pose/ code is CMU's OpenPose licence: noncommercial"
+    say "  research use only. Set ASSET_ENGINE_CONTROLNET_AUX=0 to skip it."
+    tmp="$(mktemp -d /app/temp/controlnet_aux.XXXXXX 2>/dev/null)" || {
+        warn "no writable /app/temp; comfyui_controlnet_aux not fetched"; return 0; }
+    if git init -q "$tmp" &&
+        git -C "$tmp" fetch -q --depth 1 "$url" "$ref" &&
+        git -C "$tmp" checkout -q FETCH_HEAD &&
+        mv "$tmp" "$dest" 2>/dev/null; then
+        say "  comfyui_controlnet_aux ready at $(git -C "$dest" rev-parse --short HEAD)"
+    else
+        rm -rf "$tmp"
+        warn "could not fetch comfyui_controlnet_aux; Pose Transfer will be missing its node"
+    fi
+}
+fetch_controlnet_aux
+
+# --- 1c. build UniRig's environment ----------------------------------------
+
+# UniRig runs its nodes in its own pixi environment, under $HOME/.ce, which the
+# packaged service keeps in the unirig-home volume. Nothing else builds it:
+# without it the nodes load in the main environment, where Apply Animation died
+# loading Blender ("undefined symbol: rtcGetSceneTraversable", 2026-09-30).
+#
+# Built with UniRig's own install.py, not comfy-env's COMFY_ENV_AUTO_INSTALL.
+# The auto-install writes a manifest without the [cuda] wheels, so the
+# environment loads and Auto Rig then dies on "No module named
+# 'torch_cluster'" (2026-09-30); install.py adds torch-scatter, torch-cluster,
+# spconv, cumm and flash-attn. Its comfy-kitchen comes from UniRig's
+# comfy-env.toml, which scripts/patch_nodes.py pins to 0.2.26.
+#
+# install.py's spconv and cumm are swapped for the pair the main image uses.
+# comfy-env's wheel index has only cumm 0.8.2 for cu124, torch 2.6 and Python
+# 3.11, beside spconv 2.3.8, which requires cumm<0.8.0; Auto Rig then died in
+# cumm's runtime CUDA compile ("nvrtc compile failed", 2026-09-30). With
+# spconv-cu124 and cumm-cu124 at the main image's versions, pip check was clean
+# and Auto Rig rigged a mesh in 45 s. The versions are read from the main image
+# at start-up, so the two cannot drift apart.
+#
+# The test imports what broke: comfy_kitchen, which a version torch 2.6 rejects
+# fails to import, and the CUDA wheels; and it checks that cumm-cu124, not the
+# index's cumm, is installed. It takes about 5 s. An environment that fails it
+# is removed and rebuilt, so a half-built one, or one an older image built,
+# heals itself. ASSET_ENGINE_UNIRIG_ENV=0 skips all of it, and UniRig with it.
+UNIRIG_ENV_TEST='
+import comfy_kitchen, torch_cluster, torch_scatter, spconv.pytorch
+from importlib.metadata import version, PackageNotFoundError
+version("cumm-cu124")
+try:
+    version("cumm")
+except PackageNotFoundError:
+    pass
+else:
+    raise SystemExit("the index cumm is installed")
+'
+build_unirig_env() {
+    local node=/app/custom_nodes/ComfyUI-UniRig
+    local env="${HOME:-/app/.home}/.ce/envs/unirig-nodes"
+    local py="$env/.pixi/envs/default/bin/python"
+    local log="${HOME:-/app/.home}/.ce/unirig-install.log"
+    local pair
+    [ -f "$node/install.py" ] || return 0
+    [ "${ASSET_ENGINE_UNIRIG_ENV:-1}" = "1" ] || {
+        say "skipping UniRig's environment (ASSET_ENGINE_UNIRIG_ENV=${ASSET_ENGINE_UNIRIG_ENV})"
+        return 0
+    }
+    if [ -x "$py" ] && "$py" -c "$UNIRIG_ENV_TEST" >/dev/null 2>&1; then
+        return 0
+    fi
+    if [ -e "$env" ]; then
+        warn "UniRig's environment is incomplete or stale; rebuilding it"
+        rm -rf "$env"
+    fi
+    say "building UniRig's environment, once (about 10GB under ${HOME:-/app/.home}/.ce)"
+    mkdir -p "$(dirname "$log")" 2>/dev/null || true
+    pair="$(python3 -c 'from importlib.metadata import version as v
+print("spconv-cu124==" + v("spconv-cu124"), "cumm-cu124==" + v("cumm-cu124"))' 2>/dev/null)"
+    if (cd "$node" && python3 install.py) >"$log" 2>&1 &&
+        [ -n "$pair" ] &&
+        "$py" -m pip uninstall -y spconv cumm >>"$log" 2>&1 &&
+        "$py" -m pip install $pair >>"$log" 2>&1 &&
+        "$py" -c "$UNIRIG_ENV_TEST" >>"$log" 2>&1; then
+        say "  UniRig's environment is ready ($pair)"
+    else
+        warn "could not build UniRig's environment; its nodes will fail. Log: $log"
+    fi
+}
+build_unirig_env
 
 # --- 2. report on the weights ---------------------------------------------
 

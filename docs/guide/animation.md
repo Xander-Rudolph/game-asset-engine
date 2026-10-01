@@ -34,10 +34,23 @@ world. The rest loop in place, which is usually what a game engine wants.
 
 ### UniRig: 5 clips and a folder to fill
 
-It ships almost nothing. What it gives you instead is a Mixamo compatible
-skeleton, so anything from Mixamo retargets onto it. Download the cycles you
-want as FBX for Unity, drop them in `input/animation_templates/mixamo/`, and they
-appear in the animation dropdown on the next node refresh.
+It ships almost nothing, and its Apply Animation node takes Mixamo clips only
+onto a Mixamo-named skeleton. It copies curves by `mixamorig:` bone name, with no
+retargeting, so it needs a rig made with the `mixamo` template. The
+`articulationxl` rigs this repo makes by default name their bones `bone_N`, and
+the node refuses them: applying Capoeira to `output/rigged/unit_warrior.fbx` on
+2026-09-30 stopped with "Model does not have mixamorig: bone names!".
+[Video to 3D motion](/reference/video-mocap) covers the retarget that would close
+that gap.
+
+On a `mixamo`-template rig, download the cycles you want as FBX for Unity, drop
+them in `input/animation_templates/mixamo/`, and they appear in the animation
+dropdown on the next node refresh. Give the node the rig as an absolute container
+path, such as `/app/output/rigged/name.fbx`: it runs in UniRig's own environment,
+where a relative path is not found. On 0.1.4, Capoeira onto `input/3d/mixamo.fbx`,
+a character with 65 `mixamorig:` bones, took about a second and gave a 250-frame
+action in which the hips, left hand and right foot travel 1.5 to 2.2 units
+(2026-09-30).
 
 ## Posing bones yourself
 

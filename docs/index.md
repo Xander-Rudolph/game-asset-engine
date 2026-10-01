@@ -31,7 +31,7 @@ features:
     details: Face budgets, seam quality and camera angles come with numbers you can reproduce with the tools in the repo.
   - icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M9 20h6M12 16v4"/></svg>'
     title: Nothing leaves your machine
-    details: No cloud service, no per-image cost, no upload of work in progress. A GPU and about 200GB of disk.
+    details: No cloud service, no per-image cost, no upload of work in progress. A GPU and about 274GB of disk.
 ---
 
 ## What you get
@@ -64,7 +64,7 @@ angle your map uses.
 ## What it costs to run
 
 A CUDA GPU (measured on an RTX 4070 Ti SUPER with 16GB and 31GB of RAM; a 12GB
-card has not been tested), about 200GB of disk for the model weights, and about
+card has not been tested), about 274GB of disk for the model weights, and about
 28GB for the prebuilt image. There are no per-asset fees. A concept image
 takes 30 seconds to 2 minutes, a mesh about a minute, a rig a few minutes.
 

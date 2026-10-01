@@ -27,7 +27,8 @@ CC0 is the cleanest source in the stack, because it has no conditions at all.
 
 ## Models are where the constraints are
 
-Most of the stack uses MIT or Apache 2.0 licences. The four below don't.
+Most of the stack uses MIT or Apache 2.0 licences. The six below don't, or
+aren't settled.
 
 ### Hunyuan3D 2 and 2.1
 
@@ -70,6 +71,42 @@ backgrounds.
 
 OpenRAIL-M. Commercial use of the images is permitted. The licence's use
 restrictions travel with the model, not with a mesh you derive from a render.
+
+### Qwen-Image-Edit Rapid AIO and its GGUF quant
+
+`complete_workflow.json` edits with Phr00t's Rapid AIO v19 SFW merge, or the
+v18 SFW Q4_K quant of it, rather than with Qwen-Image-Edit itself. **Their
+licence is unsettled.**
+
+The merge's Hub card declares Apache-2.0 in its metadata, and the repository has
+no licence file (read 2026-09-30 at commit `691024f`). The card calls the model a
+"Merge of accelerators, VAE and CLIP", and its version notes say v17 "Merged 2509
+and 2511 together" and v19 has "New Lightning Edit 2511 8-step mixed in".
+Qwen-Image-Edit and the Lightning accelerators are Apache-2.0. But earlier
+versions' notes also name community LoRAs, "Rebalancing", "Smartphone Photoreal"
+and "InSubject" among them, with no licence for any, and the card does not list
+what v19 keeps. The terms of whatever was merged in are not stated.
+
+The quant, `Novice25/Qwen-Image-Edit-Rapid-AIO-GGUF`, declares no licence at
+all, in metadata or in a file.
+
+`scripts/fetch_models.py --licenses` marks both `!`. For an edit you will sell,
+Qwen-Image-Edit 2509 itself, in `img_edit_qwen.json`, is Apache-2.0.
+
+### Anything2Real
+
+The LoRA behind `complete_workflow.json`'s Image to Real group. **Treated as
+non-commercial until settled**, so `fetch_models.py` refuses it without
+`--accept-noncommercial`, even under `--all`.
+
+Its author publishes the same file in two places with two answers. On the Hub,
+`lrzjason/QwenEdit-Anything2Real_Alpha` declares Apache-2.0 in its card metadata
+and has no licence file. On Civitai, model 2121900, whose version 2400325 has the
+same SHA-256, the author's permissions read `allowCommercialUse []`,
+`allowDerivatives false` and `allowNoCredit false`: no commercial permission of
+any kind, no derivatives, and credit required. The Hub card names that Civitai
+account as the author's. Both were read on 2026-09-30. Until the author says
+which terms govern, take the stricter one.
 
 ## Music and sound
 
@@ -198,11 +235,156 @@ Each is dated and links the text it read.
   under the standard Daz EULA. The mesh, rig or morphs inside a build need an
   Interactive License for each product, and the EULA's AI clause puts feeding
   Daz content to this pipeline's models in doubt
-  ([DAZ Genesis](/reference/daz-genesis#licences)).
+  ([DAZ Genesis](/reference/daz-genesis#licences)). Where a bought model may
+  ship whole is [below](#marketplaces-where-a-full-model-may-ship).
 - **Source engine tools.** None is in the image. The Source SDK code may be used
   only to develop a Source 1 mod of a Valve game, and content made with Valve's
   developer tools, such as studiomdl, is non-commercial by default
   ([Source Filmmaker](/reference/source-filmmaker#licences-copy-learn-from-never-vendor)).
+
+## Marketplaces: where a full model may ship
+
+Everything above is about models this pipeline runs. This is about models you
+buy. The distinction that matters is the one Daz draws: a render may ship, the
+mesh may not. Two marketplaces were read on 2026-09-21 to find where that is
+not the rule. Both were read once, from public pages, with nothing bought and
+nothing downloaded, and neither has a claim register behind it yet.
+
+| | Renders in a shipped game | The mesh inside the build |
+|---|---|---|
+| Daz 3D, standard EULA | Yes, on conditions | No: needs an Interactive License per product ([note](/reference/daz-genesis#licences)) |
+| Renderosity, Standard License | Yes, "2D rendered images for games" | No, in as many words |
+| Renderosity, Extended License | Yes | Yes, with encryption and modification conditions |
+| RenderHub, Personal Use Only | No, non-commercial only | No |
+| RenderHub, Extended Use License | Yes | Yes, no extraction or revenue conditions |
+
+### Renderosity: two tiers, and the game clause is in the paid one
+
+The [Standard License](https://www.renderosity.com/standard-license) is
+renders-only and says so. It allows "2D rendered images for games or
+backgrounds" (s.3a) and forbids using a product "in real-time rendering games
+(where the Product files are distributed)" (s.4a). That is the claim already in
+the research note as DAZ-058.
+
+The [Extended License](https://www.renderosity.com/extended-license) is the one
+that changes the answer. Section 3(d): "The Buyer may use the Product to
+incorporate and embed into an electronic game or interactive media and
+distribute that new work provided there is encryption protection, the new work
+does not compete with the original, and the new work uses modifications of the
+original Product file(s)." Extraction stays barred (s.4f), and a vendor who can
+show the original can be extracted from your work "may require both the
+original and derivative work, and all copies thereof, to be deleted" (s.5b).
+There is no attribution duty and no revenue cap; the only number is a 100,000
+run limit on physical items (s.3e).
+
+Three phrases in that clause are undefined on the page, and a game pipeline
+runs straight into all three: what counts as "encryption protection", whether a
+normal engine build satisfies it, what "uses modifications of the original
+Product file(s)" requires of you, and how the same licence can forbid
+"convert" (s.4a) while contemplating embedding in an engine, which converts.
+Those need a written answer from Renderosity before anything ships, not a
+reading.
+
+Which tier a product offers is on its page as an "Available Uses:" line, and is
+a filter: `?licenses=2` on a department listing shows only the Extended ones.
+In the 3D Models department that is 5,924 products against 14,006 Standard.
+
+**Free Stuff is a separate system with no licence at all.** The section carries
+no terms, and each item's real terms are a text file inside the zip, which is
+how the Genesis 9 characters in this library came with "free for both personal
+and commercial use in rendered images and animations" and a bar on
+redistributing the files. That is renders-only, per item, and unknowable before
+you download. It is claim DAZ-059.
+
+### RenderHub: one tier does all of it
+
+Two tiers, named in the [3D Content Licensing Agreement](https://www.renderhub.com/info/3d-content-licensing)
+(Rev: 2022.02.10, section V). The **Extended Use License** "permits both
+non-commercial and commercial use", and its permitted uses name "Computer games
+and software (computer/web/mobile games, virtual and augmented worlds,
+simulation and training environments, software user interfaces, electronic
+textbooks)". There is no interactive tier to buy on top, no revenue cap, no
+end-user count, no commercial attribution, and no duty to protect the asset
+against extraction: extract, encrypt, obfuscate and compiled appear nowhere in
+the Agreement. The **Personal Use Only License** is non-commercial and does not
+list games at all.
+
+Both tiers forbid reselling the asset and allow redistribution only where "the
+Digital Asset becomes part of a larger Creation", a Creation being "any work
+created by you". A game is such a work; the Agreement never says so in those
+words, and that inference is the one load-bearing step in the reasoning.
+Shipping the same assets as a browsable content pack is a different thing, and
+the Competition clause, which bars use "that displaces the market for the
+original Digital Asset", is where that would be argued.
+
+The tier is printed on every product page and every listing card, and cannot be
+filtered on. Free items carry tiers too and generate no invoice, so RenderHub's
+own admin advises screenshotting the product page with its licence badge,
+because that is the only evidence you will have
+([forum](https://www.renderhub.com/forum/6543/free-stuff-license), 2024-03-11).
+
+### The licence is not the risk. Provenance is
+
+RenderHub vets nothing it sells. A badge states what RenderHub permits, not
+what the seller owned, and its free rigged humans include characters named for
+films, wrestling promotions and games, every one badged Extended Use. The
+Agreement disclaims exactly this: "RenderHub does not own or license any Other
+Intellectual Property", defined to include trademark, trade dress and right of
+publicity, and it asks you to make "an independent assessment". Assets built on
+Unreal's MetaHuman framework carry Epic's terms, which the product page does
+not mention.
+
+### Both sites sell Daz figure content, and a game licence does not rescue it
+
+This is the trap to know. Renderosity's character departments are 96 to 99.5
+per cent content **for** a figure you do not get: filter Characters to Genesis 9
+with an Extended licence and 190 of the 196 results are "3D Figure Assets",
+which are morphs, skins and material presets. RenderHub has a whole Daz section
+badged Extended Use in the same way. Either way the vendor licenses only what
+the vendor made, and the Genesis mesh, rig and UVs are not in the box. An
+Extended licence on a Genesis morph ships you a morph.
+
+Tell them apart from the product page. Renderosity: the "Software" field says a
+Daz Studio or Poser version rather than FBX, Unity or Unreal, the breadcrumb
+says Characters, Clothing, Hair or Morphs rather than 3D Models, and the
+description names `.duf` files. RenderHub: the page has "Software: Daz Studio"
+and "Compatible Figure" rows, and "Included Formats" says Daz. On both,
+`.duf` items also turn up in ordinary model listings, so the section is not a
+wall.
+
+### Neither site says anything about AI
+
+Not a permission and not a prohibition, on either. Renderosity's published AI
+policy governs what you upload to its galleries; RenderHub's governs what
+vendors upload to sell. Neither licence mentions training, datasets or machine
+learning at all. A product page on Renderosity may carry an "AI Use:" line, but
+that is the vendor disclosing how the asset was made, which says nothing about
+what a buyer may do and adds a provenance question of its own.
+
+For this pipeline, which feeds images to Qwen-Image and meshes to generators,
+that silence is the same open question the Daz EULA raises in the other
+direction. It needs a written answer per vendor before bought content goes into
+an AI stage.
+
+### What a bought model still needs here
+
+A licence that permits the mesh in a build is the first condition, not the only
+one. The rest is the same as for anything generated: a scale the pipeline can
+normalise (`normalise_mesh.py`), a rig the sheets can pose or a skeleton
+`bone_roles.py` can name, a face budget the target can carry
+(`decimation_report.py`), and a provenance row in `sources.json` recording
+where it came from and under which licence, written by `cleanup.py keep
+--source --licence --licence-url`.
+
+### What was not read
+
+RenderHub's checkout was not observed, so whether it offers a licence upgrade
+there is unverified; its AI policy was read, its buyer-side silence inferred
+from the absence of the words. On Renderosity, the vendor packaging guidelines
+and the submission PDF return 403, so what vendors are told to put in a zip is
+unverified, and individual product pages began returning 500 part way through
+the reading, so several were read once and not re-checked. No account was
+created on either site, nothing was bought, and no file was downloaded.
 
 ## Decide per asset, before it ships
 
@@ -237,6 +419,11 @@ This is a separate question from the model weights, and easy to mix up with them
 | ComfyUI-UniRig | **GPL-3.0** |
 | ComfyUI-mesh2motion | MIT, declared in metadata, no licence file shipped |
 | ComfyUI-CameraPack | MIT, declared in metadata, no licence file shipped |
+| rgthree-comfy | MIT |
+| cg-use-everywhere | Apache-2.0 |
+| ComfyUI-GGUF | Apache-2.0 |
+| Comfyui-QwenEditUtils | Apache-2.0 |
+| comfyui_controlnet_aux | Apache-2.0 for the pack. **Its DWPose and OpenPose folders carry CMU's OpenPose licence, non-commercial research use only** |
 | Blender / bpy | GPL-2.0-or-later |
 | nvdiffrast 0.3.3 | **NVIDIA Source Code License, research and evaluation use only** |
 | diff-gaussian-rasterization | **Inria Gaussian-Splatting License, research and evaluation use only** |
@@ -252,6 +439,33 @@ Its mesh decoder's vertex colours, baked in Blender instead, load neither
 ([the vertex-colour route](/guide/trellis#the-vertex-colour-route-licence-clean-and-just-as-dark)).
 Before trusting any texturing route, read the licence file of every rasteriser
 it imports, not just the model card.
+:::
+
+::: danger The pose preprocessor is non-commercial code
+`complete_workflow.json`'s Pose Transfer group turns its second image into a
+skeleton with comfyui_controlnet_aux's DWPose preprocessor. The folder that code
+lives in, `src/custom_controlnet_aux/dwpose/`, ships CMU's OpenPose licence,
+headed "ACADEMIC OR NON-PROFIT ORGANIZATION NONCOMMERCIAL RESEARCH USE ONLY". It
+grants use "for noncommercial research purposes", and says "You may not
+distribute, copy or use the Software except as explicitly permitted herein". The
+folder's `__init__.py` says its code is "Original from CMU" by way of Hzzone's
+pytorch-openpose, which has no licence file. The DWPose node imports that
+folder's `body.py`, `hand.py`, `face.py` and `util.py`. Read at commit `0cd2904`
+on 2026-09-30; that is a reading of the imports, not a runtime check.
+
+The DWPose weights are Apache-2.0, and so is DWPose's own code upstream. The
+licence file sits on the code that runs and draws them in this pack. Whether
+CMU's terms reach a reimplementation is not answerable from the files. Until it
+is, don't use Pose Transfer for anything you sell. The image does not carry the
+pack: a container fetches it from GitHub when it starts, so downloading it, and
+with it accepting CMU's terms, is each user's own act
+([redistributing](/guide/redistributing)).
+
+The pack vendors more research-only code that no graph here loads: `open_pose/`
+(the same CMU licence), `leres/pix2pix/` ("for academic use only"), `dsine/`
+(Imperial College: "non-commercial, internal or academic research purposes") and
+`pidi/` ("just for research purpose"). AIO_Preprocessor's dropdown can select any
+of them, so check the folder's licence before switching it away from DWPose.
 :::
 
 ::: warning Two corrections to what this page used to say
@@ -416,6 +630,9 @@ realism checkpoints that were on the development machine are not used, and
 `img_refine_sdxl.json` records why: "their licensing is unclear and this
 pipeline ships game assets". Their licence terms were not read. The refine pass
 uses SDXL base instead ([concept art](/guide/concept-art#a-second-pass-for-materials)).
+The one exception is `complete_workflow.json`, which runs a community merge and a
+community LoRA; both are recorded [above](#qwen-image-edit-rapid-aio-and-its-gguf-quant)
+as unsettled.
 
 ## Hunyuan3D is kept here on purpose
 

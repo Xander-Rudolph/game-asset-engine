@@ -66,6 +66,10 @@ ALLOW = [
     (".claude-plugin/marketplace.json", "Daz",
      "the marketplace description and keywords name Daz Genesis figures as the subject of "
      "the daz-figure skill, which routes to the licence first; no Daz content is in the file"),
+    ("skills/character-source/SKILL.md", "Daz",
+     "the end-user skill for characters from commercial tools: it names Daz only to point to the daz-figure skill and docs/reference/daz-genesis.md, to say Claude may read a Daz or Reallusion render, and to say cleanup.py keep guards Daz files; it holds no Daz content"),
+    (".claude/skills/terms-recheck/SKILL.md", "Daz",
+     "the maintainer skill that re-reads licence pages: it names daz3d.com to forbid fetching it with any tool, and cites the DAZ-105 claim id; it holds no Daz content"),
     ("skills/daz-figure/SKILL.md", "Daz",
      "the end-user skill for a Daz product the user downloaded by hand: it states the "
      "licence from docs/reference/daz-genesis.md before each stage, installs into a library "
@@ -75,9 +79,25 @@ ALLOW = [
      "names Genesis 9 Starter Essentials (SKU 86958) as the one product its steps were "
      "measured on, the Genesis figure .duf paths it imports and the counts it measured; no "
      "Genesis data is in the file"),
+    ("scripts/make_hair.py", "Genesis",
+     "names Genesis 9 as the figure its five body capsules were measured on, by height "
+     "band below the fitted skull centre, and in the help of the flag that switches them "
+     "off; the numbers are proportions of a neck and shoulders, and no Genesis data is in "
+     "the file"),
+    ("scripts/make_hair.py", "Daz",
+     "its docstring says why the script exists: a Daz hair product is licence-bound and the "
+     "strand hairs in the library have no polygons, so this writes hair the repo owns; it "
+     "reads no Daz file and holds no Daz content"),
     ("scripts/lipsync_cues.py", "Valve",
      "credits the 0.08 s window of Valve's phoneme filter as the source of the share "
      "frame rule, a number read in docs/reference/source-filmmaker.md, not SDK code"),
+    ("scripts/daz_characters.py", "Daz",
+     "rolls characters out of a user's own Daz content library outside the repo and "
+     "renders them into gitignored output/daz/, so it names the maker, its folder layout "
+     "and its file names; no Daz content is in the file"),
+    ("scripts/daz_characters.py", "Genesis",
+     "the figures it rolls are Genesis ones, named in its help and in the folders it "
+     "reads; no Genesis data is in the file"),
     ("scripts/daz_inventory.py", "Daz",
      "reads a user's own Daz content library from outside the repo and refuses a path "
      "inside it, so it names the maker, its folders and its spec; its test library is "

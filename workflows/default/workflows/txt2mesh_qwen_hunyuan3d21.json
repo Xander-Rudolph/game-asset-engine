@@ -492,6 +492,7 @@
    },
    "widgets_values": [
     0,
+    "fixed",
     30,
     7.5,
     256,

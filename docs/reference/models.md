@@ -1,8 +1,10 @@
 # Models and weights
 
 Weights live outside the repo and outside the image. `MODELS_DIR` in `.env` says
-where. Expect about 200GB for `--all`, which leaves out the `gated` and
-`noncommercial` groups.
+where. Expect about 274GB for `--all`, which leaves out the `gated` and
+`noncommercial` groups and refuses any model marked non-commercial. That figure
+is the fetcher's own file list summed against the Hub's sizes on 2026-09-30, in
+the units it prints.
 
 ```sh
 scripts/fetch_models.py                       # check the core group
@@ -33,6 +35,8 @@ node an hour later.
 | `core` | SDXL, TripoSR, TripoSG | ~20GB |
 | `qwen` | Qwen-Image, plus the 4 step Lightning LoRA and a pre-merged 4 step copy. Apache 2.0, the default concept generator | ~48GB |
 | `qwen_edit` | Qwen-Image-Edit, for changing one part of an image | ~19GB |
+| `qwen_rapid` | For `complete_workflow.json`: Phr00t's Qwen-Image-Edit Rapid AIO merge and a GGUF quant of it, the Anything2Real LoRA and the DWPose weights. Licences unsettled, and Anything2Real needs `--accept-noncommercial` | ~40GB |
+| `wan_i2v` | Wan 2.2 image to video 14B, both experts in fp8, with its text encoder, VAE and 4 step LoRAs. Apache 2.0 | ~35GB |
 | `hunyuan` | Hunyuan3D 2.1 shape generation and texturing. Best meshes. Territory limited licence | ~24GB |
 | `instantmesh` | Zero123++ multiview into InstantMesh | ~10GB |
 | `trellis` | TRELLIS image to 3D, both branches | ~9GB |
@@ -65,7 +69,8 @@ at all.
 ## Licences in one line each
 
 Run `scripts/fetch_models.py --licenses` for the authoritative list. Every model
-not listed below is MIT, Apache 2.0 or BSD. The four that are not:
+not listed below is MIT, Apache 2.0 or BSD. The six that are not, or are not
+settled:
 
 - **Hunyuan3D 2 and 2.1**: royalty free but territorially limited. Does not apply
   in the EU, UK or South Korea.
@@ -75,6 +80,16 @@ not listed below is MIT, Apache 2.0 or BSD. The four that are not:
   (Apache 2.0).
 - **SDXL and SD 1.5**: OpenRAIL-M (OpenRAIL++-M for SDXL). Commercial use of the
   images is permitted. The use restrictions travel with the model.
+- **Qwen-Image-Edit Rapid AIO and its GGUF quant**: unsettled. The merge's card
+  declares Apache-2.0 but folds in community LoRAs with no stated licence, and
+  the quant declares none.
+- **Anything2Real**: unsettled, and treated as non-commercial. Apache-2.0 on the
+  Hub, but the author's Civitai page for the same file allows no commercial use
+  and no derivatives. Refused without `--accept-noncommercial`.
+
+The DWPose weights are Apache 2.0, but the comfyui_controlnet_aux code that runs
+them carries CMU's non-commercial OpenPose licence. See
+[licensing](/guide/licensing#the-licences-of-the-tools-themselves).
 
 TripoSG is listed as MIT, and it is MIT upstream. But its copy in this pack
 ships a Tencent licence file with the same EU, UK and South Korea exclusion, and

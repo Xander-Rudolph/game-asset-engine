@@ -29,6 +29,18 @@ NODES = Path(os.environ.get("COMFY_CUSTOM_NODES", ROOT / "custom_nodes"))
 # (file, find, replace, why)
 PATCHES: list[tuple[str, str, str, str]] = [
     (
+        "ComfyUI-UniRig/nodes/comfy-env.toml",
+        'comfy-kitchen = "*"',
+        'comfy-kitchen = "==0.2.26"',
+        "UniRig runs its nodes in its own pixi environment, built from this file, "
+        "and '*' resolved to comfy-kitchen 0.2.36 on 2026-09-30. On this stack's "
+        "torch 2.6 that fails ComfyUI's import inside the environment "
+        "(\"Parameter stride has unsupported type list[int]\"), so UniRig "
+        "registered 0 nodes. 0.2.26 is the last line torch 2.6 accepts, the one "
+        "the Dockerfile pins in the main environment for the same reason; with it "
+        "UniRig registered all 16. Drop this when the stack moves to torch 2.7.",
+    ),
+    (
         "ComfyUI-3D-Pack/Gen_3D_Modules/Era3D/mvdiffusion/pipelines/pipeline_mvdiffusion_unclip.py",
         "CLIPFeatureExtractor",
         "CLIPImageProcessor",

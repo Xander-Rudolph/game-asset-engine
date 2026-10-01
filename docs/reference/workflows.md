@@ -128,18 +128,44 @@ running with the steps value in the guidance box:
 
 - an input that is **wired** is a slot, not a widget, and takes no place in the
   array
-- an integer flagged to change after each generation, which every seed is, is
-  followed by an extra value the backend never sees
+- an integer the editor gives a randomise dropdown is followed by an extra value
+  the backend never sees. That is one flagged to change after each generation,
+  and also, in frontend 1.47.12, any integer named `seed` or `noise_seed` that
+  is not flagged off, whether the node asks for the dropdown or not
 
-`--check` reads each converted graph back the way ComfyUI reads it and compares
-every value against the original. It is not decoration. It caught the rigging
+`--check` reads each converted graph back the way the converter believes ComfyUI
+reads it, and compares every value against the original. It caught the rigging
 nodes declaring their dropdowns with a newer type, which had silently dropped
-five widgets across two workflows.
+five widgets across two workflows. It cannot catch a belief that is wrong, since
+it shares it: until 2026-09-30 the converter added the extra value only when a
+node set the flag, which 3D-Pack's TRELLIS, Hunyuan3D and TripoSG nodes do not.
+Opened in the editor, those five graphs sent every value after the seed one
+place early, such as Hunyuan3D ShapeGen with 7.5 steps and guidance 256. Graphs
+run by `run_workflow.py` use the API file and were never affected. The check
+that found it loaded every converted graph in the editor and compared the
+prompt it would send with the API original; all 25 now match.
 :::
 
 Converted graphs are generated. Edit the API JSON and re-run the converter,
 unless you are crafting in the editor, in which case save from ComfyUI and it
 lands in the same folder.
+
+## Two graphs made for the editor
+
+Two graphs in `workflows/default/workflows/` have no API version, because they
+are built for the editor and lean on node packs that do their work in the
+browser: rgthree's stage panels, relays and switches, and Use Everywhere.
+
+- `asset_workflow.json` joins the base graphs above into one pipeline, from a
+  prompt to a turntable, with a panel that switches stages on and off and a
+  picker per stage for running one step on its own. `scripts/build_asset_workflow.py`
+  builds it from the base graphs, so edit those, not it.
+- `complete_workflow.json` is the owner's image and video graph on the Rapid AIO
+  merge and Wan 2.2, and the one editor graph that is built by hand. Its weights
+  are the `qwen_rapid` and `wan_i2v` groups. Some of those weights, and its Pose
+  Transfer flow, are not cleared for commercial use.
+
+[The whole pipeline in one graph](/guide/asset-workflow) covers both.
 
 ## Export format
 
