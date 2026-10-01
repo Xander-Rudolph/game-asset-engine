@@ -69,7 +69,7 @@ While the package is still private, the pull needs you to log in first. See
 
 ### Weights are not in the image
 
-The weight set is around 200GB, so it stays on your disk under `MODELS_DIR`. The
+The weight set is around 274GB, so it stays on your disk under `MODELS_DIR`. The
 container reads `models.json` on boot and names anything missing before the
 server starts, rather than letting it turn up as a red node an hour later.
 

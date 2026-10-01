@@ -112,6 +112,49 @@ folders intact. What the use limits mean for texturing is in
 [licensing](/guide/licensing#the-licences-of-the-tools-themselves) and
 [TRELLIS](/guide/trellis#why-the-colour-is-research-only).
 
+### Five node packs added for complete_workflow.json
+
+The Dockerfile clones the first four at pinned commits. The fifth,
+comfyui_controlnet_aux, is **not in the image**; see below. Their licence files were read from
+clones at those commits on 2026-09-30, **not from a built image**. All five are
+source, so there is no source offer to make; MIT and Apache-2.0 ask for the
+licence text to travel with the code, and each clone carries its own.
+
+| Pack | Commit | Licence |
+|---|---|---|
+| rgthree-comfy | `449c58f` | MIT, Copyright (c) 2023 Regis Gaughan, III |
+| cg-use-everywhere | `50ae9f8` | Apache-2.0 |
+| ComfyUI-GGUF | `6ea2651` | Apache-2.0 |
+| Comfyui-QwenEditUtils | `cdd4d02` | Apache-2.0 |
+| comfyui_controlnet_aux | `0cd2904` | Apache-2.0 at the root, and see below. Fetched at start-up, not in the image |
+
+::: danger One folder forbids distribution outright
+comfyui_controlnet_aux vendors annotators with their own licence files, and two
+of its folders, `src/custom_controlnet_aux/dwpose/` and `open_pose/`, carry CMU's
+OpenPose licence. Unlike nvdiffrast's and Inria's, which permit distribution with
+a copy of the licence, this one does not: "You may not distribute, copy or use
+the Software except as explicitly permitted herein", and "You may not sell, rent,
+lease, sublicense, lend, time-share or transfer, in whole or in part, or provide
+third parties access to" it. An image with this pack in it would distribute both
+folders, and `dwpose/` is the code the Pose Transfer group runs
+([licensing](/guide/licensing#the-licences-of-the-tools-themselves)).
+
+`leres/pix2pix/` says "A redistribution of this software, with or without
+modifications, has to be for academic use only", and `dsine/` bars you from
+transferring its licence. `custom_manopth/` is GPL-3.0, so its licence text
+has to travel with it, which the clone does.
+
+So the image does not carry the pack (the owner's decision, 2026-09-30).
+`scripts/entrypoint.sh` fetches it from GitHub, at the commit the Dockerfile pins,
+the first time a container starts, so each user downloads it from its source.
+Downloading it accepts CMU's terms, which the entrypoint says as it does so, and
+`ASSET_ENGINE_CONTROLNET_AUX=0` skips it, and Pose Transfer with it. Checked on
+2026-09-30: the built image holds no copy of the pack and no copy of CMU's licence
+text, and the fetch was run as the container's user with the default, with the
+opt-out, on a second start, and with no network, where it warns and the server
+still starts.
+:::
+
 ## The AGPL question, which is not answered here
 
 `ultralytics` is AGPL-3.0, and the entire purpose of this image is to serve
@@ -139,6 +182,9 @@ locally, resolve it before you do.
 6. **Keep the two research-only licences with their packages**, and read their
    use limits ([above](#two-research-only-libraries-not-copyleft-still-conditional))
    before publishing for anyone who will use the image commercially.
+7. **Check that comfyui_controlnet_aux is still left out.**
+   `docker run --rm --entrypoint ls <image> /app/custom_nodes` must not list it
+   ([above](#five-node-packs-added-for-complete-workflow-json)).
 
 ## What is still unresolved
 
@@ -153,5 +199,10 @@ Recorded so the gaps are visible rather than implied to be absent.
   the wheel.
 - **Per-file licensing inside ComfyUI-3D-Pack** was not re-audited here. That is a
   file-level audit rather than a metadata sweep.
+- **22 of the 35 annotator folders under comfyui_controlnet_aux's
+  `src/custom_controlnet_aux/` have no licence file at any depth**,
+  `depth_anything`, `sam`, `oneformer` and `uniformer` among them, so the root
+  Apache-2.0 is the only licence on them. Whether it covers what they vendor was
+  not checked; no graph here loads them.
 - **The pixi environment UniRig builds on first run** provisions further components
   after the image ships, and was not inventoried.

@@ -1,9 +1,9 @@
 {
-  "_comment": "Apply a Mixamo animation to a rigged FBX from mesh_rig_unirig.json. animation_file is a combo built from input/animation_templates/mixamo/, which ships Breakdance, Capoeira, Dying, Hip_Hop_Dancing and Mma_Kick \u2014 drop more .fbx there and they appear in the list.",
+  "_comment": "Apply a Mixamo animation to a rigged FBX whose bones carry Mixamo names, which means one rigged with skeleton_template='mixamo'. It copies curves by mixamorig: bone name, with no retargeting, and refuses anything else: on an articulationxl rig from mesh_rig_unirig.json it stops with 'Model does not have mixamorig: bone names!' (output/rigged/unit_warrior.fbx with Capoeira, run 2026-09-30). docs/reference/video-mocap.md covers the retarget that would close that gap. model_fbx_path must be an absolute container path such as /app/output/rigged/name.fbx: the node runs in UniRig's isolated environment, whose working directory is not /app, so a relative path is not found (the same run). animation_file is a combo built from input/animation_templates/mixamo/, which ships Breakdance, Capoeira, Dying, Hip_Hop_Dancing and Mma_Kick; drop more .fbx there and they appear in the list.",
   "1": {
     "class_type": "UniRigApplyAnimation",
     "inputs": {
-      "model_fbx_path": "output/rigged.fbx",
+      "model_fbx_path": "/app/output/rigged.fbx",
       "animation_type": "mixamo",
       "animation_file": "Capoeira.fbx",
       "output_name": ""

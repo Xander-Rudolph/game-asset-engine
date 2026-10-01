@@ -15,10 +15,10 @@ reads it from there rather than guessing.  Two traps live in it:
 - An input wired to another node is a *slot*, not a widget, and takes no
   place in the array.  Getting that wrong shifts every value after it,
   and the graph loads with the steps in the cfg box.
-- An INT flagged `control_after_generate` (every `seed`) is followed in
-  the array by an extra value the backend never sees -- the editor's
-  randomise dropdown.  Miss it and everything after the seed shifts by
-  one.
+- An INT flagged `control_after_generate`, and any INT named `seed` or
+  `noise_seed` whether flagged or not, is followed in the array by an
+  extra value the backend never sees -- the editor's randomise dropdown.
+  Miss it and everything after the seed shifts by one.  See has_control.
 
 Written into `workflows/default/workflows/`.  A source-build service (the
 `comfy` and `comfy-local` profiles) mounts `workflows/` at `/app/user`, so
@@ -183,6 +183,15 @@ at all.
 MIA is better than mixamo for humanoids, and much faster.""",
     "rig_apply_animation": """RIGGED FBX + CLIP -> ANIMATED FBX
 
+MIXAMO-NAMED RIGS ONLY.  It copies curves by mixamorig: bone name and
+refuses an articulationxl rig, whose bones are bone_N: "Model does not
+have mixamorig: bone names!" (run 2026-09-30).  Rig with the mixamo
+template to use it.
+
+model_fbx_path must be an absolute container path, such as
+/app/output/rigged/name.fbx.  The node runs in UniRig's own
+environment, where a relative path is not found.
+
 UniRig ships five Mixamo clips and none of them are game cycles.  For
 idle/walk/attack, drop clips into input/animation_templates/mixamo/ or
 use mesh2motion's 176 CC0 clips.  scripts/list_animations.py prints
@@ -283,6 +292,80 @@ def is_slot(typ):
     return typ not in WIDGET_TYPES
 
 
+def has_control(iname, typ, opts):
+    """Whether the editor puts its randomise dropdown after this widget.
+
+    Not only when the node asks for one.  The editor's INT widget (frontend
+    1.47.12) adds it when `control_after_generate ?? ['seed',
+    'noise_seed'].includes(name)`, so an INT named seed gets one unless the
+    node says false.  3D-Pack's TRELLIS and Hunyuan3D nodes never set the
+    flag, and reading the flag alone put every value after their seed one
+    widget early: TRELLIS ran with 0 structured-latent steps (queued from the
+    editor, 2026-09-30).  The round trip below could not see it, because it
+    read the array back with the same mistake."""
+    flag = opts.get("control_after_generate")
+    if flag is not None:
+        return bool(flag)
+    return typ == "INT" and iname in ("seed", "noise_seed")
+
+
+def build_node(nid, node, spec, pos, order):
+    """One API node as an editor node, with each wired input's source left
+    in a `_wire` key for the caller to turn into a link.
+
+    Shared with build_asset_workflow.py, so the widget order is worked out in
+    exactly one place."""
+    ctype = node["class_type"]
+    inputs, widgets = [], []
+    for iname, typ, opts in declared_inputs(spec):
+        wired = node["inputs"].get(iname)
+        if is_slot(typ):
+            inputs.append({"name": iname, "type": typ, "link": None,
+                           "_wire": wired})
+            continue
+        if isinstance(wired, list) and len(wired) == 2:
+            # A widget that has been wired up instead of typed in: it
+            # becomes a slot and drops out of the value array.  The
+            # editor finds the widget it stands in for by "widget".
+            inputs.append({"name": iname, "type": typ if isinstance(typ, str)
+                           else "COMBO", "widget": {"name": iname},
+                           "link": None, "_wire": wired})
+            continue
+        if iname in node["inputs"]:
+            widgets.append(node["inputs"][iname])
+        elif "default" in opts:
+            widgets.append(opts["default"])
+        elif isinstance(typ, list) and typ:
+            widgets.append(typ[0])
+        elif opts.get("options"):
+            widgets.append(opts["options"][0])
+        else:
+            widgets.append("")
+        # The editor's randomise dropdown rides along behind a seed.
+        if has_control(iname, typ, opts):
+            widgets.append("fixed")
+
+    outs = []
+    for i, (otype, oname) in enumerate(
+            zip(spec.get("output", []), spec.get("output_name", []))):
+        outs.append({"name": oname, "type": otype, "links": [],
+                     "slot_index": i})
+
+    return {
+        "id": int(nid),
+        "type": ctype,
+        "pos": pos,
+        "size": [400, 120],
+        "flags": {},
+        "order": order,
+        "mode": 0,
+        "inputs": inputs,
+        "outputs": outs,
+        "properties": {"Node name for S&R": ctype},
+        "widgets_values": widgets,
+    }
+
+
 def convert(api, info, name):
     nodes_in = {k: v for k, v in api.items() if not k.startswith("_")}
 
@@ -326,53 +409,10 @@ def convert(api, info, name):
         row[col] = row.get(col, 0) + 1
         pos = [MARGIN_X + col * COL_W, 60 + (row[col] - 1) * ROW_H]
 
-        inputs, widgets = [], []
-        for iname, typ, opts in declared_inputs(spec):
-            wired = node["inputs"].get(iname)
-            if is_slot(typ):
-                inputs.append({"name": iname, "type": typ, "link": None,
-                               "_wire": wired})
-                continue
-            if isinstance(wired, list) and len(wired) == 2:
-                # A widget that has been wired up instead of typed in:
-                # it becomes a slot and drops out of the value array.
-                inputs.append({"name": iname, "type": typ if isinstance(typ, str)
-                               else "COMBO", "link": None, "_wire": wired})
-                continue
-            if iname in node["inputs"]:
-                widgets.append(node["inputs"][iname])
-            elif "default" in opts:
-                widgets.append(opts["default"])
-            elif isinstance(typ, list) and typ:
-                widgets.append(typ[0])
-            elif opts.get("options"):
-                widgets.append(opts["options"][0])
-            else:
-                widgets.append("")
-            # The editor's randomise dropdown rides along behind a seed.
-            if opts.get("control_after_generate"):
-                widgets.append("fixed")
-
-        outs = []
-        for i, (otype, oname) in enumerate(
-                zip(spec.get("output", []), spec.get("output_name", []))):
-            outs.append({"name": oname, "type": otype, "links": [],
-                         "slot_index": i})
+        built = build_node(nid, node, spec, pos, order.index(nid))
+        for i in range(len(built["outputs"])):
             produced[(nid, i)] = None
-
-        nodes.append({
-            "id": int(nid),
-            "type": ctype,
-            "pos": pos,
-            "size": [400, 120],
-            "flags": {},
-            "order": order.index(nid),
-            "mode": 0,
-            "inputs": inputs,
-            "outputs": outs,
-            "properties": {"Node name for S&R": ctype},
-            "widgets_values": widgets,
-        })
+        nodes.append(built)
 
     by_id = {str(n["id"]): n for n in nodes}
     for n in nodes:
@@ -455,7 +495,7 @@ def back_to_api(ui, info):
             if at < len(vals):
                 inputs[iname] = vals[at]
                 at += 1
-                if opts.get("control_after_generate"):
+                if has_control(iname, typ, opts):
                     at += 1
         api[str(n["id"])] = {"class_type": n["type"], "inputs": inputs}
     return api

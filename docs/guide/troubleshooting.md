@@ -177,6 +177,52 @@ against their bodies.
 
 Use `articulationxl` instead.
 
+## UniRig dies with rtcGetSceneTraversable, or has no nodes at all
+
+Both mean UniRig's own environment is missing or broken. UniRig runs its nodes in
+an isolated pixi environment under `/app/.home/.ce`, which the packaged service
+keeps in the `unirig-home` volume. From 0.1.4, `scripts/entrypoint.sh` builds it
+before ComfyUI starts, checks it on every start (about 5 s), and rebuilds it if it
+fails the check; the log says `building UniRig's environment` and then `UniRig's
+environment is ready`. If it says `could not build`, read
+`/app/.home/.ce/unirig-install.log`. `ASSET_ENGINE_UNIRIG_ENV=0` skips it.
+
+Up to 0.1.3 nothing built it, and building it by hand ran into three faults in
+turn, all found on 2026-09-30. The entrypoint now handles each:
+
+- **No environment.** ComfyUI's log says `pixi has not materialized unirig-nodes;
+  using in-process import`. The nodes load in the main environment, and Apply
+  Animation died loading Blender with `undefined symbol: rtcGetSceneTraversable`,
+  the Embree mismatch between the image's bpy 4.5.9 and UniRig's that the compose
+  file names.
+- **No nodes.** Built as it comes, UniRig registered 0 nodes, and the log's
+  metadata scan ended in `infer_schema(func): Parameter stride has unsupported type
+  list[int]`. UniRig's `nodes/comfy-env.toml` asks for `comfy-kitchen = "*"`,
+  which resolved to 0.2.36, and nothing past 0.2.26 works on this image's torch 2.6.
+  `scripts/patch_nodes.py` pins it to 0.2.26.
+- **Auto Rig dies in `nvrtc compile failed`**, with errors in cumm's tensorview
+  headers. comfy-env's wheel index has only cumm 0.8.2 for this stack, beside
+  spconv 2.3.8, which requires cumm below 0.8. The entrypoint swaps in
+  spconv-cu124 and cumm-cu124 at the main image's versions, 2.3.8 and 0.7.11.
+  comfy-env's own `COMFY_ENV_AUTO_INSTALL` is left off, because its manifest leaves
+  out the CUDA wheels altogether, and Auto Rig then died on `No module named
+  'torch_cluster'`.
+
+Built this way from an empty volume, UniRig registered all 16 nodes, and
+`scripts/rig_units.sh` rigged a TRELLIS mesh in 36 s. Inside the environment the
+nodes do not run from `/app`, so give them absolute container paths, such as
+`/app/output/rigged/name.fbx`: a relative one is not found.
+
+On an image before 0.1.4, delete the environment and let a 0.1.4 container build
+it, or build it by hand with UniRig's installer and then make the same two fixes
+inside it:
+
+```sh
+docker exec comfyui-packaged bash -c 'cd /app/custom_nodes/ComfyUI-UniRig && python3 install.py'
+docker exec comfyui-packaged bash -c 'P=/app/.home/.ce/envs/unirig-nodes/.pixi/envs/default/bin/python; $P -m pip install --no-deps "comfy-kitchen==0.2.26" && $P -m pip uninstall -y spconv cumm && $P -m pip install "spconv-cu124==2.3.8" "cumm-cu124==0.7.11"'
+docker restart comfyui-packaged     # once /queue is empty
+```
+
 ## The sprite sheet is the rest pose four times
 
 Look for this line in the output:
@@ -274,6 +320,10 @@ the editor format, and the position depends on the order the node declares its
 inputs, which is only knowable from the running server. Two things shift that
 array and produce a graph that looks perfect and runs with the steps in the
 guidance box: an input that is wired takes no slot in the array, and every seed
-field is followed by an extra value the backend never sees. The check reads each
-converted graph back the way ComfyUI reads it and compares every value against the
-original. It caught five widgets silently dropped across two workflows.
+field is followed by an extra value the backend never sees, whether or not its node
+asks for one. The check reads each converted graph back and compares every value
+against the original. It caught five widgets silently dropped across two
+workflows, but it reads the array with the converter's own idea of its order, so a
+wrong idea passes it: on 2026-09-30 the TRELLIS, Hunyuan3D and TripoSG graphs
+passed while the editor sent their values one place early
+([Workflows](/reference/workflows#editing-graphs-in-the-comfyui-editor)).

@@ -1,11 +1,11 @@
 {
  "note": "docs/reference/daz-genesis.md",
  "researched": "2026-09-15",
- "checked": "2026-09-15 to 2026-09-16",
+ "checked": "2026-09-15 to 2026-09-16, DAZ-119 re-read 2026-09-22, DAZ-107 checked 2026-09-23, DAZ-105 re-read 2026-09-23",
  "statuses": {
   "confirmed": 41,
-  "corrected": 36,
-  "unchecked": 43,
+  "corrected": 37,
+  "unchecked": 42,
   "unsettled": 4,
   "unverifiable": 1
  },
@@ -1983,10 +1983,13 @@
    "status": "corrected",
    "kind": "licence",
    "load_bearing": true,
-   "claim": "As of 2026-09-15, Reallusion's Content License Policy (License Update 2025.8.1) and its Content EULA (updated 1 August 2025) no longer have a separate Extended License. The Standard License now covers CC Components (ccAvatar, ccProject, ccSlider, ccHair, ccCloth, ccShoes, ccGloves). With a one-time Standard purchase, you may \"repeatedly use CC components to create unlimited characters across multiple titles or projects\" in commercial games, AR/VR projects and interactive services, and export them to outside engines. The EULA has two license classes, Standard and Enterprise (case-by-case). The policy table also lists iContent, which works only inside Reallusion software and cannot be exported. iContent, Standard and Enterprise all tick \"Render image or video for commercial use\". The Standard License forbids using the content or its derivatives: as paid in-software or downloadable content; for online or in-software character generation or in character-generation APIs; as content embedded in applications or online services; and \"for machine learning, AI training, or AI-generated output\". It also requires that 3D models ship in proprietary formats that a publicly available application cannot open. Only an Enterprise License covers AI training. The FAQ further down the same page still has the older, contradictory wording (one character per Standard License, Extended needed for mass character output).",
+   "claim": "As of 2026-09-15, neither the licence table in Reallusion's Content License Policy (License Update 2025.8.1) nor its Content EULA (updated 1 August 2025) has a separate Extended License. The Standard License now covers CC Components (ccAvatar, ccProject, ccSlider, ccHair, ccCloth, ccShoes, ccGloves). With a one-time Standard purchase, you may \"repeatedly use CC components to create unlimited characters across multiple titles or projects\" in commercial games, AR/VR projects and interactive services, and export them to outside engines. The EULA has two license classes, Standard and Enterprise (case-by-case). The policy table also lists iContent, which works only inside Reallusion software and cannot be exported. iContent, Standard and Enterprise all tick \"Render image or video for commercial use\". The Standard License forbids using the content or its derivatives: as paid in-software or downloadable content; for online or in-software character generation or in character-generation APIs; as content embedded in applications or online services; and \"for machine learning, AI training, or AI-generated output\". The EULA also requires (6.3) that 3D models ship in proprietary formats that a publicly available application cannot open. Only an Enterprise License covers AI training. The page's markup still holds an older FAQ with the earlier, contradictory wording (one character per Standard License, Extended needed for mass character output), but in a block styled display: none, so readers do not see it; the FAQ data file carries five of that FAQ's later answers as entries marked disabled. The visible FAQ says \"All Standard Licenses, regardless of when they were purchased, are covered under the new Standard License policy.\" Its iContent tab still mentions the old tier: an answer table lists an \"Extended license\" as available in the Content Store and Marketplace.",
    "as_first_reported": "Under Reallusion's Content License Policy 2025.8.1 a Standard License allows commercial imagery with CC Components but only one character per commercial game or interactive project; an Extended License is needed for mass character outputs, and both permit commercial render images and video.",
    "sources": [
-    "https://www.reallusion.com/license/content.html"
+    "https://www.reallusion.com/license/content.html",
+    "https://www.reallusion.com/includes/rl-modules/faq/data/cs-content-policy-faq-general/en.json",
+    "https://www.reallusion.com/includes/rl-modules/faq/data/cs-content-policy-faq-icontent/en.json",
+    "https://www.reallusion.com/Content/EULA/EULA.htm"
    ],
    "checks": [
     {
@@ -2002,6 +2005,20 @@
      "read": "https://www.reallusion.com/Content/EULA/EULA.htm",
      "evidence": "Content EULA, \"Updated August 1st, 2025\", section 2.1(B) STANDARD LICENSE: \"your resulting creations are granted full ownership and usage rights to provide, sell, and redistribute those creations for use in commercial games, AR/VR projects and interactive services. With a one-time purchase of the Standard License, you may repeatedly use CC components to create unlimited characters across multiple titles or projects.\" The EULA has only two license sections (2.1 Standard, 2.2 Enterprise), and the word \"Extended\" appears 0 times. The policy page header \"License Update (2025.8.1)\" says: \"We're expanding the Standard License to include features that were previously exclusive to the Extended Licen...",
      "notes": "What's wrong: the claim mixes up the current 2025.8.1 policy with leftover FAQ text from the July 2022 Standard/Extended scheme. That text is still printed on https://www.reallusion.com/license/content.html (the server reported it last modified 20 Aug 2026; I fetched it 2026-09-16). The page contradicts itself: the header and licence table say Standard covers unlimited characters, while FAQ Q1, Q2, Q3, Q6, Q7, Q8 and Q11 still describe an Extended License. When the two disagree, go by the EULA, because it is the binding document, and it has no Extended tier at all. Points for the writer: (1) For this pipeline, the bigger problem is EULA 2.1 Restrictions (C). Standard content may not be used ..."
+    },
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "https://www.reallusion.com/license/content.html (curl and rendered in Playwright 2026-09-23 (own tab): Q1 to Q11 p.question elements all offsetWidth/Height 0; enclosing element <div class=\"rl-row-1440 rl-row-80\" style=\"display: none;\"> (computed display none); visible #faq-general questions are the six non-disabled en.json entries); https://www.reallusion.com/includes/rl-modules/faq/data/cs-content-policy-faq-general/en.json and https://www.reallusion.com/includes/rl-modules/faq/data/cs-content-policy-faq-icontent/en.json (fetched 2026-09-23, Last-Modified 15 Aug 2025); https://www.reallusion.com/Content/EULA/EULA.htm (fetched 2026-09-23)",
+     "evidence": "Hidden block Q1: \"Extended License is for Mass Character Production\"; \"one Standard License only grants outputs for one single character. Extended License grants mass character outputs\". Visible: \"All Standard Licenses, regardless of when they were purchased, are covered under the new Standard License policy.\" iContent tab (disabled:false): \"Extended license - ✅ Available ✅ Available -\" (columns In-Application, Content Store, Marketplace, ActorCore). EULA: \"two classifications\", 2.1 STANDARD, 2.2 ENTERPRISE; \"Extended\" 0 hits.",
+     "notes": "Refuted on three points. (1) The one-character/mass-character wording is in hidden Q1 and Q2, which have no en.json entries; only five later answers (old Q7 to Q11) are disabled entries, so \"its FAQ data entries are marked disabled\" overstates. (2) The visible FAQ's iContent tab still lists an \"Extended license\" as available in the Content Store and Marketplace, so \"the policy ... no longer [has] a separate Extended License\" says more than the page; narrowed to the licence table and the EULA. (3) The proprietary-format duty is EULA 6.3, which binds every Member, not a Standard License term; reattributed. All other sentences checked and hold: banner, CC Components list, the unlimited-characters quote (EULA 2.1(B)), table ticks, the 2.1(C) restrictions, Enterprise only for AI training. Final wording re-read: confirmed."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "content.html CDX and ten captures 2025-02 to 2026-08; EULA CDX; live digests; all read 2026-09-23",
+     "evidence": "Old FAQ visible in 20250524125851 (no 2025.8.1 banner); hidden in a display: none block from 20251206215335 through 20260830084432 and live. EULA live digest SIYQBQ4TEQNOEOXRSUALI3LMBB6IXH7B equals the 20250815004032 capture.",
+     "notes": "The 2025.8.1 policy, the hidden old FAQ and the EULA are unchanged across every capture since December 2025, so \"as of 2026-09-15\" still holds on 2026-09-23 (page Last-Modified now 17 Sep 2026, but the old FAQ, banner and table read the same). The final wording keeps the binding EULA, the policy table, the hidden legacy FAQ and the visible FAQ apart."
     }
    ]
   },
@@ -2027,12 +2044,22 @@
   },
   {
    "id": "DAZ-107",
-   "status": "unchecked",
+   "status": "corrected",
    "kind": "capability",
    "load_bearing": false,
-   "claim": "Character Creator's ExpressionPlus (ExPlus) facial profile provides 63 blendshapes (52 ARKit plus 11 tongue shapes), is applied by default to CC3+ characters after version 3.4, and pairs with AccuLips visemes for lip sync in iClone.",
+   "claim": "Character Creator's \"AccuLips & ExPlus\" facial profile includes 63 custom blend shapes (52 ARKit shapes and eleven tongue shapes) and the AccuLips viseme set for lip sync in iClone; CC3+ characters after version 3.4 come with the ExpressionPlus profile applied by default.",
    "sources": [
     "https://manual.reallusion.com/Character-Creator-4/Content/ENU/4.0/08_Animation/Creating-Character-with-ARKit-Profile.htm"
+   ],
+   "as_first_reported": "Character Creator's ExpressionPlus (ExPlus) facial profile provides 63 blendshapes (52 ARKit plus 11 tongue shapes), is applied by default to CC3+ characters after version 3.4, and pairs with AccuLips visemes for lip sync in iClone.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "https://manual.reallusion.com/Character-Creator-4/Content/ENU/4.0/08_Animation/Creating-Character-with-ARKit-Profile.htm, curl, read 2026-09-23",
+     "evidence": "\"By default, CC3+ characters after version 3.4 will all come with ExpressionPlus profile applied.\" \"Notice that the AccuLips & ExPlus facial profile includes: ExpressionPlus Six new tongue morph sliders ... 63 custom blend shapes: 52 ARKit shapes ... and eleven tongue shapes ... Seven new animation profiles: for facial puppeteering in iClone. Acculips system viseme: It produces more accurate, smooth and natural viseme for creating lipsync animation in iClone.\"",
+     "notes": "The AccuLips part is on this same primary Reallusion page (CC4 manual), so it now has a source. Refuted only on attribution: the page credits the 63 shapes and the AccuLips visemes to the combined \"AccuLips & ExPlus\" facial profile, not to ExPlus alone, and says the visemes are part of that profile rather than something ExPlus 'pairs with'. The default-since-3.4 part is confirmed as worded. A separate iClone AccuLips page was not read (the Wayback CDX was offline); none is needed for the final wording. Kind in the register is 'capability'; checked with the fact lens as asked."
+    }
    ]
   },
   {
@@ -2291,6 +2318,13 @@
      "read": "https://quaternius.com/license.html",
      "evidence": "Licence page https://quaternius.com/license.html: \"Quaternius Asset License (QAL) v1.0 / Last updated: 8/28/2026 ... You can use these assets, free of charge, in personal, educational, and commercial games and other projects, with no credit required. You just can't resell or redistribute the assets themselves as assets.\" Section 3a: \"You may not extract, repackage, sublicense, sell, or otherwise redistribute the Assets (in original or modified form) as a standalone asset, asset pack ... This restriction applies regardless of how much the Assets have been modified.\" Section 7: \"We may publish updated versions of this License for future Asset releases. Changes will not apply retroactively...\"\n...",
      "notes": "What is refuted is the opening blanket statement, \"Quaternius states all its models are CC0\". The FAQ still says it word for word, but it is out of date: Quaternius's own licence page and newest pack (Bestiary, published about 2026-08-29, v1.1 dated 29/8/2026) now use QAL. QAL is not an open licence. It bans redistributing the assets as assets, even modified, which matters for asset stores, template or starter-kit products, and possibly mod SDKs that ship raw meshes. Shipping a finished game is explicitly allowed. The part about Universal Base Characters still holds today.\n\nNuances:\n(1) QAL section 7 says a change applies only to future releases, and CC0 cannot be revoked for copies already ..."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "https://quaternius.com/license.html; https://quaternius.com/packs/universalbasecharacters.html; https://quaternius.itch.io/universal-base-characters",
+     "evidence": "Re-read 2026-09-22 for research/claims/hair-cards.json (HAIR-146): the licence page still shows 'Quaternius Asset License (QAL) v1.0, Last updated: 8/28/2026' and the Universal Base Characters pack page and itch.io page still state CC0.",
+     "notes": "No drift since 2026-09-15; the corrected wording stands. Status unchanged."
     }
    ]
   },

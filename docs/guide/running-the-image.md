@@ -74,7 +74,7 @@ Each flag solves a specific problem:
 | `PYOPENGL_PLATFORM=egl` | Enables headless rendering |
 | `HF_HOME` inside the models mount | Keeps the Hugging Face cache with the weights. Otherwise it sits inside the container, and recreating the container loses it |
 | `3d_checkpoints` mount | The 3D pack only looks for checkpoints inside its own node folder, so the ones in your models folder are mounted there |
-| `unirig-home` volume | The rigging pack builds an environment of about 11GB on first use. A named volume keeps it through `down` and `--force-recreate` |
+| `unirig-home` volume | The entrypoint builds the rigging pack's own environment here on the first start: 9.8GB under `.ce`, and 92 s from starting the container to ComfyUI answering, on the reference machine (2026-09-30). A named volume keeps it through `down` and `--force-recreate`. `ASSET_ENGINE_UNIRIG_ENV=0` skips it |
 | `comfy-user` volume | Graphs you save in the editor live here. Without it, `down` or `--force-recreate` deletes them |
 
 ::: danger Don't mount an empty folder over custom_nodes
@@ -85,7 +85,7 @@ profile doesn't mount source for this reason.
 
 ## Weights are separate
 
-The weight set is around 200GB and stays on your disk under `MODELS_DIR`. The
+The weight set is around 274GB and stays on your disk under `MODELS_DIR`. The
 container reads `models.json` on boot and names anything missing **before** the
 server starts, rather than letting it turn up as a red node an hour later.
 

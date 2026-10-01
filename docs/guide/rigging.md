@@ -14,8 +14,8 @@ Out comes `output/rigged/golem.fbx`.
 
 | | UniRig | mesh2motion |
 |---|---|---|
-| Skeleton | Mixamo compatible or generic | Its own, one per creature family |
-| Animations | Anything from Mixamo | 176 clips built in |
+| Skeleton | Mixamo-named with the `mixamo` template; `bone_N` with `articulationxl` | Its own, one per creature family |
+| Animations | Mixamo clips, on a `mixamo`-template rig only ([why](/guide/animation#unirig-5-clips-and-a-folder-to-fill)) | 176 clips built in |
 | Non humanoids | Poorly | Fox, spider, snake, dragon, bird, kaiju |
 | How you drive it | Command line | Interactive, in the browser |
 

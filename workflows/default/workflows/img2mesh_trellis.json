@@ -146,6 +146,7 @@
    "widgets_values": [
     "single",
     1234,
+    "fixed",
     7.5,
     12,
     3.0,

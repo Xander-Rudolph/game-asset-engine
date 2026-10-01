@@ -1,0 +1,760 @@
+{
+ "note": "docs/reference/video-mocap.md",
+ "researched": "2026-09-30",
+ "checked": "2026-09-30",
+ "statuses": {
+  "confirmed": 22,
+  "corrected": 3,
+  "unchecked": 3,
+  "unsettled": 1,
+  "unverifiable": 2
+ },
+ "conflicts_found": [],
+ "claims": [
+  {
+   "id": "VMC-001",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "As of 2026-09-30, WHAM's code (github.com/yohanshin/WHAM at 2b54f77, 2024-04-18) is under the MIT licence, Copyright (c) 2023 Soyong Shin; LICENSE has one commit, 2023-12-08. The code does not cover the SMPL body model, which WHAM's README says to download after registering at smpl.is.tue.mpg.de and smplify.is.tue.mpg.de, or its person detector, which it loads through Ultralytics (`from ultralytics import YOLO` in lib/models/preproc/detector.py, yolov8x.pt). No separate licence for WHAM's own checkpoints was found.",
+   "sources": [
+    "https://github.com/yohanshin/WHAM/blob/2b54f7797391c94876848b905ed875b154c4a295/LICENSE",
+    "https://github.com/yohanshin/WHAM/blob/2b54f7797391c94876848b905ed875b154c4a295/README.md",
+    "https://github.com/yohanshin/WHAM/blob/2b54f7797391c94876848b905ed875b154c4a295/lib/models/preproc/detector.py",
+    "https://github.com/yohanshin/WHAM/blob/2b54f7797391c94876848b905ed875b154c4a295/requirements.txt"
+   ],
+   "as_first_reported": "WHAM is MIT code but needs SMPL and YOLO.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://github.com/yohanshin/WHAM/blob/2b54f7797391c94876848b905ed875b154c4a295/LICENSE",
+     "evidence": "\"MIT License / Copyright (c) 2023 Soyong Shin / Permission is hereby granted, free of charge...\"",
+     "notes": "README: \"To download SMPL body models (Neutral, Female, and Male), you need to register for SMPL and SMPLify\"."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "https://api.github.com/repos/yohanshin/WHAM/commits?path=LICENSE",
+     "evidence": "One commit touches LICENSE (5fefe86, 2023-12-08); the repository's last push is 2024-04-18.",
+     "notes": "Conflation checked: the MIT grant is on the code; SMPL, the YOLO detector and the checkpoints are kept apart in the claim."
+    }
+   ]
+  },
+  {
+   "id": "VMC-002",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "As of 2026-09-30, GVHMR's code (github.com/zju3dv/GVHMR at ee960bb, 2026-09-15) permits use \"for educational, research and non-profit purposes only\", says \"Any modification based on this work must be open-source and prohibited for commercial use\", and sends commercial use to xwzhou@zju.edu.cn. On 2026-09-15 the repository replaced it with a \"Project Registration License (PRL) v1.0\", which allowed use by a company for any project, commercial or not, free of charge once registered through a Google form, and reverted to the non-commercial text the same day (commit ee960bb, \"Revert \\\"Adopt Project Registration License v1.0\\\"\"). GVHMR also needs SMPL and SMPL-X, and its demo detects people with Ultralytics YOLOv8.",
+   "sources": [
+    "https://github.com/zju3dv/GVHMR/blob/ee960bb6e2ea2d381aa97f08e9b71ef320b624b1/LICENSE",
+    "https://github.com/zju3dv/GVHMR/commits/main/LICENSE",
+    "https://github.com/zju3dv/GVHMR/blob/ee960bb6e2ea2d381aa97f08e9b71ef320b624b1/docs/INSTALL.md",
+    "https://github.com/zju3dv/GVHMR/blob/ee960bb6e2ea2d381aa97f08e9b71ef320b624b1/hmr4d/utils/preproc/tracker.py"
+   ],
+   "as_first_reported": "GVHMR's code is research and non-profit only.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://github.com/zju3dv/GVHMR/blob/ee960bb6e2ea2d381aa97f08e9b71ef320b624b1/LICENSE",
+     "evidence": "\"Permission to use, copy, modify and distribute this software and its documentation for educational, research and non-profit purposes only. Any modification based on this work must be open-source and prohibited for commercial use.\" / \"For commercial uses of this software, please send email to xwzhou@zju.edu.cn\"",
+     "notes": "INSTALL.md: \"You need to sign up for downloading SMPL and SMPLX\". tracker.py: \"from ultralytics import YOLO\"."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "https://api.github.com/repos/zju3dv/GVHMR/commits?path=LICENSE",
+     "evidence": "Three commits touch LICENSE: cb702cd (2024-09-04, \"Code release\"), a2dc45f (2026-09-15, \"Adopt Project Registration License v1.0\") and ee960bb (2026-09-15, the revert). The a2dc45f text read: \"Use of the Software by a company, organization, or other entity as part of any internal or external product ... is permitted free of charge, provided that the Project Use is registered before such use begins.\"",
+     "notes": "Drift found and recorded: the licence changed twice on one day, fifteen days before this reading. The claim states the current text and the reverted one apart."
+    }
+   ]
+  },
+  {
+   "id": "VMC-003",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "As of 2026-09-30, TRAM's code (github.com/yufu-wang/tram at 4861c11, 2025-06-08) is under the MIT licence, Copyright (c) 2024 Yufu Wang. Its pipeline needs SMPL (register at smplify.is.tue.mpg.de and smpl.is.tue.mpg.de) and includes DEVA-Track-Anything, whose LICENSE.md is Creative Commons Attribution-NonCommercial-ShareAlike 4.0, as well as DROID-SLAM (BSD-3-Clause), Detectron2 (Apache-2.0), Segment-Anything and ZoeDepth (MIT).",
+   "sources": [
+    "https://github.com/yufu-wang/tram/blob/4861c112f3c148201326680a50c9199650da6088/LICENSE",
+    "https://github.com/yufu-wang/tram/blob/4861c112f3c148201326680a50c9199650da6088/README.md",
+    "https://github.com/yufu-wang/tram/blob/4861c112f3c148201326680a50c9199650da6088/.gitmodules",
+    "https://github.com/hkchengrex/Tracking-Anything-with-DEVA/blob/404a112/LICENSE.md"
+   ],
+   "as_first_reported": "TRAM is MIT but its tracker is non-commercial.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://github.com/yufu-wang/tram/blob/4861c112f3c148201326680a50c9199650da6088/LICENSE",
+     "evidence": "\"MIT License / Copyright (c) 2024 Yufu Wang\". README: \"the pipeline includes Detectron2, Segment-Anything, and DEVA-Track-Anything\". DEVA LICENSE.md: \"This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License\".",
+     "notes": ""
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "https://api.github.com/repos/yufu-wang/tram/commits?path=LICENSE",
+     "evidence": "TRAM LICENSE: one commit, 541b474, 2024-04-23. DEVA LICENSE.md: one commit, b582a42, 2023-09-06.",
+     "notes": "Conflation checked: TRAM's own code and the vendored tracker carry different licences; the claim keeps them apart."
+    }
+   ]
+  },
+  {
+   "id": "VMC-004",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "As of 2026-09-30, 4D-Humans (HMR 2.0) code (github.com/shubham-goel/4D-Humans at efe18de, 2026-02-07) is under the MIT licence, Copyright (c) 2023 UC Regents, Shubham Goel. Its demo needs the SMPL neutral model from smplify.is.tue.mpg.de, runs ViTDet through Detectron2, and tracks with PHALP, whose LICENSE says \"This code base itself is MIT, but please follow the license for SMPL.\" Its tracker writes \"a .pkl file containing the tracklets with 3D pose and shape\". No separate licence for the HMR 2.0 checkpoints was found.",
+   "sources": [
+    "https://github.com/shubham-goel/4D-Humans/blob/efe18deff163b29dff87ddbd575fa29b716a356c/LICENSE.md",
+    "https://github.com/shubham-goel/4D-Humans/blob/efe18deff163b29dff87ddbd575fa29b716a356c/README.md",
+    "https://github.com/brjathu/PHALP/blob/96f7e6c/LICENSE"
+   ],
+   "as_first_reported": "4D-Humans is MIT code but needs SMPL.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://github.com/shubham-goel/4D-Humans/blob/efe18deff163b29dff87ddbd575fa29b716a356c/LICENSE.md",
+     "evidence": "\"MIT License / Copyright (c) 2023 UC Regents, Shubham Goel\". README: \"you also need to download the SMPL model. You will need the neutral model for training and running the demo code.\" / \"The output directory ... will contain a video rendering of the tracklets and a .pkl file containing the tracklets with 3D pose and shape.\"",
+     "notes": ""
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "https://api.github.com/repos/shubham-goel/4D-Humans/commits?path=LICENSE.md",
+     "evidence": "One commit touches LICENSE.md, b2750b8, 2023-06-06.",
+     "notes": "Conflation checked: code, checkpoints and SMPL kept apart."
+    }
+   ]
+  },
+  {
+   "id": "VMC-005",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "As of 2026-09-30, SMPLer-X (github.com/caizhongang/SMPLer-X, which now redirects to MotrixLab/SMPLer-X, read at 064baef) is under the S-Lab License 1.0, which permits redistribution and use \"for non-commercial purpose\" and says commercial use requires contacting the contributors. It predicts SMPL-X parameters and its install pins Python 3.8, PyTorch 1.12, mmcv-full 1.7.1 and mmdet 2.26.0.",
+   "sources": [
+    "https://github.com/MotrixLab/SMPLer-X/blob/064baef0e4ab5277a3297691bc1d46ea5412586f/LICENSE",
+    "https://github.com/MotrixLab/SMPLer-X/blob/064baef0e4ab5277a3297691bc1d46ea5412586f/README.md",
+    "https://github.com/MotrixLab/SMPLer-X/blob/064baef0e4ab5277a3297691bc1d46ea5412586f/requirements.txt"
+   ],
+   "as_first_reported": "SMPLer-X is non-commercial.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://github.com/MotrixLab/SMPLer-X/blob/064baef0e4ab5277a3297691bc1d46ea5412586f/LICENSE",
+     "evidence": "\"S-Lab License 1.0 ... Redistribution and use for non-commercial purpose in source and binary forms ... are permitted\" / \"4. In the event that redistribution and/or use for commercial purpose in source or binary forms ... is required, please contact the contributor(s) of the work.\"",
+     "notes": ""
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "https://api.github.com/repos/MotrixLab/SMPLer-X/commits?path=LICENSE",
+     "evidence": "One commit touches LICENSE, 857a3ec, 2023-06-14. The repository moved owner: the GitHub API answers caizhongang/SMPLer-X with a redirect to MotrixLab/SMPLer-X.",
+     "notes": "The README now points to SMPLest-X as its successor; its licence was not read."
+    }
+   ]
+  },
+  {
+   "id": "VMC-006",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "As of 2026-09-30, MotionBERT's code (github.com/Walter0807/MotionBERT at 705d3a9) is under the Apache License 2.0. It lifts 2D keypoints to 3D (17 Human3.6M joints) and, for mesh recovery, SMPL; its in-the-wild guide says to extract the 2D keypoints with AlphaPose, whose LICENSE is an \"ACADEMIC OR NON-PROFIT ORGANIZATION NONCOMMERCIAL RESEARCH USE ONLY\" agreement. The checkpoints are OneDrive links with no licence of their own stated.",
+   "sources": [
+    "https://github.com/Walter0807/MotionBERT/blob/705d3a95354db8bdb696b3492e47a3b5537174ff/LICENSE",
+    "https://github.com/Walter0807/MotionBERT/blob/705d3a95354db8bdb696b3492e47a3b5537174ff/README.md",
+    "https://github.com/Walter0807/MotionBERT/blob/705d3a95354db8bdb696b3492e47a3b5537174ff/docs/inference.md",
+    "https://github.com/MVIG-SJTU/AlphaPose/blob/c60106d/LICENSE"
+   ],
+   "as_first_reported": "MotionBERT is Apache-2.0 but needs AlphaPose.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://github.com/Walter0807/MotionBERT/blob/705d3a95354db8bdb696b3492e47a3b5537174ff/LICENSE",
+     "evidence": "Apache License, Version 2.0. docs/inference.md: \"Please use AlphaPose to extract the 2D keypoints for your video first.\" AlphaPose LICENSE: \"The Software may be used for your own noncommercial internal research purposes.\"",
+     "notes": "AlphaPose is the documented source of MotionBERT's input, not a hard dependency: another 2D detector giving H36M-format keypoints could feed it, which was not tried."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "https://api.github.com/repos/Walter0807/MotionBERT/commits?path=LICENSE",
+     "evidence": "MotionBERT LICENSE: one commit, 47d557d, 2023-03-28. AlphaPose LICENSE: last commit ef2a060, 2019-12-22.",
+     "notes": ""
+    }
+   ]
+  },
+  {
+   "id": "VMC-007",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "As of 2026-09-30, the SMPL-Model and SMPL-X Model licences still grant use only \"for the sole purpose of performing non-commercial scientific research, non-commercial education, or non-commercial artistic projects\", say \"For commercial use please email smpl@max-planck-innovation\", and add \"The software/data is also available for commercial licensing through Meshcapade.\" The pages report Last-Modified 2026-05-05 (SMPL) and 2026-07-02 (SMPL-X), the same dates recorded when DAZ-115 checked them on 2026-09-16.",
+   "sources": [
+    "https://smpl.is.tue.mpg.de/modellicense.html",
+    "https://smpl-x.is.tue.mpg.de/modellicense.html",
+    "research/claims/daz-genesis.json (DAZ-115)"
+   ],
+   "as_first_reported": "The SMPL body model is non-commercial unless licensed.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://smpl.is.tue.mpg.de/modellicense.html",
+     "evidence": "SMPL: \"To use the Software for the sole purpose of performing non-commercial scientific research, non-commercial education, or non-commercial artistic projects\" / \"For commercial use please email smpl@max-planck-innovation\" / \"The software/data is also available for commercial licensing through Meshcapade.\" SMPL-X: the same grant for the \"Model & Software\".",
+     "notes": ""
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "https://smpl-x.is.tue.mpg.de/modellicense.html",
+     "evidence": "Last-Modified headers: SMPL Tue, 05 May 2026; SMPL-X Thu, 02 Jul 2026. Unchanged since DAZ-115 (2026-09-16).",
+     "notes": "DAZ-117 (unchecked) reports that Epic Games acquired Meshcapade on 2026-02-18; both pages still name Meshcapade."
+    }
+   ]
+  },
+  {
+   "id": "VMC-008",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "As of 2026-09-30, Ultralytics (github.com/ultralytics/ultralytics) is under the GNU Affero General Public License v3, and both WHAM and GVHMR import its YOLO class to detect people, loading yolov8x.pt.",
+   "sources": [
+    "https://github.com/ultralytics/ultralytics/blob/79bab61/LICENSE",
+    "https://github.com/yohanshin/WHAM/blob/2b54f7797391c94876848b905ed875b154c4a295/lib/models/preproc/detector.py",
+    "https://github.com/zju3dv/GVHMR/blob/ee960bb6e2ea2d381aa97f08e9b71ef320b624b1/hmr4d/utils/preproc/tracker.py"
+   ],
+   "as_first_reported": "WHAM and GVHMR use AGPL YOLO.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://github.com/ultralytics/ultralytics/blob/79bab61/LICENSE",
+     "evidence": "\"GNU AFFERO GENERAL PUBLIC LICENSE Version 3, 19 November 2007\". WHAM detector.py line 13 and GVHMR tracker.py line 1: \"from ultralytics import YOLO\".",
+     "notes": ""
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "https://api.github.com/repos/ultralytics/ultralytics/commits?path=LICENSE",
+     "evidence": "Two commits touch LICENSE, last 2c6fc0a on 2023-04-14.",
+     "notes": "What AGPL obliges for a tool run offline to make assets, rather than shipped or served, is not settled here; the repo's AGPL question is an open owner decision in CLAUDE.md."
+    }
+   ]
+  },
+  {
+   "id": "VMC-009",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "As of 2026-09-30, SAM 3D Body (github.com/facebookresearch/sam-3d-body at b5c765a) puts its code and checkpoints under Meta's SAM License, \"Last Updated: November 19, 2025\". It grants a \"non-exclusive, worldwide, non-transferable and royalty-free limited license\" to use, reproduce, distribute and modify, with no non-commercial clause. It forbids use subject to ITAR and \"end uses prohibited by Trade Controls, including those related to military or warfare purposes\", forbids reverse engineering the materials, and lets Meta modify it with changes \"effective immediately\". Both checkpoint repositories on Hugging Face (facebook/sam-3d-body-dinov3 and -vith) are gated with manual approval and carry license: other, sam-license.",
+   "sources": [
+    "https://github.com/facebookresearch/sam-3d-body/blob/b5c765a0d89d789985e186d396315e7590887b94/LICENSE",
+    "https://github.com/facebookresearch/sam-3d-body/blob/b5c765a0d89d789985e186d396315e7590887b94/README.md",
+    "https://github.com/facebookresearch/sam-3d-body/blob/b5c765a0d89d789985e186d396315e7590887b94/INSTALL.md",
+    "https://huggingface.co/facebook/sam-3d-body-dinov3",
+    "https://huggingface.co/facebook/sam-3d-body-vith"
+   ],
+   "as_first_reported": "SAM 3D Body is under the SAM License, which allows commercial use.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://github.com/facebookresearch/sam-3d-body/blob/b5c765a0d89d789985e186d396315e7590887b94/LICENSE",
+     "evidence": "\"You are granted a non-exclusive, worldwide, non-transferable and royalty-free limited license under Meta's intellectual property ... to use, reproduce, distribute, copy, create derivative works of, and make modifications to the SAM Materials.\" / \"Meta may modify this Agreement from time to time ... All such changes will be effective immediately.\" README: \"The SAM 3D Body model checkpoints and code are licensed under SAM License.\"",
+     "notes": "The grant names no field of use; commercial use is not mentioned either way. ComfyUI-SAM3DBody's README reads it as \"allowing commercial use\"."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "https://api.github.com/repos/facebookresearch/sam-3d-body/commits?path=LICENSE",
+     "evidence": "One commit touches LICENSE, 4e33ae4, 2025-11-19. Hugging Face API: both model repos gated \"manual\", last modified 2025-12-10.",
+     "notes": "The licence reserves unilateral amendment, so the reading is dated. Code and weights are under the same licence here, not conflated."
+    }
+   ]
+  },
+  {
+   "id": "VMC-010",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "As of 2026-09-30, MHR, Meta's Momentum Human Rig (github.com/facebookresearch/MHR at d96fafa), is under the Apache License 2.0, and so are its model assets: release v1.0.1 (2025-11-19), which ships assets.zip, says \"Added LICENSE to assets\". MHR has 45 identity, 204 pose and 72 facial expression parameters, and a tool to convert between MHR and SMPL or SMPL-X.",
+   "sources": [
+    "https://github.com/facebookresearch/MHR/blob/d96fafa33bbf018647c70c3525e91f53e79d2a14/LICENSE",
+    "https://github.com/facebookresearch/MHR/blob/d96fafa33bbf018647c70c3525e91f53e79d2a14/README.md",
+    "https://github.com/facebookresearch/MHR/blob/d96fafa33bbf018647c70c3525e91f53e79d2a14/pyproject.toml",
+    "https://github.com/facebookresearch/MHR/releases/tag/v1.0.1"
+   ],
+   "as_first_reported": "MHR is Apache-2.0.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://github.com/facebookresearch/MHR/blob/d96fafa33bbf018647c70c3525e91f53e79d2a14/README.md",
+     "evidence": "README: \"MHR is licensed under the Apache Software License 2.0, as found in the LICENSE file.\" pyproject.toml: license = {text = \"Apache-2.0\"}. Release v1.0.1 body: \"Added LICENSE to assets\".",
+     "notes": ""
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "https://api.github.com/repos/facebookresearch/MHR/commits?path=LICENSE",
+     "evidence": "One commit touches LICENSE, 0dafd5f, 2025-11-19.",
+     "notes": "The assets' licence rests on the release note and the LICENSE shipped inside assets.zip; the zip itself was not downloaded."
+    }
+   ]
+  },
+  {
+   "id": "VMC-011",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "As of 2026-09-30, ComfyUI-MotionCapture (github.com/PozzettiAndrea/ComfyUI-MotionCapture at 09e90d8, by the author of ComfyUI-UniRig) is GPL-3.0 and \"vendors GVHMR code which has its own license\", with SMPL and SMPL-X needing \"separate licenses\". It also ships arrays named for SMPL, such as nodes/body_model/smpl_faces.npy and smpl_neutral_J_regressor.npy; whether those count as SMPL Software under its licence was not settled here.",
+   "sources": [
+    "https://github.com/PozzettiAndrea/ComfyUI-MotionCapture/blob/09e90d86ec0eb9bca1edba17673231490380957a/LICENSE",
+    "https://github.com/PozzettiAndrea/ComfyUI-MotionCapture/blob/09e90d86ec0eb9bca1edba17673231490380957a/README.md",
+    "https://github.com/PozzettiAndrea/ComfyUI-MotionCapture/tree/09e90d86ec0eb9bca1edba17673231490380957a/nodes"
+   ],
+   "as_first_reported": "ComfyUI-MotionCapture wraps GVHMR.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://github.com/PozzettiAndrea/ComfyUI-MotionCapture/blob/09e90d86ec0eb9bca1edba17673231490380957a/README.md",
+     "evidence": "README License: \"This package vendors GVHMR code which has its own license. Please check the original GVHMR repository for licensing terms. SMPL and SMPL-X body models require separate licenses from their respective providers.\" LICENSE: GNU GPL v3.",
+     "notes": "So the GVHMR terms in VMC-002 travel with it."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "https://api.github.com/repos/PozzettiAndrea/ComfyUI-MotionCapture/commits?path=LICENSE",
+     "evidence": "One commit touches LICENSE, 81d11fc, 2026-02-24.",
+     "notes": ""
+    }
+   ]
+  },
+  {
+   "id": "VMC-012",
+   "status": "unsettled",
+   "kind": "licence",
+   "load_bearing": false,
+   "claim": "As of 2026-09-30, ComfyUI-SAM3DBody (github.com/PozzettiAndrea/ComfyUI-SAM3DBody at 6800ef9) gives two answers for its own code. Its root LICENSE is the GNU GPL v3 text, since a \"cleanup\" commit on 2026-02-11. Its README and docs/licenses/LICENSE say the wrapper code is MIT and the vendored sam_3d_body library is under the SAM License.",
+   "sources": [
+    "https://github.com/PozzettiAndrea/ComfyUI-SAM3DBody/blob/6800ef98f25e407f46ad06e5ab8bb5c62e8cec8e/LICENSE",
+    "https://github.com/PozzettiAndrea/ComfyUI-SAM3DBody/blob/6800ef98f25e407f46ad06e5ab8bb5c62e8cec8e/README.md",
+    "https://github.com/PozzettiAndrea/ComfyUI-SAM3DBody/blob/6800ef98f25e407f46ad06e5ab8bb5c62e8cec8e/docs/licenses/LICENSE",
+    "https://github.com/PozzettiAndrea/ComfyUI-SAM3DBody/blob/6800ef98f25e407f46ad06e5ab8bb5c62e8cec8e/docs/licenses/LICENSE-MIT"
+   ],
+   "as_first_reported": "ComfyUI-SAM3DBody is MIT for the wrapper and SAM License for the library.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://github.com/PozzettiAndrea/ComfyUI-SAM3DBody/blob/6800ef98f25e407f46ad06e5ab8bb5c62e8cec8e/docs/licenses/LICENSE",
+     "evidence": "\"1. WRAPPER CODE (MIT License) - Files: nodes/, lib/, web/, install.py, __init__.py ...\" / \"2. SAM 3D BODY LIBRARY (SAM License)\"",
+     "notes": "The README and docs/licenses agree with the first report."
+    },
+    {
+     "lens": "drift",
+     "verdict": "refuted",
+     "read": "https://api.github.com/repos/PozzettiAndrea/ComfyUI-SAM3DBody/commits?path=LICENSE",
+     "evidence": "Root LICENSE: \"GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007\"; commits 29178ba (2025-11-23, \"added licenses\"), 6c655c5 and 1b47e1f (2026-02-11, \"updated license location\", \"cleanup\").",
+     "notes": "The files disagree, so the wrapper's licence is unsettled. The vendored library is the SAM License on both readings."
+    }
+   ]
+  },
+  {
+   "id": "VMC-013",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "As of 2026-09-30, the BlazePose GHUM 3D model card for MediaPipe's pose landmarker says \"LICENSED UNDER Apache License, Version 2.0\", and MediaPipe's code (github.com/google-ai-edge/mediapipe) is Apache-2.0. The model returns 33 keypoints for one person, and the card says its z coordinate \"is obtained from synthetic data\". The card gives \"entertainment\" as the primary intended application and lists \"Applications requiring metric accurate depth\", multiple people, and people further than 4 metres from the camera as out of scope.",
+   "sources": [
+    "https://storage.googleapis.com/mediapipe-assets/Model%20Card%20BlazePose%20GHUM%203D.pdf",
+    "https://github.com/google-ai-edge/mediapipe/blob/45005ba/LICENSE"
+   ],
+   "as_first_reported": "MediaPipe pose is Apache-2.0.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://storage.googleapis.com/mediapipe-assets/Model%20Card%20BlazePose%20GHUM%203D.pdf",
+     "evidence": "\"LICENSED UNDER Apache License, Version 2.0\" / \"Returns 33 keypoints describing the approximate location of body parts\" / \"The model is providing 3D coordinates, but the z-coordinate is obtained from synthetic data\" / \"The primary intended application is entertainment.\" / out of scope: \"Multiple people in an image\", \"People too far away from the camera (e.g. further than 14 feet/4 meters)\", \"Applications requiring metric accurate depth\".",
+     "notes": ""
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "https://github.com/google-ai-edge/mediapipe/blob/45005ba/LICENSE",
+     "evidence": "Repository LICENSE is Apache 2.0 at 45005ba. The card PDF carries no date; its content was read as fetched on the date given.",
+     "notes": "Code and model card read separately; both Apache-2.0."
+    }
+   ]
+  },
+  {
+   "id": "VMC-014",
+   "status": "unverifiable",
+   "kind": "licence",
+   "load_bearing": false,
+   "claim": "As of 2026-09-30, SAM 3D Body's default person detector loads the Detectron2 ViTDet checkpoint cascade_mask_rcnn_vitdet_h/f328730692/model_final_f05665.pkl (tools/build_detector.py). projects/ViTDet/README.md, which lists it, states no licence; Detectron2's MODEL_ZOO.md puts \"All models available for download through this document\" under CC BY-SA 3.0, and that document does not list the ViTDet checkpoints. Its optional field-of-view model MoGe-2 is MIT in its Hugging Face card metadata.",
+   "sources": [
+    "https://github.com/facebookresearch/sam-3d-body/blob/b5c765a0d89d789985e186d396315e7590887b94/tools/build_detector.py",
+    "https://github.com/facebookresearch/detectron2/blob/1e3e13b/MODEL_ZOO.md",
+    "https://github.com/facebookresearch/detectron2/blob/1e3e13b/projects/ViTDet/README.md",
+    "https://huggingface.co/Ruicheng/moge-2-vitl-normal"
+   ]
+  },
+  {
+   "id": "VMC-015",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": false,
+   "claim": "As of 2026-09-30, the other components these pipelines load are: ViTPose, Apache-2.0 (an Open-MMLab LICENSE); ViTPose-Pytorch, which GVHMR credits, GPL-3.0; DPVO, MIT; DROID-SLAM, BSD-3-Clause; Detectron2's code, Apache-2.0; ZoeDepth, MIT; MoGe's code, MIT.",
+   "sources": [
+    "https://github.com/ViTAE-Transformer/ViTPose/blob/c050ed2/LICENSE",
+    "https://github.com/gpastal24/ViTPose-Pytorch/blob/a9f8025/LICENSE",
+    "https://github.com/princeton-vl/DPVO/blob/0ac95b6/LICENSE",
+    "https://github.com/princeton-vl/DROID-SLAM/blob/2dfd39f/LICENSE",
+    "https://github.com/facebookresearch/detectron2/blob/1e3e13b/LICENSE",
+    "https://github.com/isl-org/ZoeDepth/blob/d87f17b/LICENSE",
+    "https://github.com/microsoft/MoGe/blob/74fbce0/LICENSE"
+   ],
+   "as_first_reported": "The dependencies are permissive except ViTPose-Pytorch.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "LICENSE files at the listed commits",
+     "evidence": "ViTPose: \"Copyright 2018-2020 Open-MMLab. All rights reserved. Apache License\"; ViTPose-Pytorch: \"GNU GENERAL PUBLIC LICENSE Version 3\"; DPVO: \"MIT License Copyright (c) 2022 Princeton Vision & Learning Lab\"; DROID-SLAM: \"BSD 3-Clause License\"; Detectron2: \"Apache License Version 2.0\"; ZoeDepth: \"MIT License\"; MoGe: \"MIT License Copyright (c) Microsoft Corporation\".",
+     "notes": ""
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "GitHub API, repository licence detection at the same dates",
+     "evidence": "GitHub's detected SPDX ids agree for every one except MoGe, detected NOASSERTION while its LICENSE reads MIT.",
+     "notes": "Weights for ViTPose and the SLAM models were not read; this is the code only."
+    }
+   ]
+  },
+  {
+   "id": "VMC-020",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "As of 2026-09-30, DeepMotion's Animate 3D pricing page (deepmotion.com/pricing-animate3d) says in its FAQ: \"Freemium accounts are available for personal, non-commercial use\", and that licensing depends on plan type: \"only your plan type affects your licensing\". It says animations \"can be exported in FBX, BVH, MP4, and GLB formats (GLB only available for custom characters)\". The prices and the terms of service render only in a browser and were not read.",
+   "sources": [
+    "https://www.deepmotion.com/pricing-animate3d",
+    "https://www.deepmotion.com/terms-of-service"
+   ],
+   "as_first_reported": "DeepMotion's free tier is non-commercial; paid tiers carry a commercial licence.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "https://www.deepmotion.com/pricing-animate3d",
+     "evidence": "FAQ: \"If I obtain the animation using free credits, does that impact my commercial licensing? No, only your plan type affects your licensing\" / \"Freemium accounts are available for personal, non-commercial use\" / \"Animations can be exported in FBX, BVH, MP4, and GLB formats (GLB only available for custom characters)\".",
+     "notes": "Refutes part of the first report: the readable FAQ says the free tier is non-commercial and that plan type decides licensing, but not that paid tiers, or which ones, carry a commercial licence."
+    },
+    {
+     "lens": "drift",
+     "verdict": "refuted",
+     "read": "https://www.deepmotion.com/terms-of-service",
+     "evidence": "The terms page served 1,087 characters of script shell with no clauses; the binding text was not read.",
+     "notes": "A FAQ is a summary, not the terms. The first report's \"paid tiers carry a commercial licence\" rests on search-engine summaries, not the page, so the claim keeps only what the FAQ says."
+    }
+   ]
+  },
+  {
+   "id": "VMC-021",
+   "status": "corrected",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "As of 2026-09-30, Rokoko's Terms of Use for Studio, Preview and Vision (rokoko.com/terms-of-use-update, \"Effective date: 16 July 2026\") define User Content as content \"that you create/generate using\" the Services, \"including animations\", and say \"we do not claim ownership over any User Content\". They grant \"a limited, revocable, non-exclusive, non-sublicensable, and non-transferable license to use the Services\", and forbid using assets obtained under the agreement to train machine learning or AI models without written consent. No clause restricting commercial use of your own recordings by plan was found in the text read.",
+   "sources": [
+    "https://www.rokoko.com/terms-of-use-update",
+    "https://www.rokoko.com/terms-of-service"
+   ],
+   "as_first_reported": "Rokoko Vision output is yours to use commercially.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "https://www.rokoko.com/terms-of-use-update",
+     "evidence": "\"You are solely responsible for all information and content that you create/generate using ... the Site and/or Services (including animations, 3D models ...) (\\\"User Content\\\")\" / \"Except as otherwise set forth in the Terms, we do not claim ownership over any User Content.\" / \"You may not use any assets obtained or provided under this agreement for the purpose of developing, training, or enhancing machine learning and/or AI models\".",
+     "notes": "The first report's \"yours to use commercially\" is stronger than the text: the terms disclaim ownership rather than grant commercial rights, and the page's pricing line about commercial use is about the Motion Library, not Vision."
+    },
+    {
+     "lens": "drift",
+     "verdict": "refuted",
+     "read": "https://www.rokoko.com/terms-of-service",
+     "evidence": "rokoko.com/terms-of-service is the hardware store's terms (shipping, invoices); the software terms are the separate Terms of Use effective 16 July 2026.",
+     "notes": "Refutes part of the first report by conflation: the pricing page's \"use in any of your projects, including commercial ones\" is the Motion Library row, and the store terms are a different document. The claim cites the software terms only."
+    }
+   ]
+  },
+  {
+   "id": "VMC-022",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "As of 2026-09-30, Rokoko's pricing page lists Starter at $0 with \"Vision AI video processing: 30s/month\", FBX export and retargeting onto default meshes only; Basic at $10 a month billed annually with 600 s a month, BVH export, import and retarget of custom characters, and smoothing filter and loop segments; Plus at $20 (3,000 s); Pro at $50 (15,000 s); Enterprise from $100.",
+   "sources": [
+    "https://www.rokoko.com/pricing"
+   ],
+   "as_first_reported": "Rokoko Vision has a free tier.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://www.rokoko.com/pricing",
+     "evidence": "\"Starter / $ 0 free forever / ... Export to .FBX / Rokoko Create: Vision AI video processing: 30s/month\" / \"Basic / Optimized for AI mocap / $ 10/m billed annually / ... Import & retarget custom characters / Export to .BHV + advanced options / Smoothing filter & loop segments / ... Vision AI video processing: 600s/month\".",
+     "notes": "The page spells BVH \"BHV\" in one place."
+    }
+   ]
+  },
+  {
+   "id": "VMC-023",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "As of 2026-09-30, Plask's pricing page (plask.ai/pricing) lists Freemium, free, with a 15-second daily motion capture limit; Standard at $18 a month billed yearly with 10 minutes a month; and Pro at $50 a month billed yearly with 1 hour a month. Every tier lists FBX, GLB and BVH export.",
+   "sources": [
+    "https://plask.ai/pricing"
+   ],
+   "as_first_reported": "Plask exports FBX, GLB and BVH.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://plask.ai/pricing",
+     "evidence": "\"FREEMIUM Free ... Motion Capture 15 Seconds daily limit ... FBX, GLB, BVH Export\" / \"STANDARD $18/month billed yearly ... Motion Capture 10 Minutes a month\" / \"PRO $50/month billed yearly ... Motion Capture 1 Hour a month\".",
+     "notes": ""
+    }
+   ]
+  },
+  {
+   "id": "VMC-024",
+   "status": "unverifiable",
+   "kind": "licence",
+   "load_bearing": false,
+   "claim": "As of 2026-09-30, the terms governing commercial use of Plask and Move.ai output could not be read. Plask's candidate terms URLs answered 404, and Move.ai's terms page (move.ai/terms-of-use) is an index of separate EULAs that render only in a browser. Search-engine summaries say Plask's free plan is for personal non-commercial use; that was not checked.",
+   "sources": [
+    "https://plask.ai/pricing",
+    "https://move.ai/terms-of-use"
+   ]
+  },
+  {
+   "id": "VMC-030",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "WHAM, GVHMR and TRAM each recover a person's motion in world coordinates, not only relative to the camera, from one moving-camera video. WHAM uses camera angular velocity from SLAM and \"a contact-aware trajectory refinement method\" against foot sliding; GVHMR estimates poses in a gravity-and-view coordinate system and maps them back with camera rotations; TRAM uses a masked SLAM for camera motion and scale and a video transformer for body motion.",
+   "sources": [
+    "https://arxiv.org/abs/2312.07531",
+    "https://arxiv.org/abs/2409.06662",
+    "https://arxiv.org/abs/2403.17346"
+   ],
+   "as_first_reported": "They output world-grounded SMPL motion.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "arXiv abstracts 2312.07531, 2409.06662, 2403.17346",
+     "evidence": "WHAM: \"reconstructs 3D human motion in a global coordinate system from video\" / \"a contact-aware trajectory refinement method\". GVHMR: \"recovering world-grounded human motion from monocular video\". TRAM: \"reconstruct a human's global trajectory and motion from in-the-wild videos\".",
+     "notes": "Read from abstracts, not measured."
+    }
+   ]
+  },
+  {
+   "id": "VMC-031",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Read from each project's install files, not installed: WHAM targets Python 3.9, PyTorch 1.11 with CUDA 11.3 and mmcv 1.3.9; GVHMR Python 3.10, PyTorch 2.3.0 with CUDA 12.1 and a matching PyTorch3D wheel; TRAM Python 3.10, PyTorch 2.4.0 with CUDA 11.8, Detectron2 and a compiled DROID-SLAM; 4D-Humans Python 3.10 with CUDA 11.8 and Detectron2; SMPLer-X Python 3.8, PyTorch 1.12 and mmcv-full 1.7.1; MotionBERT Python 3.7. SAM 3D Body's install creates a Python 3.11 environment and MHR requires Python 3.11 or newer; neither pins a PyTorch version.",
+   "sources": [
+    "https://github.com/yohanshin/WHAM/blob/2b54f7797391c94876848b905ed875b154c4a295/docs/INSTALL.md",
+    "https://github.com/zju3dv/GVHMR/blob/ee960bb6e2ea2d381aa97f08e9b71ef320b624b1/requirements.txt",
+    "https://github.com/yufu-wang/tram/blob/4861c112f3c148201326680a50c9199650da6088/install.sh",
+    "https://github.com/shubham-goel/4D-Humans/blob/efe18deff163b29dff87ddbd575fa29b716a356c/environment.yml",
+    "https://github.com/MotrixLab/SMPLer-X/blob/064baef0e4ab5277a3297691bc1d46ea5412586f/README.md",
+    "https://github.com/Walter0807/MotionBERT/blob/705d3a95354db8bdb696b3492e47a3b5537174ff/README.md",
+    "https://github.com/facebookresearch/sam-3d-body/blob/b5c765a0d89d789985e186d396315e7590887b94/INSTALL.md",
+    "https://github.com/facebookresearch/MHR/blob/d96fafa33bbf018647c70c3525e91f53e79d2a14/pyproject.toml"
+   ],
+   "as_first_reported": "Most need an older stack than this image's.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the install files listed",
+     "evidence": "WHAM: \"conda create -n wham python=3.9\", \"pytorch==1.11.0 ... cudatoolkit=11.3\". GVHMR: \"torch==2.3.0+cu121\". TRAM: \"pip install torch==2.4.0 ... cu118\". SMPLer-X: \"python=3.8\", \"pytorch==1.12.0\", \"mmcv-full==1.7.1\". SAM 3D Body: \"conda create -n sam_3d_body python=3.11\". MHR: requires-python = \">= 3.11\".",
+     "notes": "This image is Python 3.11, PyTorch 2.6.0 and CUDA 12.4 (Dockerfile). Matching only SAM 3D Body and MHR on Python is a reading, not an install."
+    }
+   ]
+  },
+  {
+   "id": "VMC-032",
+   "status": "confirmed",
+   "kind": "capability",
+   "load_bearing": true,
+   "claim": "SAM 3D Body is described by its authors as \"a promptable model for single-image full-body 3D human mesh recovery\". Its README documents no video or temporal mode, so a clip made with it is a sequence of independent per-frame fits, with no world trajectory of its own. It outputs Momentum Human Rig parameters, not SMPL.",
+   "sources": [
+    "https://github.com/facebookresearch/sam-3d-body/blob/b5c765a0d89d789985e186d396315e7590887b94/README.md",
+    "https://github.com/facebookresearch/MHR/blob/d96fafa33bbf018647c70c3525e91f53e79d2a14/README.md"
+   ],
+   "as_first_reported": "SAM 3D Body works frame by frame.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://github.com/facebookresearch/sam-3d-body/blob/b5c765a0d89d789985e186d396315e7590887b94/README.md",
+     "evidence": "\"SAM 3D Body (3DB) is a promptable model for single-image full-body 3D human mesh recovery (HMR).\" The demo takes --mhr_path .../assets/mhr_model.pt.",
+     "notes": "\"No video mode\" is from reading the README; jitter across frames was not measured."
+    }
+   ]
+  },
+  {
+   "id": "VMC-033",
+   "status": "confirmed",
+   "kind": "capability",
+   "load_bearing": true,
+   "claim": "ComfyUI-MotionCapture at 09e90d8 runs GVHMR on a video and has nodes that turn SMPL motion into BVH (SMPLToBVH), retarget SMPL onto a Mixamo character by a fixed map to mixamorig: bone names (SMPLToMixamo, \"specifically optimized for Mixamo characters with the mixamorig: prefix\"), and retarget BVH onto an FBX or VRM character in Blender with Copy Rotation constraints, by named bones such as Hips and Head (BVHtoFBX).",
+   "sources": [
+    "https://github.com/PozzettiAndrea/ComfyUI-MotionCapture/blob/09e90d86ec0eb9bca1edba17673231490380957a/nodes/smpl_to_mixamo_node.py",
+    "https://github.com/PozzettiAndrea/ComfyUI-MotionCapture/blob/09e90d86ec0eb9bca1edba17673231490380957a/nodes/bvh_retarget_node.py",
+    "https://github.com/PozzettiAndrea/ComfyUI-MotionCapture/blob/09e90d86ec0eb9bca1edba17673231490380957a/README.md"
+   ],
+   "as_first_reported": "It exports BVH and retargets.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://github.com/PozzettiAndrea/ComfyUI-MotionCapture/blob/09e90d86ec0eb9bca1edba17673231490380957a/nodes/bvh_retarget_node.py",
+     "evidence": "bvh_retarget_node.py: \"BVHtoFBX Node - Retarget BVH motion to rigged FBX/VRM characters using bpy\", get_skeleton_height(char_armature, 'Hips', 'Head'), const.target_space = 'LOCAL'. smpl_to_mixamo_node.py: SMPL_TO_MIXAMO = {'Pelvis': 'mixamorig:Hips', ...}.",
+     "notes": "Read, not run. Every map in it is by bone name, so none fits this repo's bone_N rigs as written."
+    }
+   ]
+  },
+  {
+   "id": "VMC-034",
+   "status": "confirmed",
+   "kind": "capability",
+   "load_bearing": false,
+   "claim": "ComfyUI-SAM3DBody at 6800ef9 has a \"SAM 3D Body: Save Skeleton\" node that writes JSON, BVH or FBX, and processes one image, or several people in one image, per run.",
+   "sources": [
+    "https://github.com/PozzettiAndrea/ComfyUI-SAM3DBody/blob/6800ef98f25e407f46ad06e5ab8bb5c62e8cec8e/nodes/skeleton_io.py",
+    "https://github.com/PozzettiAndrea/ComfyUI-SAM3DBody/blob/6800ef98f25e407f46ad06e5ab8bb5c62e8cec8e/README.md"
+   ],
+   "as_first_reported": "It exports skeletons.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "https://github.com/PozzettiAndrea/ComfyUI-SAM3DBody/blob/6800ef98f25e407f46ad06e5ab8bb5c62e8cec8e/nodes/skeleton_io.py",
+     "evidence": "node_id=\"SAM3DBodySaveSkeleton\", display_name=\"SAM 3D Body: Save Skeleton\", format options [\"json\", \"bvh\", \"fbx\"].",
+     "notes": "Whether its BVH holds more than one frame was not checked."
+    }
+   ]
+  },
+  {
+   "id": "VMC-035",
+   "status": "corrected",
+   "kind": "capability",
+   "load_bearing": true,
+   "claim": "Read in the running container, not run: UniRig's Apply Animation node, at the commit this image pins (69ee59d), refuses a model whose bones lack the mixamorig: prefix (\"Model does not have mixamorig: bone names!\") and likewise a clip, then copies the clip's F-curves onto bones with identical names, scaling only location keys; it does no rest-pose retargeting. Its smpl animation type raises NotImplementedError (\"SMPL animation support is not yet implemented\").",
+   "sources": [
+    "docker exec comfyui-packaged: /app/custom_nodes/ComfyUI-UniRig/nodes/animation.py",
+    "docker exec comfyui-packaged: /app/custom_nodes/ComfyUI-UniRig/nodes/unirig/direct_apply_animation.py",
+    "Dockerfile (UNIRIG_REF)"
+   ],
+   "as_first_reported": "A Mixamo-style clip in input/animation_templates/mixamo/ runs through rig_apply_animation.json.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "refuted",
+     "read": "nodes/unirig/direct_apply_animation.py, lines 70 to 160",
+     "evidence": "raise RuntimeError(\"Model does not have mixamorig: bone names!\\nThe model must use 'mixamo' skeleton template for Mixamo animations.\") ; matching_bones = model_bone_names.intersection(anim_bone_names) ; _apply_direct_copy / _apply_partial_copy. animation.py line 174: raise NotImplementedError(\"SMPL animation support is not yet implemented. Please use Mixamo animations for now.\")",
+     "notes": "The first report assumed any Mixamo-style clip would run; the code limits it to mixamorig: names on both sides."
+    }
+   ]
+  },
+  {
+   "id": "VMC-036",
+   "status": "confirmed",
+   "kind": "capability",
+   "load_bearing": true,
+   "claim": "This repo's rigging graph, mesh_rig_unirig.json, rigs with skeleton_template articulationxl, which names bones bone_0 to bone_N (docs/guide/rigging.md). By VMC-035, rig_apply_animation.json would refuse such a rig for any clip, Mixamo or mocap. This is a reading of the code and the graph; no clip was applied.",
+   "sources": [
+    "workflows/api/mesh_rig_unirig.json",
+    "workflows/api/rig_apply_animation.json",
+    "docs/guide/rigging.md"
+   ],
+   "as_first_reported": "Whether Mixamo clips retarget cleanly onto articulationxl is not established.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "workflows/api/mesh_rig_unirig.json",
+     "evidence": "\"skeleton_template\": \"articulationxl\". rigging.md: \"articulationxl names every bone bone_0 through bone_N\".",
+     "notes": "docs/guide/animation.md says UniRig gives \"a Mixamo compatible skeleton, so anything from Mixamo retargets onto it\", which holds only for the mixamo template the rigging guide advises against."
+    }
+   ]
+  },
+  {
+   "id": "VMC-037",
+   "status": "confirmed",
+   "kind": "capability",
+   "load_bearing": false,
+   "claim": "ComfyUI-mesh2motion 1.2.0 (2026-05-07) can import a self-contained FBX, mesh, skeleton and clips in one file such as a Mixamo download, and play its clips. Its bundled retarget page maps mesh2motion's own library onto an uploaded skinned model through a bone-mapping dialog. No route to put an outside clip onto a UniRig rig is documented.",
+   "sources": [
+    "docker exec comfyui-packaged: /app/custom_nodes/ComfyUI-mesh2motion/README.md",
+    "docker exec comfyui-packaged: /app/custom_nodes/ComfyUI-mesh2motion/mesh2motion-ui/assets/retarget-CsJqsR8W.js"
+   ],
+   "as_first_reported": "mesh2motion offers retargeting.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "ComfyUI-mesh2motion README.md, Changelog 1.2.0",
+     "evidence": "\"Custom FBX import. Users can drop self-contained FBX assets (mesh + skeleton + animations packed in one file, e.g. Mixamo downloads) straight into the editor\". The retarget bundle sets target bones through target_bone_tree_dialog and warns \"Mixamo rigs will work as long as they only have one skeleton\".",
+     "notes": "Read from the README and minified JS, not run."
+    }
+   ]
+  },
+  {
+   "id": "VMC-050",
+   "status": "unchecked",
+   "kind": "recommendation",
+   "load_bearing": true,
+   "claim": "For a game that will be sold, take motion from a hosted video mocap service on a plan whose terms you have read, as BVH, and build this repo's own retarget from BVH onto articulationxl rigs using the bone roles scripts/bone_roles.py already finds, in Blender, followed by Blender's own filters for jitter and loops.",
+   "sources": [
+    "docs/reference/video-mocap.md"
+   ]
+  },
+  {
+   "id": "VMC-051",
+   "status": "unchecked",
+   "kind": "recommendation",
+   "load_bearing": true,
+   "claim": "The open route worth a trial is SAM 3D Body with MHR, fitted frame by frame and smoothed afterwards: of the open models read, it is the only one whose code, checkpoints and body model carry no non-commercial clause. Try it before building on it, because it has no temporal model and its licence can be amended by Meta.",
+   "sources": [
+    "docs/reference/video-mocap.md"
+   ]
+  },
+  {
+   "id": "VMC-052",
+   "status": "unchecked",
+   "kind": "recommendation",
+   "load_bearing": true,
+   "claim": "Do not put WHAM, GVHMR, TRAM, 4D-Humans, SMPLer-X or MotionBERT into a commercial asset pipeline as released: each needs SMPL or SMPL-X, or ships non-commercial or AGPL parts, and replacing those is a project of its own.",
+   "sources": [
+    "docs/reference/video-mocap.md"
+   ]
+  }
+ ]
+}

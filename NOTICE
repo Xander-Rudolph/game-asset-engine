@@ -55,6 +55,24 @@ is stated rather than guessed.
     https://github.com/PozzettiAndrea/ComfyUI-CameraPack
     No LICENSE file ships with the pack.
 
+  rgthree-comfy              MIT
+    https://github.com/rgthree/rgthree-comfy
+    Copyright (c) 2023 Regis Gaughan, III (rgthree)
+
+  cg-use-everywhere          Apache-2.0
+    https://github.com/chrisgoringe/cg-use-everywhere
+
+  ComfyUI-GGUF               Apache-2.0
+    https://github.com/city96/ComfyUI-GGUF
+
+  Comfyui-QwenEditUtils      Apache-2.0
+    https://github.com/lrzjason/Comfyui-QwenEditUtils
+
+  comfyui_controlnet_aux     Apache-2.0, for the pack's own code
+    https://github.com/Fannovel16/comfyui_controlnet_aux
+    NOT in the image: the container fetches it from GitHub at start-up.
+    The root licence does not cover everything the pack vendors. See below.
+
   Blender / bpy              GPL-2.0-or-later
     https://www.blender.org
     Installed as a compiled binary wheel. See "Redistributing the image".
@@ -73,6 +91,19 @@ UNION, UNITED KINGDOM AND SOUTH KOREA". This affects the Tencent Hunyuan 3D
 
 NON-COMMERCIAL. The Hunyuan3D-1 checkpoint licence vendored in the pack defines
 permitted use as "academic, research and education purposes only".
+
+NON-COMMERCIAL, AND NO DISTRIBUTION. The src/custom_controlnet_aux/dwpose/ and
+open_pose/ folders in comfyui_controlnet_aux carry CMU's OpenPose licence:
+"ACADEMIC OR NON-PROFIT ORGANIZATION NONCOMMERCIAL RESEARCH USE ONLY", and "You
+may not distribute, copy or use the Software except as explicitly permitted
+herein". complete_workflow.json's Pose Transfer group runs the dwpose/ code. In
+the same pack, leres/pix2pix/ is "for academic use only", dsine/ is licensed for
+"non-commercial, internal or academic research purposes", and pidi/ is "just for
+research purpose".
+
+UNSETTLED WEIGHTS. The Qwen-Image-Edit Rapid AIO merge and its GGUF quant, and
+the Anything2Real LoRA, all used by complete_workflow.json, have no settled
+licence. scripts/fetch_models.py treats Anything2Real as non-commercial.
 
 UNRESOLVED PROVENANCE. The LICENSE file in the pack's TripoSG module is the
 Tencent Hunyuan FlashVDM Community License, not a TripoSG licence, and the module
@@ -105,6 +136,11 @@ GPL-2.0-or-later, so the licence-copy duty applies; it ships no copy of the GPL
 text itself; and the C/C++ source behind its 213MB compiled object is absent, so
 the source-offer duty applies too. Its metadata declares GPL-3.0 while its shipped
 files say GPL-2.0-or-later.
+
+The image does not carry comfyui_controlnet_aux, because its CMU-licensed
+folders (above) forbid distribution (the owner's decision, 2026-09-30).
+scripts/entrypoint.sh fetches it from GitHub, at the commit the Dockerfile pins,
+when a container starts; ASSET_ENGINE_CONTROLNET_AUX=0 skips it.
 
 Unresolved: ultralytics is AGPL-3.0 and this image exists to serve a network
 port, which engages AGPL section 13 for anyone hosting it rather than running it

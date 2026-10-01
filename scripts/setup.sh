@@ -27,6 +27,13 @@ NODES=(
   "https://github.com/PozzettiAndrea/ComfyUI-UniRig.git|ComfyUI-UniRig"
   "https://github.com/PozzettiAndrea/ComfyUI-CameraPack.git|ComfyUI-CameraPack"
   "https://github.com/jtydhr88/ComfyUI-mesh2motion.git|ComfyUI-mesh2motion"
+  # complete_workflow.json and asset_workflow.json.  Their Python deps come
+  # from the image, as the Dockerfile installs them, not from these clones.
+  "https://github.com/rgthree/rgthree-comfy.git|rgthree-comfy"
+  "https://github.com/chrisgoringe/cg-use-everywhere.git|cg-use-everywhere"
+  "https://github.com/Fannovel16/comfyui_controlnet_aux.git|comfyui_controlnet_aux"
+  "https://github.com/city96/ComfyUI-GGUF.git|ComfyUI-GGUF"
+  "https://github.com/lrzjason/Comfyui-QwenEditUtils.git|Comfyui-QwenEditUtils"
 )
 
 GROUPS=()

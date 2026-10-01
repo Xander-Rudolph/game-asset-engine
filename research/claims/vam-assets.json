@@ -1,0 +1,802 @@
+{
+ "note": "docs/reference/vam-assets.md",
+ "researched": "2026-09-23",
+ "checked": "2026-09-23",
+ "statuses": {
+  "confirmed": 35,
+  "unchecked": 2
+ },
+ "conflicts_found": [],
+ "how_checked": "One session on 2026-09-23 on the reference machine. The .vab layout was read from a third-party reader and not run, then confirmed by parsing six .var packages with a fresh implementation; every other fact here was measured or run on this machine, by experimental code under output/hair/_exp/ rather than by a script in scripts/, so each carries an id and a basis field saying whether it was measured, run, or read and not run. The one licence claim, VAM-002, went through the text lens only, against the packages' own meta.json: the CC BY deed and legal code were not read and the drift lens was not run, so the note states only what the files declare plus the conservative reading in VAM-035. Conclusions the owner drew, VAM-028 and VAM-035, are recommendations and are unchecked.",
+ "claims": [
+  {
+   "id": "VAM-001",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "A .var package is a zip. Its meta.json carries licenseType, creatorName, packageName and a dependencies map, which is empty in all six packages read.",
+   "sources": [
+    "output/hair/_exp/vam_read.py and the read-only probes in output/hair/_exp/, run 2026-09-23 on the six .var packages in ~/Downloads"
+   ],
+   "basis": "measured",
+   "topic": "format",
+   "as_first_reported": "A .var is a zip with a meta.json holding the licence and the package's dependencies.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the six .var packages listed in VAM-002, opened as zips",
+     "evidence": "meta.json in each of the six carries licenseType, creatorName, packageName and a dependencies map; the dependencies map is empty in all six."
+    }
+   ]
+  },
+  {
+   "id": "VAM-002",
+   "status": "confirmed",
+   "kind": "licence",
+   "load_bearing": true,
+   "claim": "All six packages read declare licenseType CC BY in their meta.json, and none declares CC0. Five are by the creator scooped (Clean_Cut.2, Viking_Hair.1, Lumberjack_Beard.1, Smart_Goatee.1, Crew_Cut.1) and one by verytoxic (Boss_Fades.2). A creator's CC BY covers the strand shapes that creator authored, and requires attribution.",
+   "sources": [
+    "output/hair/_exp/vam_read.py and the read-only probes in output/hair/_exp/, run 2026-09-23 on the six .var packages in ~/Downloads",
+    "the meta.json inside each of the six packages"
+   ],
+   "basis": "measured (the declaration), read and not run (what CC BY covers)",
+   "topic": "licence",
+   "as_first_reported": "The packages are CC BY, so the strand shapes may be reused with attribution.",
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "the meta.json of scooped.Clean_Cut.2.var, scooped.Viking_Hair.1.var, scooped.Lumberjack_Beard.1.var, scooped.Smart_Goatee.1.var, scooped.Crew_Cut.1.var and verytoxic.Boss_Fades.2.var",
+     "evidence": "licenseType reads CC BY in all six; creatorName reads scooped in five and verytoxic in one; no package declares CC0.",
+     "notes": "Only the packages' own declaration was read. The CC BY deed and legal code were NOT read in this session, and the drift lens was not run, so this claim is limited to what the files declare plus the conservative reading that CC BY reaches only what the creator authored."
+    }
+   ]
+  },
+  {
+   "id": "VAM-003",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "A VaM hair item is a triple of files under Custom/Hair/<Male|Female>/<creator>/<item>/: <name>.vab (binary), <name>.vaj (JSON) and <name>.vam (JSON), with colour presets under Presets/*.vap.",
+   "sources": [
+    "output/hair/_exp/vam_read.py and the read-only probes in output/hair/_exp/, run 2026-09-23 on the six .var packages in ~/Downloads"
+   ],
+   "basis": "measured",
+   "topic": "format",
+   "as_first_reported": "A hair item is a .vab, a .vaj and a .vam under Custom/Hair/.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the zip entry listings of the six packages",
+     "evidence": "Every hair item found sits at Custom/Hair/<Male|Female>/<creator>/<item>/ and consists of a .vab, a .vaj and a .vam, with .vap presets under Presets/."
+    }
+   ]
+  },
+  {
+   "id": "VAM-004",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "One package can hold several items: scooped.Viking_Hair.1.var has 84 entries and two items, \"Viking Beard\" and \"Viking Hawk\", of three parts each.",
+   "sources": [
+    "output/hair/_exp/vam_read.py and the read-only probes in output/hair/_exp/, run 2026-09-23 on the six .var packages in ~/Downloads"
+   ],
+   "basis": "measured",
+   "topic": "format",
+   "as_first_reported": "A package can hold more than one hairstyle.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "scooped.Viking_Hair.1.var",
+     "evidence": "84 zip entries; two items, Viking Beard and Viking Hawk, three parts each."
+    }
+   ]
+  },
+  {
+   "id": "VAM-005",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "The .vab binary layout was worked out by reading the reader in yass3d/vkit (native/vkit_core/src/vam/hair.rs, lines 1942 to 2141 and 1851 to 1900), a project licensed MIT or Apache-2.0. It was read, not run, and no code was copied: the reader used in this work is a fresh implementation of the layout that source describes. The layout was then confirmed by parsing the six packages.",
+   "sources": [
+    "yass3d/vkit, native/vkit_core/src/vam/hair.rs lines 1942 to 2141 and 1851 to 1900 (MIT or Apache-2.0), read and not run",
+    "output/hair/_exp/vam_read.py and the read-only probes in output/hair/_exp/, run 2026-09-23 on the six .var packages in ~/Downloads"
+   ],
+   "basis": "read, not run (the source), then measured (the confirmation)",
+   "topic": "format",
+   "as_first_reported": "The .vab format is documented in a third-party Rust reader and can be re-implemented from it.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "yass3d/vkit, native/vkit_core/src/vam/hair.rs lines 1942 to 2141 and 1851 to 1900 (MIT or Apache-2.0), read and not run; then the six packages parsed with output/hair/_exp/vam_read.py and the read-only probes in output/hair/_exp/, run 2026-09-23 on the six .var packages in ~/Downloads",
+     "evidence": "Every field the source describes was found in the same order in all six packages, and the guide counts, providers and segment lengths in VAM-010 were read out with it.",
+     "notes": "No VaM file format specification is published. This layout rests on one third-party reader plus six packages."
+    }
+   ]
+  },
+  {
+   "id": "VAM-006",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "In a .vab, strings are .NET BinaryWriter strings, a 7-bit encoded length prefix then UTF-8; integers are little-endian i32; positions are little-endian f32 in metres.",
+   "sources": [
+    "yass3d/vkit, native/vkit_core/src/vam/hair.rs lines 1942 to 2141 and 1851 to 1900 (MIT or Apache-2.0), read and not run",
+    "output/hair/_exp/vam_read.py and the read-only probes in output/hair/_exp/, run 2026-09-23 on the six .var packages in ~/Downloads"
+   ],
+   "basis": "read, not run, then measured",
+   "topic": "format",
+   "as_first_reported": "Strings are length-prefixed UTF-8 and positions are float metres.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "yass3d/vkit, native/vkit_core/src/vam/hair.rs lines 1942 to 2141 and 1851 to 1900 (MIT or Apache-2.0), read and not run; the six packages",
+     "evidence": "Parsing the six packages on these conventions reads every string, count and position without a mismatch."
+    }
+   ]
+  },
+  {
+   "id": "VAM-007",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "A .vab is ordered: the string \"DynamicStore\", a version, optional component blocks, then the marker string \"RuntimeHairGeometryCreator\", a schema string (\"1.0\" or \"1.1\"), the scalp provider name, an i32 segment count, an f32 segment length in metres, a scalp mask name, an i32 scalp vertex count, one byte per scalp vertex (the mask), an i32 guide count, then per slot a u32 scalp vertex index, an i32 point count and that many x, y, z triples.",
+   "sources": [
+    "yass3d/vkit, native/vkit_core/src/vam/hair.rs lines 1942 to 2141 and 1851 to 1900 (MIT or Apache-2.0), read and not run",
+    "output/hair/_exp/vam_read.py and the read-only probes in output/hair/_exp/, run 2026-09-23 on the six .var packages in ~/Downloads"
+   ],
+   "basis": "read, not run, then measured",
+   "topic": "format",
+   "as_first_reported": "The .vab holds a header, a scalp mask and then one slot of points per guide.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "yass3d/vkit, native/vkit_core/src/vam/hair.rs lines 1942 to 2141 and 1851 to 1900 (MIT or Apache-2.0), read and not run; the six packages",
+     "evidence": "The six packages parse in this order; both schema strings \"1.0\" and \"1.1\" were seen."
+    }
+   ]
+  },
+  {
+   "id": "VAM-008",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "A slot is written for every scalp vertex, and a masked-off vertex has 0 points. The reader used here skips any slot with fewer than 2 points.",
+   "sources": [
+    "yass3d/vkit, native/vkit_core/src/vam/hair.rs lines 1942 to 2141 and 1851 to 1900 (MIT or Apache-2.0), read and not run",
+    "output/hair/_exp/vam_read.py and the read-only probes in output/hair/_exp/, run 2026-09-23 on the six .var packages in ~/Downloads"
+   ],
+   "basis": "read, not run, then measured",
+   "topic": "format",
+   "as_first_reported": "Empty scalp vertices still occupy a slot.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "yass3d/vkit, native/vkit_core/src/vam/hair.rs lines 1942 to 2141 and 1851 to 1900 (MIT or Apache-2.0), read and not run; cleantop.vab and the other parts of the six packages",
+     "evidence": "cleantop.vab writes 922 slots for 922 scalp vertices while only 546 are active, so the empty slots are present and carry 0 points."
+    }
+   ]
+  },
+  {
+   "id": "VAM-009",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "A CustomScalp item carries a DAZMesh block before the hair section: the string \"DAZMesh\", a version, four group name strings, an i32 vertex count, then x, y, z triples in metres.",
+   "sources": [
+    "yass3d/vkit, native/vkit_core/src/vam/hair.rs lines 1942 to 2141 and 1851 to 1900 (MIT or Apache-2.0), read and not run",
+    "output/hair/_exp/vam_read.py and the read-only probes in output/hair/_exp/, run 2026-09-23 on the six .var packages in ~/Downloads"
+   ],
+   "basis": "read, not run, then measured",
+   "topic": "format",
+   "as_first_reported": "CustomScalp items embed a mesh ahead of the hair data.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "yass3d/vkit, native/vkit_core/src/vam/hair.rs lines 1942 to 2141 and 1851 to 1900 (MIT or Apache-2.0), read and not run; the three Viking Beard .vab files",
+     "evidence": "The block was found at byte 18 in all three Viking Beard parts, with four group name strings and 1,699 vertices; see VAM-014."
+    }
+   ]
+  },
+  {
+   "id": "VAM-010",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Measured per package on 2026-09-23: Clean Cut, parts cleantop 376, cleanleft 205, cleanright 157 (738 guides), provider SoleilScalp, 5 points per guide, segment length 0.02 m. Viking Hawk, vikingtop 252, vikinghawk 252, vikingfringe 24, provider UdaneScalp, 30 points per guide, segment length 0.0061 / 0.0042 m. Viking Beard, vikingbeard 932, vikingchin 123, vikingstache 193, provider CustomScalp, 25 points per guide, segment length 0.0023 / 0.0100 m. Lumberjack, lumberchin 947, lumberscruff 236, lumberstache 232, provider CustomScalp, 13 / 5 / 13 points per guide. Smart Goatee, smgoatchin 154, smgoatpatch 29, smgoatstache 170, provider CustomScalp, 20 points per guide. Crew Cut, crewstache 213, crewstub 1150, crewtop 745, provider CustomScalp, 9 / 4 / 4 points per guide.",
+   "sources": [
+    "output/hair/_exp/vam_read.py and the read-only probes in output/hair/_exp/, run 2026-09-23 on the six .var packages in ~/Downloads"
+   ],
+   "basis": "measured",
+   "topic": "measurement",
+   "as_first_reported": "Per-package guide counts, scalp providers and segment lengths.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the six packages parsed with output/hair/_exp/vam_read.py and the read-only probes in output/hair/_exp/, run 2026-09-23 on the six .var packages in ~/Downloads",
+     "evidence": "Guide counts, provider names, points per guide and segment lengths as listed. No segment length was recorded for Lumberjack, Smart Goatee or Crew Cut."
+    }
+   ]
+  },
+  {
+   "id": "VAM-011",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "cleantop.vab reports 922 scalp vertices of which 546 are active.",
+   "sources": [
+    "output/hair/_exp/vam_read.py and the read-only probes in output/hair/_exp/, run 2026-09-23 on the six .var packages in ~/Downloads"
+   ],
+   "basis": "measured",
+   "topic": "measurement",
+   "as_first_reported": "About 60 percent of the Clean Cut scalp is masked in.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "cleantop.vab in scooped.Clean_Cut.2.var",
+     "evidence": "922 scalp vertices in the mask, 546 of them active."
+    }
+   ]
+  },
+  {
+   "id": "VAM-012",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "vikinghawk.vab and vikingtop.vab are both 195,637 bytes and give identical root statistics (252 guides, the same centroid), so they are duplicates of one another.",
+   "sources": [
+    "output/hair/_exp/vam_read.py and the read-only probes in output/hair/_exp/, run 2026-09-23 on the six .var packages in ~/Downloads"
+   ],
+   "basis": "measured",
+   "topic": "measurement",
+   "as_first_reported": "Two of the Viking Hawk parts are the same file.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "vikinghawk.vab and vikingtop.vab in scooped.Viking_Hair.1.var",
+     "evidence": "Both files are 195,637 bytes; both read 252 guides with the same root centroid."
+    }
+   ]
+  },
+  {
+   "id": "VAM-013",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "The first hair .vab read from verytoxic.Boss_Fades.2.var has no guide with two or more points: every scalp slot is empty. The reader reports that rather than failing.",
+   "sources": [
+    "output/hair/_exp/vam_read.py and the read-only probes in output/hair/_exp/, run 2026-09-23 on the six .var packages in ~/Downloads"
+   ],
+   "basis": "measured",
+   "topic": "measurement",
+   "as_first_reported": "One of the six packages read as empty.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the first hair .vab in verytoxic.Boss_Fades.2.var",
+     "evidence": "No slot held two or more points, so no guide was returned.",
+     "notes": "Why the file is empty was not established."
+    }
+   ]
+  },
+  {
+   "id": "VAM-014",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "The DAZMesh block in the three Viking Beard .vab files begins at byte 18 and holds 1,699 vertices, with group names [\"scalp\", \"scalp\", \"geometry\", \"geometry\"]. In the repo's Blender frame its bounding box is x plus or minus 7.59 cm, y -9.79 to 5.20 cm, z 149.28 to 171.08 cm.",
+   "sources": [
+    "output/hair/_exp/vam_read.py and the read-only probes in output/hair/_exp/, run 2026-09-23 on the six .var packages in ~/Downloads"
+   ],
+   "basis": "measured",
+   "topic": "measurement",
+   "as_first_reported": "The embedded scalp mesh is a 1,699 vertex head mesh.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "vikingbeard.vab, vikingchin.vab and vikingstache.vab in scooped.Viking_Hair.1.var",
+     "evidence": "Block start at byte 18, 1,699 vertices, four group name strings [\"scalp\", \"scalp\", \"geometry\", \"geometry\"], bounding box as stated after the Unity to Blender mapping in VAM-016.",
+     "notes": "The block was read into memory only. Nothing from it was written to the repo (VAM-036)."
+    }
+   ]
+  },
+  {
+   "id": "VAM-015",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "The .vaj carries a Sim storable whose ids are VaM's own hair physics parameters. Read verbatim: cleanleft rootRigidity 0.2, mainRigidity 0.01, tipRigidity 0, rigidityRolloffPower 8, drag 0.1, gravityMultiplier 1, weight 1.5, iterations 2, cling 0.5, clingRolloff 1, snap 0.2, bendResistance 0.2, collisionRadius 0.001, collisionRadiusRoot 0.001, friction 0.2, simulationEnabled false, collisionEnabled false, usePaintedRigidity true; vikingtop rootRigidity 0.2, mainRigidity 0.6, tipRigidity 0.0797, rigidityRolloffPower 8, simulationEnabled true; vikingchin rootRigidity 0.4997, mainRigidity 0.5003, tipRigidity 0.5.",
+   "sources": [
+    "output/hair/_exp/vam_read.py and the read-only probes in output/hair/_exp/, run 2026-09-23 on the six .var packages in ~/Downloads"
+   ],
+   "basis": "measured",
+   "topic": "measurement",
+   "as_first_reported": "The .vaj holds VaM's hair physics parameters.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "cleanleft.vaj, vikingtop.vaj and vikingchin.vaj",
+     "evidence": "Values read verbatim from the Sim storable in each file.",
+     "notes": "What VaM's solver does with each parameter was not read; only the stored values are claimed."
+    }
+   ]
+  },
+  {
+   "id": "VAM-016",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "VaM is Unity: metres, +Y up, +Z the face. The repo's Blender frame is +Z up with the figure facing -Y, so the mapping is (x, y, z)_unity -> (x, -z, y)_blender. Guide points are absolute world positions on a standing figure, not offsets from the root.",
+   "sources": [
+    "yass3d/vkit, native/vkit_core/src/vam/hair.rs lines 1942 to 2141 and 1851 to 1900 (MIT or Apache-2.0), read and not run",
+    "output/hair/_exp/vam_read.py and the read-only probes in output/hair/_exp/, run 2026-09-23 on the six .var packages in ~/Downloads"
+   ],
+   "basis": "read, not run (the Unity convention), measured (the positions)",
+   "topic": "format",
+   "as_first_reported": "VaM stores hair in Unity world metres.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "yass3d/vkit, native/vkit_core/src/vam/hair.rs lines 1942 to 2141 and 1851 to 1900 (MIT or Apache-2.0), read and not run; the guide positions read from the six packages",
+     "evidence": "Guide points read out at standing-figure world heights, around 150 to 171 cm in the Blender frame once mapped, which is only consistent with absolute world positions."
+    }
+   ]
+  },
+  {
+   "id": "VAM-017",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Fitting a sphere through the hair roots was tried and discarded. On the Viking package it fits at radius 10.39 cm against this figure's 8.26 cm skull sphere, so scale 0.795. It fits the hair, not the head, and shrank everything by 20% about the wrong centre.",
+   "sources": [
+    "output/hair/_exp/groom2.py, run 2026-09-23 in the container's Blender 4.5.9 with numpy and scipy 1.15.0",
+    "output/hair/_exp/fit_probe.py"
+   ],
+   "basis": "measured",
+   "topic": "transform",
+   "as_first_reported": "A sphere through the roots gives the scale.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the root-sphere fit run on the Viking package against the Genesis 9 skull sphere of VAM-023",
+     "evidence": "Fitted radius 10.39 cm against 8.26 cm, so scale 0.795; the result was judged wrong by looking as well as by the number."
+    }
+   ]
+  },
+  {
+   "id": "VAM-018",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "ICP of the embedded scalp mesh to the skin was tried and discarded. A free similarity converged to a 4.7 mm mean surface residual but slid 7.7 cm up the forehead and put the beard over the eyes. Constrained to scale and offset only, on head skin only, with the closest 70% of correspondences kept, it still left the moustache 6.06 cm too high. A smooth cranium gives a low residual almost anywhere, so the fit is not determined.",
+   "sources": [
+    "output/hair/_exp/groom2.py, run 2026-09-23 in the container's Blender 4.5.9 with numpy and scipy 1.15.0",
+    "output/hair/_exp/fit_probe.py"
+   ],
+   "basis": "measured",
+   "topic": "transform",
+   "as_first_reported": "ICP of the embedded scalp onto the skin gives the transform.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the ICP runs of the DAZMesh block against the Genesis 9 skin",
+     "evidence": "Free similarity: 4.7 mm mean surface residual, 7.7 cm slide up the forehead. Constrained variant, head skin only, closest 70% of correspondences: moustache 6.06 cm too high."
+    }
+   ]
+  },
+  {
+   "id": "VAM-019",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Two cautions measured while fitting landmark pairs: bone joint positions are the wrong landmarks, because they sit inside the skull about 1.5 cm behind the skin and fitting to them parks roots at bone depth; and a lip-and-chin pair alone is a 3.2 cm baseline, which swung the fitted scale from 0.678 to 1.148 depending on which other landmark was added.",
+   "sources": [
+    "output/hair/_exp/groom2.py, run 2026-09-23 in the container's Blender 4.5.9 with numpy and scipy 1.15.0",
+    "output/hair/_exp/face_landmarks.py",
+    "output/hair/_exp/fit_probe.py"
+   ],
+   "basis": "measured",
+   "topic": "transform",
+   "as_first_reported": "Landmark choice matters; short baselines and bone joints mislead the fit.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the bone head and skin surface positions of VAM-022, and the landmark fits run on the Viking package",
+     "evidence": "Bone heads sit about 1.5 cm behind the corresponding skin points; a lip-and-chin baseline of 3.2 cm gave fitted scales between 0.678 and 1.148."
+    }
+   ]
+  },
+  {
+   "id": "VAM-020",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "The landmark fit is what works. The working set spans the whole head: the moustache root centroid to the lip skin, the beard roots' left and right deciles to the two ear regions, and the hair part's top decile to the crown. Fitted on the Viking package it gives scale 0.9899 and offset (0, -0.30, -6.92) cm, with residuals 1.68, 2.03, 1.97 and 2.23 cm over the four landmarks. With it the hawk roots top out at 170.9 cm against this figure's crown at 169.9 cm. Read physically, the VaM figure's head is the same size as Genesis 9's and sits about 7 cm higher.",
+   "sources": [
+    "output/hair/_exp/groom2.py, run 2026-09-23 in the container's Blender 4.5.9 with numpy and scipy 1.15.0",
+    "output/hair/_exp/fit_probe.py"
+   ],
+   "basis": "measured",
+   "topic": "transform",
+   "as_first_reported": "A whole-head landmark fit puts Genesis 2 hair on Genesis 9.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the landmark fit run on the Viking package against the Genesis 9 landmarks of VAM-022",
+     "evidence": "scale 0.9899, offset (0, -0.30, -6.92) cm, residuals 1.68, 2.03, 1.97 and 2.23 cm; fitted hawk roots at 170.9 cm against a crown at 169.9 cm.",
+     "notes": "Fitted on one package. Checked against four others only through the root centroid agreement in VAM-021."
+    }
+   ]
+  },
+  {
+   "id": "VAM-021",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "The transform belongs to the creator's authoring figure, not to the package. The moustache root centroids of Viking (162.37), Lumberjack (162.41), Smart Goatee (162.60) and Crew Cut (162.44), in Blender z centimetres, agree within 4 mm, so one transform serves all five scooped packages.",
+   "sources": [
+    "output/hair/_exp/vam_read.py and the read-only probes in output/hair/_exp/, run 2026-09-23 on the six .var packages in ~/Downloads"
+   ],
+   "basis": "measured",
+   "topic": "transform",
+   "as_first_reported": "One transform serves every package by the same creator.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the moustache root centroids of the four scooped packages that have one",
+     "evidence": "162.37, 162.41, 162.60 and 162.44 cm in Blender z, a spread of 4 mm.",
+     "notes": "All five packages are by one creator, so this is evidence of one authoring figure, not of a general Genesis 2 to Genesis 9 transform."
+    }
+   ]
+  },
+  {
+   "id": "VAM-022",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Genesis 9 landmarks measured on the figure in output/daz/s_base2.blend, skin surface and not bone, in world centimetres: nose tip (0, -11.84, 155.69); philtrum (0.39, -10.53, 153.43); upper lip skin (0, -10.68, 152.94); lower lip skin (0, -10.40, 151.79); chin front (0, -9.77, 149.98); right ear region (7.21, 0.40, 156.97); crown (0, 0.54, 169.88); highest skin vertex 170.02. The mouth band is x plus or minus 3.51 cm, so 7.02 cm wide, and the lower face x plus or minus 6.64 cm, so 13.28 cm wide. For contrast the bone heads: lipuppermiddle (0, -9.84, 153.0) and chin (0, -8.29, 149.28).",
+   "sources": [
+    "output/hair/_exp/face_landmarks.py and output/hair/_exp/mouth_probe.py, run 2026-09-23 on output/daz/s_base2.blend"
+   ],
+   "basis": "measured",
+   "topic": "measurement",
+   "as_first_reported": "The Genesis 9 face landmarks the fit targets.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "output/daz/s_base2.blend",
+     "evidence": "Positions as listed, taken from skin vertices except the two bone heads, which are named as such."
+    }
+   ]
+  },
+  {
+   "id": "VAM-023",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "The skull sphere that daz_import_probe.py scene --wear-obj fits is radius 8.26 cm centred 162.1 cm up. Measured on 2026-09-22, not in this session.",
+   "sources": [
+    "scripts/daz_import_probe.py, measured 2026-09-22"
+   ],
+   "basis": "measured (2026-09-22, not re-measured in this session)",
+   "topic": "measurement",
+   "as_first_reported": "The declip pass fits an 8.26 cm skull sphere.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the skull sphere reported by daz_import_probe.py scene --wear-obj on 2026-09-22",
+     "evidence": "radius 8.26 cm, centre 162.1 cm up."
+    }
+   ]
+  },
+  {
+   "id": "VAM-024",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Measured after the transform and after snapping every root to the nearest skin point: 50.3% of Viking moustache strands and 70.7% of chin strands point into the skin, meaning a negative angle between the first segment and the skin normal. 35.8% and 33.3% respectively have a point more than 2 mm deep. The cheek part is much better at 19.0%.",
+   "sources": [
+    "output/hair/_exp/groom2.py, run 2026-09-23 in the container's Blender 4.5.9 with numpy and scipy 1.15.0",
+    "output/hair/_exp/exit_probe.py"
+   ],
+   "basis": "measured",
+   "topic": "clipping",
+   "as_first_reported": "Most imported beard strands point into the face.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the Viking beard parts after the VAM-020 transform and a root snap",
+     "evidence": "moustache 50.3% and chin 70.7% in-pointing; 35.8% and 33.3% more than 2 mm deep; cheek 19.0%."
+    }
+   ]
+  },
+  {
+   "id": "VAM-025",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "The moustache roots sit 1.56 cm behind the lip surface and 0.62 cm above it; the chin roots 1.44 cm behind theirs and 0.93 cm below. The vertical corrections are in opposite directions, so a single uniform nudge cannot fix both.",
+   "sources": [
+    "output/hair/_exp/groom2.py, run 2026-09-23 in the container's Blender 4.5.9 with numpy and scipy 1.15.0",
+    "output/hair/_exp/mouth_probe.py"
+   ],
+   "basis": "measured",
+   "topic": "clipping",
+   "as_first_reported": "The beard parts need different offsets.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the Viking moustache and chin root positions against the Genesis 9 skin",
+     "evidence": "moustache 1.56 cm behind and 0.62 cm above; chin 1.44 cm behind and 0.93 cm below."
+    }
+   ]
+  },
+  {
+   "id": "VAM-026",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "Width is not the problem: the Viking moustache is 7.56 cm wide against the figure's 7.02 cm mouth band, 7% out, and the beard is 8% out against the lower face.",
+   "sources": [
+    "output/hair/_exp/groom2.py, run 2026-09-23 in the container's Blender 4.5.9 with numpy and scipy 1.15.0",
+    "output/hair/_exp/mouth_probe.py"
+   ],
+   "basis": "measured",
+   "topic": "clipping",
+   "as_first_reported": "The imported beard is about the right width.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the fitted Viking beard widths against the Genesis 9 mouth band and lower face of VAM-022",
+     "evidence": "moustache 7.56 cm against 7.02 cm, 7% out; beard 8% out against the 13.28 cm lower face."
+    }
+   ]
+  },
+  {
+   "id": "VAM-027",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Eight fixes measured on the Viking beard, with \"inside\" the share of strand points inside the skin after the declip pass: uniform nudge about the lip at scale 1.03 and 3 mm, 10.2% inside, the owner preferred its look; the same at 1.06 and 6 mm, 7.5%; the same at 1.10 and 10 mm, 3.3%, which cleared the lip but the owner preferred the smaller one; per-part offsets each to its own landmark, moustache 0.1%, chin 3.7%, cheek 4.7%, rejected because it closed the mouth; forward-only per part at moustache 15.6 mm, chin 14.4 mm, cheek 8 mm, moustache 0.5% and chin 2.2%, rejected because the owner still preferred the uniform nudge; rotating every in-pointing strand to a minimum exit angle of 12, 20 and 28 degrees, which rotated 25.2%, 34.2% and 41.4% of strands for a whole beard at 8.5%, 8.0% and 7.4% inside, rejected because it breaks the combing and reads scruffy; a local ellipsoidal flex at the mouth, centre (0, -10.2, 152.15) cm, radii 4.8 by 3.8 by 3.2 cm, pushed along the skin normal weighted by a smoothstep, which moved 6,122 points or 20.4% of the beard and took mouth-region clipping from 6.69% to 5.42% at a 7 mm push, rejected by the owner; and choosing a beard that does not wrap the mouth, Lumberjack at 0 mm 12.2% inside, 4 mm 9.2%, 8 mm 7.1%, accepted.",
+   "sources": [
+    "output/hair/_exp/groom2.py, run 2026-09-23 in the container's Blender 4.5.9 with numpy and scipy 1.15.0",
+    "output/hair/_exp/exit_probe.py"
+   ],
+   "basis": "measured",
+   "topic": "clipping",
+   "as_first_reported": "A transform plus a declip can seat any imported beard.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "each fix run on the fitted Viking beard, and the Lumberjack beard at three forward shifts",
+     "evidence": "Percentages as listed. The accepted outcome is the last row: the Lumberjack beard shifted 4 mm forward, 9.2% inside.",
+     "notes": "The acceptances and rejections are the owner's, recorded on 2026-09-23. Clipping was judged by the share of points inside the skin and by looking; no engine-side test was run."
+    }
+   ]
+  },
+  {
+   "id": "VAM-028",
+   "status": "unchecked",
+   "kind": "recommendation",
+   "load_bearing": false,
+   "claim": "A beard authored to wrap tightly round the mouth cannot be rescued by a transform. Pick a looser beard.",
+   "sources": [
+    "output/hair/_exp/groom2.py, run 2026-09-23 in the container's Blender 4.5.9 with numpy and scipy 1.15.0"
+   ],
+   "basis": "the conclusion the owner reached from VAM-027 on 2026-09-23",
+   "topic": "clipping"
+  },
+  {
+   "id": "VAM-029",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "A translation of a beard part only sticks when the root snap is turned off, because snapping pulls every root back to the nearest skin point and cancels it.",
+   "sources": [
+    "output/hair/_exp/groom2.py, run 2026-09-23 in the container's Blender 4.5.9 with numpy and scipy 1.15.0"
+   ],
+   "basis": "measured",
+   "topic": "clipping",
+   "as_first_reported": "Root snapping cancels a translation.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the forward-shift runs of VAM-027 with and without the root snap",
+     "evidence": "With the snap on, a translated part returned to its snapped roots and the measured share inside did not change."
+    }
+   ]
+  },
+  {
+   "id": "VAM-030",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "VaM stores the styled state and simulates from it in game, so imported guides stand where the creator left them and do not drape until a solver runs.",
+   "sources": [
+    "output/hair/_exp/vam_read.py and the read-only probes in output/hair/_exp/, run 2026-09-23 on the six .var packages in ~/Downloads",
+    "yass3d/vkit, native/vkit_core/src/vam/hair.rs lines 1942 to 2141 and 1851 to 1900 (MIT or Apache-2.0), read and not run"
+   ],
+   "basis": "measured (the stored pose), read and not run (that VaM simulates from it)",
+   "topic": "settle",
+   "as_first_reported": "VaM hair files hold the styled pose, not a settled one.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the guide positions read from the six packages, and the simulationEnabled flags of VAM-015",
+     "evidence": "Guides read out in a styled standing pose rather than a draped one; the .vaj carries a full physics parameter set, so the stored pose is the input to a solver and not its output."
+    }
+   ]
+  },
+  {
+   "id": "VAM-031",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Running the repo's position-based settle from the authored pose, with the part's own storables, makes it fall: the package's rigidityRolloffPower of 8 leaves only the first three points of a 24-point strand rigid, and 200 frames of gravity flattened the top, while rolloff 2 with mainRigidity 0.75 keeps the crown and lets the ends drape.",
+   "sources": [
+    "output/hair/_exp/groom2.py, run 2026-09-23 in the container's Blender 4.5.9 with numpy and scipy 1.15.0"
+   ],
+   "basis": "run",
+   "topic": "settle",
+   "as_first_reported": "The packaged physics parameters can be used as settle parameters unchanged.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the settle run on an imported part with its own .vaj storables, and again at rolloff 2 with mainRigidity 0.75",
+     "evidence": "At rolloff 8 only the first three points of a 24-point strand stay rigid and 200 frames of gravity flattened the top; at rolloff 2 with mainRigidity 0.75 the crown survives and the ends drape."
+    }
+   ]
+  },
+  {
+   "id": "VAM-032",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "Imported guides must skip clumping. They have no surface_uv_coordinate attribute, so Create Guide Index Map puts every curve at UV (0, 0) and Clump Hair Curves pulls the whole head into a single spike.",
+   "sources": [
+    "output/hair/_exp/groom2.py, run 2026-09-23 in the container's Blender 4.5.9 with numpy and scipy 1.15.0"
+   ],
+   "basis": "run",
+   "topic": "settle",
+   "as_first_reported": "Imported guides can go through the same node chain as grown ones.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the Blender essentials hair nodes run on imported guides in the container's Blender 4.5.9",
+     "evidence": "With no surface_uv_coordinate attribute, Create Guide Index Map assigns UV (0, 0) to every curve and Clump Hair Curves collapses the head into one spike."
+    }
+   ]
+  },
+  {
+   "id": "VAM-033",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "Three scenes were kept, all in the gitignored output/daz/ and none committed. s_viking.blend and s_viking_head.png: the Viking hawk plus the Viking beard on the uniform nudge the owner chose (scale 1.03, 3 mm), hawk 4,005 curves at 6.2% inside and beard 13,728 curves at 10.2% inside. s_vhawk_lumber.blend and s_vhawk_lumber_head.png: the Viking hawk plus the Lumberjack chin and moustache shifted 4 mm forward, hawk 4,005 curves, beard 12,969 curves at 9.2% inside, with the Lumberjack scruff part (neck stubble, 236 guides, 0.81 cm) dropped as too sparse to read. s_vam_head.png: Clean Cut alone, 738 guides to 11,070 curves.",
+   "sources": [
+    "output/hair/_exp/groom2.py, run 2026-09-23 in the container's Blender 4.5.9 with numpy and scipy 1.15.0"
+   ],
+   "basis": "run",
+   "topic": "output",
+   "as_first_reported": "Three VaM grooms were kept as reference scenes.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the three scenes in output/daz/, generated and viewed on 2026-09-23",
+     "evidence": "Curve counts and shares inside as listed."
+    }
+   ]
+  },
+  {
+   "id": "VAM-034",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "The Smart Goatee was rejected: 353 guides over the chin and lip against Lumberjack's 1,179, and its smgoatpatch part is 29 guides, so at the same fill it reads as a sketch rather than a groom. A forward shift improved it, from 23.2% inside at 0 mm to 21.2% at 8 mm, but did not make it usable.",
+   "sources": [
+    "output/hair/_exp/vam_read.py and the read-only probes in output/hair/_exp/, run 2026-09-23 on the six .var packages in ~/Downloads",
+    "output/hair/_exp/groom2.py, run 2026-09-23 in the container's Blender 4.5.9 with numpy and scipy 1.15.0"
+   ],
+   "basis": "measured",
+   "topic": "output",
+   "as_first_reported": "The Smart Goatee is too sparse to use.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "scooped.Smart_Goatee.1.var parsed and fitted, against scooped.Lumberjack_Beard.1.var",
+     "evidence": "353 guides against 1,179; smgoatpatch 29 guides; 23.2% inside at 0 mm falling to 21.2% at 8 mm.",
+     "notes": "The judgement that it reads as a sketch is the owner's, made by looking on 2026-09-23."
+    }
+   ]
+  },
+  {
+   "id": "VAM-035",
+   "status": "unchecked",
+   "kind": "recommendation",
+   "load_bearing": false,
+   "claim": "Treat a VaM-derived asset as not shippable as 3D data on the creator's licence alone: the CC BY covers the strand shapes the creator authored, but not VaM's own built-in scalps, nor the DAZMesh block of geometry a CustomScalp item embeds, which is reported to be Daz Genesis 2 derived geometry, an attribution not independently checked in this session. Renders are a separate question and are governed by the repo's existing Daz rules.",
+   "sources": [
+    "output/hair/_exp/vam_read.py and the read-only probes in output/hair/_exp/, run 2026-09-23 on the six .var packages in ~/Downloads",
+    "docs/reference/daz-genesis.md",
+    "CLAUDE.md"
+   ],
+   "basis": "the conservative conclusion drawn on 2026-09-23 from VAM-002, VAM-009 and VAM-014",
+   "topic": "licence"
+  },
+  {
+   "id": "VAM-036",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": true,
+   "claim": "The DAZMesh block was read into memory only, to try a fit. Nothing from it was written to the repo.",
+   "sources": [
+    "output/hair/_exp/vam_read.py and the read-only probes in output/hair/_exp/, run 2026-09-23 on the six .var packages in ~/Downloads",
+    "output/hair/_exp/groom2.py, run 2026-09-23 in the container's Blender 4.5.9 with numpy and scipy 1.15.0"
+   ],
+   "basis": "measured",
+   "topic": "licence",
+   "as_first_reported": "The embedded Daz mesh was used only in memory.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the ICP run of VAM-018 and the repo working tree on 2026-09-23",
+     "evidence": "The block was parsed into an in-memory array for the ICP attempt; no file holding it, or geometry derived from it, was written inside the repo."
+    }
+   ]
+  },
+  {
+   "id": "VAM-037",
+   "status": "confirmed",
+   "kind": "fact",
+   "load_bearing": false,
+   "claim": "The owner downloaded six .var packages from hub.virtamate.com in a browser, by hand. Nothing was scripted against the Hub, no package was fetched by tool, and no package is in the repo: the files stayed in ~/Downloads. The Hub's hairstyle listing was read with curl (HTTP 200, consent cookie vamhubconsent=yes) to find candidates, and reading listing pages is all that was done there.",
+   "sources": [
+    "hub.virtamate.com hairstyle listing pages, read with curl on 2026-09-23"
+   ],
+   "basis": "run (the listing read), measured (the file locations)",
+   "topic": "provenance",
+   "as_first_reported": "The packages came from the VaM Hub.",
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "the curl requests to the Hub's hairstyle listing, and the downloaded files in ~/Downloads",
+     "evidence": "Listing pages returned HTTP 200 with the consent cookie vamhubconsent=yes; the six packages were downloaded by hand and none is inside the repo."
+    }
+   ]
+  }
+ ]
+}
