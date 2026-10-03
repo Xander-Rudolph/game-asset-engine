@@ -127,6 +127,7 @@ export default defineConfig({
             { text: 'Hair and beard meshes', link: '/reference/hair-meshes' },
             { text: 'Virt-A-Mate assets', link: '/reference/vam-assets' },
             { text: 'Video to 3D motion', link: '/reference/video-mocap' },
+            { text: 'Animation sources', link: '/reference/animation-sources' },
           ],
         },
       ],

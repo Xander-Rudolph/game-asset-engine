@@ -256,6 +256,14 @@ The script works around this by copying each mesh over a file that was already
 in the list. The node reads the actual file when it runs, so you don't need to
 restart between figures.
 
+The list only applies to a path you type. A path wired into `file_path` from
+another node is never checked against it, because the server checks a value
+against a list only when it is typed in, and the node then joins the path onto
+the source folder, where an absolute container path wins. That is how the Rig
+stage of [the pipeline graph](/guide/asset-workflow) rigs a mesh the Mesh stage
+has just saved: on 2026-10-02 it rigged `/app/output/mesh/TRELLIS_2026-10-01-00-08-06.glb`,
+a file on no list, in 21.6 seconds.
+
 **Change the output name for each figure, or you get the previous one.** Every
 figure is loaded through the same input slot, so ComfyUI sees identical inputs
 and serves its cached result. It reports done in 0s and hands back the previous
