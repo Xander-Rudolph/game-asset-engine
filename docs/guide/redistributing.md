@@ -112,18 +112,20 @@ folders intact. What the use limits mean for texturing is in
 [licensing](/guide/licensing#the-licences-of-the-tools-themselves) and
 [TRELLIS](/guide/trellis#why-the-colour-is-research-only).
 
-### Five node packs added for complete_workflow.json
+### Six node packs added for complete_workflow.json and asset_workflow.json
 
-The Dockerfile clones the first four at pinned commits. The fifth,
+The Dockerfile clones the first five at pinned commits. The sixth,
 comfyui_controlnet_aux, is **not in the image**; see below. Their licence files were read from
-clones at those commits on 2026-09-30, **not from a built image**. All five are
-source, so there is no source offer to make; MIT and Apache-2.0 ask for the
-licence text to travel with the code, and each clone carries its own.
+clones at those commits on 2026-09-30, and cg-image-filter's on 2026-10-02,
+**not from a built image**. All six are source, so there is no source offer to
+make; MIT and Apache-2.0 ask for the licence text to travel with the code, and
+each clone carries its own.
 
 | Pack | Commit | Licence |
 |---|---|---|
 | rgthree-comfy | `449c58f` | MIT, Copyright (c) 2023 Regis Gaughan, III |
 | cg-use-everywhere | `50ae9f8` | Apache-2.0 |
+| cg-image-filter | `1602dbe` | Apache-2.0. Its four audio files under `js/audio/` carry no separate notice |
 | ComfyUI-GGUF | `6ea2651` | Apache-2.0 |
 | Comfyui-QwenEditUtils | `cdd4d02` | Apache-2.0 |
 | comfyui_controlnet_aux | `0cd2904` | Apache-2.0 at the root, and see below. Fetched at start-up, not in the image |

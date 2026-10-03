@@ -21,11 +21,23 @@ How the stages hand over, which is the point of the design:
   when a live stage above feeds the switch, or an empty picker would stop the
   whole queue, so an rgthree relay mutes it whenever any stage above is on
   (the same device complete_workflow.json uses for its input image).
+- Each image stage makes a batch of takes, and an Image Filter (cg-image-filter)
+  after it pauses the queue to show them and passes on the one clicked.  It is
+  an ordinary node, so the server runs it only when a stage below reads it; a
+  stage queued on its own just saves its takes.
+- The pickers sit together in a Stage inputs row under the prompt, in stage
+  order, so a run can be picked up at any stage from the top of the graph.  A
+  picker is also muted while its own stage is off, so the pickers lit up are
+  exactly the ones the next queue reads.  A relay can only say "mute when any
+  input is active", so the second rule needs an inverter: a relay watching the
+  stage drives a flag node that is active while the stage is off, and the
+  picker's relay watches the sources and that flag together.
 
 Stage images save to the top of output/, as asset_<stage>_NNNNN_.png, because
 the picker lists only the top of that folder: ComfyUI's /internal/files/output
-route reads it with os.scandir, not recursively.  Meshes stay in output/mesh/
-so a .glb never lands in an image picker.
+route reads it with os.scandir, not recursively.  Meshes stay in output/mesh/,
+rigs in output/rigged/ and video in output/video/, so none of them lands in an
+image picker, which lists every file at the top of output/, not only images.
 
 Built, never hand-edited, from the base graphs, so a fix to one of them reaches
 this graph on the next run.  Presets come first: the Simplify stage is read
@@ -79,27 +91,36 @@ STAGE_TITLE = r"^[0-9]+\. "
 # ---------------------------------------------------------------- the stages
 # src:      the base graph in workflows/api/
 # drop:     nodes replaced by something outside the stage (its LoadImage)
-# feed:     "node.input" -> what drives it instead: an input switch, a prompt
+# feed:     "node.input" -> what drives it instead: an input switch, a text
+# set:      "node.input" -> a value this graph uses instead of the base one
 # result:   (node, slot) the next stage reads, and the relays watch
 # save:     node whose filename_prefix moves to the top of output/
+# takes:    "node.input", the batch size the Takes box drives; or
+#           "repeat:node.input", a latent input that gets a RepeatLatentBatch
+#           in front of it, for a stage whose latent comes from an image
+# pick:     an Image Filter after the result pauses the queue, shows the
+#           takes, and passes on the one clicked; it runs only when a stage
+#           below reads it, so a stage run on its own never pauses
 # on:       switched on when the graph opens
 STAGES = [
     {"key": "concept_fast", "src": "txt2img_qwen_fast", "on": True,
      "title": "1. Concept, fast: Qwen-Image 4-step",
-     "feed": {"4.text": "prompt"},
+     "feed": {"4.text": "prompt"}, "takes": "6.batch_size", "pick": True,
      "result": ("9", 0), "save": ("10", "asset_concept_fast")},
     {"key": "concept", "src": "txt2img_qwen",
      "title": "1. Concept, full: Qwen-Image 20 steps",
-     "feed": {"4.text": "prompt"},
+     "feed": {"4.text": "prompt"}, "takes": "6.batch_size", "pick": True,
      "result": ("9", 0), "save": ("10", "asset_concept")},
     {"key": "edit", "src": "img_edit_qwen",
      "title": "2. Edit: Qwen-Image-Edit 2509",
      "drop": ["1"], "feed": {"2.image": "image_switch:edit",
                              "8.prompt": "instruction"},
+     "takes": "repeat:11.latent_image", "pick": True,
      "result": ("12", 0), "save": ("13", "asset_edit")},
     {"key": "simplify", "src": "preset_simplify_concept",
      "title": "3. Simplify: game-ready shapes, Qwen-Image-Edit 2509",
      "drop": ["1"], "feed": {"2.image": "image_switch:simplify"},
+     "takes": "repeat:11.latent_image", "pick": True,
      "result": ("12", 0), "save": ("13", "asset_simplify")},
     {"key": "mesh_trellis", "src": "img2mesh_trellis",
      "title": "4. Mesh: TRELLIS (MIT)",
@@ -117,31 +138,71 @@ STAGES = [
     {"key": "turntable", "src": "mesh_render_sprites",
      "title": "6. Turntable: 8 flat frames to check the silhouette",
      "feed": {"1.mesh_file_path": "path_switch:turntable"}},
+    # UniRig's loader offers a list of files, but a wired path skips the list:
+    # the server checks a value against a list only when it is typed in, and
+    # the node joins the path onto output/, where an absolute path wins.
+    {"key": "rig", "src": "mesh_rig_unirig",
+     "title": "7. Rig: UniRig, articulationxl skeleton",
+     "feed": {"1.file_path": "path_switch:rig"},
+     "set": {"3.fbx_name": "rigged/asset"},
+     "result": ("3", 0)},
+    {"key": "animate", "src": "img2video_wan22",
+     "title": "8. Animate: Wan 2.2 image to video, five seconds",
+     "drop": ["1"], "feed": {"12.start_image": "image_switch:animate",
+                             "10.text": "motion"},
+     "set": {"16.filename_prefix": "video/asset_animate",
+             "17.filename_prefix": "video/asset_animate"},
+     "save": ("19", "asset_animate_last")},
 ]
 
-# The input switches.  Sources are nearest first: the switch passes on the
-# first one present.  The picker comes last and is muted while any source is on.
+# The texts typed at the top: key -> (stage, node, input, title).  Each takes
+# its default from the base graph it feeds.
+TEXTS = {
+    "prompt": ("concept", "4", "text", "Prompt (both Concept stages)"),
+    "instruction": ("edit", "8", "prompt", "Edit instruction (Stage 2)"),
+    "motion": ("animate", "10", "text", "Motion prompt (Stage 8)"),
+}
+
+# How many takes each image stage makes per queue, and how long a pick waits.
+# Two takes of Concept, fast, is about 45 s; the reference card's limit for a
+# batch of 1104x1472 Qwen images is not measured.  A pick left alone for an
+# hour sends the first take on, so an unattended queue still finishes.
+TAKES = 2
+PICK_TIMEOUT = 3600
+PICK = "Image Filter"
+
+# The input switches, in stage order, which is the order of the pickers in the
+# Stage inputs row.  Sources are nearest first: the switch passes on the first
+# one present.  The picker comes last, muted while any source is on.
 SWITCHES = {
     "image_switch:edit": {
         "type": "IMAGE", "sources": ["concept", "concept_fast"],
         "title": "2. Edit takes",
-        "picker": "Edit input when no stage above is on"},
+        "picker": "2. Edit: image to edit"},
     "image_switch:simplify": {
         "type": "IMAGE", "sources": ["edit", "concept", "concept_fast"],
         "title": "3. Simplify takes",
-        "picker": "Simplify input when no stage above is on"},
+        "picker": "3. Simplify: image to simplify"},
     "image_switch:mesh": {
         "type": "IMAGE", "sources": ["simplify", "edit", "concept", "concept_fast"],
         "title": "4. Mesh and 5. Texture take",
-        "picker": "Mesh and Texture image when no stage above is on"},
+        "picker": "4. Mesh and 5. Texture: concept image"},
     "path_switch:texture": {
         "type": "STRING", "sources": ["mesh_trellis", "mesh_hunyuan"],
         "title": "5. Texture mesh",
-        "picker": "Mesh to texture when no Mesh stage is on (container path)"},
+        "picker": "5. Texture: mesh to texture (container path)"},
     "path_switch:turntable": {
         "type": "STRING", "sources": ["texture", "mesh_trellis", "mesh_hunyuan"],
         "title": "6. Turntable mesh",
-        "picker": "Mesh to render when no stage above is on (container path)"},
+        "picker": "6. Turntable: mesh to render (container path)"},
+    "path_switch:rig": {
+        "type": "STRING", "sources": ["texture", "mesh_trellis", "mesh_hunyuan"],
+        "title": "7. Rig mesh",
+        "picker": "7. Rig: mesh to rig (container path)"},
+    "image_switch:animate": {
+        "type": "IMAGE", "sources": ["simplify", "edit", "concept", "concept_fast"],
+        "title": "8. Animate takes",
+        "picker": "8. Animate: start frame"},
 }
 
 README = """## Asset pipeline
@@ -152,18 +213,25 @@ Only Stage 1, fast, is on when the graph opens.
 **Handing over.** Each stage takes its input from the nearest stage above it that
 is on. With Concept, Edit and Mesh all on, one queue goes from prompt to mesh.
 
-**Running a step on its own, as often as you like.** Switch on only that stage.
-With no stage above it on, it reads the picker in the column to its left instead.
-Queue it until you like a result, then switch it off and switch on the next
-stage. The next stage's picker refresh arrow selects the newest file, which is the
-result you just made, or pick any earlier one. To edit an edit, pick the last
-edit in Edit's own picker.
+**Takes and picks.** Each image stage (1 to 3) makes **Takes** images per queue,
+and saves them all. When a stage below it is on, the queue pauses after the
+stage, shows the takes, and carries on with the one you click and Send. Escape
+cancels the queue; left alone for an hour it carries on with the first take.
+Click one take: Mesh and Animate expect one image. A stage with nothing below it
+on never pauses, so a stage on its own just makes its takes.
 
-**Pickers** list the top of `output/`, where every stage here saves its image as
-`asset_<stage>_NNNNN_.png`. A picker is muted while any stage above it is on,
-so an empty picker never stops a chained run. Meshes save to `output/mesh/`;
-their pickers are path boxes, holding a container path such as
-`/app/output/mesh/asset.glb`.
+**Picking up at any stage.** The **Stage inputs** row below holds one picker per
+stage, in stage order. A picker is read only when its stage is on and no stage
+above it is on, and it is muted otherwise, so the pickers lit up are exactly the
+ones the next queue reads. Switch on one stage, pick its input, and queue as often
+as it takes. Then switch it off, switch on the next stage, and press that picker's
+refresh arrow: it selects the newest file, which is the take you just made, or pick
+any earlier one. To edit an edit, pick the last edit in Edit's own picker.
+
+**Pickers** list the top of `output/`, where every image stage here saves as
+`asset_<stage>_NNNNN_.png`. Meshes save to `output/mesh/`, rigs to
+`output/rigged/` and video to `output/video/`; the mesh pickers are path boxes
+holding a container path such as `/app/output/mesh/asset.glb`.
 
 **Seeds** are set to randomise, so each queue of a stage is a new take.
 
@@ -179,10 +247,19 @@ VRAM, because 3D-Pack keeps its pipelines outside ComfyUI's model management:
 run Mesh, restart ComfyUI, then run Texture with Mesh off.
 
 **Licences.** The Hunyuan3D stages are under a licence that excludes the EU, the
-UK and South Korea; TRELLIS is MIT. See docs/guide/licensing.
+UK and South Korea; TRELLIS is MIT; Wan 2.2 is Apache-2.0. See docs/guide/licensing.
 
-**Rigging** is not a stage: UniRig reads a saved file from a list, so it cannot
-be wired onto the end of a graph. Use mesh_rig_unirig.
+**7. Rig** hands UniRig the mesh path from the Mesh or Texture stage, or from its
+path box, so the mesh need not be in the loader's file list. Its skeleton is
+`articulationxl`, whose bones are `bone_N`; `scripts/bone_roles.py map` names them.
+
+**8. Animate** makes five seconds of video of the image with Wan 2.2, under
+`output/video/`, and its last frame at the top of `output/`. Its settings are
+the ones that ran on the 16 GB reference card: 480x640 and 20 steps, with the
+4-step LoRAs in the graph at strength 0, because at strength 1 that card ran out
+of memory merging them into the fp8 weights. It makes a video, not a clip:
+nothing in this image turns the video into motion for the rig.
+docs/reference/video-mocap.md is the state of that.
 
 Built by scripts/build_asset_workflow.py from the graphs in workflows/api/.
 Change those, not this."""
@@ -229,13 +306,14 @@ def build(info):
     base = {s["key"]: json.loads((API_DIR / f"{s['src']}.json").read_text())
             for s in STAGES}
 
-    # The two things typed at the top.  Their defaults are the base graphs' own.
-    prompt = new("PrimitiveStringMultiline",
-                 {"value": base["concept"]["4"]["inputs"]["text"]},
-                 "inputs", "Prompt (both Concept stages)")
-    instruction = new("PrimitiveStringMultiline",
-                      {"value": base["edit"]["8"]["inputs"]["prompt"]},
-                      "inputs", "Edit instruction (Stage 2)")
+    # The texts typed at the top.  Their defaults are the base graphs' own.
+    text_id = {}
+    for key, (stage, lid, iname, name) in TEXTS.items():
+        text_id[key] = new("PrimitiveStringMultiline",
+                           {"value": base[stage][lid]["inputs"][iname]},
+                           "inputs", name)
+    takes = new("PrimitiveInt", {"value": TAKES}, "inputs",
+                "Takes per image stage (each queue of Stages 1 to 3)")
 
     # Shared loaders first, so a stage can point at them.
     shared = {}                    # canonical key -> node id
@@ -284,23 +362,51 @@ def build(info):
             local[(s["key"], lid)] = new(g[lid]["class_type"],
                                          dict(g[lid]["inputs"]), s["key"])
 
-    # Input switches and their pickers, in the hand-off column.
-    switch_id, picker_id = {}, {}
+    # Input switches, in the hand-off column, and their pickers, in the Stage
+    # inputs row.  The flag is the inverter's output: a node that is active
+    # while every stage reading the switch is off, which the picker's relay
+    # watches beside the sources.  It is a string nobody reads, so the server
+    # never runs it; a picker needs a node with an output to be muted through.
+    switch_id, picker_id, flag_id = {}, {}, {}
     for key, sw in SWITCHES.items():
         if sw["type"] == "IMAGE":
             picker_id[key] = new("LoadImageOutput", {"image": ""},
-                                 "handoff:" + key, sw["picker"])
+                                 "inputs", sw["picker"])
         else:
             picker_id[key] = new("PrimitiveString",
                                  {"value": "/app/output/mesh/asset.glb"},
-                                 "handoff:" + key, sw["picker"])
+                                 "inputs", sw["picker"])
         switch_id[key] = new(SWITCH, {}, "handoff:" + key, sw["title"])
+        flag_id[key] = new("PrimitiveString", {"value": ""}, "handoff:" + key,
+                           sw["title"] + ": flag, active while its stage is off")
 
+    # The pick after an image stage: an Image Filter on its result, which
+    # becomes what the stages below and the relays read.  It is an ordinary
+    # node, so the server runs it only when something below it is on.
     result = {}
     for s in STAGES:
         if "result" in s:
             lid, slot = s["result"]
             result[s["key"]] = [local[(s["key"], lid)], slot]
+        if s.get("pick"):
+            number = s["title"].split(":")[0]
+            filt = new(PICK, {"images": result[s["key"]],
+                              "timeout": PICK_TIMEOUT, "ontimeout": "send first",
+                              "tip": f"{number}: click the take to carry on "
+                                     "with, then Send. Escape cancels the queue."},
+                       s["key"], f"{number}: pick the take")
+            result[s["key"]] = [filt, 0]
+
+    # The stages that read each switch, by the node that reads it: what the
+    # inverter watches.
+    owners = {key: [] for key in SWITCHES}
+    for s in STAGES:
+        for target, what in s.get("feed", {}).items():
+            if what in SWITCHES:
+                lid = target.split(".")[0]
+                node = local[(s["key"], lid)]
+                if (s["key"], node) not in owners[what]:
+                    owners[what].append((s["key"], node))
 
     for key, sw in SWITCHES.items():
         wires = [result[k] for k in sw["sources"]] + [[picker_id[key], 0]]
@@ -324,13 +430,21 @@ def build(info):
                               else [local[(s["key"], str(v[0]))], v[1]])
         for target, what in s.get("feed", {}).items():
             lid, iname = target.split(".")
-            if what == "prompt":
-                src = [prompt, 0]
-            elif what == "instruction":
-                src = [instruction, 0]
-            else:
-                src = [switch_id[what], 0]
+            src = [text_id[what] if what in text_id else switch_id[what], 0]
             api[local[(s["key"], lid)]]["inputs"][iname] = src
+        for target, val in s.get("set", {}).items():
+            lid, iname = target.split(".")
+            api[local[(s["key"], lid)]]["inputs"][iname] = val
+        if "takes" in s:
+            repeat = s["takes"].startswith("repeat:")
+            lid, iname = s["takes"].split(":")[-1].split(".")
+            ins = api[local[(s["key"], lid)]]["inputs"]
+            if repeat:
+                ins[iname] = [new("RepeatLatentBatch",
+                                  {"samples": ins[iname], "amount": [takes, 0]},
+                                  s["key"]), 0]
+            else:
+                ins[iname] = [takes, 0]
         if "save" in s:
             lid, prefix = s["save"]
             api[local[(s["key"], lid)]]["inputs"]["filename_prefix"] = prefix
@@ -363,7 +477,9 @@ def build(info):
     for nid, stages in users.items():
         if len(stages) == 1:
             group_of[nid] = next(iter(stages))
-    return api, group_of, title, switch_id, picker_id, result
+    return api, group_of, title, {"switch": switch_id, "picker": picker_id,
+                                  "flag": flag_id, "owners": owners,
+                                  "result": result}
 
 
 def depth_in(graph, lid, seen=()):
@@ -377,9 +493,11 @@ def depth_in(graph, lid, seen=()):
     return d
 
 
-def to_ui(api, group_of, title, switch_id, picker_id, result, info):
+def to_ui(api, group_of, title, wiring, info):
     """The joined graph as the editor's file: nodes placed in groups, links,
     the stage panel and the relays."""
+    switch_id, picker_id, flag_id = wiring["switch"], wiring["picker"], wiring["flag"]
+    owners, result = wiring["owners"], wiring["result"]
     nodes, links = [], []
     by_id = {}
     next_link = [1]
@@ -422,10 +540,13 @@ def to_ui(api, group_of, title, switch_id, picker_id, result, info):
             # Every seed randomises: a stage run again is a new take.  The
             # value itself is the base graph's; only the control after it,
             # which the server never sees, changes.
+            # The Takes box is an integer with the same dropdown, and must
+            # stay put between queues.
             wv = built["widgets_values"]
             for i in range(len(wv) - 1):
                 if wv[i + 1] == "fixed" and isinstance(wv[i], int) \
-                        and not isinstance(wv[i], bool):
+                        and not isinstance(wv[i], bool) \
+                        and node["class_type"] != "PrimitiveInt":
                     wv[i + 1] = "randomize"
         if nid in title:
             built["title"] = title[nid]
@@ -474,12 +595,16 @@ def to_ui(api, group_of, title, switch_id, picker_id, result, info):
         group_of[str(ue["id"])] = "models"
         link(by_id[nid], 0, ue, 0, typ)
 
-    # Relays: each mutes its picker while any source stage is on.
-    for key, sw in SWITCHES.items():
+    # Relays.  Both are inverted: an active input mutes, all muted activates.
+    # The first watches the stages that read the switch and drives the flag,
+    # so the flag is active exactly while they are all off.  The second
+    # watches the sources and the flag and drives the picker, so the picker
+    # is active exactly while no source is on and its stage is on.
+    def relay_pair(names, what, title_relay, title_repeater):
         relay = {"id": fresh_id(), "type": "Mute / Bypass Relay (rgthree)",
-                 "pos": [0, 0], "size": [260, 60 + 22 * (len(sw["sources"]) + 1)],
+                 "pos": [0, 0], "size": [260, 60 + 22 * (len(names) + 1)],
                  "flags": {"collapsed": False}, "order": 0, "mode": 0,
-                 "title": sw["title"] + ": picker off while a source is on",
+                 "title": title_relay,
                  "inputs": [], "outputs": [{"name": "REPEATER", "dir": 4, "shape": 5,
                                             "type": "_NODE_REPEATER_", "links": [],
                                             "color_on": "#Fc0", "color_off": "#a80"}],
@@ -487,25 +612,48 @@ def to_ui(api, group_of, title, switch_id, picker_id, result, info):
                                 "on_bypassed_inputs": "ACTIVE",
                                 "on_any_active_inputs": "MUTE"},
                  "widgets_values": None}
-        for src in sw["sources"]:
-            relay["inputs"].append({"dir": 3, "name": src, "type": "*", "link": None})
+        for name in names:
+            relay["inputs"].append({"dir": 3, "name": name, "type": "*", "link": None})
         relay["inputs"].append({"dir": 3, "name": "", "type": "*", "link": None})
         repeater = {"id": fresh_id(), "type": "Mute / Bypass Repeater (rgthree)",
                     "pos": [0, 0], "size": [260, 90], "flags": {}, "order": 0,
-                    "mode": 0, "title": sw["title"] + ": picker switch",
+                    "mode": 0, "title": title_repeater,
                     "inputs": [{"dir": 3, "name": "Mute / Bypass Relay (rgthree)",
                                 "type": "*", "link": None},
-                               {"dir": 3, "name": "picker", "type": "*", "link": None},
+                               {"dir": 3, "name": what, "type": "*", "link": None},
                                {"dir": 3, "name": "", "type": "*", "link": None}],
                     "outputs": [], "properties": {}, "widgets_values": None}
-        nodes += [relay, repeater]
-        group_of[str(relay["id"])] = group_of[str(repeater["id"])] = "handoff:" + key
+        link(relay, 0, repeater, 0, "_NODE_REPEATER_")
+        return relay, repeater
+
+    handoff = {}                   # switch key -> its column, top to bottom
+    for key, sw in SWITCHES.items():
+        stage_relay, stage_repeater = relay_pair(
+            [stage for stage, _ in owners[key]], "flag",
+            sw["title"] + ": flag on while every stage reading it is off",
+            sw["title"] + ": flag switch")
+        for i, (_, nid) in enumerate(owners[key]):
+            link(by_id[nid], 0, stage_relay, i, by_id[nid]["outputs"][0]["type"])
+        flag = by_id[flag_id[key]]
+        link(flag, 0, stage_repeater, 1, flag["outputs"][0]["type"])
+
+        relay, repeater = relay_pair(
+            sw["sources"] + ["stage off"], "picker",
+            sw["title"] + ": picker off while a source is on or its stage is off",
+            sw["title"] + ": picker switch")
         for i, src in enumerate(sw["sources"]):
             rid, slot = result[src]
             link(by_id[rid], slot, relay, i, by_id[rid]["outputs"][slot]["type"])
-        link(relay, 0, repeater, 0, "_NODE_REPEATER_")
+        link(flag, 0, relay, len(sw["sources"]), flag["outputs"][0]["type"])
         picker = by_id[picker_id[key]]
         link(picker, 0, repeater, 1, picker["outputs"][0]["type"])
+
+        column = [by_id[switch_id[key]], relay, repeater,
+                  stage_relay, stage_repeater, flag]
+        nodes += [stage_relay, stage_repeater, relay, repeater]
+        for n in column:
+            group_of[str(n["id"])] = "handoff:" + key
+        handoff[key] = column
 
     # The panel and the notes.
     muter = {"id": fresh_id(), "type": "Fast Groups Muter (rgthree)",
@@ -534,11 +682,12 @@ def to_ui(api, group_of, title, switch_id, picker_id, result, info):
         nodes.append(note)
         group_of[str(note["id"])] = s["key"]
 
-    groups = layout(nodes, group_of, info)
+    groups = layout(nodes, group_of, handoff,
+                    [by_id[picker_id[key]] for key in SWITCHES])
 
-    # Starting modes: only the stages marked "on".  A picker starts in the
-    # mode its relay would give it, so the file is consistent before the
-    # relays first run.
+    # Starting modes: only the stages marked "on".  A flag and a picker start
+    # in the mode their relays would give them, so the file is consistent
+    # before the relays first run.
     on = {s["key"] for s in STAGES if s.get("on")}
     for n in nodes:
         g = group_of.get(str(n["id"]), "")
@@ -546,7 +695,9 @@ def to_ui(api, group_of, title, switch_id, picker_id, result, info):
             n["mode"] = ACTIVE if g in on else MUTE
     for key, sw in SWITCHES.items():
         live = any(k in on for k in sw["sources"])
-        by_id[picker_id[key]]["mode"] = MUTE if live else ACTIVE
+        owned = any(stage in on for stage, _ in owners[key])
+        by_id[flag_id[key]]["mode"] = MUTE if owned else ACTIVE
+        by_id[picker_id[key]]["mode"] = ACTIVE if owned and not live else MUTE
 
     for i, n in enumerate(sorted(nodes, key=lambda n: (n["pos"][1], n["pos"][0]))):
         n["order"] = i
@@ -565,9 +716,10 @@ def to_ui(api, group_of, title, switch_id, picker_id, result, info):
     }
 
 
-def layout(nodes, group_of, info):
-    """Inputs and Models across the top, then one row per stage: the hand-off
-    column on the left, the stage group to its right, laid out by depth."""
+def layout(nodes, group_of, handoff, pickers):
+    """Inputs and Models across the top, the Stage inputs row under them, then
+    one row per stage: the hand-off column on the left, the stage group to its
+    right, laid out by depth."""
     by_group = {}
     for n in nodes:
         by_group.setdefault(group_of.get(str(n["id"]), ""), []).append(n)
@@ -645,6 +797,10 @@ def layout(nodes, group_of, info):
         p["size"] = [620, 300]
         p["pos"] = [px, py]
         py += 300 + GAP
+    for n in [n for n in inputs if n["type"] == "PrimitiveInt"]:
+        n["size"] = [620, 80]
+        n["pos"] = [px, py]
+        py += 80 + GAP
     panel[0]["pos"] = [px + 620 + GAP, y + 60]
     inputs_right = px + 620 + GAP + panel[0]["size"][0] + GAP
     inputs_bottom = max(y + 60 + readme[0]["size"][1], py, y + 60 + panel[0]["size"][1])
@@ -655,8 +811,25 @@ def layout(nodes, group_of, info):
         "Models (shared by the Qwen stages; a loader only runs for a stage that is on)",
         by_group["models"], "#444", inputs_right + GAP, y)
 
-    # One row per stage.
-    y = max(inputs_bottom + GAP, models_bottom) + 2 * GAP
+    # Second row: the pickers, one per switch, in stage order.  An image
+    # picker is sized for its preview; a path box is one line.
+    y = max(inputs_bottom + GAP, models_bottom) + GAP
+    px = x + GAP
+    for n in pickers:
+        n["pos"] = [px, y + 60]
+        n["size"] = [400, 420 if n["type"] == "LoadImageOutput" else 110]
+        px += 400 + GAP
+    groups.append({"id": len(groups) + 1,
+                   "title": "Stage inputs: each is read when its stage is on and "
+                            "no stage above it is on, and muted otherwise",
+                   "color": "#3f789e",
+                   "bounding": [x, y, px - x, 60 + 420 + GAP],
+                   "font_size": 24, "flags": {}})
+    y += 60 + 420 + GAP
+
+    # One row per stage.  The hand-off column holds the switch and the relays
+    # of every switch this stage is the first to read.
+    y += 2 * GAP
     placed = set()
     for s in STAGES:
         row_top = y
@@ -668,14 +841,9 @@ def layout(nodes, group_of, info):
                 continue
             placed.add(key)
             hy = row_top + 60
-            order = ["LoadImageOutput", "PrimitiveString", SWITCH,
-                     "Mute / Bypass Relay (rgthree)", "Mute / Bypass Repeater (rgthree)"]
-            members = sorted(by_group["handoff:" + key],
-                             key=lambda n: order.index(n["type"]))
-            for n in members:
+            for n in handoff[key]:
                 n["pos"] = [HANDOFF_X + GAP, hy]
-                if n["type"] != "LoadImageOutput":
-                    n["size"][0] = max(n["size"][0], 400)
+                n["size"][0] = max(n["size"][0], 400)
                 hy += height_of(n) + GAP
             handoff_bottom = max(handoff_bottom, hy)
         colour = "#8A8" if s.get("on") else "#3f789e"
@@ -741,8 +909,8 @@ def main():
     args = ap.parse_args()
 
     info = api_to_ui.object_info()
-    api, group_of, title, switch_id, picker_id, result = build(info)
-    ui = to_ui(api, group_of, title, switch_id, picker_id, result, info)
+    api, group_of, title, wiring = build(info)
+    ui = to_ui(api, group_of, title, wiring, info)
     text = json.dumps(ui, indent=1)
 
     out = pathlib.Path(args.out)

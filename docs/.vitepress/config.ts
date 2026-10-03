@@ -126,6 +126,7 @@ export default defineConfig({
             { text: 'Character asset costs', link: '/reference/character-assets' },
             { text: 'Hair and beard meshes', link: '/reference/hair-meshes' },
             { text: 'Video to 3D motion', link: '/reference/video-mocap' },
+            { text: 'Animation sources', link: '/reference/animation-sources' },
           ],
         },
       ],

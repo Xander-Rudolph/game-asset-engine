@@ -59,6 +59,7 @@ means it is silently reverted next time anyone runs the builder.
 | `mesh_render_sprites.json` | Mesh to 8 facings, unlit. Silhouette check |
 | `mesh_rig_unirig.json` | Mesh to skeleton and skin, out as FBX |
 | `rig_apply_animation.json` | Rigged FBX plus a clip, out as animated FBX |
+| `img2video_wan22.json` | Image to five seconds of video with Wan 2.2, 14B, two fp8 experts, at 480x640 and 20 steps, the settings that ran on the 16 GB reference card on 2026-10-02 in 604.7 s. The 4-step LoRAs sit in the graph at strength 0, because at strength 1 that card ran out of memory. Apache-2.0. Needs the `wan_i2v` weight group. Makes a video, not a clip for a rig: see [Video to 3D motion](/reference/video-mocap) |
 | `txt2music_acestep15.json` | Caption to an instrumental music track with ACE-Step 1.5 turbo, saved as FLAC. MIT, and the model card allows commercial use of the music. Needs the `music` weight group. [Details](/guide/music) |
 
 ## Running one
@@ -157,9 +158,11 @@ are built for the editor and lean on node packs that do their work in the
 browser: rgthree's stage panels, relays and switches, and Use Everywhere.
 
 - `asset_workflow.json` joins the base graphs above into one pipeline, from a
-  prompt to a turntable, with a panel that switches stages on and off and a
-  picker per stage for running one step on its own. `scripts/build_asset_workflow.py`
-  builds it from the base graphs, so edit those, not it.
+  prompt to a rig and a video, with a panel that switches stages on and off, a
+  row of pickers at the top, one per stage, for picking a run up at any stage,
+  and a pause after each image stage to choose which of its takes carries on.
+  `scripts/build_asset_workflow.py` builds it from the base graphs, so edit
+  those, not it.
 - `complete_workflow.json` is the owner's image and video graph on the Rapid AIO
   merge and Wan 2.2, and the one editor graph that is built by hand. Its weights
   are the `qwen_rapid` and `wan_i2v` groups. Some of those weights, and its Pose

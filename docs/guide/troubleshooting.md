@@ -124,6 +124,11 @@ Copy your mesh over a filename that is already on the list and load through that
 The node reads the file at run time, so the contents are yours even though the
 name is not.
 
+Or wire the path in. A `file_path` fed by another node, such as a string
+primitive holding `/app/output/mesh/name.glb`, is not checked against the list,
+and the node takes an absolute container path as it is. The Rig stage of
+[the pipeline graph](/guide/asset-workflow) works that way (run 2026-10-02).
+
 ## Anything using sparse convolution dies with "type not registered yet"
 
 The full error names nothing you could usefully search for:

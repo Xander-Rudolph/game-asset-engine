@@ -27,6 +27,10 @@ capability comes from other people's work. Here is whose.
 - **[cg-use-everywhere](https://github.com/chrisgoringe/cg-use-everywhere)** by
   chrisgoringe. Apache-2.0. Sends one model, CLIP and VAE to every node that
   needs them.
+- **[cg-image-filter](https://github.com/chrisgoringe/cg-image-filter)** by
+  chrisgoringe. Apache-2.0. Pauses a queue while you pick the take to carry on
+  with. Added for a pick step between the stages of `asset_workflow.json`,
+  which is not built yet.
 - **[comfyui_controlnet_aux](https://github.com/Fannovel16/comfyui_controlnet_aux)**
   by Fannovel16. Apache-2.0 for the pack. The DWPose code it vendors carries
   CMU's non-commercial OpenPose licence, covered in the licensing guide. It draws

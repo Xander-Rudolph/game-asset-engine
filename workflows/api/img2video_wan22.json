@@ -1,0 +1,302 @@
+{
+  "_comment": "Wan 2.2 image-to-video, 14B, the two-expert fp8 route complete_workflow.json runs: the high-noise expert takes the first steps, the low-noise expert the rest, both on the 2.1 VAE. The start image is squeezed to width x height, so 480x640 keeps the 3:4 of a 1104x1472 concept. 81 frames at 16 fps is five seconds. The defaults are what ran on the reference 16 GB card on 2026-10-02: 480x640, 20 steps, cfg 3.5, split at step 10, with the lightx2v 4-step LoRAs (Apache-2.0, in the wan_i2v group) present but at strength 0, which the server skips (nodes.py, load_lora: strength 0 returns the model unchanged). That run took 604.7 s on ComfyUI's own clock, VRAM peaked at 14,876 MiB, and the expert sat only partly on the card: 9,259 MB loaded, 4,372 MB offloaded, in the server log. With the LoRAs at strength 1 (then set both samplers to 4 steps, cfg 1, split at step 2) the same card ran out of GPU memory four times that day: at 624x832 in the forward pass, and at 480x640 while merging the LoRA into the fp8 weights, which needs float copies of each weight on the card. 624x832 without the LoRAs was not tried. Saves a WEBM and an animated WEBP under output/video/, and the last frame as a PNG. Nothing here extracts motion from the video: docs/reference/video-mocap.md is the state of that.",
+  "1": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "example.png"
+    },
+    "_meta": {
+      "title": "Start Frame"
+    }
+  },
+  "2": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "type": "wan",
+      "device": "default"
+    },
+    "_meta": {
+      "title": "umT5 Text Encoder"
+    }
+  },
+  "3": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors",
+      "weight_dtype": "default"
+    },
+    "_meta": {
+      "title": "High-noise Expert"
+    }
+  },
+  "4": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors",
+      "weight_dtype": "default"
+    },
+    "_meta": {
+      "title": "Low-noise Expert"
+    }
+  },
+  "5": {
+    "class_type": "LoraLoaderModelOnly",
+    "inputs": {
+      "model": [
+        "3",
+        0
+      ],
+      "lora_name": "wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors",
+      "strength_model": 0.0
+    },
+    "_meta": {
+      "title": "4-step LoRA, high (off at 0)"
+    }
+  },
+  "6": {
+    "class_type": "LoraLoaderModelOnly",
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "lora_name": "wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors",
+      "strength_model": 0.0
+    },
+    "_meta": {
+      "title": "4-step LoRA, low (off at 0)"
+    }
+  },
+  "7": {
+    "class_type": "ModelSamplingSD3",
+    "inputs": {
+      "model": [
+        "5",
+        0
+      ],
+      "shift": 8.0
+    },
+    "_meta": {
+      "title": "Shift, high"
+    }
+  },
+  "8": {
+    "class_type": "ModelSamplingSD3",
+    "inputs": {
+      "model": [
+        "6",
+        0
+      ],
+      "shift": 8.0
+    },
+    "_meta": {
+      "title": "Shift, low"
+    }
+  },
+  "9": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "wan_2.1_vae.safetensors"
+    },
+    "_meta": {
+      "title": "Wan 2.1 VAE"
+    }
+  },
+  "10": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "2",
+        0
+      ],
+      "text": "The weathered stone golem walks slowly on the spot, lifting each foot in turn and swinging its arms, the whole figure staying in frame from head to feet. The camera is fixed and the plain grey background does not change."
+    },
+    "_meta": {
+      "title": "Positive"
+    }
+  },
+  "11": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "2",
+        0
+      ],
+      "text": "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走"
+    },
+    "_meta": {
+      "title": "Negative"
+    }
+  },
+  "12": {
+    "class_type": "WanImageToVideo",
+    "inputs": {
+      "positive": [
+        "10",
+        0
+      ],
+      "negative": [
+        "11",
+        0
+      ],
+      "vae": [
+        "9",
+        0
+      ],
+      "start_image": [
+        "1",
+        0
+      ],
+      "width": 480,
+      "height": 640,
+      "length": 81,
+      "batch_size": 1
+    },
+    "_meta": {
+      "title": "Image To Video"
+    }
+  },
+  "13": {
+    "class_type": "KSamplerAdvanced",
+    "inputs": {
+      "model": [
+        "7",
+        0
+      ],
+      "positive": [
+        "12",
+        0
+      ],
+      "negative": [
+        "12",
+        1
+      ],
+      "latent_image": [
+        "12",
+        2
+      ],
+      "add_noise": "enable",
+      "noise_seed": 0,
+      "steps": 20,
+      "cfg": 3.5,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "start_at_step": 0,
+      "end_at_step": 10,
+      "return_with_leftover_noise": "enable"
+    },
+    "_meta": {
+      "title": "Sampler, high"
+    }
+  },
+  "14": {
+    "class_type": "KSamplerAdvanced",
+    "inputs": {
+      "model": [
+        "8",
+        0
+      ],
+      "positive": [
+        "12",
+        0
+      ],
+      "negative": [
+        "12",
+        1
+      ],
+      "latent_image": [
+        "13",
+        0
+      ],
+      "add_noise": "disable",
+      "noise_seed": 0,
+      "steps": 20,
+      "cfg": 3.5,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "start_at_step": 10,
+      "end_at_step": 10000,
+      "return_with_leftover_noise": "disable"
+    },
+    "_meta": {
+      "title": "Sampler, low"
+    }
+  },
+  "15": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "14",
+        0
+      ],
+      "vae": [
+        "9",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Decode"
+    }
+  },
+  "16": {
+    "class_type": "SaveWEBM",
+    "inputs": {
+      "images": [
+        "15",
+        0
+      ],
+      "filename_prefix": "video/wan22",
+      "codec": "vp9",
+      "fps": 16.0,
+      "crf": 13.33
+    },
+    "_meta": {
+      "title": "Save Video"
+    }
+  },
+  "17": {
+    "class_type": "SaveAnimatedWEBP",
+    "inputs": {
+      "images": [
+        "15",
+        0
+      ],
+      "filename_prefix": "video/wan22",
+      "fps": 16.0,
+      "lossless": false,
+      "quality": 80,
+      "method": "default"
+    },
+    "_meta": {
+      "title": "Save Preview"
+    }
+  },
+  "18": {
+    "class_type": "ImageFromBatch",
+    "inputs": {
+      "image": [
+        "15",
+        0
+      ],
+      "batch_index": 80,
+      "length": 1
+    },
+    "_meta": {
+      "title": "Last Frame"
+    }
+  },
+  "19": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "18",
+        0
+      ],
+      "filename_prefix": "video/wan22_last"
+    },
+    "_meta": {
+      "title": "Save Last Frame"
+    }
+  }
+}
