@@ -40,7 +40,7 @@ retargeting, so it needs a rig made with the `mixamo` template. The
 `articulationxl` rigs this repo makes by default name their bones `bone_N`, and
 the node refuses them: applying Capoeira to `output/rigged/unit_warrior.fbx` on
 2026-09-30 stopped with "Model does not have mixamorig: bone names!".
-[Video to 3D motion](/reference/video-mocap) covers the retarget that would close
+[Animation sources](/reference/animation-sources) covers the clip libraries and retargeters read for that gap, and [Video to 3D motion](/reference/video-mocap) covers the retarget that would close
 that gap.
 
 On a `mixamo`-template rig, download the cycles you want as FBX for Unity, drop

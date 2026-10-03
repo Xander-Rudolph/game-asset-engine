@@ -1,22 +1,22 @@
 {
  "note": "docs/reference/video-mocap.md",
  "researched": "2026-09-30",
- "checked": "2026-09-30",
+ "checked": "2026-09-30 to 2026-10-02",
  "statuses": {
-  "confirmed": 22,
-  "corrected": 3,
-  "unchecked": 3,
+  "corrected": 8,
+  "confirmed": 17,
   "unsettled": 1,
-  "unverifiable": 2
+  "unverifiable": 2,
+  "unchecked": 3
  },
  "conflicts_found": [],
  "claims": [
   {
    "id": "VMC-001",
-   "status": "confirmed",
+   "status": "corrected",
    "kind": "licence",
    "load_bearing": true,
-   "claim": "As of 2026-09-30, WHAM's code (github.com/yohanshin/WHAM at 2b54f77, 2024-04-18) is under the MIT licence, Copyright (c) 2023 Soyong Shin; LICENSE has one commit, 2023-12-08. The code does not cover the SMPL body model, which WHAM's README says to download after registering at smpl.is.tue.mpg.de and smplify.is.tue.mpg.de, or its person detector, which it loads through Ultralytics (`from ultralytics import YOLO` in lib/models/preproc/detector.py, yolov8x.pt). No separate licence for WHAM's own checkpoints was found.",
+   "claim": "As of 2026-10-02, WHAM's root LICENSE (github.com/yohanshin/WHAM at 2b54f77, 2024-04-18, still the head of main) is the MIT licence, Copyright (c) 2023 Soyong Shin; LICENSE has one commit, 5fefe86, 2023-12-08. The root grant does not cover everything in the tree: lib/utils/utils.py and lib/core/trainer.py open with the Max Planck header \"You can only use this computer program if you have closed a license agreement with MPG or you get the right to use the computer program from someone who is authorized to grant you that right. Any use of the computer program without a valid license is prohibited and liable to prosecution.\" (Copyright©2019 MPG, contact ps-license@tuebingen.mpg.de); they are imported by train.py and lib/eval/evaluate_rich.py, not by demo.py. lib/utils/transforms.py, which demo.py imports, is \"mainly borrowed from PyTorch3D\" and reads \"Copyright (c) Meta Platforms, Inc. and affiliates. All rights reserved. This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.\", a file WHAM's tree does not carry. lib/eval/eval_utils.py borrows from akanazawa/human_dynamics (\"Adhere to their licence to use these functions\"). The README says \"The base implementation is largely borrowed from VIBE and TCMR\". The code does not cover the SMPL body model, which the README says to download after registering at smpl.is.tue.mpg.de and smplify.is.tue.mpg.de, or its person detector, which it loads through Ultralytics (`from ultralytics import YOLO` in lib/models/preproc/detector.py, yolov8x.pt; `ultralytics` in requirements.txt). fetch_demo_data.sh fetches wham_vit_w_3dpw.pth.tar, wham_vit_bedlam_w_3dpw.pth.tar, hmr2a.ckpt, dpvo.pth and yolov8x.pt from Google Drive; no separate licence for WHAM's own checkpoints was found.",
    "sources": [
     "https://github.com/yohanshin/WHAM/blob/2b54f7797391c94876848b905ed875b154c4a295/LICENSE",
     "https://github.com/yohanshin/WHAM/blob/2b54f7797391c94876848b905ed875b154c4a295/README.md",
@@ -38,6 +38,20 @@
      "read": "https://api.github.com/repos/yohanshin/WHAM/commits?path=LICENSE",
      "evidence": "One commit touches LICENSE (5fefe86, 2023-12-08); the repository's last push is 2024-04-18.",
      "notes": "Conflation checked: the MIT grant is on the code; SMPL, the YOLO detector and the checkpoints are kept apart in the claim."
+    },
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "Raw LICENSE, README.md, lib/models/preproc/detector.py and requirements.txt at 2b54f77 on 2026-10-02, plus the rest of the tree in a blobless clone at the same head.",
+     "evidence": "LICENSE: \"MIT License\" / \"Copyright (c) 2023 Soyong Shin\" / \"Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \\\"Software\\\"), to deal in the Software without restriction\". README line 24: \"To download SMPL body models (Neutral, Female, and Male), you need to register for [SMPL](https://smpl.is.tue.mpg.de/) and [SMPLify](https://smplify.is.tue.mpg.de/).\" detector.py line 13: \"from ultralytics import YOLO\"; lines 39-40: \"bbox_model_ckpt = osp.join(ROOT_DIR, 'checkpoints', 'yolov8x.pt')\" / \"self.bbox_model = YOLO(bbox_model_ckpt)\". requirements.txt line 20: \"ultralytics\". README's only licence line: \"Please see [License](./LICENSE) for details.\" Refuted in part on the code layer: lib/utils/utils.py and lib/core/trainer.py open with \"Max-Planck-Gesellschaft zur Förderung der Wissenschaften e.V. (MPG) is holder of all proprietary rights on this computer program. You can only use this computer program if you have closed a license agreement with MPG or you get the right to use the computer program from someone who is authorized to grant you that right. Any use of the computer program without a valid license is prohibited and liable to prosecution.\" / \"Copyright©2019 Max-Planck-Gesellschaft zur Förderung der Wissenschaften e.V. (MPG). acting on behalf of its Max Planck Institute for Intelligent Systems. All rights reserved.\" / \"Contact: ps-license@tuebingen.mpg.de\". lib/utils/transforms.py: \"This transforms function is mainly borrowed from PyTorch3D\" / \"Copyright (c) Meta Platforms, Inc. and affiliates. All rights reserved.\" / \"This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.\" (WHAM's root LICENSE is MIT; no BSD-style file is in the tree). lib/eval/eval_utils.py: \"Some functions are borrowed from https://github.com/akanazawa/human_dynamics/blob/master/src/evaluation/eval_util.py\" / \"Adhere to their licence to use these functions\".",
+     "notes": "Re-checked 2026-10-02. Every clause the register quotes still appears as quoted. The claim says more than the pages do when it calls \"WHAM's code\" MIT: two files carry the MPG proprietary header and one carries a Meta BSD-style notice whose licence file is absent. Import trace: lib.utils.utils is imported only by train.py and lib/eval/evaluate_rich.py, lib.core.trainer only by train.py, so neither is on the demo path; lib.utils.transforms is imported by demo.py (line 17) and lib/models/wham.py. README line 94: \"The base implementation is largely borrowed from [VIBE](https://github.com/mkocabas/VIBE) and [TCMR](https://github.com/hongsukchoi/TCMR_RELEASE).\" fetch_demo_data.sh fetches wham_vit_w_3dpw.pth.tar, wham_vit_bedlam_w_3dpw.pth.tar, hmr2a.ckpt, dpvo.pth and yolov8x.pt from Google Drive, with no licence text for any of them; \"No separate licence for WHAM's own checkpoints was found\" still holds."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "api.github.com/repos/yohanshin/WHAM/commits?path=LICENSE, api.github.com/repos/yohanshin/WHAM, git log in the blobless clone, and the Wayback CDX index for github.com/yohanshin/WHAM/blob/main/LICENSE.",
+     "evidence": "LICENSE has one commit, 5fefe86, 2023-12-08T09:17:55Z, \"Initial commit\". Head of main is 2b54f77, 2024-04-18T19:21:17Z (\"Merge pull request #85 from yohanshin/train\"); pushed_at 2024-04-18T19:21:17Z, so nothing has been pushed since the claim's pinned commit. GitHub's detected licence is MIT (metadata only). Wayback CDX lists no capture of the LICENSE page in 2025 or 2026, so there is no 2026-09-30 capture to compare; a pinned-commit raw file cannot change.",
+     "notes": "Re-checked 2026-10-02. No page changed since 2026-09-30. The correction comes from files the first reading did not open (the MPG-headed utils.py and trainer.py and the PyTorch3D-derived transforms.py), not from drift. Conflation check: the root MIT grant, the MPG-headed files, the Meta-headed file, SMPL, the YOLO detector and the checkpoints are all kept apart in the corrected wording."
     }
    ]
   },
@@ -68,15 +82,29 @@
      "read": "https://api.github.com/repos/zju3dv/GVHMR/commits?path=LICENSE",
      "evidence": "Three commits touch LICENSE: cb702cd (2024-09-04, \"Code release\"), a2dc45f (2026-09-15, \"Adopt Project Registration License v1.0\") and ee960bb (2026-09-15, the revert). The a2dc45f text read: \"Use of the Software by a company, organization, or other entity as part of any internal or external product ... is permitted free of charge, provided that the Project Use is registered before such use begins.\"",
      "notes": "Drift found and recorded: the licence changed twice on one day, fifteen days before this reading. The claim states the current text and the reverted one apart."
+    },
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "Raw LICENSE at ee960bb, at a2dc45f and on main, docs/INSTALL.md and hmr4d/utils/preproc/tracker.py at ee960bb, README.md at ee960bb, and tools/demo/demo.py in the clone, all on 2026-10-02.",
+     "evidence": "LICENSE at ee960bb (byte-identical to main): \"Permission to use, copy, modify and distribute this software and its documentation for educational, research and non-profit purposes only. Any modification based on this work must be open-source and prohibited for commercial use.\" / \"For commercial uses of this software, please send email to xwzhou@zju.edu.cn\" (the raw file wraps these across lines with trailing spaces; the words are as quoted). LICENSE at a2dc45f: \"# Project Registration License (PRL) v1.0\" / \"Use of the Software by a company, organization, or other entity as part of any internal or external product, service, system, application, development project, or other organizational project (\\\"Project Use\\\") is permitted free of charge, provided that the Project Use is registered before such use begins.\" / \"This requirement applies regardless of whether the project: - is commercial or non-commercial;\" / \"Registration shall be submitted through: https://docs.google.com/forms/d/e/1FAIpQLSff5QjjANlJ2hnXYqBSAzKWxEM58gIxPLh17-t3j3-MqO1a5w/viewform\". INSTALL.md line 40: \"You need to sign up for downloading [SMPL](https://smpl.is.tue.mpg.de/) and [SMPLX](https://smpl-x.is.tue.mpg.de/).\" tracker.py line 1: \"from ultralytics import YOLO\"; line 22: \"self.yolo = YOLO(PROJ_ROOT / \\\"inputs/checkpoints/yolo/yolov8x.pt\\\")\"; tools/demo/demo.py line 23 imports Tracker and line 109 reads \"tracker = Tracker()\".",
+     "notes": "Re-checked 2026-10-02. The claim says no more than the pages do. Checkpoint layer, not covered by the claim: INSTALL.md line 48 reads \"Download other pretrained models from Google-Drive (By downloading, you agree to the corresponding licences)\" and names no licence, so GVHMR's own checkpoints have a licence stated only as that. README.md has no licence line. Inner headers found in the tree, none more restrictive than the root text: hmr4d/utils/geo/quaternion.py \"Copyright (c) 2018-present, Facebook, Inc. All rights reserved. This source code is licensed under the license found in the LICENSE file in the root directory of this source tree.\" (the root file in GVHMR's tree is the ZJU text); hmr4d/utils/body_model/utils.py \"From https://github.com/vchoutas/smplify-x/blob/master/smplifyx/utils.py\" / \"Please see license for usage restrictions.\"; the vitpose heads \"Original Licence: MIT License\". GitHub's detected licence is NOASSERTION (metadata only)."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "api.github.com/repos/zju3dv/GVHMR/commits?path=LICENSE, api.github.com/repos/zju3dv/GVHMR, git log and git show --stat in the blobless clone, diff of main LICENSE against ee960bb, and the Wayback CDX index for both GitHub pages.",
+     "evidence": "Three commits touch LICENSE: cb702cd 2024-09-04T07:09:48Z \"Code release\", a2dc45f 2026-09-15T07:34:02Z \"Adopt Project Registration License v1.0\" (LICENSE only, 58 insertions, 16 deletions) and ee960bb 2026-09-15T07:44:58Z \"Revert \\\"Adopt Project Registration License v1.0\\\"\" (LICENSE only, the reverse; body \"This reverts commit a2dc45f89ec1e21c752be970b7f6a98bffa9234c.\"). ee960bb is still the head of main; pushed_at 2026-09-15T07:45:53Z; main's LICENSE is byte-identical to ee960bb. Wayback CDX lists no capture of blob/main/LICENSE or commits/main/LICENSE in 2025 or 2026.",
+     "notes": "Re-checked 2026-10-02. No change since 2026-09-30: the licence has not moved since the same-day revert of 2026-09-15. The register's commits/main/LICENSE source was read through the API and the clone's history rather than the HTML page, as the task prefers."
     }
    ]
   },
   {
    "id": "VMC-003",
-   "status": "confirmed",
+   "status": "corrected",
    "kind": "licence",
    "load_bearing": true,
-   "claim": "As of 2026-09-30, TRAM's code (github.com/yufu-wang/tram at 4861c11, 2025-06-08) is under the MIT licence, Copyright (c) 2024 Yufu Wang. Its pipeline needs SMPL (register at smplify.is.tue.mpg.de and smpl.is.tue.mpg.de) and includes DEVA-Track-Anything, whose LICENSE.md is Creative Commons Attribution-NonCommercial-ShareAlike 4.0, as well as DROID-SLAM (BSD-3-Clause), Detectron2 (Apache-2.0), Segment-Anything and ZoeDepth (MIT).",
+   "claim": "As of 2026-10-02, TRAM's root LICENSE (github.com/yufu-wang/tram at 4861c11, 2025-06-08, still the head of main) is the MIT licence, Copyright (c) 2024 Yufu Wang; LICENSE has one commit, 541b474, 2024-04-23. Its pipeline needs SMPL (register at smplify.is.tue.mpg.de and smpl.is.tue.mpg.de; the README adds \"Note that thirdparty models have their own licenses.\") and the tree carries code under other terms: DEVA-Track-Anything as a submodule pinned at 3911986 (2024-04-13), whose LICENSE.md is Creative Commons Attribution-NonCommercial-ShareAlike 4.0 (identical at DEVA's head 404a112); a vendored, modified copy of DROID-SLAM (thirdparty/DROID-SLAM/LICENSE: BSD 3-Clause, Copyright (c) 2021, Princeton Vision & Learning Lab); and thirdparty/camcalib (model.py, cam_utils.py, camcalib_demo.py) and lib/datasets/coco_occlusion.py, which open with the Max Planck header \"You can only use this computer program if you have closed a license agreement with MPG or you get the right to use the computer program from someone who is authorized to grant you that right. Any use of the computer program without a valid license is prohibited and liable to prosecution.\" (Copyright©2019 MPG, contact ps-license@tuebingen.mpg.de). camcalib is on the demo path (scripts/estimate_camera.py imports align_cam_to_world from lib/camera, whose est_gravity.py imports thirdparty.camcalib.model and loads data/pretrain/camcalib_sa_biased_l2.ckpt), coco_occlusion.py is on the training path, and the README names neither. install.sh installs Detectron2 from git at a59f056 (Apache-2.0) and the PyPI package segment_anything 1.0 (uploaded 2023-04-06; no licence, author or home page in its metadata; its wheel ships an Apache-2.0 LICENSE, and facebookresearch/segment-anything's LICENSE is Apache-2.0, not MIT). lib/camera/masked_droid_slam.py loads ZoeDepth (MIT, Copyright (c) 2022 Intelligent Systems Lab Org; repository archived 2025-05-05) and its ZoeD_N weights through torch.hub at run time. scripts/download_models.sh fetches DEVA-propagation.pth from DEVA's GitHub releases, sam_vit_h_4b8939.pth from dl.fbaipublicfiles.com, and droid.pth, camcalib_sa_biased_l2.ckpt and TRAM's own vimo_checkpoint.pth.tar from Google Drive; no separate licence for TRAM's own checkpoint was found.",
    "sources": [
     "https://github.com/yufu-wang/tram/blob/4861c112f3c148201326680a50c9199650da6088/LICENSE",
     "https://github.com/yufu-wang/tram/blob/4861c112f3c148201326680a50c9199650da6088/README.md",
@@ -98,15 +126,29 @@
      "read": "https://api.github.com/repos/yufu-wang/tram/commits?path=LICENSE",
      "evidence": "TRAM LICENSE: one commit, 541b474, 2024-04-23. DEVA LICENSE.md: one commit, b582a42, 2023-09-06.",
      "notes": "Conflation checked: TRAM's own code and the vendored tracker carry different licences; the claim keeps them apart."
+    },
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "Raw LICENSE, README.md, .gitmodules, install.sh, scripts/download_models.sh and thirdparty/DROID-SLAM/LICENSE at 4861c11; DEVA LICENSE.md at 404a112, at 3911986 and on main; the segment-anything, detectron2 (at a59f056), DROID-SLAM and ZoeDepth licence files; the PyPI segment_anything 1.0 wheel; and the TRAM tree in a blobless clone, all on 2026-10-02.",
+     "evidence": "Holds: TRAM LICENSE \"MIT License\" / \"Copyright (c) 2024 Yufu Wang\". README line 36: \"Register at [SMPLify](https://smplify.is.tue.mpg.de) and [SMPL](https://smpl.is.tue.mpg.de), whose usernames and passwords will be used by our script to download the SMPL models.\" / \"Note that thirdparty models have their own licenses.\" README line 102: \"the pipeline includes [Detectron2](https://github.com/facebookresearch/detectron2), [Segment-Anything](https://github.com/facebookresearch/segment-anything), and [DEVA-Track-Anything](https://github.com/hkchengrex/Tracking-Anything-with-DEVA).\" DEVA LICENSE.md, identical at 404a112, at TRAM's submodule pin 3911986 and on main: \"This work is licensed under a <a rel=\\\"license\\\" href=\\\"http://creativecommons.org/licenses/by-nc-sa/4.0/\\\">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.\" thirdparty/DROID-SLAM/LICENSE in TRAM's tree: \"BSD 3-Clause License\" / \"Copyright (c) 2021, Princeton Vision & Learning Lab\". detectron2 LICENSE at a59f056: \"Apache License\" / \"Version 2.0, January 2004\". ZoeDepth LICENSE: \"MIT License\" / \"Copyright (c) 2022 Intelligent Systems Lab Org\". Refuted: facebookresearch/segment-anything LICENSE opens \"Apache License\" / \"Version 2.0, January 2004\" / \"http://www.apache.org/licenses/\" (201 lines, the Apache text, no MIT text anywhere), and the PyPI wheel segment_anything-1.0 that install.sh installs (\"pip install segment_anything\") ships dist-info/LICENSE with the same Apache text while its METADATA carries no licence, author, summary or home page; so \"Segment-Anything ... (MIT)\" is wrong. Also left out: thirdparty/camcalib/model.py, cam_utils.py and camcalib_demo.py, and lib/datasets/coco_occlusion.py, open with \"Max-Planck-Gesellschaft zur Förderung der Wissenschaften e.V. (MPG) is holder of all proprietary rights on this computer program. You can only use this computer program if you have closed a license agreement with MPG or you get the right to use the computer program from someone who is authorized to grant you that right. Any use of the computer program without a valid license is prohibited and liable to prosecution.\" / \"Copyright©2019 Max-Planck-Gesellschaft zur Förderung der Wissenschaften e.V. (MPG). acting on behalf of its Max Planck Institute for Intelligent Systems. All rights reserved.\" / \"Contact: ps-license@tuebingen.mpg.de\".",
+     "notes": "Re-checked 2026-10-02. camcalib is on the demo path: README step 1 runs scripts/estimate_camera.py, which imports align_cam_to_world from lib.camera; lib/camera/__init__.py takes it from est_gravity.py, which imports thirdparty.camcalib.model.CameraRegressorNetwork and loads data/pretrain/camcalib_sa_biased_l2.ckpt. coco_occlusion.py is imported by lib/datasets/video_dataset.py (training). TRAM's README names neither camcalib nor its origin; thirdparty/camcalib was added by commit 6e2cc47 (2025-02-13, \"improve gravity/floor\"). The .gitmodules lists only DEVA, lietorch and eigen; DROID-SLAM is a modified copy inside TRAM's tree (README: \"In this project, DROID is modified to support masking.\"). ZoeDepth is not installed: lib/camera/masked_droid_slam.py calls torch.hub.load(\"isl-org/ZoeDepth\", \"ZoeD_N\", pretrained=True), which pulls the code and the ZoeD_M12_N.pt weights from github.com/isl-org/ZoeDepth/releases at run time. download_models.sh fetches DEVA-propagation.pth from DEVA's GitHub releases, sam_vit_h_4b8939.pth from dl.fbaipublicfiles.com, droid.pth and camcalib_sa_biased_l2.ckpt from Google Drive, and TRAM's own vimo_checkpoint.pth.tar from Google Drive. The register's DEVA source is 404a112 (DEVA's head, 2025-04-26); TRAM pins 3911986 (2024-04-13); the licence file is identical at both."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "api.github.com/repos/yufu-wang/tram/commits?path=LICENSE, api.github.com/repos/yufu-wang/tram, git log on each licence file in the blobless clones of tram, Tracking-Anything-with-DEVA, segment-anything, ZoeDepth and DROID-SLAM, and the Wayback CDX index for the TRAM and DEVA licence pages.",
+     "evidence": "TRAM LICENSE: one commit, 541b474, 2024-04-23T18:44:54Z, \"Create LICENSE\"; head of main still 4861c11, 2025-06-08T19:30:23Z, pushed_at the same. DEVA LICENSE.md: one commit, b582a42, 2023-09-05T20:48:56-05:00 (2023-09-06 UTC), \"Update and rename LICENSE to LICENSE.md\", which deleted a 674-line GNU GENERAL PUBLIC LICENSE Version 3 file and added the CC BY-NC-SA text; no change since; DEVA head 404a112, 2025-04-26. segment-anything LICENSE: one commit, 5717941, 2023-04-04, \"Initial commit\"; head dca509f, 2024-09-18. ZoeDepth LICENSE: one commit, 5a3cb08, 2022-11-14; head d87f17b, 2025-05-05, \"Archiving Notice\". DROID-SLAM LICENSE: one commit, 28d0016, 2021-08-24. Wayback CDX lists no capture at all of the TRAM or DEVA licence pages, so there is no 2026-09-30 capture to compare; pinned-commit raw files cannot change.",
+     "notes": "Re-checked 2026-10-02. No page changed since 2026-09-30. Segment-Anything has been Apache-2.0 since the repository's first commit, so the register's MIT reading was wrong on 2026-09-30 too, not drift. Conflation check: the corrected wording keeps TRAM's own MIT code, the CC BY-NC-SA submodule, the vendored BSD copy, the MPG-headed vendored code, the pip-installed Apache packages, the hub-loaded MIT code and weights, and each checkpoint source apart."
     }
    ]
   },
   {
    "id": "VMC-004",
-   "status": "confirmed",
+   "status": "corrected",
    "kind": "licence",
    "load_bearing": true,
-   "claim": "As of 2026-09-30, 4D-Humans (HMR 2.0) code (github.com/shubham-goel/4D-Humans at efe18de, 2026-02-07) is under the MIT licence, Copyright (c) 2023 UC Regents, Shubham Goel. Its demo needs the SMPL neutral model from smplify.is.tue.mpg.de, runs ViTDet through Detectron2, and tracks with PHALP, whose LICENSE says \"This code base itself is MIT, but please follow the license for SMPL.\" Its tracker writes \"a .pkl file containing the tracklets with 3D pose and shape\". No separate licence for the HMR 2.0 checkpoints was found.",
+   "claim": "As of 2026-10-02, 4D-Humans (HMR 2.0) root LICENSE.md (github.com/shubham-goel/4D-Humans at efe18de, 2026-02-07, still the head of main) is the MIT licence, Copyright (c) 2023 UC Regents, Shubham Goel; it has one commit, b2750b8, 2023-06-06, and is the only licence text in the repository. hmr2/models/backbones/vit.py, the ViT backbone the demo runs, and hmr2/utils/pck_accuracy.py open with \"# Copyright (c) OpenMMLab. All rights reserved.\" and state no licence of their own. Its demo needs the SMPL neutral model from smplify.is.tue.mpg.de, runs ViTDet through Detectron2 (demo.py loads cascade_mask_rcnn_vitdet_h_75ep.py through detectron2.config.LazyConfig), and tracks with PHALP (track.py imports phalp.trackers.PHALP), whose LICENSE at 96f7e6c, PHALP's master head, says \"This code base itself is MIT, but please follow the license for SMPL.\" and has read so since 2022-03-12. Its tracker writes \"a .pkl file containing the tracklets with 3D pose and shape\". The HMR 2.0 checkpoints are fetched from https://www.cs.utexas.edu/~pavlakos/4dhumans/hmr2_data.tar.gz; no separate licence for them was found.",
    "sources": [
     "https://github.com/shubham-goel/4D-Humans/blob/efe18deff163b29dff87ddbd575fa29b716a356c/LICENSE.md",
     "https://github.com/shubham-goel/4D-Humans/blob/efe18deff163b29dff87ddbd575fa29b716a356c/README.md",
@@ -127,6 +169,20 @@
      "read": "https://api.github.com/repos/shubham-goel/4D-Humans/commits?path=LICENSE.md",
      "evidence": "One commit touches LICENSE.md, b2750b8, 2023-06-06.",
      "notes": "Conflation checked: code, checkpoints and SMPL kept apart."
+    },
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "Raw LICENSE.md, README.md, demo.py and track.py at efe18de, PHALP LICENSE at 96f7e6c and on master, and the 4D-Humans tree in a blobless clone, all on 2026-10-02.",
+     "evidence": "Holds: LICENSE.md \"MIT License\" / \"Copyright (c) 2023 UC Regents, Shubham Goel\". README line 30: \"Besides these files, you also need to download the *SMPL* model. You will need the [neutral model](http://smplify.is.tue.mpg.de) for training and running the demo code.\" README line 33: \"The following command will run ViTDet and HMR2.0 on all images\"; demo.py lines 45-52: \"from detectron2.config import LazyConfig\" / \"cfg_path = Path(hmr2.__file__).parent/'configs'/'cascade_mask_rcnn_vitdet_h_75ep.py'\" / \"detector = DefaultPredictor_Lazy(detectron2_cfg)\". README line 42: \"Our tracker builds on PHALP, please install that first:\"; line 44: \"pip install git+https://github.com/brjathu/PHALP.git\"; line 58: \"The output directory (`./outputs` by default) will contain a video rendering of the tracklets and a `.pkl` file containing the tracklets with 3D pose and shape.\"; track.py line 15: \"from phalp.trackers.PHALP import PHALP\". PHALP LICENSE at 96f7e6c, byte-identical on master: \"MIT License\" / \"This code base itself is MIT, but please follow the license for SMPL.\" / \"Copyright (c) 2022, University of California, Berkeley\". Refuted only in scope, on the code layer: hmr2/models/backbones/vit.py (the backbone the demo runs; hmr2/models/backbones/__init__.py reads \"from .vit import vit\") and hmr2/utils/pck_accuracy.py open with \"# Copyright (c) OpenMMLab. All rights reserved.\" and state no licence of their own. LICENSE.md is the only file in the repository containing the word licence; no licence text for the checkpoints was found (hmr2/models/__init__.py fetches \"https://www.cs.utexas.edu/~pavlakos/4dhumans/hmr2_data.tar.gz\").",
+     "notes": "Re-checked 2026-10-02. Every quoted clause still appears as quoted and the checkpoint statement still holds. The only correction is to say that the root MIT grant is accompanied by two OpenMMLab-copyright files that carry no licence line; no restrictive clause was found in the tree, and no MPG header is present in 4D-Humans or PHALP. GitHub's detected licence is MIT for 4D-Humans and NOASSERTION for PHALP (metadata only)."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "api.github.com/repos/shubham-goel/4D-Humans/commits?path=LICENSE.md, the repository endpoints, git log in both blobless clones, diff of PHALP master LICENSE against 96f7e6c, the 2024-01-10 Wayback capture of PHALP's LICENSE page, and the Wayback CDX index for both pages.",
+     "evidence": "4D-Humans LICENSE.md: one commit, b2750b8, 2023-06-06T22:05:21Z, \"Create LICENSE.md\"; head of main still efe18de, 2026-02-07T16:46:00Z (\"Update Links\"), pushed_at the same. PHALP LICENSE: two commits, 52e2ae5 (2022-03-12T16:46:42-08:00, \"smplx package, added License, fast online demo\"), whose text already read \"MIT License\" / \"This code base itself is MIT, but please follow the license for SMPL.\" / \"Copyright (c) 2022, University of California, Berkeley\", and 47efbbc (2023-06-13T04:03:28-07:00, \"4D Humans update\"), which changed only the file mode from 100644 to 100755; 96f7e6c is PHALP's master head (2026-02-07T16:55:01Z) and master's LICENSE is byte-identical. The only Wayback capture of github.com/brjathu/PHALP/blob/master/LICENSE, 20240110142236, contains \"follow the license for SMPL\" and \"2022, University of California, Berkeley\"; the CDX index lists no capture of 4D-Humans' LICENSE.md page at all, so there is no 2026-09-30 capture to compare.",
+     "notes": "Re-checked 2026-10-02. No page changed since 2026-09-30, and neither licence file has changed in substance since 2022-03-12 (PHALP) and 2023-06-06 (4D-Humans). Conflation check: code, the OpenMMLab-headed files, the checkpoints, SMPL and PHALP are kept apart."
     }
    ]
   },
@@ -156,6 +212,20 @@
      "read": "https://api.github.com/repos/MotrixLab/SMPLer-X/commits?path=LICENSE",
      "evidence": "One commit touches LICENSE, 857a3ec, 2023-06-14. The repository moved owner: the GitHub API answers caizhongang/SMPLer-X with a redirect to MotrixLab/SMPLer-X.",
      "notes": "The README now points to SMPLest-X as its successor; its licence was not read."
+    },
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://raw.githubusercontent.com/MotrixLab/SMPLer-X/064baef0e4ab5277a3297691bc1d46ea5412586f/LICENSE",
+     "evidence": "LICENSE at 064baef, read 2026-10-02: \"S-Lab License 1.0 / Copyright 2022 S-Lab / Redistribution and use for non-commercial purpose in source and binary forms, with or without modification, are permitted provided that the following conditions are met:\" and \"4. In the event that redistribution and/or use for commercial purpose in source or binary forms, with or without modification is required, please contact the contributor(s) of the work.\" README line 44 \"conda create -n smplerx python=3.8 -y\", line 46 \"conda install pytorch==1.12.0 torchvision==0.13.0 torchaudio==0.12.0 cudatoolkit=11.3 -c pytorch -y\", line 47 \"pip install mmcv-full==1.7.1 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.12.0/index.html\"; requirements.txt last line \"mmdet==2.26.0\". README line 255: \"Currently, this repo supports SMPL-X estimation and a simple visualization (overlay of SMPL-X vertices).\" README line 3: \"Check out [SMPLest-X](https://github.com/wqyin/SMPLest-X), an extension of SMPLer-X with stronger foundation models!\"",
+     "notes": "Re-checked 2026-10-02. Every quoted clause appears as quoted. Clause 4 says \"please contact\" and grants nothing itself; the claim's \"commercial use requires contacting the contributors\" is a fair paraphrase of a licence whose grant is only \"for non-commercial purpose\". requirements.txt also pins smplx==0.1.28 (the Python package); the SMPL-X body model files are downloaded from smpl-x.is.tue.mpg.de (README line 117) under the licence in VMC-007. GitHub's detected licence is NOASSERTION, which is expected for a non-SPDX licence; the file was read, not the metadata."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "https://api.github.com/repos/MotrixLab/SMPLer-X/commits?path=LICENSE",
+     "evidence": "GitHub API, 2026-10-02: one commit touches LICENSE, 857a3ec \"Init commit\", 2023-06-14T16:22:11Z. The LICENSE at 064baef is byte-identical to the file on main today. The default branch head is still 064baef (2026-02-12T08:55:28Z, \"Update README.md\") and the repository's pushed_at is 2026-02-12T08:55:28Z, so nothing in the repository changed after the 2026-09-30 check. api.github.com/repos/caizhongang/SMPLer-X still answers 301 \"Moved Permanently\" to api.github.com/repositories/650521566, which is the id the API reports for MotrixLab/SMPLer-X.",
+     "notes": "Re-checked 2026-10-02. No Wayback comparison was needed: the commit history dates the file. The README's pointer to SMPLest-X as successor is still present; its licence was not read, as before."
     }
    ]
   },
@@ -186,6 +256,20 @@
      "read": "https://api.github.com/repos/Walter0807/MotionBERT/commits?path=LICENSE",
      "evidence": "MotionBERT LICENSE: one commit, 47d557d, 2023-03-28. AlphaPose LICENSE: last commit ef2a060, 2019-12-22.",
      "notes": ""
+    },
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://raw.githubusercontent.com/Walter0807/MotionBERT/705d3a95354db8bdb696b3492e47a3b5537174ff/LICENSE",
+     "evidence": "MotionBERT LICENSE at 705d3a9, read 2026-10-02, opens \"Apache License / Version 2.0, January 2004 / http://www.apache.org/licenses/\". docs/inference.md line 5: \"Please use [AlphaPose](https://github.com/MVIG-SJTU/AlphaPose#quick-start) to extract the 2D keypoints for your video first. We use the *Fast Pose* model trained on *Halpe* dataset\". AlphaPose LICENSE at c60106d, lines 1 to 3: \"ALPHAPOSE: MULTIPERSON KEYPOINT DETECTION / SOFTWARE LICENSE AGREEMENT / ACADEMIC OR NON-PROFIT ORGANIZATION NONCOMMERCIAL RESEARCH USE ONLY\"; and \"PERMITTED USES:  The Software may be used for your own noncommercial internal research purposes.\" README line 65: \"The model uses 17 body keypoints ([H36M format](...)). If you are using other formats, please convert them before feeding to MotionBERT.\" README lines 78 to 84 list every checkpoint (MotionBERT, MotionBERT-Lite, 3D Pose, Action Recognition, Mesh) as an OneDrive link; the string \"licen\" does not occur anywhere in README.md, so no checkpoint licence is stated.",
+     "notes": "Re-checked 2026-10-02. Every quoted clause appears as quoted and the claim says no more than the pages. AlphaPose's agreement also says derivatives \"will be owned by Licensor\" and that you may not \"provide third parties access to prior or present versions (or any parts thereof) of the Software\"; the claim does not rely on those. The mesh checkpoint (README line 84, \"Mesh (with 3DPW, ft)\") is the SMPL path, whose body model licence is VMC-007."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "https://api.github.com/repos/Walter0807/MotionBERT/commits?path=LICENSE",
+     "evidence": "GitHub API, 2026-10-02: MotionBERT LICENSE has one commit, 47d557d \"add LICENSE\", 2023-03-28T07:06:31Z, and the file at 705d3a9 is byte-identical to main; the repository's pushed_at is 2026-03-14T07:57:31Z, before the 2026-09-30 check. AlphaPose LICENSE: last commit ef2a060 \"init new version\", 2019-12-22T08:09:32Z (three commits that day: f591ab6, 04a78b8, ef2a060), and the c60106d file is byte-identical to master; the repository's pushed_at is 2024-05-13T14:33:34Z.",
+     "notes": "Re-checked 2026-10-02. Neither repository has been pushed since the first check, so no page behind this claim can have changed. AlphaPose's GitHub detected licence is NOASSERTION, as expected for a bespoke agreement; the file was read."
     }
    ]
   },
@@ -215,6 +299,20 @@
      "read": "https://smpl-x.is.tue.mpg.de/modellicense.html",
      "evidence": "Last-Modified headers: SMPL Tue, 05 May 2026; SMPL-X Thu, 02 Jul 2026. Unchanged since DAZ-115 (2026-09-16).",
      "notes": "DAZ-117 (unchecked) reports that Epic Games acquired Meshcapade on 2026-02-18; both pages still name Meshcapade."
+    },
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://smpl.is.tue.mpg.de/modellicense.html",
+     "evidence": "SMPL-Model License page, fetched 2026-10-02 as raw HTML with tags stripped: \"This software/data and the associated license is for academic research purposes. The software/data is also available for commercial licensing through Meshcapade.com. For commercial use please email smpl@max-planck-innovation.de\"; \"To use the Software for the sole purpose of performing non-commercial scientific research, non-commercial education, or non-commercial artistic projects;\"; \"Any other use, in particular any use for commercial purposes, is prohibited. This includes, without limitation, incorporation in a commercial product, use in a commercial service, or production of other artefacts for commercial purposes.\" SMPL-X page, same day: the same header sentence word for word, and \"To use the Model & Software for the sole purpose of performing non-commercial scientific research, non-commercial education, or non-commercial artistic projects;\"; \"Any other use, in particular any use for commercial, pornographic, military, or surveillance, purposes is prohibited.\" Response headers: SMPL \"Last-Modified: Tue, 05 May 2026 08:58:10 GMT\", SMPL-X \"Last-Modified: Thu, 02 Jul 2026 13:54:40 GMT\". DAZ-115's drift check in daz-genesis.json records \"Last-Modified 2026-05-05 for SMPL and 2026-07-02 for SMPL-X\" fetched 2026-09-16.",
+     "notes": "Re-checked 2026-10-02. All three quoted clauses appear on both live pages, and the claim says no more than the pages. One wording nit, not a page change: the register's quotes stop short of the full strings. The page reads \"through Meshcapade.com.\" and \"smpl@max-planck-innovation.de\"; the register quotes \"through Meshcapade.\" and \"smpl@max-planck-innovation\". The fragments are substrings of the page text, so the text lens passes, but the register would serve a reader better carrying the full domain and address. The pages were not rendered in a browser; the licence text sits in plain paragraphs, and the FAQ page was not read."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "https://web.archive.org/web/20260916150450id_/https://smpl.is.tue.mpg.de/modellicense.html",
+     "evidence": "Wayback has no capture of either page after 2026-09-30: web.archive.org/web/20260930id_/ redirected to the nearest captures, 2026-09-16 15:04:50 UTC for SMPL (memento-datetime \"Wed, 16 Sep 2026 15:04:50 GMT\"; the CDX index lists no other capture since 2026-09-01) and 2026-07-12 21:06:12 UTC for SMPL-X (no other capture since 2026-06-01). The capture bodies arrived gzip-compressed; after inflating them, the tag-stripped text of each capture is identical to today's live page (SMPL 5977 characters both, SMPL-X 6792 characters both, zero sentence-level differences), and each capture's x-archive-orig-last-modified header equals today's Last-Modified (\"Tue, 05 May 2026 08:58:10 GMT\" and \"Thu, 02 Jul 2026 13:54:40 GMT\"). Both Last-Modified dates precede the 2026-09-30 check.",
+     "notes": "Re-checked 2026-10-02. Both pages still name Meshcapade.com for commercial licensing and the 2024 copyright footer is unchanged. DAZ-117 (Epic Games' acquisition of Meshcapade, 2026-02-18) remains unchecked and was not checked here. The pages carry no visible date stamp, so the server header and the capture comparison are the only drift evidence."
     }
    ]
   },
@@ -244,6 +342,20 @@
      "read": "https://api.github.com/repos/ultralytics/ultralytics/commits?path=LICENSE",
      "evidence": "Two commits touch LICENSE, last 2c6fc0a on 2023-04-14.",
      "notes": "What AGPL obliges for a tool run offline to make assets, rather than shipped or served, is not settled here; the repo's AGPL question is an open owner decision in CLAUDE.md."
+    },
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://raw.githubusercontent.com/ultralytics/ultralytics/79bab61/LICENSE",
+     "evidence": "LICENSE at 79bab61, read 2026-10-02, opens \"GNU AFFERO GENERAL PUBLIC LICENSE / Version 3, 19 November 2007 / Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>\". WHAM lib/models/preproc/detector.py at 2b54f77, line 13: \"from ultralytics import YOLO\"; line 39: \"bbox_model_ckpt = osp.join(ROOT_DIR, 'checkpoints', 'yolov8x.pt')\"; line 40: \"self.bbox_model = YOLO(bbox_model_ckpt)\". GVHMR hmr4d/utils/preproc/tracker.py at ee960bb, line 1: \"from ultralytics import YOLO\"; line 22: \"self.yolo = YOLO(PROJ_ROOT / \\\"inputs/checkpoints/yolo/yolov8x.pt\\\")\".",
+     "notes": "Re-checked 2026-10-02. Every quoted clause appears as quoted. Context the claim does not state and need not: the Ultralytics README on main (line 278 onwards) says \"Ultralytics offers two licensing options\", the AGPL-3.0 file and an \"Ultralytics Enterprise License\" for \"development and production use\" that works \"bypassing the open-source requirements of AGPL-3.0\", obtained through ultralytics.com/license. The LICENSE file itself is AGPL-3.0 only, so the claim does not overstate. 79bab61 is the commit of 2026-09-30T19:11:04Z (\"Fix regressions found in third-party PR audits (#26461)\"), so the pin was the branch head on the day of the first check."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "https://api.github.com/repos/ultralytics/ultralytics/commits?path=LICENSE",
+     "evidence": "GitHub API, 2026-10-02 (read through gh api after unauthenticated requests hit \"API rate limit exceeded\"): two commits touch LICENSE, 95f6fa1 \"Initial commit\" 2022-09-11 and 2c6fc0a \"Update LICENSE to AGPL-3.0 (#2031)\" 2023-04-14T13:17:41Z. The 79bab61 LICENSE is byte-identical to main today (repository pushed_at 2026-10-02T18:47:05Z, detected licence AGPL-3.0). WHAM's default branch head is still 2b54f77 (2024-04-18T19:21:17Z); GVHMR's head is still ee960bb (2026-09-15T07:44:58Z, \"Revert \\\"Adopt Project Registration License v1.0\\\"\"). detector.py and tracker.py on each main branch are byte-identical to the pinned files.",
+     "notes": "Re-checked 2026-10-02. GVHMR's head commit message shows its own licence file was changed and then reverted in September 2026; that concerns GVHMR's licence claim, which is not in this batch, not the Ultralytics dependency, which is unchanged. The AGPL question for a tool run offline to make assets stays an open owner decision in CLAUDE.md."
     }
    ]
   },
@@ -275,6 +387,20 @@
      "read": "https://api.github.com/repos/facebookresearch/sam-3d-body/commits?path=LICENSE",
      "evidence": "One commit touches LICENSE, 4e33ae4, 2025-11-19. Hugging Face API: both model repos gated \"manual\", last modified 2025-12-10.",
      "notes": "The licence reserves unilateral amendment, so the reading is dated. Code and weights are under the same licence here, not conflated."
+    },
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://raw.githubusercontent.com/facebookresearch/sam-3d-body/b5c765a0d89d789985e186d396315e7590887b94/LICENSE",
+     "evidence": "LICENSE at b5c765a, read in full 2026-10-02: \"SAM License / Last Updated: November 19, 2025\"; 1.a \"You are granted a non-exclusive, worldwide, non-transferable and royalty-free limited license under Meta's intellectual property or other rights owned by Meta embodied in the SAM Materials to use, reproduce, distribute, copy, create derivative works of, and make modifications to the SAM Materials.\"; 1.b.iv \"Your use of the SAM Materials will not involve or encourage others to reverse engineer, decompile or discover the underlying components of the SAM Materials.\"; 1.b.v \"You agree not to use, or permit others to use, SAM Materials for any activities subject to the International Traffic in Arms Regulations (ITAR) or end uses prohibited by Trade Controls, including those related to military or warfare purposes, nuclear industries or applications, espionage, or the development or use of guns or illegal weapons.\"; 8 \"Meta may modify this Agreement from time to time; provided that they are similar in spirit to the current version of the Agreement, but may differ in detail to address new problems or concerns. All such changes will be effective immediately.\" The word \"commercial\" occurs zero times in the file (grep count 0). README line 152: \"The SAM 3D Body model checkpoints and code are licensed under [SAM License](./LICENSE).\" Hugging Face API, both repos: \"gated\": \"manual\", cardData license \"other\", license_name \"sam-license\", license_link pointing at the repo's own LICENSE file; the public model pages show \"License: sam-license\", \"The SAM 3D Body model is licensed under SAM License\" and the gate text \"You need to agree to share your contact information to access this model\".",
+     "notes": "Re-checked 2026-10-02. Every quoted clause appears as quoted and the claim says no more than the pages. The Hugging Face repos list LICENSE and README.md among their files, but raw reads return 401 without approved access, so the Hugging Face copy of the licence was not read; the claim rests on the GitHub LICENSE and README, and its Hugging Face statement is limited to the gating and the licence metadata, which is what was read. INSTALL.md adds: \"SAM 3D Body is available via HuggingFace globally, **except** in comprehensively sanctioned jurisdictions. Sanctioned jurisdiction will result in requests being **rejected**.\" The licence also carries a patent-litigation termination (1.a.i) and an indemnity (5.b), which the claim does not need."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "https://api.github.com/repos/facebookresearch/sam-3d-body/commits?path=LICENSE",
+     "evidence": "GitHub API, 2026-10-02: one commit touches LICENSE, 4e33ae4 \"Initial commit\", 2025-11-19T15:54:47Z; the pinned LICENSE is byte-identical to main; the default branch head is still b5c765a (2026-02-19T18:16:00Z, \"add arXiv\") and the repository's pushed_at is 2026-02-19T18:16:10Z. Hugging Face API lastModified: 2025-12-10T18:45:19Z (sam-3d-body-dinov3) and 2025-12-10T18:45:15Z (sam-3d-body-vith), the same as at the 2026-09-30 check; both still gated \"manual\".",
+     "notes": "Re-checked 2026-10-02. Section 8 lets Meta amend with immediate effect, so this reading stays dated; nothing had changed by 2026-10-02. The two gated raw README files could not be read, as at the first check; they are not the decisive pages and the register does not quote them."
     }
    ]
   },
@@ -305,6 +431,20 @@
      "read": "https://api.github.com/repos/facebookresearch/MHR/commits?path=LICENSE",
      "evidence": "One commit touches LICENSE, 0dafd5f, 2025-11-19.",
      "notes": "The assets' licence rests on the release note and the LICENSE shipped inside assets.zip; the zip itself was not downloaded."
+    },
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "The four sources at d96fafa, read raw on 2026-10-02, plus the release through the GitHub API and the rendered release page",
+     "evidence": "LICENSE begins \"Apache License / Version 2.0, January 2004\" (202 lines). README line 227: \"MHR is licensed under the Apache Software License 2.0, as found in the [LICENSE](LICENSE) file.\" pyproject.toml line 8: license = {text = \"Apache-2.0\"}. Release v1.0.1, published 2025-11-19T19:21:12Z, body: \"Added LICENSE to assets\". README lines 13-15: \"45 shape parameters controlling body identity\", \"204 model parameters for full-body articulation\", \"72 expression parameters for detailed face animation\"; line 101: \"Conversion between MHR and SMPL/SMPL-X.\"",
+     "notes": "Re-checked 2026-10-02. Every quoted clause is on the live pages as quoted, and the claim says no more than they do. New this time: the assets.zip central directory, read by HTTP range request without downloading the 198,943,157-byte file, lists 19 entries including assets/LICENSE.txt (11,358 bytes), whose text begins \"Apache License / Version 2.0, January 2004\". The register's old drift note (\"the zip itself was not downloaded\") can now be replaced by that reading."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "GitHub API: commits touching LICENSE, the default-branch head, repository licence detection and the release asset's updated_at; Wayback availability API",
+     "evidence": "LICENSE still has one commit, 0dafd5f, 2025-11-19T19:03:20Z. The default branch head is still d96fafa (2026-09-11), the pinned commit. GitHub detects Apache-2.0. The release's assets.zip was re-uploaded on 2026-06-10T11:55:42Z, after the 2025-11-19 release note, and the LICENSE.txt inside it is Apache 2.0 today.",
+     "notes": "Re-checked 2026-10-02. No page changed since 2026-09-30. Wayback holds no capture of the release page (availability API returned none for 20260930), so no capture comparison was possible; the pinned commit is immutable and the branch has not moved. WebFetch of the rendered release page returned the same title, date and body but could not list the assets (\"There was an error while loading\"); the API listing was used instead."
     }
    ]
   },
@@ -334,6 +474,20 @@
      "read": "https://api.github.com/repos/PozzettiAndrea/ComfyUI-MotionCapture/commits?path=LICENSE",
      "evidence": "One commit touches LICENSE, 81d11fc, 2026-02-24.",
      "notes": ""
+    },
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "LICENSE, README.md and the full tree at 09e90d8, read raw and through the GitHub API on 2026-10-02",
+     "evidence": "LICENSE begins \"GNU GENERAL PUBLIC LICENSE / Version 3, 29 June 2007\" (674 lines). README lines 65-67: \"This package vendors GVHMR code which has its own license. Please check the original GVHMR repository for licensing terms.\" / \"SMPL and SMPL-X body models require separate licenses from their respective providers.\" Tree at 09e90d8: nodes/body_model/smpl_faces.npy (165,440 bytes), nodes/body_model/smpl_neutral_J_regressor.npy (661,568 bytes), plus smpl_coco17_J_regressor.npy, smpl_3dpw14_J_regressor_sparse.npz, smplx2smpl_sparse.npz, smplx_verts437.npy, nodes/hmr2/smpl_mean_params.npz and four assets/*.npz. ComfyUI-UniRig's owner is PozzettiAndrea.",
+     "notes": "Re-checked 2026-10-02. Every quoted clause appears as quoted; the claim says no more than the pages. pyproject.toml at 09e90d8 has license = {file = \"LICENSE\"}, which points at the GPL file, so the package metadata agrees with the root licence."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "GitHub API: commits touching LICENSE and README.md, default-branch head, licence detection; Wayback availability API",
+     "evidence": "LICENSE still has one commit, 81d11fc, 2026-02-24T00:43:40Z. README last changed 5055f7e, 2026-05-16. The default branch head is still 09e90d8 (2026-07-31), the pinned commit; repository pushed_at is 2026-08-24, on another branch. GitHub detects GPL-3.0.",
+     "notes": "Re-checked 2026-10-02. No page changed since 2026-09-30. Wayback's nearest capture of the repository page is 2026-02-17, none in late September, so the comparison rests on the commit history, which is sufficient for files pinned to a commit."
     }
    ]
   },
@@ -364,15 +518,29 @@
      "read": "https://api.github.com/repos/PozzettiAndrea/ComfyUI-SAM3DBody/commits?path=LICENSE",
      "evidence": "Root LICENSE: \"GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007\"; commits 29178ba (2025-11-23, \"added licenses\"), 6c655c5 and 1b47e1f (2026-02-11, \"updated license location\", \"cleanup\").",
      "notes": "The files disagree, so the wrapper's licence is unsettled. The vendored library is the SAM License on both readings."
+    },
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "The four sources at 6800ef9, read raw on 2026-10-02",
+     "evidence": "Root LICENSE begins \"GNU GENERAL PUBLIC LICENSE / Version 3, 29 June 2007\" (674 lines). docs/licenses/LICENSE: \"1. WRAPPER CODE (MIT License) / - Files: nodes/, lib/, web/, install.py, __init__.py, prestartup_script.py, constants.py, and other ComfyUI integration code / - Copyright (c) 2025 Andrea Pozzetti\" and \"2. SAM 3D BODY LIBRARY (SAM License) / - Directory: sam_3d_body/\". docs/licenses/LICENSE-MIT: \"MIT License / Copyright (c) 2025 Andrea Pozzetti\". README lines 67-73: \"This project uses a **dual-license structure**. License files are located in `docs/licenses/`.\" / \"**Wrapper Code** (ComfyUI integration): **MIT License**\" / \"**SAM 3D Body Library** (vendored in `sam_3d_body/`): **SAM License**\".",
+     "notes": "Re-checked 2026-10-02. The files still disagree exactly as the claim says, so the status stays unsettled. A third signal, not in the claim: pyproject.toml at 6800ef9 has license = {file = \"LICENSE\"}, which points at the root GPL file. It does not settle the question, since the README and docs/licenses/LICENSE still say MIT."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "Raw root LICENSE and docs/licenses/LICENSE at each of the three commits in the LICENSE history, the GitHub API commit list, default-branch head and licence detection",
+     "evidence": "The history is unchanged: 29178ba (2025-11-23, \"added licenses\"), 6c655c5 (2026-02-11, \"updated license location\"), 1b47e1f (2026-02-11, \"cleanup\"). Read at each commit: at 29178ba the root LICENSE is the \"ComfyUI-SAM3DBody License\" dual-licence text with LICENSE-MIT and LICENSE-SAM beside it; at 6c655c5 the root LICENSE returns 404 and that text sits at docs/licenses/LICENSE; at 1b47e1f the root LICENSE is \"GNU GENERAL PUBLIC LICENSE / Version 3, 29 June 2007\". The default branch head is still 6800ef9 (2026-07-31). GitHub detects GPL-3.0.",
+     "notes": "Re-checked 2026-10-02. This is the register's existing drift refutation re-read today, not a new one: the GPL text arrived with the \"cleanup\" commit on 2026-02-11 as the claim says, and nothing has changed since 2026-09-30. Wayback's nearest capture of the repository page is 2026-01-30, before the GPL commit, and there is none from late September."
     }
    ]
   },
   {
    "id": "VMC-013",
-   "status": "confirmed",
+   "status": "corrected",
    "kind": "licence",
    "load_bearing": true,
-   "claim": "As of 2026-09-30, the BlazePose GHUM 3D model card for MediaPipe's pose landmarker says \"LICENSED UNDER Apache License, Version 2.0\", and MediaPipe's code (github.com/google-ai-edge/mediapipe) is Apache-2.0. The model returns 33 keypoints for one person, and the card says its z coordinate \"is obtained from synthetic data\". The card gives \"entertainment\" as the primary intended application and lists \"Applications requiring metric accurate depth\", multiple people, and people further than 4 metres from the camera as out of scope.",
+   "claim": "As of 2026-10-02, the BlazePose GHUM 3D model card for MediaPipe's pose landmarker, which prints \"DATE / April, 16, 2021\", says \"LICENSED UNDER Apache License, Version 2.0\", and MediaPipe's code (github.com/google-ai-edge/mediapipe) is Apache-2.0, except that its LICENSE appends a separate permissive Lucent Technologies notice \"For files under tasks/cc/text/language_detector/custom_ops/utils/utf/\", a language-detector directory. The model returns 33 keypoints for one person, and the card says its z coordinate \"is obtained from synthetic data\". The card gives \"entertainment\" as the primary intended application and lists \"Applications requiring metric accurate depth\", multiple people, and people further than 4 metres from the camera as out of scope.",
    "sources": [
     "https://storage.googleapis.com/mediapipe-assets/Model%20Card%20BlazePose%20GHUM%203D.pdf",
     "https://github.com/google-ai-edge/mediapipe/blob/45005ba/LICENSE"
@@ -392,6 +560,20 @@
      "read": "https://github.com/google-ai-edge/mediapipe/blob/45005ba/LICENSE",
      "evidence": "Repository LICENSE is Apache 2.0 at 45005ba. The card PDF carries no date; its content was read as fetched on the date given.",
      "notes": "Code and model card read separately; both Apache-2.0."
+    },
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "The PDF downloaded on 2026-10-02 and read with pdftotext (plain, -layout and -raw), and the MediaPipe LICENSE at 45005ba read raw",
+     "evidence": "Card, page 1: \"LICENSED UNDER / Apache License, Version 2.0\"; \"Returns 33 keypoints describing the approximate location of body parts\"; out-of-scope column: \"● Multiple people in an image.\" / \"● People too far away from the camera (e.g. further than 14 feet/4 meters)\" / \"● Head is not visible\" / \"● Applications requiring metric accurate depth\"; page 2: \"The primary intended application is entertainment.\"; evaluation: \"The model is providing 3D coordinates, but the z-coordinate is obtained from synthetic data, so for a fair comparison with human annotations, only 2D coordinates are employed.\" The card also prints \"DATE / April, 16, 2021\" under its authors. MediaPipe LICENSE at 45005ba: \"Apache License / Version 2.0, January 2004\" (218 lines), followed by a block headed \"For files under tasks/cc/text/language_detector/custom_ops/utils/utf/\" that reads \"The authors of this software are Rob Pike and Ken Thompson. Copyright (c) 2002 by Lucent Technologies. Permission to use, copy, modify, and distribute this software for any purpose without fee is hereby granted, provided that this entire notice is included in all copies of any software which is or includes a copy or modification of this software and in all copies of the supporting documentation for such software.\"",
+     "notes": "Re-checked 2026-10-02. Every clause the claim quotes from the card is on the live card as quoted. The refutation is narrow and concerns the code sentence: \"MediaPipe's code ... is Apache-2.0\" says slightly more than the LICENSE file, which appends a separate permissive notice for one language-detector directory of vendored utf code. The practical effect for a commercial game is nil (the notice is permissive and the directory is not pose code), so the correction is a refinement, not a change of outcome. Also, the register's existing drift evidence says \"The card PDF carries no date\"; the card prints \"DATE / April, 16, 2021\", so the new check entry should not repeat that sentence."
+    },
+    {
+     "lens": "drift",
+     "verdict": "refuted",
+     "read": "GCS object headers for the PDF (HEAD and GET), the sha256 of today's download, the MediaPipe LICENSE commit history, and the Wayback availability and CDX APIs",
+     "evidence": "The PDF has not changed: Last-Modified \"Thu, 04 May 2023 18:05:27 GMT\", x-goog-generation 1683223527001276, x-goog-metageneration 1, ETag \"25da88a5c8fa34c76372830e90327ecf\", 1,398,977 bytes, 8 pages, sha256 e982460cedece5ad9a46aa8f13523328e9ab95d7d5b2b8c99b33f13f6a79ca86. MediaPipe LICENSE: two commits, the last ce3cd94 on 2023-03-15; commit 45005ba is dated 2026-09-30T21:22:57Z and GitHub detects Apache-2.0.",
+     "notes": "Re-checked 2026-10-02. Nothing drifted: the card object has been the same since 2023-05-04 and the LICENSE since 2023-03-15. The verdict is refuted on the conflation half of the lens, matching the text lens: the claim runs MediaPipe's own Apache-2.0 code and the Lucent-notice utf directory in the same LICENSE file together. Wayback has no capture of the PDF at all (availability API returned none; the CDX query answered 429 once), so the GCS generation number is the dated evidence."
     }
    ]
   },
@@ -406,14 +588,30 @@
     "https://github.com/facebookresearch/detectron2/blob/1e3e13b/MODEL_ZOO.md",
     "https://github.com/facebookresearch/detectron2/blob/1e3e13b/projects/ViTDet/README.md",
     "https://huggingface.co/Ruicheng/moge-2-vitl-normal"
+   ],
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "Fact check of the four sources on 2026-10-02, plus tools/build_fov_estimator.py at b5c765a, Detectron2's README at 1e3e13b and the Hugging Face API listing",
+     "evidence": "tools/build_detector.py line 12: def __init__(self, name=\"vitdet\", device=\"cuda\", **kwargs); line 86: \"https://dl.fbaipublicfiles.com/detectron2/ViTDet/COCO/cascade_mask_rcnn_vitdet_h/f328730692/model_final_f05665.pkl\". projects/ViTDet/README.md line 167 links that same file as \"model\" and contains no line matching \"licen\". MODEL_ZOO.md lines 73-74: \"All models available for download through this document are licensed under the [Creative Commons Attribution-ShareAlike 3.0 license](https://creativecommons.org/licenses/by-sa/3.0/).\" and has zero matches for \"vitdet\", \"f328730692\" or \"model_final_f05665\". tools/build_fov_estimator.py line 7: name=\"moge2\" by default, line 27: path = \"Ruicheng/moge-2-vitl-normal\"; sam-3d-body README line 90: \"Run demo script with default ViTdet detector and MoGe2 FOV model\". Hugging Face API cardData: {'license': 'mit', 'base_model': ['facebook/dinov2-large'], 'pipeline_tag': 'depth-estimation'}; README.md is five lines of front matter only; the repository holds .gitattributes, README.md and model.pt and no licence file.",
+     "notes": "Re-checked 2026-10-02. Every statement in the claim holds today: the detector is still the ViTDet checkpoint, the ViTDet README still states no licence, the Model Zoo's CC BY-SA 3.0 sentence still covers only \"this document\", which still does not list the ViTDet checkpoints, and MoGe-2's MIT is still stated only in card metadata with no licence file (recorded as exactly that). Detectron2's root README adds nothing on model licences: \"Detectron2 is released under the [Apache 2.0 license](LICENSE).\" The status should stay unverifiable: no page read states a licence for the ViTDet checkpoint, which is what the claim is about."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "GitHub API commit histories for the three files and default-branch heads (through gh after the unauthenticated quota ran low), the Hugging Face commits API, and the Wayback capture of the card from 2026-02-22",
+     "evidence": "sam-3d-body: head is still b5c765a (2026-02-19), the pinned commit; tools/build_detector.py last changed 564743a, 2025-12-02. Detectron2: MODEL_ZOO.md last changed 8b0953c, 2021-07-21; projects/ViTDet/README.md last changed 9957012, 2022-06-09; the pinned commit 1e3e13b is dated 2026-09-30T06:00:50Z. Hugging Face: last commit cb0e8bb \"Update README.md\", 2026-09-02, before the register's check; the 2026-02-22 Wayback capture also carries license:mit, as the live page does.",
+     "notes": "Re-checked 2026-10-02. No page changed since 2026-09-30. Set to the same verdict as the fact check, as the task directs for a fact-shaped claim. Wayback holds no late-September capture of the Hugging Face card; the February capture is the nearest and agrees."
+    }
    ]
   },
   {
    "id": "VMC-015",
-   "status": "confirmed",
+   "status": "corrected",
    "kind": "licence",
    "load_bearing": false,
-   "claim": "As of 2026-09-30, the other components these pipelines load are: ViTPose, Apache-2.0 (an Open-MMLab LICENSE); ViTPose-Pytorch, which GVHMR credits, GPL-3.0; DPVO, MIT; DROID-SLAM, BSD-3-Clause; Detectron2's code, Apache-2.0; ZoeDepth, MIT; MoGe's code, MIT.",
+   "claim": "As of 2026-10-02, the other components these pipelines load are: ViTPose, Apache-2.0 (an Open-MMLab LICENSE); ViTPose-Pytorch, which GVHMR credits, GPL-3.0; DPVO, MIT; DROID-SLAM, BSD-3-Clause; Detectron2's code, Apache-2.0; ZoeDepth, MIT; MoGe's code, MIT except the DINOv2 code it vendors in moge/model/modules/dinov2, which its README says \"is released by Meta AI under the Apache 2.0 license\", so its LICENSE file carries the MIT text followed by the Apache 2.0 text and GitHub detects no single licence (NOASSERTION).",
    "sources": [
     "https://github.com/ViTAE-Transformer/ViTPose/blob/c050ed2/LICENSE",
     "https://github.com/gpastal24/ViTPose-Pytorch/blob/a9f8025/LICENSE",
@@ -438,6 +636,20 @@
      "read": "GitHub API, repository licence detection at the same dates",
      "evidence": "GitHub's detected SPDX ids agree for every one except MoGe, detected NOASSERTION while its LICENSE reads MIT.",
      "notes": "Weights for ViTPose and the SLAM models were not read; this is the code only."
+    },
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "The seven LICENSE files at the listed commits, read raw on 2026-10-02, plus MoGe's README at 74fbce0 and GVHMR's README on main",
+     "evidence": "ViTPose: \"Copyright 2018-2020 Open-MMLab. All rights reserved.\" then \"Apache License / Version 2.0, January 2004\". ViTPose-Pytorch: \"GNU GENERAL PUBLIC LICENSE / Version 3, 29 June 2007\". DPVO: \"MIT License / Copyright (c) 2022 Princeton Vision & Learning Lab\". DROID-SLAM: \"BSD 3-Clause License / Copyright (c) 2021, Princeton Vision & Learning Lab\". Detectron2: \"Apache License / Version 2.0, January 2004\". ZoeDepth: \"MIT License / Copyright (c) 2022 Intelligent Systems Lab Org\". MoGe LICENSE (224 lines): \"MIT License / Copyright (c) Microsoft Corporation.\" in lines 1-21, followed from line 24 by the full \"Apache License / Version 2.0, January 2004\" text with no sentence saying what it covers; MoGe README line 330: \"MoGe code is released under the MIT license, except for DINOv2 code in `moge/model/modules/dinov2` which is released by Meta AI under the Apache 2.0 license.\" GVHMR README line 77 still credits \"[ViTPose-Pytorch](https://github.com/gpastal24/ViTPose-Pytorch)\".",
+     "notes": "Re-checked 2026-10-02. Six of the seven entries are confirmed as quoted. The MoGe entry, \"MoGe's code, MIT\", says more than its pages: the LICENSE file carries two licence texts and the README states the Apache 2.0 exception for the vendored DINOv2 module. The register's earlier evidence, \"its LICENSE reads MIT\", was a partial reading of that file. Both licences are permissive, so the outcome for a commercial game does not change; the wording does."
+    },
+    {
+     "lens": "drift",
+     "verdict": "refuted",
+     "read": "GitHub repository licence detection, LICENSE commit histories, pinned-commit dates and default-branch heads for all seven repositories, through the API and gh",
+     "evidence": "Detected SPDX ids are identical to the register's: Apache-2.0, GPL-3.0, MIT, BSD-3-Clause, Apache-2.0, MIT and NOASSERTION for MoGe. No LICENSE changed after 2026-09-30; the last commits to each are ViTPose 33f49cf 2022-05-24, ViTPose-Pytorch 5e59ed1 2022-11-06, DPVO 0adc633 2022-08-08, DROID-SLAM 28d0016 2021-08-24, Detectron2 60d7a1f 2020-11-05, ZoeDepth 5a3cb08 2022-11-14, MoGe eccc617 2024-10-29 (\"release inference code\", +203 lines, which appended the Apache 2.0 text to the MIT text committed in 564db81 on 2024-09-23). Every pinned commit is still its repository's default-branch head (ViTPose c050ed2 2025-12-25, ViTPose-Pytorch a9f8025 2023-05-28, DPVO 0ac95b6 2026-09-20, DROID-SLAM 2dfd39f 2025-05-05, Detectron2 1e3e13b 2026-09-30, ZoeDepth d87f17b 2025-05-05, MoGe 74fbce0 2026-08-19).",
+     "notes": "Re-checked 2026-10-02. Nothing drifted. The verdict is refuted on the conflation half of the lens, as this register did for VMC-021: the MoGe entry ran MoGe's own MIT code and its vendored Apache 2.0 DINOv2 module together, which is also why GitHub detects no single licence. With both lenses refuting part of the first wording, the register's rule gives the status corrected. Weights for ViTPose and the SLAM models were again not read; this remains code only."
     }
    ]
   },
@@ -446,7 +658,7 @@
    "status": "corrected",
    "kind": "licence",
    "load_bearing": true,
-   "claim": "As of 2026-09-30, DeepMotion's Animate 3D pricing page (deepmotion.com/pricing-animate3d) says in its FAQ: \"Freemium accounts are available for personal, non-commercial use\", and that licensing depends on plan type: \"only your plan type affects your licensing\". It says animations \"can be exported in FBX, BVH, MP4, and GLB formats (GLB only available for custom characters)\". The prices and the terms of service render only in a browser and were not read.",
+   "claim": "As of 2026-10-02, DeepMotion's Animate 3D pricing page (deepmotion.com/pricing-animate3d) says in its FAQ: \"Freemium accounts are available for personal, non-commercial use\"; \"No, only your plan type affects your licensing\" and \"In order to have licensed animation, you must have a premium subscription plan\"; and animations \"can be exported in FBX, BVH, MP4, and GLB formats (GLB only available for custom characters)\". The plan prices render only in a browser and were not read. deepmotion.com/terms-of-service is a \"404 Not Found\" page; the binding terms are the Terms of Use at deepmotion.com/terms-of-use (\"Last updated on March 30, 2025\"), which the pricing page links to. They say \"We own all right, title, copyright, and other intellectual property rights and interest in the Products of the Site. Except as expressly granted in these Terms, no license, right or interest in any Products of the Site is granted to you. Products of the site are licensed, not sold.\"; \"Our \\\"Freemium\\\" Plan is for hobbyists, students, or non-commercial use. With respect to Products you create with the Site while you are subscribed to our \\\"Freemium\\\" Plan, we grant you a revocable, non-exclusive, fully-paid, royalty-free, worldwide Non-Commercial License to use, copy, modify, publicly perform, publicly display and reproduce such Products, exclusively for non-commercial purposes.\"; and \"Commercial use is granted with a Paid Plan. With respect to Products you created with the Site while you are subscribed to our Paid Plans including but not limited to the \\\"Starter\\\", the \\\"Innovator\\\", the \\\"Professional\\\", the \\\"Studio\\\" and the \\\"Enterprise\\\" Plans, we grant you a perpetual, non-exclusive, fully-paid, royalty-free, worldwide Commercial license to use, copy, modify, publicly perform, publicly display and reproduce such Products, for both commercial and non-commercial purposes.\" Every licence is limited: \"the Products of the Site may not be used in a way that allows others to use or access the Products as a stand-alone (for instance, no sub-license or resale by you to others is allowed)\", \"you may not retarget the animations contained in the Products to a different character and sell the retargeted animations\", and with the Commercial licence you may \"distribute or sell your own creative works as a binary only\". DeepMotion reserves \"the right, in our sole discretion, to make changes or modifications to these Terms of Use at any time and for any reason\". The plan names in the terms were not matched against the pricing page, whose prices were not read.",
    "sources": [
     "https://www.deepmotion.com/pricing-animate3d",
     "https://www.deepmotion.com/terms-of-service"
@@ -466,6 +678,20 @@
      "read": "https://www.deepmotion.com/terms-of-service",
      "evidence": "The terms page served 1,087 characters of script shell with no clauses; the binding text was not read.",
      "notes": "A FAQ is a summary, not the terms. The first report's \"paid tiers carry a commercial licence\" rests on search-engine summaries, not the page, so the claim keeps only what the FAQ says."
+    },
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "https://www.deepmotion.com/pricing-animate3d, https://www.deepmotion.com/terms-of-service and https://www.deepmotion.com/terms-of-use, read 2026-10-02 with curl (bodies decompressed from gzip) and WebFetch",
+     "evidence": "Pricing FAQ, live: \"If I obtain the animation using free credits, does that impact my commercial licensing?\" / \"No, only your plan type affects your licensing. Acquiring animations through free credits does not affect your licensing. Your licensing remains unaffected by the method used to obtain the animation, whether through free credits or your subscription credits. In order to have licensed animation, you must have a premium subscription plan.\" / \"Freemium accounts are available for personal, non-commercial use.\" / \"Animations can be exported in FBX, BVH, MP4, and GLB formats (GLB only available for custom characters).\" The page text carries no prices (zero dollar signs). deepmotion.com/terms-of-service answers HTTP 200 with the title \"404 Not Found -Sorry we could not find that page, this might be because:\" and the body \"Oops! Page not found\"; its body is byte-identical to /terms and /legal. The pricing page footer links /terms-of-use, which is the Terms of Use, \"Last updated on March 30, 2025\": \"We own all right, title, copyright, and other intellectual property rights and interest in the Products of the Site. Except as expressly granted in these Terms, no license, right or interest in any Products of the Site is granted to you. Products of the site are licensed, not sold.\" / \"Our \\\"Freemium\\\" Plan is for hobbyists, students, or non-commercial use. With respect to Products you create with the Site while you are subscribed to our \\\"Freemium\\\" Plan, we grant you a revocable, non-exclusive, fully-paid, royalty-free, worldwide Non-Commercial License to use, copy, modify, publicly perform, publicly display and reproduce such Products, exclusively for non-commercial purposes.\" / \"Commercial use is granted with a Paid Plan. With respect to Products you created with the Site while you are subscribed to our Paid Plans including but not limited to the \\\"Starter\\\", the \\\"Innovator\\\", the \\\"Professional\\\", the \\\"Studio\\\" and the \\\"Enterprise\\\" Plans, we grant you a perpetual, non-exclusive, fully-paid, royalty-free, worldwide Commercial license to use, copy, modify, publicly perform, publicly display and reproduce such Products, for both commercial and non-commercial purposes.\" / \"you may not retarget the animations contained in the Products to a different character and sell the retargeted animations\" / \"distribute or sell your own creative works as a binary only\" / \"We reserve the right, in our sole discretion, to make changes or modifications to these Terms of Use at any time and for any reason.\"",
+     "notes": "Re-checked 2026-10-02. All three pricing-page quotes still appear exactly as the register quotes them. Refuted on the sentence \"the terms of service render only in a browser and were not read\": the cited URL is a not-found page, not a browser-only page, and the binding Terms of Use sit at /terms-of-use and read in full without a browser. DeepMotion's server sends gzip bodies whether or not the client asks for them; an undecompressed read shows 5,783 bytes of binary for the 404 page, which is probably the \"script shell\" the 2026-09-30 check recorded. The Terms of Use confirm the first report's \"paid tiers carry a commercial licence\" and add that DeepMotion owns the Products, licenses rather than sells them, forbids stand-alone redistribution and retarget-and-sell, and allows distribution of your own works as a binary only. The plan names in the terms (Starter, Innovator, Professional, Studio, Enterprise) were not matched against the pricing page, whose prices still were not read."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "https://web.archive.org/web/20260925114556id_/https://www.deepmotion.com/pricing-animate3d, https://web.archive.org/web/20260906161052id_/https://www.deepmotion.com/terms-of-use, and the CDX index for deepmotion.com/terms-of-service",
+     "evidence": "Pricing page text identical to the 2026-09-25 capture (167 lines, 0 differing). Terms of Use text identical to the 2026-09-06 capture (192 lines, 0 differing) and self-dated \"Last updated on March 30, 2025\". The CDX index lists no capture of www.deepmotion.com/terms-of-service or deepmotion.com/terms-of-service at any date, so whether that URL was already a 404 page on 2026-09-30 cannot be shown; the register's own evidence (a short shell with no clauses) is consistent with it.",
+     "notes": "Re-checked 2026-10-02. No DeepMotion page changed since the claim date. What changes is the register's description of the terms page and the addition of the readable Terms of Use. Sources should become pricing-animate3d, terms-of-use, and terms-of-service noted as a dead URL."
     }
    ]
   },
@@ -474,7 +700,7 @@
    "status": "corrected",
    "kind": "licence",
    "load_bearing": true,
-   "claim": "As of 2026-09-30, Rokoko's Terms of Use for Studio, Preview and Vision (rokoko.com/terms-of-use-update, \"Effective date: 16 July 2026\") define User Content as content \"that you create/generate using\" the Services, \"including animations\", and say \"we do not claim ownership over any User Content\". They grant \"a limited, revocable, non-exclusive, non-sublicensable, and non-transferable license to use the Services\", and forbid using assets obtained under the agreement to train machine learning or AI models without written consent. No clause restricting commercial use of your own recordings by plan was found in the text read.",
+   "claim": "As of 2026-10-02, Rokoko's Standard Terms of Use (rokoko.com/terms-of-use, where rokoko.com/terms-of-use-update now redirects; \"Effective date: 16 July 2026 (Version 2.0.1)\") cover \"the Rokoko Studio platform\", \"the Rokoko Studio Preview platform\" and \"the Rokoko Create platform located at https://create.rokoko.com/\"; Vision is not named in the terms, and Rokoko's pricing page lists \"Vision AI video processing\" under \"Rokoko Create\". They define User Content as content \"that you create/generate using\" the Services, \"including animations\", say \"we do not claim ownership over any User Content\" and \"You retain all rights to your User Content\", grant \"a limited, revocable, non-exclusive, non-sublicensable, and non-transferable license to use the Services\", and forbid using \"any assets obtained or provided under this agreement for the purpose of developing, training, or enhancing machine learning and/or AI models or algorithms\" without written consent. You grant Rokoko \"a perpetual, worldwide, non-exclusive, royalty-free, sublicensable right to access, use, copy, and modify any intellectual property rights that arise in connection with the User Content, Usage Data and any other Data related to you (if any), strictly for the purposes of providing the Services\". Rokoko may amend the terms \"at any time with 1 (one) month prior notice\", and continued use \"constitutes your consent to such changes\". No clause restricting commercial use of your own recordings by plan was found in the text read. rokoko.com/terms-of-service is the hardware store's terms, a different document.",
    "sources": [
     "https://www.rokoko.com/terms-of-use-update",
     "https://www.rokoko.com/terms-of-service"
@@ -494,6 +720,20 @@
      "read": "https://www.rokoko.com/terms-of-service",
      "evidence": "rokoko.com/terms-of-service is the hardware store's terms (shipping, invoices); the software terms are the separate Terms of Use effective 16 July 2026.",
      "notes": "Refutes part of the first report by conflation: the pricing page's \"use in any of your projects, including commercial ones\" is the Motion Library row, and the store terms are a different document. The claim cites the software terms only."
+    },
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "https://www.rokoko.com/terms-of-use (where rokoko.com/terms-of-use-update now lands), read 2026-10-02 with curl and WebFetch; https://www.rokoko.com/terms-of-service",
+     "evidence": "Title \"Rokoko Services - Standard Terms of Use\"; \"Effective date: 16 July 2026 (Version 2.0.1)\". 1.1: \"We have developed and operate the Rokoko Studio platform located at https://www.rokoko.com/products/studio (Site), the Rokoko Studio Preview platform located at https://www.rokoko.com/products/studio/studio-preview and the Rokoko Create platform located at https://create.rokoko.com/ (Site) which allows users to create, store, and share 3D assets (collectively, with all other services accessible through the Site, referred to as the Services).\" 3.1: \"You are solely responsible for all information and content that you create/generate using, submit to use, or use with or store within the Site and/or Services (including animations, 3D models, images, audio, and related content, as well as user comments) (\\\"User Content\\\"). ... Except as otherwise set forth in the Terms, we do not claim ownership over any User Content.\" 4.1: \"we grant you a limited, revocable, non-exclusive, non-sublicensable, and non-transferable license to use the Services as they are provided to you by us, only as set forth in the Terms.\" 5.4: \"You may not use any assets obtained or provided under this agreement for the purpose of developing, training, or enhancing machine learning and/or AI models or algorithms, whether for commercial or non-commercial purposes, without the explicit written consent of the Company.\" 6.3: \"You retain all rights to your User Content and are responsible for protecting those rights. You hereby grant us a perpetual, worldwide, non-exclusive, royalty-free, sublicensable right to access, use, copy, and modify any intellectual property rights that arise in connection with the User Content, Usage Data and any other Data related to you (if any), strictly for the purposes of providing the Services and to exercise such other rights, which are explicitly set out in these Terms.\" 12.1: \"We reserve the right to amend the terms and conditions of the Terms at any time with 1 (one) month prior notice. The most recent version of the Terms may be found at https://www.rokoko.com/services-terms-of-use.\" The word \"Vision\" occurs in the terms text zero times; its four occurrences on the page are site navigation (\"Rokoko Vision (AI mocap)\", \"New Vision AI 3.0: Better quality, faster processing\", \"Vision AI\"). rokoko.com/terms-of-service: title \"Rokoko - Terms\", heading \"Rokoko Terms of Service\", hardware store terms (\"All hardware products ordered on www.rokoko.com are shipped through the service of a third-party logistics provider\", \"the commercial invoice of the package\", a 30-day returns policy).",
+     "notes": "Re-checked 2026-10-02. Every clause the register quotes is still on the page as quoted, in the same version (2.0.1, 16 July 2026), and no clause restricting commercial use of your own recordings by plan was found again. Refuted on one point: the claim calls them \"Terms of Use for Studio, Preview and Vision\", which says more than the page. Clause 1.1 names the Rokoko Studio, Rokoko Studio Preview and Rokoko Create platforms; Vision is not named anywhere in the terms. Rokoko's pricing page lists \"Vision AI video processing\" under a \"Rokoko Create:\" heading, which is the pricing page's framing of where Vision sits, not the terms'. The store terms remain a different document, as the register says."
+    },
+    {
+     "lens": "drift",
+     "verdict": "refuted",
+     "read": "Redirect chain from https://www.rokoko.com/terms-of-use-update (curl, no redirect following, per hop); https://www.rokoko.com/services-terms-of-use; https://web.archive.org/web/20260928054051id_/https://www.rokoko.com/terms-of-service; CDX index for terms-of-use-update, terms-of-use and services-terms-of-use",
+     "evidence": "rokoko.com/terms-of-use-update answers 301 to /studio-term-of-use, which answers 301 to /studio-terms-of-use, which answers 301 to /terms-of-use (200). rokoko.com/services-terms-of-use, the address clause 12.1 gives, also lands on /terms-of-use with the same body (0 differing lines from the effective-date line onward). The terms body is the version the register recorded. The store terms are identical to the 2026-09-28 capture except for one site banner line (\"Save 40% with the new Creator Bundle\" became \"Explore our bestselling motion capture bundles\"). The CDX index lists no capture of terms-of-use-update or terms-of-use at any date, and captures of services-terms-of-use on 2026-06-14 and 2026-08-13 only, so when the redirect appeared cannot be shown.",
+     "notes": "Re-checked 2026-10-02. The terms text did not drift; the URL the register cites no longer serves it directly. The register's sources and the note's two links to rokoko.com/terms-of-use-update should point at rokoko.com/terms-of-use. Also worth carrying: 1.5 \"Your continued use of the Services (or any User Content downloaded from the Services) constitutes your consent to such changes\"."
     }
    ]
   },
@@ -514,6 +754,20 @@
      "read": "https://www.rokoko.com/pricing",
      "evidence": "\"Starter / $ 0 free forever / ... Export to .FBX / Rokoko Create: Vision AI video processing: 30s/month\" / \"Basic / Optimized for AI mocap / $ 10/m billed annually / ... Import & retarget custom characters / Export to .BHV + advanced options / Smoothing filter & loop segments / ... Vision AI video processing: 600s/month\".",
      "notes": "The page spells BVH \"BHV\" in one place."
+    },
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://www.rokoko.com/pricing, read 2026-10-02 with curl and WebFetch",
+     "evidence": "Plan cards: \"Starter / Get started with Studio / $0 / free forever / ... / Export to .FBX / Rokoko Create: / Vision AI video processing: 30s/month\"; \"Basic / Optimized for AI mocap / $10/m / billed annually / All Starter features, plus: / Import & retarget custom characters / Export to .BHV + advanced options / Smoothing filter & loop segments / Rokoko Create: / Vision AI video processing: 600s/month (30s during trial)\"; \"Plus / Optimized for hardware tools / $20/m / billed annually / ... / Vision AI video processing: 3000s/month (30s during trial)\"; \"Pro / Access all features / $50/m / billed annually / ... / Export to .CSV / ... / Vision AI video processing: 15000s/month (30s during trial)\"; \"Enterprise / Access custom solutions / $100/m / starting from\". Feature table: \"Visualize your motion capture animations on other meshes (default ones for \\\"Starter\\\" plan, custom meshes for \\\"Plus\\\" plans and above)\". FAQ: \"Rokoko Studio exports to .FBX (all plans) and .BVH (Plus and Pro plans). ... CSV export is available on Pro and Enterprise plans.\" and \"Paid plans unlock BVH and CSV exports, unlimited Vision AI capture\".",
+     "notes": "Re-checked 2026-10-02. Fact claim, so this is the fact check. Every figure in the claim is on the page as stated, and the \"BHV\" spelling persists. Two cautions the register does not record: the paid cards add \"(30s during trial)\" after the Vision seconds, and the page contradicts its own Basic card elsewhere, with the feature table placing custom meshes at \"Plus\" plans and above and the FAQ placing BVH export on \"Plus and Pro plans\". The claim, and the note's \"BVH export starts at $10 a month billed annually\", rest on the Basic card alone; only Rokoko or a purchase settles which is right."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "https://web.archive.org/web/20260928054054id_/https://www.rokoko.com/pricing against the live page, as text with link targets stripped",
+     "evidence": "608 lines in each; the only differing line is the site banner (\"Save 40% with the new Creator Bundle\" became \"Explore our bestselling motion capture bundles\"). Every plan card, price, seconds figure and feature line is identical to the 2026-09-28 capture.",
+     "notes": "Re-checked 2026-10-02. Same verdict as the fact check, per the task's rule for fact claims. The claim's date can move to 2026-10-02."
     }
    ]
   },
@@ -534,6 +788,20 @@
      "read": "https://plask.ai/pricing",
      "evidence": "\"FREEMIUM Free ... Motion Capture 15 Seconds daily limit ... FBX, GLB, BVH Export\" / \"STANDARD $18/month billed yearly ... Motion Capture 10 Minutes a month\" / \"PRO $50/month billed yearly ... Motion Capture 1 Hour a month\".",
      "notes": ""
+    },
+    {
+     "lens": "text",
+     "verdict": "confirmed",
+     "read": "https://plask.ai/pricing, which redirects to https://plask.ai/en-US/pricing (title \"Pricing | Plask Motion\"), read 2026-10-02 with curl and WebFetch",
+     "evidence": "\"FREEMIUM / Free / billed yearly / For beginners to explore AI motion capture / ... / Motion Capture / 15 Seconds daily limit / ... / FBX, GLB, BVH Export\"; \"STANDARD / $18/month / billed yearly / ... / Motion Capture / 10 Minutes a month / ... / FBX, GLB, BVH Export\"; \"PRO / $50/month / billed yearly / ... / Motion Capture / 1 Hour a month / ... / FBX, GLB, BVH Export\". No line on the page mentions commercial, non-commercial, personal or licence, and the page carries no link to any terms.",
+     "notes": "Re-checked 2026-10-02. Fact claim, so this is the fact check. Every figure and the export line on all three tiers are on the page as the claim states them. The \"billed yearly\" label also sits under the free tier, an artefact of the annual/monthly toggle."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "The 2025-04-18 capture (rendered HTML) against the live page, and the 2026-01-29 capture (a Next.js data payload rather than rendered HTML) grepped for the plan strings",
+     "evidence": "2025-04-18 capture: the only differing lines are five navigation links; all plan text identical. 2026-01-29 capture: contains \"FREEMIUM\", \"15 Seconds daily limit\", \"$18/month\", \"10 Minutes a month\", \"$50/month\", \"1 Hour a month\" and \"FBX, GLB, BVH Export\". The CDX index lists no capture between 2026-02-11 and today, so no capture from late September 2026 exists; the Internet Archive answered several index queries with its \"Temporarily Offline\" page during this check.",
+     "notes": "Re-checked 2026-10-02. Same verdict as the fact check. The plan text has been the same since at least 2025-04-18. The claim's date can move to 2026-10-02."
     }
    ]
   },
@@ -542,10 +810,26 @@
    "status": "unverifiable",
    "kind": "licence",
    "load_bearing": false,
-   "claim": "As of 2026-09-30, the terms governing commercial use of Plask and Move.ai output could not be read. Plask's candidate terms URLs answered 404, and Move.ai's terms page (move.ai/terms-of-use) is an index of separate EULAs that render only in a browser. Search-engine summaries say Plask's free plan is for personal non-commercial use; that was not checked.",
+   "claim": "As of 2026-10-02, Plask's Terms of Service are at plask.ai/en-US/docs/100002 (\"Terms of Service\", PLASK USA INC., \"Last Updated: April 5, 2023\"); plask.ai/terms, /terms-of-service, /terms-of-use and /policy/terms, bare and under /en-US/, answer \"404: This page could not be found.\", and neither the home page nor the pricing page links the terms. They say \"The Service is owned by Plask and its licensors. You may only utilize the Service for personal non-commercial use.\"; the Service licence is \"limited, revocable, personal, non-commercial, non-transferable, non-assignable, non-sublicensable and non-exclusive\"; \"User Videos include Plask IP. The Company grants you a limited, revocable, personal, non-exclusive, non-transferable, worldwide license to utilize the Plask IP in and as a part of the User Videos and their distribution in all media.\"; \"Except as specifically provided in these TOS, You will not utilize or allow others to utilize Plask IP for commercial purposes including without limitation copying, transmitting, publishing, distributing, broadcasting, streaming or other methods without the prior written consent of the Company in our sole discretion. Notwithstanding the foregoing, posting User Videos on your personal social media channels will not constitute a commercial purpose under these TOS.\"; and \"Paid Users who subscribe to the Commercial subscription plan (\\\"Commercial Users\\\") will receive a non-exclusive, royalty-free, worldwide license to use, copy, modify, publicly perform, publicly display and reproduce the Plask IP (defined under Intellectual Property Rights below) worldwide in and as a part of the User Videos and their distribution in all media for commercial and non-commercial purposes.\" \"You retain full ownership of all User IP\", where User IP is what \"you provide to us\". The pricing page lists Freemium, Standard and Pro and no plan called Commercial, the terms carry an unfilled \"[NUMBER OF HOURS]\" placeholder, and they speak of \"User Videos\" and NFTs, never of FBX, GLB or BVH exports; which plan, if any, is the \"Commercial subscription plan\" is not established. Plask \"may modify these TOS, at our sole discretion, without your consent, effective immediately upon posting\". Move.ai's terms page (move.ai/terms-of-use) is an index of ten EULAs and policies, each readable without a browser. Under the Move One App EULA (move.ai/move-one-app-eula; the Move Pro EULA and the two Move Pro for Desktop cloud-processing EULAs carry the same clauses), the Output is \"the motion capture files (and their content) that is provided to you by us through the App\"; \"Move AI owns and shall retain ownership of all Intellectual Property Rights in and to ... the Motion Data, Output, and any feedback/comments provided by you\", with an assignment to Move AI of any such rights that vest in you; and \"Subject to clause 7.5, Move AI hereby grants to you a worldwide, royalty-free, fully paid-up, non-exclusive transferable, sublicensable licence of all Intellectual Property Rights it owns in the Output with effect from the date of their creation.\" That licence is void on any \"Prohibited Use\", meaning use \"(i) to create a product that competes with any product or system of Move AI or with Move AI's business generally; (ii) to train any AI System ...; and/or (iii) as an input for any AI System (whether or not to train or fine-tune the same) other than solely for purposes of creation of an original video work for your own use and/or commercialisation\", and a sublicensee must accept terms \"materially the same as (and no less onerous than)\" the EULA. You grant Move AI a perpetual, irrevocable licence over your Video Data and Materials for \"the development, training and improvement of our products, technologies, systems and services\". No clause tying commercial use of Output to a paid account was found; clause 8 only exempts a \"free account\" from fees. The Move Pro For Desktop (Local Processing) EULA differs: \"you shall own and shall retain ownership of any Intellectual Property Rights: (i) in the Materials; and (ii) first created by you, or any Authorised User on your behalf, in and to any Output.\" Neither service's terms have been through a licence audit.",
    "sources": [
     "https://plask.ai/pricing",
     "https://move.ai/terms-of-use"
+   ],
+   "checks": [
+    {
+     "lens": "text",
+     "verdict": "refuted",
+     "read": "https://plask.ai/en-US/docs/100002 (found by web search; not linked from plask.ai or its pricing page), the eight candidate Plask terms URLs, https://move.ai/terms-of-use and the seven EULA pages it links, all read 2026-10-02 with curl, the first and the index also with WebFetch",
+     "evidence": "Plask: the candidate URLs plask.ai/terms, /terms-of-service, /terms-of-use and /policy/terms, bare and under /en-US/, each answer \"404: This page could not be found.\" The Terms of Service page is titled \"Terms of Service\", headed \"PLASK USA INC.\", dated \"Last Updated: April 5, 2023\" (the docs site stamps it \"Jaejun You | 2023-09-23\"), and says: \"The Service is owned by Plask and its licensors. You may only utilize the Service for personal non-commercial use. You may not sell or transfer the Service, or any content or digital items within the Service, to anyone else.\" / Service licence \"(a) limited, revocable, personal, non-commercial, non-transferable, non-assignable, non-sublicensable and non-exclusive\" / \"User Videos include Plask IP. The Company grants you a limited, revocable, personal, non-exclusive, non-transferable, worldwide license to utilize the Plask IP in and as a part of the User Videos and their distribution in all media.\" / \"Except as specifically provided in these TOS, You will not utilize or allow others to utilize Plask IP for commercial purposes including without limitation copying, transmitting, publishing, distributing, broadcasting, streaming or other methods without the prior written consent of the Company in our sole discretion. Notwithstanding the foregoing, posting User Videos on your personal social media channels will not constitute a commercial purpose under these TOS.\" / \"Notwithstanding anything to the contrary in these TOS, Paid Users who subscribe to the Commercial subscription plan (\\\"Commercial Users\\\") will receive a non-exclusive, royalty-free, worldwide license to use, copy, modify, publicly perform, publicly display and reproduce the Plask IP (defined under Intellectual Property Rights below) worldwide in and as a part of the User Videos and their distribution in all media for commercial and non-commercial purposes.\" / \"You retain full ownership of all User IP.\" / \"We may modify these TOS, at our sole discretion, without your consent, effective immediately upon posting of the revised TOS\". The text also carries an unfilled placeholder: \"Paid users will receive a minimum of [NUMBER OF HOURS] of motion capture processing time per month.\" Move.ai: move.ai/terms-of-use is an index linking Move Live EULA, Move Pro Acceptable Use Policy, Creator Policies, Move Pro EULA, Move One API EULA, Move One Acceptable Use Policy, Move One App EULA, Move Pro For Desktop (Local Processing), Move Pro For Desktop (Cloud Processing), Move Pro For Desktop Self Serve (Cloud Processing) and Privacy Policy; each EULA answered 200 with 60 to 72 KB of HTML and 42,000 to 56,000 characters of text to curl. Move One App EULA: 2.3 \"the motion capture files (and their content) that is provided to you by us through the App (the \\\"Output\\\")\"; 7.1.2 \"Move AI owns and shall retain ownership of all Intellectual Property Rights in and to the App and the Documentation and any and all content, information, data and know-how obtained or developed in connection with the provision or use of the App and the Documentation, including the Motion Data, Output, and any feedback/comments provided by you or on your behalf in relation to the App and the Documentation. You hereby assign (including by way of present assignment of future rights) to Move AI any and all Intellectual Property Rights in the foregoing that vest, vested or in future will vest in you or any other Contributor upon creation with effect from that date\"; 7.2 grants Move AI \"a worldwide, royalty-free, fully paid-up, non-exclusive, perpetual, irrevocable, transferable, sub-licensable licence to copy, display, communicate, adapt, edit, and otherwise use the Video Data and the Materials for the provision of the App and related services and/or the development, training and improvement of our products, technologies, systems and services\"; 7.3 \"Subject to clause 7.5, Move AI hereby grants to you a worldwide, royalty-free, fully paid-up, non-exclusive transferable, sublicensable licence of all Intellectual Property Rights it owns in the Output with effect from the date of their creation.\"; 7.5.2 \"use or permit any other person to use (whether directly or indirectly) any Output or any copy, extract or modified or derivative version of it for any Prohibited Use. Non-compliance with this clause 7.5 shall immediately render the licence at clause 7.3 (and any sublicence granted under it) void.\"; \"Prohibited Use means use: (i) to create a product that competes with any product or system of Move AI or with Move AI's business generally; (ii) to train any AI System (e.g., to enable it to perform new tasks or better perform existing tasks, or to alter or improve its operation, accuracy, efficiency, effectiveness, reliability, usability or scope of use); and/or (iii) as an input for any AI System (whether or not to train or fine-tune the same) other than solely for purposes of creation of an original video work for your own use and/or commercialisation\"; 7.6 \"we shall not Sell any Output, Video Data, Motion Data and/or Materials.\" The Move Pro EULA carries the same 7.1 to 7.3 text, and the two Move Pro for Desktop cloud-processing EULAs the same ownership clause at 8.1.2. Move Pro For Desktop (Local Processing) EULA 6.1.2: \"subject to clause 6.1.1, you shall own and shall retain ownership of any Intellectual Property Rights: (i) in the Materials; and (ii) first created by you, or any Authorised User on your behalf, in and to any Output.\" The only free-account clause in the Move One App EULA is 8.1, which exempts \"a guest account or any other free-to-use account (\\\"free account\\\")\" from the fees provisions.",
+     "notes": "Re-checked 2026-10-02. Refuted on readability: Plask's terms exist and read without a browser at a URL the first check did not find, and every Move.ai EULA renders to curl, so \"render only in a browser\" no longer holds for either. The candidate-URL 404s still hold. Conflicts to record: Plask's pricing page lists Freemium, Standard and Pro and no plan called Commercial, so which plan, if any, is the \"Commercial subscription plan\" is not established; the Plask terms speak of \"User Videos\" and NFTs and never of FBX, GLB or BVH exports, so what they say about an exported animation file is a reading, not a clause. Under Move One, Move Pro and the cloud desktop EULAs the Output's intellectual property belongs to Move AI and you hold a broad licence that is void on any Prohibited Use; under the local-processing desktop EULA you own the Output. No clause tying commercial use of Move.ai Output to a paid account was found. This recheck quotes the clauses; it is not the licence-audit pass, which the owner may want before any page states a verdict on either service."
+    },
+    {
+     "lens": "drift",
+     "verdict": "confirmed",
+     "read": "https://web.archive.org/web/20260611003338id_/https://move.ai/terms-of-use and https://web.archive.org/web/20260608091912id_/https://move.ai/move-one-app-eula against the live pages; CDX index for move.ai/move-one-app-eula and move.ai/move-pro-eula; the Plask captures listed under VMC-023",
+     "evidence": "Move.ai index: 58 lines, identical to the 2026-06-11 capture. Move One App EULA: 243 lines, identical to the 2026-06-08 capture (the 2025-02-17 capture differs in site navigation and footer lines in what was compared, not in the clauses shown). The CDX index shows the Move One App EULA captured as HTTP 200 on 2025-02-17, 2025-05-22, 2025-10-06, 2026-02-09, 2026-05-12 and 2026-06-08, and the Move Pro EULA on eight dates from 2025-02-17 to 2026-06-08, so the EULAs were being served as readable pages long before 2026-09-30. Plask pricing identical to its 2025-04-18 capture apart from navigation links. The CDX queries for plask.ai/en-US/docs/100002 and move.ai/move-pro-for-desktop-local-processing-eula returned the Internet Archive's \"Temporarily Offline\" page, so those two pages are dated only by their own text (\"Last Updated: April 5, 2023\" for Plask; the Move.ai EULAs carry no date beyond a 2026 copyright footer).",
+     "notes": "Re-checked 2026-10-02. No page changed since the claim date. The 2026-09-30 check's \"render only in a browser\" was a reading failure, not a page state. What changes is the register's wording, which should now carry the clauses."
+    }
    ]
   },
   {
