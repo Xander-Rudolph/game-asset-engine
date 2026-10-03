@@ -1,14 +1,19 @@
 # The whole pipeline in one graph
 
-::: tip Status: built, checked in the editor, and run on 2026-09-30
+::: tip Status: built, checked in the editor, and run on 2026-09-30, 2026-10-02 and 2026-10-03
 `asset_workflow.json` was opened in ComfyUI's editor (frontend 1.47.12) in the
 packaged container, built from this repo's Dockerfile with the node packs
-below. Its stage panel, relays and switches were driven there, and the prompt the
-editor would send was captured with the submit call stubbed out, for fourteen
-combinations of stages, then checked against the server's node definitions. Four
-runs were then queued from the editor on the reference machine: Concept, fast;
-Edit, twice, from its picker; TRELLIS and Turntable from a picked edit; and
-Concept, Edit and TRELLIS as one queue. All four finished; the figures are under
+below. On 2026-10-02 its stage panel, relays and switches were driven there for
+twenty combinations of stages, and the prompt the editor would send was captured
+with the submit call stubbed out, then checked against the server's node
+definitions; on 2026-10-03, after the picks were added, six combinations were
+captured and checked again. Seven runs have been queued on the reference
+machine: on 2026-09-30, Concept, fast; Edit, twice, from its picker; TRELLIS and
+Turntable from a picked edit; and Concept, Edit and TRELLIS as one queue; on
+2026-10-02, Rig on a saved TRELLIS mesh, and Animate, which ran once given the
+owner's 20-step route without the 4-step LoRAs, at 480x640, after four
+out-of-memory failures with the LoRAs on; on 2026-10-03, Concept, fast, and Edit
+as one queue with two takes each, pausing for the pick. The figures are under
 [Measured runs](#measured-runs). Concept, full, Simplify, the Hunyuan3D mesh and
 Texture have not been queued from this graph. `complete_workflow.json` was built
 by the owner, and the prompt for each of its seven flows was captured and checked
@@ -18,9 +23,10 @@ the same way; it has not been run here.
 Two graphs are made for the editor rather than for `run_workflow.py`, and both
 open from the sidebar under **Workflows**:
 
-- **`asset_workflow.json`** is the pipeline in one graph: a prompt at the top,
-  a panel that switches stages on and off, and every stage from concept to
-  turntable, wired so that each one hands over to the next.
+- **`asset_workflow.json`** is the pipeline in one graph: the prompts at the
+  top, a panel that switches stages on and off, a row of pickers for picking a
+  run up at any stage, and every stage from concept to a rig and a video, wired
+  so that each one hands over to the next.
 - **`complete_workflow.json`** is the owner's image and video graph on Phr00t's
   Qwen-Image-Edit Rapid AIO merge and Wan 2.2, one flow at a time off a shared
   image and prompt.
@@ -29,13 +35,66 @@ open from the sidebar under **Workflows**:
 
 ### Using it
 
-1. Write the subject in **Prompt**. It feeds both Concept stages.
+1. Write the subject in **Prompt**. It feeds both Concept stages. **Edit
+   instruction** feeds Stage 2 and **Motion prompt** Stage 8. **Takes** is how
+   many images each of Stages 1 to 3 makes per queue; two when the graph opens.
 2. Switch stages on in the **Stages** panel. Only Stage 1, fast, is on when the
    graph opens. The arrow on each row jumps to that stage.
-3. Queue.
+3. To start anywhere but Concept, pick that stage's input in the **Stage
+   inputs** row under the prompts. There is one picker per stage, in stage
+   order, and the pickers lit up are exactly the ones the next queue reads.
+4. Queue. When an image stage has a stage below it on, the queue pauses after
+   it and shows the takes: click the one to carry on with, then **Send**.
 
 With Concept, Edit and Mesh all on, one queue goes from the prompt to a saved
-mesh.
+mesh, pausing twice for you to choose. With every stage on one path on, it goes
+on to a rigged FBX and a video.
+
+::: warning Open it in a fresh tab, not over another graph with relays in it
+rgthree's relays poll their inputs every 500 ms and never stop, even after the
+graph they belong to has been replaced in the tab, and they act through link
+ids, which a newly loaded graph numbers afresh. On 2026-10-02, with an older
+copy of this graph loaded first into the same tab, its relays went on running
+and muted a switch of the new graph, which then vanished from the prompt; on
+2026-10-03 the same thing muted the CLIP broadcaster, and every text encoder
+was sent without a CLIP. Read in `node_mode_relay.js` at the commit the
+Dockerfile pins: `stabilize()` reschedules itself and never checks that its node
+is still in a graph. Seen when a graph is loaded into a tab in place of another;
+whether switching between workflow tabs is safe was not checked. Open this
+graph in a new tab, and if nodes mute themselves for no reason, reload the page.
+:::
+
+### Picking a take
+
+Each image stage, 1 to 3, makes **Takes** images per queue and saves them all.
+Behind each sits an **Image Filter**, from cg-image-filter, that passes on only
+the take you choose. The server runs it only when something below it is on, so:
+
+- A stage with nothing below it on never pauses. Queue Concept alone and you get
+  its takes, saved and listed in the pickers.
+- With a stage below on, the queue pauses after each image stage. A window
+  shows the takes; click one (its border turns green), press **Send** or Enter,
+  and the chosen take goes on to the next stage. **Cancel** or Escape stops the
+  queue. Left alone for an hour it carries on with the first take, so an
+  unattended queue still finishes. Clicking two sends both; Mesh and Animate
+  expect one.
+- The takes are the stage's saved files, so a take you did not choose is still
+  there for the Stage inputs row later.
+- Click exactly one. In the run under [Measured runs](#measured-runs), driven
+  from a script, the window already held the first take as picked before
+  anything was clicked, for a reason not found, and reported both as picked
+  after the second was clicked; Edit then made its two takes from the second
+  concept only. What two green takes send on was not established.
+
+The Concept stages get their takes from the latent batch size; Edit and
+Simplify repeat the encoded source that many times before sampling, so each
+take is a new seed on the same input.
+
+The Image Filter node comes from cg-image-filter, which the Dockerfile added on
+2026-10-02. An image published before that lacks it, and the editor then opens
+this graph with four missing nodes; the stages still run, but nothing pauses
+and nothing flows between them. Rebuild the image, or clone the pack into
+`custom_nodes/` at the commit the Dockerfile pins and restart.
 
 ### The stages
 
@@ -44,28 +103,45 @@ holds here too.
 
 | Stage | Built from | Saves |
 |---|---|---|
-| 1. Concept, fast | `txt2img_qwen_fast.json` | `output/asset_concept_fast_NNNNN_.png` |
-| 1. Concept, full | `txt2img_qwen.json` | `output/asset_concept_NNNNN_.png` |
-| 2. Edit | `img_edit_qwen.json`, instruction from **Edit instruction** | `output/asset_edit_NNNNN_.png` |
-| 3. Simplify | `preset_simplify_concept.json` | `output/asset_simplify_NNNNN_.png` |
+| 1. Concept, fast | `txt2img_qwen_fast.json`, **Takes** per queue, then a pick | `output/asset_concept_fast_NNNNN_.png`, one per take |
+| 1. Concept, full | `txt2img_qwen.json`, the same | `output/asset_concept_NNNNN_.png` |
+| 2. Edit | `img_edit_qwen.json`, instruction from **Edit instruction**, **Takes** per queue, then a pick | `output/asset_edit_NNNNN_.png` |
+| 3. Simplify | `preset_simplify_concept.json`, the same | `output/asset_simplify_NNNNN_.png` |
 | 4. Mesh, TRELLIS | `img2mesh_trellis.json` | `output/mesh/TRELLIS_<date>.glb` |
 | 4. Mesh, Hunyuan3D 2.1 | `img2mesh_hunyuan3d21.json` | `output/mesh/Hunyuan21_<date>.glb` |
 | 5. Texture | `mesh_texture_hunyuan3d21.json` | `output/mesh/textured_<date>.glb` |
 | 6. Turntable | `mesh_render_sprites.json` | `output/sprites/asset_NNNNN_.png` |
+| 7. Rig | `mesh_rig_unirig.json`, with `fbx_name` set to `rigged/asset` | `output/rigged/asset_articulationxl.fbx` |
+| 8. Animate | `img2video_wan22.json`, motion from **Motion prompt** | `output/video/asset_animate_NNNNN_.webm` and `.webp`, and the last frame as `output/asset_animate_last_NNNNN_.png` |
 
-Rigging is not a stage. UniRig reads a saved file from a list, so it cannot be
-wired onto the end of a graph; use `mesh_rig_unirig.json` on the saved mesh, as
-[Rigging](/guide/rigging) describes.
+**Rig** is a stage although UniRig's loader offers a list of files. The list
+only binds a path that is typed in: the server checks a value against a list
+only then, and a path wired into `file_path` from another node is passed
+through, after which the node joins it onto the source folder, where an
+absolute container path wins. Here the Mesh or Texture stage's saved path, or
+the Rig picker's path box, is wired in, so the mesh need not be on any list.
+Its skeleton is `articulationxl`, whose bones are `bone_0` to `bone_N`;
+`scripts/bone_roles.py map` names them, as [Rigging](/guide/rigging) explains.
+A rig made this way overwrites the last one, because the name is fixed.
+
+**Animate** makes five seconds of video of the image with Wan 2.2's two 14B
+experts, as [its graph](/reference/workflows) does. Its defaults are the
+settings that ran here: 480x640, 20 steps, cfg 3.5, with the lightx2v 4-step
+LoRAs in the graph at strength 0, which the server skips. With them at strength
+1, and the samplers at 4 steps, cfg 1 and a split at step 2, the reference card
+ran out of GPU memory four times on 2026-10-02; see [Memory](#memory). Write the
+motion in **Motion prompt**, not the subject again.
 
 ### How a stage finds its input
 
 Each stage takes its input from the **nearest stage above it that is on**. Edit
 reads a Concept stage, Simplify reads Edit, or a Concept stage if Edit is off,
 and so on down. Texture reads the mesh the Mesh stage saved and the same image
-the Mesh stage used, and Turntable reads Texture's mesh, or a Mesh stage's.
+the Mesh stage used; Turntable and Rig read Texture's mesh, or a Mesh stage's;
+Animate reads the same image stages as Mesh does.
 
 A stage with no stage above it switched on reads its own **picker** instead, in
-the column to the left of its group:
+the **Stage inputs** row under the prompts:
 
 - An image stage's picker is **Load Image (from Outputs)**. It lists the top of
   `output/`, newest first, and its refresh arrow selects the newest file. You can
@@ -73,25 +149,35 @@ the column to the left of its group:
 - A mesh stage's picker is a path box holding a container path, such as
   `/app/output/mesh/asset.glb`.
 
+A picker is muted whenever it would not be read: while any stage above it is
+on, so that an empty picker never stops a chained run, and while its own stage
+is off. The pickers lit up are therefore exactly the ones the next queue reads.
+
 That is why the image stages save to the top of `output/` rather than into a
-subfolder. The server lists that folder with `os.scandir`, which does not look
-into subfolders, and sorts it by modification time, newest first. That was read
-in the server code of this image, not run.
+subfolder, and the mesh, rig and video stages into subfolders. The server lists
+that folder with `os.scandir`, which does not look into subfolders, sorts it by
+modification time, newest first, and lists every file there, not only images;
+on 2026-10-02 an FBX at the top of `output/` appeared in the image pickers.
 
 The choosing is done by rgthree's **Any Switch**, which passes on the first of its
 inputs that is present. A muted stage sends nothing, so the switch falls through
-to the next stage up, and last to the picker. A picker must not be checked while a
-live stage feeds its switch, or an empty picker would stop the whole queue, so an
-rgthree relay mutes the picker whenever any stage above it is on. It is the same
-device `complete_workflow.json` uses for its input image.
+to the next stage up, and last to the picker. The muting is done by rgthree's
+relays, which can only say "mute when any input is active, activate when all are
+muted". The first rule is one relay watching the stages above. The second needs
+an inverter: a relay watching the stages that read the switch drives a **flag**
+node that is active exactly while they are all off, and the picker's relay
+watches the stages above and that flag together. The flag is a string nobody
+reads, so the server never runs it. It is the same device
+`complete_workflow.json` uses for its input image, used twice.
 
 ### Running one step as often as you like
 
 Switch on only the stage you want. With nothing above it on, it reads its picker:
-pick the image to work from, and queue as many times as it takes. Every seed here
-is set to randomise, so each queue is a new take. When one is right, switch that
-stage off and the next one on. The next stage's picker refresh arrow selects the
-newest file, which is the take you just made, or you can pick an earlier one.
+pick the image or path to work from, and queue as many times as it takes. Every
+seed here is set to randomise, so each queue is a new take. When one is right,
+switch that stage off and the next one on. The next stage's picker refresh arrow
+selects the newest file, which is the take you just made, or you can pick an
+earlier one.
 
 To edit an edit, pick the last edit in Edit's own picker and queue again.
 
@@ -103,7 +189,9 @@ which is never muted, and a loader there runs only when a stage that is on needs
 it: the Qwen text encoder, the Qwen VAE, and the Qwen-Image-Edit 2509 model that
 Edit and Simplify both use. The encoder and VAE reach each stage through a
 **Use Everywhere** node each, so their wires are not drawn; that node fills every
-unwired input of its type when the prompt is sent.
+unwired input of its type when the prompt is sent. The Animate stage's umT5
+encoder and Wan VAE are wired in the ordinary way inside that stage, so Use
+Everywhere leaves them alone; the captured prompts confirm it.
 
 ### Memory
 
@@ -117,12 +205,59 @@ On the reference machine's 16 GB card and 31 GB of RAM:
   pipelines outside ComfyUI's model management. That is what the texture graph's
   own note says; it was not re-measured for this graph. Run Mesh, restart
   ComfyUI, then run Texture with Mesh off.
+- Rig runs in UniRig's own worker process, which held 5,544 MiB of VRAM after
+  the run (nvidia-smi, 2026-10-02). That needs no purging before Animate:
+  comfy-env registers the worker's models with ComfyUI's memory manager, so when
+  Animate asks for the Wan expert, ComfyUI evicts them over the worker's socket
+  along with its own text encoder and VAE. The worker's log shows that within
+  70 ms of "Requested to load WAN21", and Animate got the same weight budget
+  whether the worker was loaded or the card free beforehand: 6,157 and 6,151 MB
+  usable. Only the worker's CUDA context stays, 474 MiB. Read in comfy-env 0.4.1
+  and ComfyUI's `model_management.py`, and in that day's logs. By hand,
+  `scripts/run_workflow.py --free` and the editor's **Unload Models** entry (the
+  ComfyUI menu at the top of the left sidebar, then Edit) do the same, with one
+  read-not-run caveat: after a second Rig run in the same worker the models are
+  not re-registered, so neither reaches them until the worker is replaced.
+- Animate with the 4-step LoRAs on ran out of GPU memory on the empty card as
+  well, four times on 2026-10-02: at 624x832 in the forward pass, after the
+  expert had loaded with 5,976 MB on the card and 7,655 MB offloaded; and at
+  480x640 twice while merging the LoRA into the fp8 weights, once with the umT5
+  encoder moved to the CPU, which did not help. The card was as empty as it
+  gets each time: ComfyUI's "usable" figure is the free VRAM minus a reserve it
+  keeps for the latent, 8,251 MiB at 624x832 and 81 frames and 5,045 MiB at
+  480x640, and both figures back-solve to about 14.4 GB free. Merging a LoRA
+  into fp8-scaled weights dequantises each weight on the card and re-rounds it
+  through an eager fallback that allocates about a dozen weight-sized
+  temporaries, which the loader's fit test does not count, so anything freed
+  beforehand only loads more weights to merge. Without the LoRAs, at 480x640 and
+  20 steps, the stage finished: the expert loaded with 9,259 MB on the card and
+  4,372 MB offloaded, VRAM peaked at 14,876 MiB, the container at 21.7 GiB, the
+  host never fell below 17 GiB available, and Docker reported no out-of-memory
+  kill. On a 16 GB card leave the LoRAs at strength 0. What would bring 4 steps
+  back is a pre-merged 4-step checkpoint, which has nothing to patch, a larger
+  `--reserve-vram` in the compose command, or the Wan 2.2 5B model; none was
+  tried here, and `research/untested.md` lists them.
 
 ### Licences
 
 Each stage carries its base graph's licence. The two Hunyuan3D stages are under a
-licence that excludes the EU, the UK and South Korea; TRELLIS is MIT. See
-[Licensing](/guide/licensing). This graph uses no pose preprocessor.
+licence that excludes the EU, the UK and South Korea; TRELLIS is MIT; Wan 2.2,
+its encoder, VAE and the 4-step LoRAs are Apache-2.0. The picks run on
+cg-image-filter, Apache-2.0, pinned in the Dockerfile at `1602dbe`; its licence
+file was read at that commit on 2026-10-02. See [Licensing](/guide/licensing).
+This graph uses no pose preprocessor.
+
+### From the video to the rig
+
+Animate makes a video of the character moving. Rig makes a skeleton with no
+motion on it. Nothing in this image joins the two: no node here extracts motion
+from a video, and UniRig's Apply Animation node takes Mixamo clips only, onto a
+rig made with the `mixamo` template, which the Rig stage does not use. What a
+video-to-motion step would take, and what each candidate's licence allows, is in
+[Video to 3D motion](/reference/video-mocap); which route to trial is an open
+decision in `research/untested.md`. Until one is built, the video is for looking
+at, for a final frame to feed back as a concept, and for a capture service or
+model that is chosen later.
 
 ### Rebuilding it
 
@@ -145,34 +280,51 @@ adds a file name it lacks, so open a rebuilt graph there by hand, as
 
 ### What was checked, and how
 
-All on 2026-09-30, in the packaged container on this branch's image, on the copy
-of the graph the entrypoint seeded into the `comfy-user` volume, through
-Playwright driving the editor. None of it generated anything.
+All on 2026-10-02, in the packaged container on this branch's image, on the
+rebuilt graph served to the editor from `input/`, through Playwright driving
+the editor. None of it generated anything.
 
-- The graph loads with its 86 nodes and 102 links. The Stages panel lists the
-  eight stage groups and not Inputs or Models, and each group holds exactly its
-  own nodes.
-- Fourteen combinations of stages were switched through the panel's own toggles:
-  each stage alone, and six chains from Concept, Edit and TRELLIS to every stage
-  on at once. With the editor's submit call replaced by a stub, the prompt it
-  would send was captured each time. In every one, each of the five pickers was
-  muted exactly when a stage above it was on, and each switch's first input was
-  the nearest stage above that was on, or its picker. Use Everywhere filled every
-  CLIP and VAE input of every node sent, reached no other input, and left no drawn
-  wire behind. The server's queue stayed empty throughout.
-- All fourteen prompts passed `scripts/validate_workflows.py`'s checks against
-  the live server. The one complaint is an extra `refresh` value the editor adds
-  to **Load Image (from Outputs)**, which the server ignores: its input gathering
-  keeps only the inputs a node declares. That was read in `execution.py`, and the
-  queued runs below confirm it.
+- The graph loads with its 140 nodes and 181 links. The Stages panel lists the
+  ten stage groups and not Inputs, Models or Stage inputs, and each group holds
+  exactly its own nodes.
+- Twenty combinations of stages were switched through the panel's own toggles:
+  each stage alone, eight chains from Concept, Edit and TRELLIS to every stage
+  on one path at once, every stage on, and none. With the editor's submit call
+  replaced by a stub, the prompt it would send was captured each time, through
+  the queue call so that Use Everywhere did its work. In every one, each of the
+  seven pickers was muted exactly when a stage above it was on or its own stage
+  was off, each flag was active exactly while every stage reading its switch
+  was off, the nodes sent were exactly the live ones, each switch's inputs were
+  the stages above that were on, nearest first, then its picker when active,
+  every wired input was a drawn link apart from the CLIP and VAE inputs Use
+  Everywhere filled with the Qwen loaders, and no CLIP or VAE input of a sent
+  node was left unfilled. The server's queue stayed empty throughout.
+- All twenty prompts went through `scripts/validate_workflows.py` against the
+  live server. Its two complaints are inputs the server's node definitions do
+  not list: the extra `refresh` value the editor adds to **Load Image (from
+  Outputs)**, which the server ignores because its input gathering keeps only
+  the inputs a node declares, and the Any Switch's `any_NN` inputs, which the
+  node declares none of because it takes any keyword. The queued runs below,
+  which pass through both, confirm the server accepts them.
+- The pickers' values were set on the captured prompts with `--set`, and the
+  prompts were queued with `scripts/run_workflow.py`, so runs E and F went
+  through the server exactly as the editor would have sent them.
+- On 2026-10-03, with the picks and the Takes box added (147 nodes, 191 links),
+  six combinations were captured the same way and passed the same checks, with
+  one Image Filter sent for each image stage on, the Takes box wired to both
+  Concept latents and to a RepeatLatentBatch in Edit and in Simplify. Run G was
+  queued from the editor itself, and the pause window was driven through its
+  own click handlers.
 
 ### Measured runs
 
-Queued from the editor on 2026-09-30, on the reference machine, in the packaged
-container, one after another, each on the default golem prompt. Seconds are
-ComfyUI's own, from `execution_start` to `execution_success` in `/history`.
-Memory was sampled every 2 seconds: the container's figure is `docker stats`
-MemUsage, the host's is `free`'s available column, and VRAM is `nvidia-smi`.
+Queued on the reference machine, in the packaged container, one after another.
+Seconds are ComfyUI's own, from `execution_start` to `execution_success` in
+`/history`. Memory was sampled every 2 seconds: the container's figure is
+`docker stats` MemUsage, the host's is `free`'s available column, and VRAM is
+`nvidia-smi`. Runs A to D were queued from the editor on 2026-09-30 on the
+previous layout of this graph, whose stage nodes are unchanged; E and F were
+queued on 2026-10-02 from the captured prompts.
 
 | Run | Stages on | Input | Seconds | Saved |
 |---|---|---|---|---|
@@ -180,19 +332,39 @@ MemUsage, the host's is `free`'s available column, and VRAM is `nvidia-smi`.
 | B | 2. Edit, queued twice | its picker, after refresh | 147.8, 171.6 | `asset_edit_00001_.png` and `_00002_`, 880x1184 |
 | C | 4. TRELLIS, 6. Turntable | Mesh's picker, set to the first edit | 22.2 | a 48,000-face mesh, then 8 frames and 8 masks from it |
 | D | 1. Concept, fast, 2. Edit, 4. TRELLIS | the prompt | 204.6 | a concept, an edit and a 48,000-face mesh |
+| E | 7. Rig | its path box, set to `TRELLIS_2026-10-01-00-08-06.glb` from C's day | 21.6 | `rigged/asset_articulationxl.fbx`, 2,474,364 bytes, with a skeleton and skinning |
+| F | 8. Animate | its picker, set to A's concept | 604.7 | `video/asset_animate_00001_.webm`, vp9 at 480x640 and 16 fps, its `.webp` twin, and `asset_animate_last_00001_.png` |
+| G | 1. Concept, fast, 2. Edit, Takes 2 | the prompt; the second take clicked at the pause | 289.0, of which 33 to the pause | `asset_concept_fast_00008_.png` and `_00009_`, 1104x1472; `asset_edit_00006_.png` and `_00007_`, 880x1184, both from the second concept |
 
 - **The hand-over worked both ways.** In B, Edit's refresh arrow selected the
   concept A had just made, the newest file, and the two queues ran on different
   seeds and made different takes. In C, Mesh's refresh arrow selected the second
   take, the newest, and picking the first from the list worked; Turntable then
   rendered the mesh TRELLIS had just saved, through its path switch. In D, each
-  stage read the one above, with every picker muted.
+  stage read the one above, with every picker muted. In E, UniRig loaded a file
+  that was on none of its lists, through the path switch.
 - **Memory.** Across A and B, the container peaked at 26.4 GiB, the host never fell
   below 13.9 GiB available, and VRAM peaked at 15,731 MiB. Across D, with two Qwen
   diffusion models in one queue, the container peaked at 22.0 GiB, the host never
   fell below 12.2 GiB available, VRAM peaked at 15,718 MiB, and Docker reported no
   out-of-memory kill and no restart. `docker stats` counts some page cache, which
   is likely why its peak sits above what the host's available figure implies.
+  After E, UniRig's worker held 5,544 MiB of VRAM. Across F, VRAM peaked at
+  14,876 MiB, the container at 21.7 GiB, and the host never fell below 17 GiB
+  available. Across G, with two takes in each stage, VRAM peaked at 15,587 MiB
+  of 16,066, the container at 27.2 GiB, and the host never fell below 13 GiB
+  available; the edit model loaded partially, 12,497 MB on the card and
+  6,987 MB offloaded. Two takes is close to the card's limit at these sizes,
+  and more was not tried.
+- **The pause worked.** In G the queue stopped 33 s in, with the two concepts
+  on screen, the tip from the graph and a 3,600 s countdown; clicking a take
+  and Send resumed it, and Edit ran on the take clicked. Nothing in the server
+  log marks the pause: it shows one prompt, executed in 288.98 s.
+- **The video is a take, not a cycle.** Three frames of F tiled with ffmpeg
+  show the golem keeping its design and the background while it shifts its
+  weight and lifts a leg: a slow step on the spot, which is what the motion
+  prompt asked for. Nothing here turns it into motion on the rig; see
+  [From the video to the rig](#from-the-video-to-the-rig).
 - **The edit is the model's, not the graph's.** Asked to put a pauldron on "the
   golem's left shoulder", the first take in B did and the second put a larger one
   on the right; D's also went right. Running a step again and picking the take is

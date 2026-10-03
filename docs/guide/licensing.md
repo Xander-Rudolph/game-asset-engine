@@ -421,6 +421,7 @@ This is a separate question from the model weights, and easy to mix up with them
 | ComfyUI-CameraPack | MIT, declared in metadata, no licence file shipped |
 | rgthree-comfy | MIT |
 | cg-use-everywhere | Apache-2.0 |
+| cg-image-filter | Apache-2.0 |
 | ComfyUI-GGUF | Apache-2.0 |
 | Comfyui-QwenEditUtils | Apache-2.0 |
 | comfyui_controlnet_aux | Apache-2.0 for the pack. **Its DWPose and OpenPose folders carry CMU's OpenPose licence, non-commercial research use only** |

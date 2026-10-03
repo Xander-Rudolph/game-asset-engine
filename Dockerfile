@@ -220,14 +220,17 @@ PY
 ARG UNIRIG_REF=69ee59dc459d2da7cb0291930c1f944886c31d7c
 ARG CAMERAPACK_REF=a58268fe5261d07ffeb93de26cc0d2558a5c0110
 ARG MESH2MOTION_REF=11fe6b7aaa5eac60afa3d726389cd9dd870ed1f6
-# The next four are what complete_workflow.json and asset_workflow.json need:
+# The next five are what complete_workflow.json and asset_workflow.json need:
 # rgthree's switches, group muters and LoRA loader, Use Everywhere's broadcast
-# nodes, the GGUF loader and the Qwen edit encoder with its own resize.  Heads
-# of each default branch on 2026-09-30.
+# nodes, the GGUF loader, the Qwen edit encoder with its own resize, and the
+# Image Filter that pauses a queue while you pick the take to carry on with.
+# Heads of each default branch on 2026-09-30, and cg-image-filter's 1.9.2
+# merge of 2026-09-29 (Apache-2.0, no Python requirements of its own).
 ARG RGTHREE_REF=449c58fcdd612f7733e54c51f6758ead63fa180b
 ARG USE_EVERYWHERE_REF=50ae9f8c5d8b9538589663c90a15d4067a02969c
 ARG GGUF_REF=6ea2651e7df66d7585f6ffee804b20e92fb38b8a
 ARG QWEN_EDIT_UTILS_REF=cdd4d028c6491d27a40092d7795158668cec9189
+ARG IMAGE_FILTER_REF=1602dbe2c663b9defd02e00fe6371e7c6af3ab99
 RUN set -eux; \
     for spec in \
         "https://github.com/PozzettiAndrea/ComfyUI-UniRig.git|ComfyUI-UniRig|${UNIRIG_REF}" \
@@ -237,6 +240,7 @@ RUN set -eux; \
         "https://github.com/chrisgoringe/cg-use-everywhere.git|cg-use-everywhere|${USE_EVERYWHERE_REF}" \
         "https://github.com/city96/ComfyUI-GGUF.git|ComfyUI-GGUF|${GGUF_REF}" \
         "https://github.com/lrzjason/Comfyui-QwenEditUtils.git|Comfyui-QwenEditUtils|${QWEN_EDIT_UTILS_REF}" \
+        "https://github.com/chrisgoringe/cg-image-filter.git|cg-image-filter|${IMAGE_FILTER_REF}" \
     ; do \
         url="${spec%%|*}"; rest="${spec#*|}"; dir="${rest%%|*}"; ref="${rest#*|}"; \
         git clone "$url" "/app/custom_nodes/$dir"; \
@@ -439,7 +443,7 @@ ARG CUDA_TAG=12.4.1-cudnn-devel-ubuntu22.04
 LABEL maintainer="Xanderu" \
       org.opencontainers.image.ref.name="game-asset-engine-comfy" \
       org.opencontainers.image.title="Game Asset Engine ComfyUI" \
-      org.opencontainers.image.description="ComfyUI with 3D-Pack, UniRig, CameraPack, mesh2motion, rgthree, Use Everywhere, GGUF and QwenEditUtils pinned and built, plus the Asset Engine pipeline workflows and scripts. Model weights are NOT included; the container names the missing ones on boot. comfyui_controlnet_aux is NOT included either: its CMU-licensed code forbids distribution, so the container fetches it from GitHub at start-up." \
+      org.opencontainers.image.description="ComfyUI with 3D-Pack, UniRig, CameraPack, mesh2motion, rgthree, Use Everywhere, GGUF, QwenEditUtils and cg-image-filter pinned and built, plus the Asset Engine pipeline workflows and scripts. Model weights are NOT included; the container names the missing ones on boot. comfyui_controlnet_aux is NOT included either: its CMU-licensed code forbids distribution, so the container fetches it from GitHub at start-up." \
       org.opencontainers.image.source="https://github.com/Xander-Rudolph/game-asset-engine" \
       org.opencontainers.image.url="https://xander-rudolph.github.io/game-asset-engine/" \
       org.opencontainers.image.documentation="https://xander-rudolph.github.io/game-asset-engine/guide/install" \
