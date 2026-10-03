@@ -62,6 +62,9 @@ is stated rather than guessed.
   cg-use-everywhere          Apache-2.0
     https://github.com/chrisgoringe/cg-use-everywhere
 
+  cg-image-filter            Apache-2.0
+    https://github.com/chrisgoringe/cg-image-filter
+
   ComfyUI-GGUF               Apache-2.0
     https://github.com/city96/ComfyUI-GGUF
 

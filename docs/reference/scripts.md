@@ -23,7 +23,7 @@ Everything in `scripts/`. Each takes `--help`.
 | `validate_workflows.py` | Check every graph against a live server's node definitions. |
 | `api_to_ui.py` | Convert graphs into the editor's format. `--check` verifies every value survived. |
 | `build_presets.py` | Generate the drop in presets from base graphs plus the prompt library. |
-| `build_asset_workflow.py` | Join the base graphs into one editor graph, `asset_workflow.json`: a prompt at the top, a panel that switches stages on and off, and a picker per stage for running a step on its own. Run it after `build_presets.py`. `--check` verifies every value survived. See [the guide](/guide/asset-workflow). |
+| `build_asset_workflow.py` | Join the base graphs into one editor graph, `asset_workflow.json`: the prompts at the top, a panel that switches stages on and off, a row of pickers under them, one per stage, for picking a run up at any stage, and a pause after each image stage to choose the take that carries on. Eight stages, from concept to a rig and a video. Run it after `build_presets.py`. `--check` verifies every value survived. See [the guide](/guide/asset-workflow). |
 | `generate_concepts.sh` | Generate a whole prompt folder in the house style. |
 | `simplify_concepts.sh` | Redraw existing art as simpler game ready versions. |
 | `asset_to_mesh.sh` | Concepts to shapes to textures to sheets to curated assets, correctly staged. |

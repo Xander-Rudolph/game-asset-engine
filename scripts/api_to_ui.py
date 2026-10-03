@@ -172,10 +172,13 @@ clay on anything untextured.
 mesh_file_path is a CONTAINER path: /app/output/mesh/<name>.glb""",
     "mesh_rig_unirig": """MESH -> RIGGED FBX -- UniRig
 
-UniRigLoadMesh reads a combo of files that already exist on disk, so
-the mesh must be saved first: this cannot be wired onto the end of a
-generate graph.  source_folder is 'output' and file_path is relative
-to it.
+UniRigLoadMesh offers a combo of files that existed when the node was
+scanned, so a typed path must be on that list.  A WIRED path skips the
+list: the server checks a value against the list only when it is
+typed in, and the node joins the path onto the source folder, where an
+absolute path wins.  asset_workflow.json rigs that way, straight off
+the Mesh stage (run 2026-10-02).  source_folder is 'output' and a
+typed file_path is relative to it.
 
 GLB in, FBX out.  FBX is what carries a skeleton; OBJ cannot carry one
 at all.
@@ -196,6 +199,30 @@ UniRig ships five Mixamo clips and none of them are game cycles.  For
 idle/walk/attack, drop clips into input/animation_templates/mixamo/ or
 use mesh2motion's 176 CC0 clips.  scripts/list_animations.py prints
 both libraries.""",
+    "img2video_wan22": """CONCEPT -> VIDEO -- Wan 2.2 image to video, 14B (604.7s measured)
+
+Five seconds (81 frames at 16 fps) of the start image moving, as a
+WEBM and an animated WEBP under output/video/, plus the last frame as
+a PNG.  Two fp8 experts take turns: high noise for the first ten
+steps, low noise for the last ten.
+
+The defaults are what ran on the reference 16 GB card on 2026-10-02:
+480x640, 20 steps, cfg 3.5, the lightx2v 4-step LoRAs in the graph at
+strength 0, which the server skips.  At strength 1 (then set both
+samplers to 4 steps, cfg 1, split at step 2) that card ran out of GPU
+memory four times: merging a LoRA into fp8 weights needs float copies
+of each weight on the card, and there was no room.
+
+The start image is squeezed to width x height.  480x640 keeps the 3:4
+of a 1104x1472 concept; square would flatten a standing figure, and
+624x832 with the LoRAs on ran out of memory in the forward pass
+(without them, not tried).
+
+Write the MOTION in the prompt, not the subject again: what moves, how
+fast, and that the camera and background stay put.
+
+This makes a video.  Nothing in this image turns it into a clip for a
+rig: docs/reference/video-mocap.md is the state of that.""",
     "txt2mesh_qwen_hunyuan3d21": """CHARACTER, END TO END -- prompt in, mesh out
 
 One queue: Qwen paints the concept, Hunyuan3D turns it into a mesh.
