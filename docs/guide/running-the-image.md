@@ -5,7 +5,7 @@ commits with their compatibility patches applied, the Hunyuan texture extension
 compiled, Blender as a Python module, and every workflow already in the editor
 sidebar.
 
-It is about 27.6GB and does **not** contain model weights.
+It is about 28GB (`docker images`, 0.1.5, 2026-10-03) and does **not** contain model weights.
 
 ```
 ghcr.io/xander-rudolph/game-asset-engine-comfy:0.1.1
@@ -134,7 +134,7 @@ docker compose --profile packaged up -d
 
 ::: warning `docker image prune -a` is expensive here
 It removes anything not used by a *running* container, which includes this image
-when it is stopped. Getting it back is a 17GB download that unpacks to 27.6GB, or an hour of CUDA layers
+when it is stopped. Getting it back is a download of about 17GB that unpacks to about 28GB, or an hour of CUDA layers
 if you rebuild. Prune by repository rather than with `-a` when clearing build
 clutter.
 :::

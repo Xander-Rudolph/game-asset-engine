@@ -158,7 +158,7 @@ input/ output/        uploads in, images and models out
 scripts/publish_image.sh 0.1.2
 ```
 
-It builds locally rather than in CI on purpose. The image is 27.6GB and a hosted
+It builds locally rather than in CI on purpose. The image is about 28GB (`docker images`, 0.1.5, 2026-10-03) and a hosted
 runner has nothing like the disk for it.
 
 Two things about that build are worth knowing:
