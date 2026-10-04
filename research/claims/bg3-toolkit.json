@@ -3,10 +3,10 @@
  "researched": "2026-10-03",
  "checked": "2026-10-03",
  "statuses": {
-  "confirmed": 30,
+  "confirmed": 31,
   "unsettled": 2,
   "corrected": 4,
-  "unchecked": 2
+  "unchecked": 3
  },
  "conflicts_found": [
   "BG3-009: Larian's FAQ says 160 GB of disk and recommends 32 GB RAM; the Toolkit Data DLC's Steam record says 150 GB and 16 GB minimum",
@@ -920,6 +920,41 @@
     }
    ],
    "as_first_reported": "Run on 2026-10-03 on the reference machine, container Blender 4.5.9 on the CPU: scripts/bg3_project.py projected HFL_F_NKD_Body_A onto a Hunyuan3D 2.1 mesh of concept qwenfast_00017 (19,898 vertices, 39,960 faces, made in 67 s) and HFL_M_NKD_Body_A onto one of qwenfast_00019 (made in 49 s), with --lock Finger --lock-weight 0.3 --seam 0.1 --cut-margin 0.03 --size 1024 --samples 2: floor-to-shoulder scale 0.6161 and 0.6385; pose turns shoulders 20.3/21.0 and 27.5/26.5 degrees, hips 14.8/13.9 and 11.5/10.2, ankles 21.4/21.0 and 20.2/18.3 with remaining error under 3 degrees; wrap mean move 0.0258 and 0.0253 of the height, max 0.1158 and 0.1564; 3,216 and 3,171 finger vertices held; normal maps 0.0% of texels unreached. Earlier sources from the clothed concepts qwenfast_00012 and 00015 wrapped hems and boots into the body; the bodysuit takes 00016 to 00021 (txt2img_qwen_fast.json, seeds 101 and 202, batch 3) were made for that reason and 00017 and 00019 chosen by Claude. ImageMagick 7.1.2 wrote the TGA maps as DXT5 DDS of 1,398,256 bytes at 1024 px. Judged by eye: slim continuous bodies, a flattened shelf between the held neck ring and the narrower shoulders, blobby feet."
+  },
+  {
+   "id": "BG3-039",
+   "status": "confirmed",
+   "kind": "capability",
+   "load_bearing": false,
+   "claim": "Run on this host on 2026-10-03: Divine v1.20.4 under Wine, with -g bg3 -a create-package -c lz4, packed a staged folder into a .pak ('Package created successfully') and -a list-package read it back; scripts/bg3_pack.py built output/bg3/NimbleHalflings.pak, 1,567,339 bytes and three entries: Generated/Public/Shared/Assets/Characters/_Models/Halflings/_Female/Resources/HFL_F_NKD_Body_A.GR2 (928,268 bytes), the _Male counterpart (867,964 bytes) and Mods/NimbleHalflings/meta.lsx. Those two virtual paths are where Models.pak holds the vanilla bodies (list-package output). Divine's allowed compression methods are zlib, zlibfast, lz4, lz4hc and none (CommandLineArguments.cs).",
+   "sources": [
+    "output/bg3/NimbleHalflings_pak.json (not in the repository)",
+    "output/bg3/models_pak_list.txt (not in the repository)",
+    "https://raw.githubusercontent.com/Norbyte/lslib/master/Divine/CLI/CommandLineArguments.cs",
+    "shell session on this host, 2026-10-03"
+   ],
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "Run on this host on 2026-10-03; sizes and entries from Divine's own output.",
+     "evidence": "create-package and list-package outputs in the session.",
+     "notes": ""
+    }
+   ],
+   "as_first_reported": "Run on this host on 2026-10-03: Divine v1.20.4 under Wine, with -g bg3 -a create-package -c lz4, packed a staged folder into a .pak ('Package created successfully') and -a list-package read it back; scripts/bg3_pack.py built output/bg3/NimbleHalflings.pak, 1,567,339 bytes and three entries: Generated/Public/Shared/Assets/Characters/_Models/Halflings/_Female/Resources/HFL_F_NKD_Body_A.GR2 (928,268 bytes), the _Male counterpart (867,964 bytes) and Mods/NimbleHalflings/meta.lsx. Those two virtual paths are where Models.pak holds the vanilla bodies (list-package output). Divine's allowed compression methods are zlib, zlibfast, lz4, lz4hc and none (CommandLineArguments.cs)."
+  },
+  {
+   "id": "BG3-040",
+   "status": "unchecked",
+   "kind": "mechanism",
+   "load_bearing": true,
+   "claim": "A .pak in the game's Mods folder that carries a file at the same virtual path as a vanilla file replaces that file when the mod is enabled, and a meta.lsx under Mods/<Name>/ with ModuleInfo attributes (Folder, Name, UUID, Version64 packed as major<<55 | minor<<47 | revision<<31 | build, Type Add-on, a PublishVersion node and a Story TargetModes entry) is what the in-game Mod Manager needs to list it. The game's Mods folder on a Steam Play install is in the Proton prefix at compatdata/1086940/pfx/drive_c/users/steamuser/AppData/Local/Larian Studios/Baldur's Gate 3/Mods. This is the modding community's practice as recalled when writing bg3_pack.py; no Larian or community document was read for it in this session, and the pak has not been loaded in the game.",
+   "sources": [
+    "scripts/bg3_pack.py (what it writes)"
+   ],
+   "checks": [],
+   "as_first_reported": "A .pak in the game's Mods folder that carries a file at the same virtual path as a vanilla file replaces that file when the mod is enabled, and a meta.lsx under Mods/<Name>/ with ModuleInfo attributes (Folder, Name, UUID, Version64 packed as major<<55 | minor<<47 | revision<<31 | build, Type Add-on, a PublishVersion node and a Story TargetModes entry) is what the in-game Mod Manager needs to list it. The game's Mods folder on a Steam Play install is in the Proton prefix at compatdata/1086940/pfx/drive_c/users/steamuser/AppData/Local/Larian Studios/Baldur's Gate 3/Mods. This is the modding community's practice as recalled when writing bg3_pack.py; no Larian or community document was read for it in this session, and the pak has not been loaded in the game."
   }
  ]
 }
