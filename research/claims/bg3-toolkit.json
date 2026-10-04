@@ -3,9 +3,9 @@
  "researched": "2026-10-03",
  "checked": "2026-10-03",
  "statuses": {
-  "confirmed": 31,
+  "confirmed": 30,
   "unsettled": 2,
-  "corrected": 3,
+  "corrected": 4,
   "unchecked": 2
  },
  "conflicts_found": [
@@ -894,13 +894,13 @@
   },
   {
    "id": "BG3-038",
-   "status": "confirmed",
+   "status": "corrected",
    "kind": "measurement",
    "load_bearing": false,
-   "claim": "Run on 2026-10-03 on the reference machine, container Blender 4.5.9 on the CPU: scripts/bg3_project.py projected HFL_F_NKD_Body_A onto a Hunyuan3D 2.1 mesh of concept qwenfast_00017 (19,898 vertices, 39,960 faces, made in 67 s) and HFL_M_NKD_Body_A onto one of qwenfast_00019 (made in 49 s), with --lock Finger --lock-weight 0.3 --seam 0.1 --cut-margin 0.03 --size 1024 --samples 2: floor-to-shoulder scale 0.6161 and 0.6385; pose turns shoulders 20.3/21.0 and 27.5/26.5 degrees, hips 14.8/13.9 and 11.5/10.2, ankles 21.4/21.0 and 20.2/18.3 with remaining error under 3 degrees; wrap mean move 0.0258 and 0.0253 of the height, max 0.1158 and 0.1564; 3,216 and 3,171 finger vertices held; normal maps 0.0% of texels unreached. Earlier sources from the clothed concepts qwenfast_00012 and 00015 wrapped hems and boots into the body; the bodysuit takes 00016 to 00021 (txt2img_qwen_fast.json, seeds 101 and 202, batch 3) were made for that reason and 00017 and 00019 chosen by Claude. ImageMagick 7.1.2 wrote the TGA maps as DXT5 DDS of 1,398,256 bytes at 1024 px. Judged by eye: slim continuous bodies, a flattened shelf between the held neck ring and the narrower shoulders, blobby feet.",
+   "claim": "Run on 2026-10-03 on the reference machine, container Blender 4.5.9 on the CPU: scripts/bg3_project.py projected HFL_F_NKD_Body_A onto a Hunyuan3D 2.1 mesh of concept qwenfast_00017 (19,898 vertices, 39,960 faces, made in 67 s) and HFL_M_NKD_Body_A onto one of qwenfast_00019 (made in 49 s), with --lock Finger --lock-weight 0.3 --seam 0.1 --cut-margin 0.03 --size 1024 --samples 2 --dds. A first pair of runs wrapped the bases onto sources facing the other way: the Hunyuan3D figures stand facing -Y (feet minus shins -0.022 and -0.005) and Larian's bodies +Y (toe bone minus ankle bone +0.116 and +0.128), which put the seat on the front; the owner saw it in a viewer. With the source turned by matrix (the glTF importer leaves objects in quaternion mode, so rotation_euler is ignored): floor-to-shoulder scale 0.6161 and 0.6385; pose turns shoulders 21.1/20.1 and 26.5/27.5 degrees, hips 13.9/14.8 and 10.2/11.5, ankles 20.8/21.3 and 17.5/19.6 with remaining error 1.0 degree or less; wrap mean move 0.0202 and 0.0190 of the height (0.0258 and 0.0253 before the turn), max 0.0874 and 0.1156; 3,216 and 3,171 finger vertices held; normal maps 0.0% of texels unreached; conformed GR2 files of 928,268 and 867,964 bytes. The exported normals were the game's own until rebuilt: 2.9% of loop normals more than 30 degrees from the moved surface's geometric normal before (1.0% on the untouched body), 1.6% and 1.4% after rebuilding from the moved faces and averaging across coincident vertices. Earlier sources from the clothed concepts qwenfast_00012 and 00015 wrapped hems and boots into the body; the bodysuit takes 00016 to 00021 (txt2img_qwen_fast.json, seeds 101 and 202, batch 3) were made for that reason and 00017 and 00019 chosen by Claude. ImageMagick 7.1.2 wrote the TGA maps as DXT5 DDS of 1,398,256 bytes at 1024 px. Judged by eye: slim continuous bodies facing the base's way, smooth necks, small feet where the source's are.",
    "sources": [
-    "output/bg3/halfling_f_v8.json and halfling_m_v7.json (not in the repository)",
-    "output/bg3/halfling_f_v8_preview_big.png and halfling_m_v7_preview_big.png",
+    "output/bg3/halfling_f_v9.json and halfling_m_v8.json (not in the repository)",
+    "output/bg3/halfling_f_v9_preview_big.png, halfling_m_v8_preview_big.png and the _check_side.png renders",
     "shell session on this host, 2026-10-03"
    ],
    "checks": [
@@ -910,6 +910,13 @@
      "read": "Run and measured on this host on 2026-10-03 (reference machine, Wine 10 with the Windows .NET 8.0.31 runtime for Divine, the container's Blender 4.5.9 for meshes); the numbers are the commands' own output.",
      "evidence": "Numbers copied from the scripts' JSON records and printed logs; the renders were looked at.",
      "notes": ""
+    },
+    {
+     "lens": "fact",
+     "verdict": "corrected",
+     "read": "The owner looked at the v8 preview in a viewer on 2026-10-03 and reported the seat on the front and mangled limbs; the cause was measured (facing from feet and toe bone) and the runs repeated.",
+     "evidence": "Pose turns swapped sides and the mean move fell on both bodies once the source was turned; normals measured before and after the rebuild.",
+     "notes": "The first numbers in as_first_reported describe the backwards runs."
     }
    ],
    "as_first_reported": "Run on 2026-10-03 on the reference machine, container Blender 4.5.9 on the CPU: scripts/bg3_project.py projected HFL_F_NKD_Body_A onto a Hunyuan3D 2.1 mesh of concept qwenfast_00017 (19,898 vertices, 39,960 faces, made in 67 s) and HFL_M_NKD_Body_A onto one of qwenfast_00019 (made in 49 s), with --lock Finger --lock-weight 0.3 --seam 0.1 --cut-margin 0.03 --size 1024 --samples 2: floor-to-shoulder scale 0.6161 and 0.6385; pose turns shoulders 20.3/21.0 and 27.5/26.5 degrees, hips 14.8/13.9 and 11.5/10.2, ankles 21.4/21.0 and 20.2/18.3 with remaining error under 3 degrees; wrap mean move 0.0258 and 0.0253 of the height, max 0.1158 and 0.1564; 3,216 and 3,171 finger vertices held; normal maps 0.0% of texels unreached. Earlier sources from the clothed concepts qwenfast_00012 and 00015 wrapped hems and boots into the body; the bodysuit takes 00016 to 00021 (txt2img_qwen_fast.json, seeds 101 and 202, batch 3) were made for that reason and 00017 and 00019 chosen by Claude. ImageMagick 7.1.2 wrote the TGA maps as DXT5 DDS of 1,398,256 bytes at 1024 px. Judged by eye: slim continuous bodies, a flattened shelf between the held neck ring and the narrower shoulders, blobby feet."

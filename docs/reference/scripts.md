@@ -43,7 +43,7 @@ Everything in `scripts/`. Each takes `--help`.
 | `decimation_report.py` | Measure what each face budget costs, three ways, or bisect for an answer. |
 | `sheet_check.py` | Check a sprite sheet for the faults that are arithmetic. Exits non-zero on a fault. |
 | `transfer_weights.py` | Move a skeleton from a decimated proxy onto the original mesh. |
-| `bg3_project.py` | Deform a game's own base mesh onto a generated shape, keeping its topology, UVs, weights and neck seam: align by shoulder height, turn the limbs onto the rig's rest pose, wrap onto a voxel remesh of the shape, smooth the move, bake the shape's colour, normals and AO onto the base's UVs as BM, NM and PM, and write glTF with the `EXT_lslib_profile` metadata Divine needs, FBX and, with `--dds`, DDS. Written for Baldur's Gate 3 and run on its halfling bodies. See [the note](/reference/bg3-toolkit). |
+| `bg3_project.py` | Deform a game's own base mesh onto a generated shape, keeping its topology, UVs, weights and neck seam: align by shoulder height, face it the base's way, turn the limbs onto the rig's rest pose, wrap onto a voxel remesh of the shape, smooth the move, bake the shape's colour, normals and AO onto the base's UVs as BM, NM and PM, and write glTF with the `EXT_lslib_profile` metadata Divine needs, FBX and, with `--dds`, DDS. Written for Baldur's Gate 3 and run on its halfling bodies. See [the note](/reference/bg3-toolkit). |
 | `normalise_mesh.py` | Scale a mesh to a declared world size and record the rule. `--check` gates a whole folder. |
 | `make_seamless.py` | Make a texture tile, and say whether it worked. |
 | `cut_icon.py` | Cut an icon out of its background and size it for a UI. |

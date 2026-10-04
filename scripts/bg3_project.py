@@ -75,7 +75,7 @@ CONTAINER = _container()
 
 BLENDER = r'''
 import bpy, sys, json, os, math
-from mathutils import Vector
+from mathutils import Vector, Matrix
 
 cfg = json.loads(sys.argv[-1])
 log = []
@@ -254,6 +254,53 @@ span = bhi.z - blo.z
 shift = Vector(((blo.x + bhi.x) / 2 - (slo.x + shi.x) / 2, 0.0, blo.z - slo.z))
 source.location += shift
 bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
+
+
+# ---- face the same way ------------------------------------------------------
+# A generated figure stands facing +Y or -Y as its maker left it, and a wrap
+# across a figure facing the wrong way puts the seat on the front and bends
+# the knees backwards.  The feet say which way a standing figure faces: the
+# toes reach further forward of the shin than the heel reaches behind it.
+# The base's toe bone says the same for the base.
+def facing(obj):
+    # From the vertices themselves: an object's bound_box lags behind an
+    # applied transform until the next depsgraph update.
+    pts = [obj.matrix_world @ v.co for v in obj.data.vertices]
+    z0 = min(p.z for p in pts)
+    h = max(p.z for p in pts) - z0
+    feet = [p.y for p in pts if p.z < z0 + 0.06 * h]
+    shins = [p.y for p in pts if z0 + 0.15 * h < p.z < z0 + 0.35 * h]
+    if not feet or not shins:
+        return 0.0
+    return sum(feet) / len(feet) - sum(shins) / len(shins)
+
+
+base_face = facing(base)
+ankle_b, toes_b = bone("Ankle_L", "Ankle_R"), bone("Toes_L", "Toes_R")
+if ankle_b and toes_b:
+    bone_face = (arm.matrix_world @ toes_b.head_local).y - (arm.matrix_world @ ankle_b.head_local).y
+    if base_face * bone_face < 0:
+        say(f"facing: the base's feet ({base_face:+.3f}) and its toe bone ({bone_face:+.3f}) disagree; "
+            "trusting the bone")
+    base_face = bone_face
+src_face = facing(source)
+way = lambda f: "+Y" if f > 0 else "-Y"
+if base_face * src_face < 0:
+    select_only([source])
+    # By matrix: the glTF importer leaves objects in quaternion rotation
+    # mode, where rotation_euler is ignored.
+    source.matrix_world = Matrix.Rotation(math.pi, 4, "Z") @ source.matrix_world
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=False)
+    pts = [source.matrix_world @ v.co for v in source.data.vertices]
+    source.location.x += (blo.x + bhi.x) / 2 - (min(p.x for p in pts) + max(p.x for p in pts)) / 2
+    bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
+    slo, shi = bounds([source])
+    say(f"facing: turned the source round; its feet pointed {way(src_face)} ({src_face:+.3f}) "
+        f"and the base's point {way(base_face)} ({base_face:+.3f}); now {facing(source):+.3f}")
+elif src_face == 0.0:
+    say("facing: could not read the source's feet; it is taken as facing the base's way")
+else:
+    say(f"facing: both point {way(base_face)} (base {base_face:+.3f}, source {src_face:+.3f})")
 
 # Cut the head off the source: a game body stops at the neck, and a head or
 # hair left above it is the nearest surface for the whole upper chest, which
@@ -565,6 +612,7 @@ def wrap(obj):
     select_only([obj])
     mask, n_locked = mask_for(obj)
     before = [v.co.copy() for v in obj.data.vertices]
+
     mod = obj.modifiers.new("bg3_project", "SHRINKWRAP")
     mod.target = target
     mod.wrap_method = cfg.get("wrap_method", "NEAREST_SURFACEPOINT")
@@ -597,6 +645,29 @@ def wrap(obj):
             disp = new
     for i, v in enumerate(obj.data.vertices):
         v.co = before[i] + disp[i] * mask[i]
+    obj.data.update()
+    # The game mesh carries its own normals, and the exporter writes them out
+    # as they are; after the move they describe the old surface, and the
+    # shading breaks wherever the shape changed.  New ones come from the moved
+    # faces, area weighted, and are averaged across coincident vertices so the
+    # shells shade as one surface.  Authored hard edges are lost; a body has
+    # none.
+    from mathutils import kdtree
+    acc = [Vector((0.0, 0.0, 0.0)) for _ in obj.data.vertices]
+    for p in obj.data.polygons:
+        for vi in p.vertices:
+            acc[vi] += p.normal * p.area
+    kd = kdtree.KDTree(len(obj.data.vertices))
+    for i, v in enumerate(obj.data.vertices):
+        kd.insert(v.co, i)
+    kd.balance()
+    merged = []
+    for v in obj.data.vertices:
+        n = Vector((0.0, 0.0, 0.0))
+        for (_, j, _) in kd.find_range(v.co, 1e-5):
+            n += acc[j]
+        merged.append(tuple(n.normalized()) if n.length > 1e-12 else (0.0, 0.0, 1.0))
+    obj.data.normals_split_custom_set_from_vertices(merged)
     obj.data.update()
     moved = [(disp[i] * mask[i]).length for i in range(len(before))]
     return moved, n_locked

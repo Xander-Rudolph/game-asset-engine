@@ -94,7 +94,7 @@ Simplify repeat the encoded source that many times before sampling, so each
 take is a new seed on the same input.
 
 The Image Filter node comes from cg-image-filter, which the Dockerfile added on
-2026-10-02 and image 0.1.5 (built and pushed 2026-10-03) is the first to carry.
+2026-10-02 and image 0.1.5 (built and pushed 2026-10-03) is the first to carry. Image 0.1.6 (built and pushed later on 2026-10-03, digest `e83e51df`) is the first to carry the graph with its own-image start, Stage 0.
 An earlier image lacks it, and the editor then opens
 this graph with four missing nodes; the stages still run, but nothing pauses
 and nothing flows between them. Rebuild the image, or clone the pack into
