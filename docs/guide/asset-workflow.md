@@ -68,7 +68,16 @@ On 2026-10-04 it reached `complete_workflow.json`: opened after this graph's
 stages had been switched, its CLIP switch was muted and its LoRA loader
 bypassed, so Basic Image Editing failed validation with `Required input is
 missing: clip` and Image Edit + LoRA failed with `'NoneType' object has no
-attribute 'tokenize'`. Since then `scripts/build_asset_workflow.py` numbers this
+attribute 'tokenize'`. It began with image 0.1.5: the 10 relays and repeaters of
+0.1.3 and 0.1.4 held no link number that a relay could follow into those nodes,
+while the stage-input pickers of 0.1.5 added 18 more, one of which reads link
+135 (in that graph, the muted GGUF CLIP loader into the CLIP switch) and writes
+through link 134 (the checkpoint into the same switch). A relay copies the mode
+of what its input links come from onto what its output links lead to
+(`node_mode_relay.js`, `stabilize()`); a leftover repeater does nothing until its
+own mode changes, which it cannot once its graph is gone. The node packs and
+`complete_workflow.json` are the same in all four images. Since then
+`scripts/build_asset_workflow.py` numbers this
 graph's nodes from 10000 and its links from 100000, which no other graph here
 uses, so its leftover relays find nothing; the same sequence in the editor then
 left both edit groups whole. `complete_workflow.json` has relays of its own,
