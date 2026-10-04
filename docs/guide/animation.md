@@ -265,8 +265,8 @@ scripts/bone_roles.py probe output/poses/golem_walk.json output/rigged/golem.fbx
 ### Measured on five rigs
 
 Measured on 2026-09-16 on five articulationxl figures: `output/rigged/unit_rogue.fbx`
-(24 bones), `output/assets/alchemist_warrior/rig.fbx` (28),
-`output/rigged/unit_alchemist.fbx` and `output/rigged/unit_beastmaster.fbx` (30
+(24 bones), `output/assets/fighter/rig.fbx` (28),
+`output/rigged/unit_mage.fbx` and `output/rigged/unit_beastmaster.fbx` (30
 each) and `output/rigged/unit_warrior.fbx` (47). The figures measure 1.84 to 2.11
 units between their lowest and highest bone ends.
 
@@ -283,7 +283,7 @@ units between their lowest and highest bone ends.
   |---|---|---|---|---|
   | 24 | +0.466 | +0.317 | -0.767 | -0.222 |
   | 28 | +0.434 | +0.308 | -0.733 | -0.226 |
-  | 30, unit_alchemist | +0.470 | +0.317 | -0.777 | -0.220 |
+  | 30, unit_mage | +0.470 | +0.317 | -0.777 | -0.220 |
   | 30, unit_beastmaster | +0.469 | +0.313 | -0.787 | -0.219 |
   | 47 | +0.469 | +0.304 | -0.759 | -0.218 |
 
@@ -314,7 +314,7 @@ The 28 and 47-bone rigs have two bones above the chest, and the 24 and 30-bone
 rigs three. An earlier `map` took the last one for the head. On the three-bone
 rigs that bone is an end marker the mesh hardly follows, so the head turns in
 `poses/roles/hit.json` and `idle.json` did almost nothing there: turning it +18 X moved no
-vertex more than 0.004 units on the 24-bone rig, 0.017 on unit_alchemist and
+vertex more than 0.004 units on the 24-bone rig, 0.017 on unit_mage and
 0.009 on unit_beastmaster.
 
 `map` now compares skin weights. The last bone above the chest is `head_end` when

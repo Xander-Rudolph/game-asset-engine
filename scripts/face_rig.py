@@ -8,15 +8,15 @@ rule, and shape keys carried over from a template head with the Surface Deform
 modifier.  Both run Blender (the `bpy` module) inside the ComfyUI container.
 
     # a jaw on a rigged character, on the bone the script takes for the head
-    scripts/face_rig.py add-jaw output/rigged/unit_alchemist.fbx \\
-        --out output/face_rig/alchemist_jaw.blend
+    scripts/face_rig.py add-jaw output/rigged/unit_mage.fbx \\
+        --out output/face_rig/mage_jaw.blend
 
     # name the head bone yourself, and write an FBX
-    scripts/face_rig.py add-jaw output/rigged/unit_alchemist.fbx --head bone_4 \\
-        --out output/face_rig/alchemist_jaw.fbx
+    scripts/face_rig.py add-jaw output/rigged/unit_mage.fbx --head bone_4 \\
+        --out output/face_rig/mage_jaw.fbx
 
     # then open the jaw in the second row of a sheet
-    scripts/render_sheet.py output/face_rig/alchemist_jaw.blend \\
+    scripts/render_sheet.py output/face_rig/mage_jaw.blend \\
         --poses transforms:output/face_rig/jaw20.json
 
     # write a test template and targets: the spheres the method was proved on
@@ -38,7 +38,7 @@ modifier.  Both run Blender (the `bpy` module) inside the ComfyUI container.
         output/face_rig/spheres/target.blend --out output/face_rig/spheres/never.blend
 
 where output/face_rig/jaw20.json holds [{}, {"jaw": {"rotate": [20, 0, 0]}}].
-output/rigged/unit_alchemist.fbx is a UniRig articulationxl rig; any rigged
+output/rigged/unit_mage.fbx is a UniRig articulationxl rig; any rigged
 .fbx, .glb or .blend will do.
 
 add-jaw

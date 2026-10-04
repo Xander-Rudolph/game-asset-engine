@@ -71,7 +71,7 @@ or the output folders, and the health check looks at all of them.
 
 Two runs through the server on 2026-09-19, on the reference machine:
 
-- `render_sprite_sheet` on `output/assets/alchemist_warrior/model.glb`, 2 angles
+- `render_sprite_sheet` on `output/assets/fighter/model.glb`, 2 angles
   at 96 px, 16 samples, Cycles on the card, finished in 0.9 seconds.
 - `engine_health` called from inside the container, which is what proves the
   Docker socket route works at all: the full health check ran, and reported

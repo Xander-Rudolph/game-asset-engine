@@ -207,7 +207,7 @@ its names:
 figures, `input/3d/mixamo.fbx` and `output/mpfb/human_game_engine.glb`. No
 non-humanoid skeleton has been tried.
 
-For the 28 bone humanoid, `output/assets/alchemist_warrior/rig.fbx`, the map
+For the 28 bone humanoid, `output/assets/fighter/rig.fbx`, the map
 agrees bone for bone with the one worked out by hand in `poses/_bones.md`:
 
 | Bones | Part |
@@ -316,8 +316,8 @@ calls the head on all five rigs:
 | Rig | Head | Vertices given jaw weight | Moved by a 20 degree turn |
 |---|---|---|---|
 | `unit_rogue`, 24 bones | `bone_4` | 297 | 264 |
-| `alchemist_warrior`, 28 bones | `bone_5` | 194 | 191 |
-| `unit_alchemist`, 30 bones | `bone_4` | 534 | 493 |
+| `fighter`, 28 bones | `bone_5` | 194 | 191 |
+| `unit_mage`, 30 bones | `bone_4` | 534 | 493 |
 | `unit_beastmaster`, 30 bones | `bone_4` | 336 | 323 |
 | `unit_warrior`, 47 bones | `bone_4` | 196 | 185 |
 
@@ -327,7 +327,7 @@ numbers, writes nothing and exits 1. Only the first case has been triggered, on
 a test head weighted 0.001, where it printed
 `! nothing moved when the jaw turned: the weights did not take`.
 
-**At sprite size the change is small.** On `unit_alchemist`, the jaw at 0 and
+**At sprite size the change is small.** On `unit_mage`, the jaw at 0 and
 at 20 degrees, counted per cell with a row diff on 2026-09-16. A second
 `add-jaw` and render the same day gave the same per-cell counts.
 

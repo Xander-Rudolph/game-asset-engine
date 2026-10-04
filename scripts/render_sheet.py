@@ -94,8 +94,8 @@ libraries are all it asks for. `--engine eevee` rasterises instead, and in this
 container EEVEE has no GPU: that runtime carries no graphics libraries, so EGL
 falls back to Mesa llvmpipe and EEVEE draws on the CPU. Measured in
 comfyui-packaged on 2026-09-18 on one 16 cell sheet (`--poses
-transforms:output/poses/alchemist_warrior_walk.json --angles 4 --size 128` on
-output/assets/alchemist_warrior/rig.fbx): 108.7 s wall on EEVEE against 3.12 s
+transforms:output/poses/fighter_walk.json --angles 4 --size 128` on
+output/assets/fighter/rig.fbx): 108.7 s wall on EEVEE against 3.12 s
 on Cycles, and per 128 px cell 5.97 s against 0.138 s at 128 samples. Cycles
 took 1,531 MiB of the 16,376 MiB card while it ran and less host memory
 than EEVEE, 869 MB against 2,386 MB. Everything but the engine is held the same
@@ -185,7 +185,7 @@ SHAPE_KEY_LIMIT = 10.0
 # state it (bpy 4.5.9 factory settings, read 2026-09-18).
 EEVEE_SAMPLES = 64
 # Cycles' default, and the default engine's. Measured on this repo's
-# alchemist_warrior walk, 4 poses by 4
+# fighter walk, 4 poses by 4
 # angles, 2026-09-18: against a 2048 sample render of the same cells, the error
 # left on the silhouette edge falls 22.7, 9.9, 4.3, 3.1, 2.6 levels of 255 at
 # 16, 32, 64, 128 and 256 samples, while a 256 px cell costs 0.142, 0.149,

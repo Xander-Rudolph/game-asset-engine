@@ -147,8 +147,8 @@ Cycles path traces on the card, because it needs no GL context. EEVEE
 rasterises on the CPU through llvmpipe in this container, because the NVIDIA
 runtime gives it no GL libraries, and that is why the default changed.
 Measured on 2026-09-18 in `comfyui-packaged`, on the 16 cell sheet
-`scripts/render_sheet.py output/assets/alchemist_warrior/rig.fbx --poses
-transforms:output/poses/alchemist_warrior_walk.json --angles 4 --size 128`:
+`scripts/render_sheet.py output/assets/fighter/rig.fbx --poses
+transforms:output/poses/fighter_walk.json --angles 4 --size 128`:
 EEVEE, then the default, took 108.7 s wall and Cycles 3.12 s wall, which is
 5.97 s against 0.138 s per 128 px cell at 128 samples. Cycles
 took 1,531 MiB of the RTX 4070 Ti SUPER's 16,376 MiB while it ran (nvidia-smi
@@ -212,7 +212,7 @@ sits only in collections that are excluded or switched off for render. A file in
 which nothing is left exits 1 with `no mesh in that file renders: each is hidden
 from render or from the camera, or in a collection that is excluded or switched
 off for render`. Measured on 2026-09-16: the walk sheet (`poses/walk.json` on
-`output/assets/alchemist_warrior/rig.fbx`) rendered 0 pixels different from the
+`output/assets/fighter/rig.fbx`) rendered 0 pixels different from the
 script before `.blend` input was added, and so did the same rig saved as a
 `.blend` with its own lamp, camera, render settings and hidden objects. A `.blend`
 that links objects from a library has not been tried. Opening a `.blend` runs its
