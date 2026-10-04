@@ -5,7 +5,7 @@ mouth cues timed to a voice line with Rhubarb Lip Sync.*
 
 Everything below was run on 2026-09-15 and 2026-09-16 on the reference
 machine: Rhubarb and ffmpeg on the host, the image edits in the container on a
-16GB card shared with other jobs. One portrait, `lord_vitriol`, was made, at
+16GB card shared with other jobs. One portrait, `herald`, was made, at
 one seed. Each section says what failed and what worked instead, and the page
 ends with [what was not tested](#what-was-not-tested).
 
@@ -19,7 +19,7 @@ on GitHub.
 ## What you end up with
 
 ```
-output/lipsync/lord_vitriol/
+output/lipsync/herald/
   source_crop.png      the square crop of the concept
   portrait.png         the approved portrait, 1024x1024
   edits/X.png ...      one whole-image edit per shape
@@ -43,14 +43,14 @@ The whole run, with an approval after every step:
 
 ```sh
 scripts/fetch_tools.py --download rhubarb
-scripts/make_mouths.py --portrait-from output/assets/lord_vitriol/concept.png \
-    --crop 372,65,340,340 --out output/lipsync/lord_vitriol
-scripts/make_mouths.py output/lipsync/lord_vitriol/portrait.png \
+scripts/make_mouths.py --portrait-from output/assets/herald/concept.png \
+    --crop 372,65,340,340 --out output/lipsync/herald
+scripts/make_mouths.py output/lipsync/herald/portrait.png \
     --box 410,440,204,190 --shapes XABCDEF --feather 8
-scripts/compose_mouths.py --check output/lipsync/lord_vitriol/manifest.json
-scripts/lipsync_cues.py lines/smith_01.ogg --out output/lipsync/lord_vitriol/smith_01.json
-scripts/preview_lipsync.py output/lipsync/lord_vitriol/manifest.json \
-    output/lipsync/lord_vitriol/smith_01.json
+scripts/compose_mouths.py --check output/lipsync/herald/manifest.json
+scripts/lipsync_cues.py lines/smith_01.ogg --out output/lipsync/herald/smith_01.json
+scripts/preview_lipsync.py output/lipsync/herald/manifest.json \
+    output/lipsync/herald/smith_01.json
 ```
 
 The `lip-sync` skill runs these one stage per turn and shows each result
@@ -241,8 +241,8 @@ audio. The flap has not been judged on a portrait.
 ## The portrait
 
 ```sh
-scripts/make_mouths.py --portrait-from output/assets/lord_vitriol/concept.png \
-    --crop 372,65,340,340 --out output/lipsync/lord_vitriol
+scripts/make_mouths.py --portrait-from output/assets/herald/concept.png \
+    --crop 372,65,340,340 --out output/lipsync/herald
 ```
 
 This crops the approved concept, keeps the crop as `source_crop.png`, and edits
@@ -306,7 +306,7 @@ without queueing anything.
 ## Nine mouths
 
 ```sh
-scripts/make_mouths.py output/lipsync/lord_vitriol/portrait.png \
+scripts/make_mouths.py output/lipsync/herald/portrait.png \
     --box 410,440,204,190 --shapes XABCDEF --feather 8
 ```
 
@@ -382,8 +382,8 @@ this set is made with `--shapes XABCDEF`.
 ## Checking the set
 
 ```sh
-scripts/compose_mouths.py --check output/lipsync/lord_vitriol/manifest.json
-scripts/preview_lipsync.py output/lipsync/lord_vitriol/manifest.json
+scripts/compose_mouths.py --check output/lipsync/herald/manifest.json
+scripts/preview_lipsync.py output/lipsync/herald/manifest.json
 ```
 
 `--check` pastes every overlay onto the portrait and fails unless no pixel
@@ -409,10 +409,10 @@ plays. Judge it one shape at a time.
 ## The preview
 
 ```sh
-scripts/preview_lipsync.py output/lipsync/lord_vitriol/manifest.json \
-    output/lipsync/lord_vitriol/concord.json
-scripts/preview_lipsync.py output/lipsync/lord_vitriol/manifest.json \
-    output/lipsync/lord_vitriol/concord_12fps.json --label --no-sheet
+scripts/preview_lipsync.py output/lipsync/herald/manifest.json \
+    output/lipsync/herald/concord.json
+scripts/preview_lipsync.py output/lipsync/herald/manifest.json \
+    output/lipsync/herald/concord_12fps.json --label --no-sheet
 ```
 
 This writes an H.264 MP4 beside the timeline, with the line's audio when the
