@@ -311,11 +311,22 @@ def note_node(nid, text, pos, size, markdown=False):
 
 
 # ------------------------------------------------------------------- build
+# Node ids from 10000 and link ids from 100000.  rgthree's Mute / Bypass
+# Relays keep polling after the editor loads another graph, and find their
+# targets by link id in whatever graph is now open; with ids from 1, the
+# relays of this graph muted and bypassed nodes of complete_workflow.json
+# opened in the same tab (its CLIP switch and its LoRA loader, 2026-10-04).
+# No hand-built or converted graph here numbers that high, so a leftover
+# relay finds nothing.
+NODE_ID_BASE = 10000
+LINK_ID_BASE = 100000
+
+
 def build(info):
     api = {}                       # every backend node, as the server sees it
     group_of = {}                  # node id -> group key
     title = {}                     # node id -> title shown in the editor
-    next_id = [1]
+    next_id = [NODE_ID_BASE]
 
     def new(ctype, inputs, group, name=None):
         nid = str(next_id[0])
@@ -524,7 +535,7 @@ def to_ui(api, group_of, title, wiring, info):
     owners, result = wiring["owners"], wiring["result"]
     nodes, links = [], []
     by_id = {}
-    next_link = [1]
+    next_link = [LINK_ID_BASE]
     last_id = max(int(k) for k in api)
 
     def fresh_id():

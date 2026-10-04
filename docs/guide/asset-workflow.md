@@ -62,9 +62,19 @@ and muted a switch of the new graph, which then vanished from the prompt; on
 2026-10-03 the same thing muted the CLIP broadcaster, and every text encoder
 was sent without a CLIP. Read in `node_mode_relay.js` at the commit the
 Dockerfile pins: `stabilize()` reschedules itself and never checks that its node
-is still in a graph. Seen when a graph is loaded into a tab in place of another;
-whether switching between workflow tabs is safe was not checked. Open this
-graph in a new tab, and if nodes mute themselves for no reason, reload the page.
+is still in a graph.
+
+On 2026-10-04 it reached `complete_workflow.json`: opened after this graph's
+stages had been switched, its CLIP switch was muted and its LoRA loader
+bypassed, so Basic Image Editing failed validation with `Required input is
+missing: clip` and Image Edit + LoRA failed with `'NoneType' object has no
+attribute 'tokenize'`. Since then `scripts/build_asset_workflow.py` numbers this
+graph's nodes from 10000 and its links from 100000, which no other graph here
+uses, so its leftover relays find nothing; the same sequence in the editor then
+left both edit groups whole. `complete_workflow.json` has relays of its own,
+numbered from 1, which can still reach a graph opened after it. Open a graph in
+a new tab, and if nodes mute themselves for no reason, close the other graph's
+tab and reload the page.
 :::
 
 ### Picking a take

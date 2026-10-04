@@ -1,11 +1,11 @@
 {
  "id": "asset_workflow",
  "revision": 0,
- "last_node_id": 149,
- "last_link_id": 199,
+ "last_node_id": 10148,
+ "last_link_id": 100198,
  "nodes": [
   {
-   "id": 1,
+   "id": 10000,
    "type": "PrimitiveStringMultiline",
    "pos": [
     560,
@@ -24,8 +24,8 @@
      "name": "STRING",
      "type": "STRING",
      "links": [
-      5,
-      13
+      100004,
+      100012
      ],
      "slot_index": 0
     }
@@ -39,7 +39,7 @@
    "title": "Prompt (both Concept stages)"
   },
   {
-   "id": 2,
+   "id": 10001,
    "type": "PrimitiveStringMultiline",
    "pos": [
     560,
@@ -58,7 +58,7 @@
      "name": "STRING",
      "type": "STRING",
      "links": [
-      22
+      100021
      ],
      "slot_index": 0
     }
@@ -72,7 +72,7 @@
    "title": "Edit instruction (Stage 2)"
   },
   {
-   "id": 3,
+   "id": 10002,
    "type": "PrimitiveStringMultiline",
    "pos": [
     560,
@@ -91,7 +91,7 @@
      "name": "STRING",
      "type": "STRING",
      "links": [
-      68
+      100067
      ],
      "slot_index": 0
     }
@@ -105,7 +105,7 @@
    "title": "Motion prompt (Stage 8)"
   },
   {
-   "id": 4,
+   "id": 10003,
    "type": "PrimitiveInt",
    "pos": [
     560,
@@ -124,10 +124,10 @@
      "name": "INT",
      "type": "INT",
      "links": [
-      6,
-      14,
-      126,
-      128
+      100005,
+      100013,
+      100125,
+      100127
      ],
      "slot_index": 0
     }
@@ -142,7 +142,7 @@
    "title": "Takes per image stage (each queue of Stages 1 to 3)"
   },
   {
-   "id": 5,
+   "id": 10004,
    "type": "UNETLoader",
    "pos": [
     1020,
@@ -161,7 +161,7 @@
      "name": "MODEL",
      "type": "MODEL",
      "links": [
-      1
+      100000
      ],
      "slot_index": 0
     }
@@ -175,7 +175,7 @@
    ]
   },
   {
-   "id": 6,
+   "id": 10005,
    "type": "CLIPLoader",
    "pos": [
     1780,
@@ -194,7 +194,7 @@
      "name": "CLIP",
      "type": "CLIP",
      "links": [
-      129
+      100128
      ],
      "slot_index": 0
     }
@@ -209,7 +209,7 @@
    ]
   },
   {
-   "id": 7,
+   "id": 10006,
    "type": "VAELoader",
    "pos": [
     1780,
@@ -228,7 +228,7 @@
      "name": "VAE",
      "type": "VAE",
      "links": [
-      130
+      100129
      ],
      "slot_index": 0
     }
@@ -241,7 +241,7 @@
    ]
   },
   {
-   "id": 8,
+   "id": 10007,
    "type": "ModelSamplingAuraFlow",
    "pos": [
     1480,
@@ -258,7 +258,7 @@
     {
      "name": "model",
      "type": "MODEL",
-     "link": 1
+     "link": 100000
     }
    ],
    "outputs": [
@@ -266,7 +266,7 @@
      "name": "MODEL",
      "type": "MODEL",
      "links": [
-      7
+      100006
      ],
      "slot_index": 0
     }
@@ -279,7 +279,7 @@
    ]
   },
   {
-   "id": 9,
+   "id": 10008,
    "type": "UNETLoader",
    "pos": [
     1020,
@@ -298,7 +298,7 @@
      "name": "MODEL",
      "type": "MODEL",
      "links": [
-      2
+      100001
      ],
      "slot_index": 0
     }
@@ -312,7 +312,7 @@
    ]
   },
   {
-   "id": 10,
+   "id": 10009,
    "type": "ModelSamplingAuraFlow",
    "pos": [
     1480,
@@ -329,7 +329,7 @@
     {
      "name": "model",
      "type": "MODEL",
-     "link": 2
+     "link": 100001
     }
    ],
    "outputs": [
@@ -337,7 +337,7 @@
      "name": "MODEL",
      "type": "MODEL",
      "links": [
-      15
+      100014
      ],
      "slot_index": 0
     }
@@ -350,7 +350,7 @@
    ]
   },
   {
-   "id": 11,
+   "id": 10010,
    "type": "UNETLoader",
    "pos": [
     1780,
@@ -369,7 +369,7 @@
      "name": "MODEL",
      "type": "MODEL",
      "links": [
-      3
+      100002
      ],
      "slot_index": 0
     }
@@ -383,7 +383,7 @@
    ]
   },
   {
-   "id": 12,
+   "id": 10011,
    "type": "ModelSamplingAuraFlow",
    "pos": [
     2240,
@@ -400,7 +400,7 @@
     {
      "name": "model",
      "type": "MODEL",
-     "link": 3
+     "link": 100002
     }
    ],
    "outputs": [
@@ -408,7 +408,7 @@
      "name": "MODEL",
      "type": "MODEL",
      "links": [
-      4
+      100003
      ],
      "slot_index": 0
     }
@@ -421,7 +421,7 @@
    ]
   },
   {
-   "id": 13,
+   "id": 10012,
    "type": "CFGNorm",
    "pos": [
     2700,
@@ -438,7 +438,7 @@
     {
      "name": "model",
      "type": "MODEL",
-     "link": 4
+     "link": 100003
     }
    ],
    "outputs": [
@@ -446,8 +446,8 @@
      "name": "patched_model",
      "type": "MODEL",
      "links": [
-      26,
-      36
+      100025,
+      100035
      ],
      "slot_index": 0
     }
@@ -461,7 +461,7 @@
    ]
   },
   {
-   "id": 14,
+   "id": 10013,
    "type": "CLIPLoader",
    "pos": [
     1020,
@@ -480,8 +480,8 @@
      "name": "CLIP",
      "type": "CLIP",
      "links": [
-      69,
-      70
+      100068,
+      100069
      ],
      "slot_index": 0
     }
@@ -496,7 +496,7 @@
    ]
   },
   {
-   "id": 15,
+   "id": 10014,
    "type": "UNETLoader",
    "pos": [
     1020,
@@ -515,7 +515,7 @@
      "name": "MODEL",
      "type": "MODEL",
      "links": [
-      64
+      100063
      ],
      "slot_index": 0
     }
@@ -529,7 +529,7 @@
    ]
   },
   {
-   "id": 16,
+   "id": 10015,
    "type": "UNETLoader",
    "pos": [
     1020,
@@ -548,7 +548,7 @@
      "name": "MODEL",
      "type": "MODEL",
      "links": [
-      65
+      100064
      ],
      "slot_index": 0
     }
@@ -562,7 +562,7 @@
    ]
   },
   {
-   "id": 17,
+   "id": 10016,
    "type": "VAELoader",
    "pos": [
     1020,
@@ -581,8 +581,8 @@
      "name": "VAE",
      "type": "VAE",
      "links": [
-      73,
-      84
+      100072,
+      100083
      ],
      "slot_index": 0
     }
@@ -595,7 +595,7 @@
    ]
   },
   {
-   "id": 18,
+   "id": 10017,
    "type": "LoadImage",
    "pos": [
     1020,
@@ -614,14 +614,14 @@
      "name": "IMAGE",
      "type": "IMAGE",
      "links": [
-      91,
-      96,
-      102,
-      119,
-      137,
-      147,
-      160,
-      197
+      100090,
+      100095,
+      100101,
+      100118,
+      100136,
+      100146,
+      100159,
+      100196
      ],
      "slot_index": 0
     },
@@ -640,7 +640,7 @@
    ]
   },
   {
-   "id": 19,
+   "id": 10018,
    "type": "CLIPTextEncode",
    "pos": [
     1020,
@@ -660,7 +660,7 @@
      "widget": {
       "name": "text"
      },
-     "link": 5
+     "link": 100004
     },
     {
      "name": "clip",
@@ -673,7 +673,7 @@
      "name": "CONDITIONING",
      "type": "CONDITIONING",
      "links": [
-      8
+      100007
      ],
      "slot_index": 0
     }
@@ -684,7 +684,7 @@
    "widgets_values": []
   },
   {
-   "id": 20,
+   "id": 10019,
    "type": "CLIPTextEncode",
    "pos": [
     1020,
@@ -709,7 +709,7 @@
      "name": "CONDITIONING",
      "type": "CONDITIONING",
      "links": [
-      9
+      100008
      ],
      "slot_index": 0
     }
@@ -722,7 +722,7 @@
    ]
   },
   {
-   "id": 21,
+   "id": 10020,
    "type": "EmptySD3LatentImage",
    "pos": [
     1020,
@@ -742,7 +742,7 @@
      "widget": {
       "name": "batch_size"
      },
-     "link": 6
+     "link": 100005
     }
    ],
    "outputs": [
@@ -750,7 +750,7 @@
      "name": "LATENT",
      "type": "LATENT",
      "links": [
-      10
+      100009
      ],
      "slot_index": 0
     }
@@ -764,7 +764,7 @@
    ]
   },
   {
-   "id": 22,
+   "id": 10021,
    "type": "KSampler",
    "pos": [
     1940,
@@ -781,22 +781,22 @@
     {
      "name": "model",
      "type": "MODEL",
-     "link": 7
+     "link": 100006
     },
     {
      "name": "positive",
      "type": "CONDITIONING",
-     "link": 8
+     "link": 100007
     },
     {
      "name": "negative",
      "type": "CONDITIONING",
-     "link": 9
+     "link": 100008
     },
     {
      "name": "latent_image",
      "type": "LATENT",
-     "link": 10
+     "link": 100009
     }
    ],
    "outputs": [
@@ -804,7 +804,7 @@
      "name": "LATENT",
      "type": "LATENT",
      "links": [
-      11
+      100010
      ],
      "slot_index": 0
     }
@@ -823,7 +823,7 @@
    ]
   },
   {
-   "id": 23,
+   "id": 10022,
    "type": "VAEDecode",
    "pos": [
     2400,
@@ -840,7 +840,7 @@
     {
      "name": "samples",
      "type": "LATENT",
-     "link": 11
+     "link": 100010
     },
     {
      "name": "vae",
@@ -853,8 +853,8 @@
      "name": "IMAGE",
      "type": "IMAGE",
      "links": [
-      12,
-      121
+      100011,
+      100120
      ],
      "slot_index": 0
     }
@@ -865,7 +865,7 @@
    "widgets_values": []
   },
   {
-   "id": 24,
+   "id": 10023,
    "type": "SaveImage",
    "pos": [
     2860,
@@ -882,7 +882,7 @@
     {
      "name": "images",
      "type": "IMAGE",
-     "link": 12
+     "link": 100011
     }
    ],
    "outputs": [
@@ -901,7 +901,7 @@
    ]
   },
   {
-   "id": 25,
+   "id": 10024,
    "type": "CLIPTextEncode",
    "pos": [
     1020,
@@ -921,7 +921,7 @@
      "widget": {
       "name": "text"
      },
-     "link": 13
+     "link": 100012
     },
     {
      "name": "clip",
@@ -934,7 +934,7 @@
      "name": "CONDITIONING",
      "type": "CONDITIONING",
      "links": [
-      16
+      100015
      ],
      "slot_index": 0
     }
@@ -945,7 +945,7 @@
    "widgets_values": []
   },
   {
-   "id": 26,
+   "id": 10025,
    "type": "CLIPTextEncode",
    "pos": [
     1020,
@@ -970,7 +970,7 @@
      "name": "CONDITIONING",
      "type": "CONDITIONING",
      "links": [
-      17
+      100016
      ],
      "slot_index": 0
     }
@@ -983,7 +983,7 @@
    ]
   },
   {
-   "id": 27,
+   "id": 10026,
    "type": "EmptySD3LatentImage",
    "pos": [
     1020,
@@ -1003,7 +1003,7 @@
      "widget": {
       "name": "batch_size"
      },
-     "link": 14
+     "link": 100013
     }
    ],
    "outputs": [
@@ -1011,7 +1011,7 @@
      "name": "LATENT",
      "type": "LATENT",
      "links": [
-      18
+      100017
      ],
      "slot_index": 0
     }
@@ -1025,7 +1025,7 @@
    ]
   },
   {
-   "id": 28,
+   "id": 10027,
    "type": "KSampler",
    "pos": [
     1940,
@@ -1042,22 +1042,22 @@
     {
      "name": "model",
      "type": "MODEL",
-     "link": 15
+     "link": 100014
     },
     {
      "name": "positive",
      "type": "CONDITIONING",
-     "link": 16
+     "link": 100015
     },
     {
      "name": "negative",
      "type": "CONDITIONING",
-     "link": 17
+     "link": 100016
     },
     {
      "name": "latent_image",
      "type": "LATENT",
-     "link": 18
+     "link": 100017
     }
    ],
    "outputs": [
@@ -1065,7 +1065,7 @@
      "name": "LATENT",
      "type": "LATENT",
      "links": [
-      19
+      100018
      ],
      "slot_index": 0
     }
@@ -1084,7 +1084,7 @@
    ]
   },
   {
-   "id": 29,
+   "id": 10028,
    "type": "VAEDecode",
    "pos": [
     2400,
@@ -1101,7 +1101,7 @@
     {
      "name": "samples",
      "type": "LATENT",
-     "link": 19
+     "link": 100018
     },
     {
      "name": "vae",
@@ -1114,8 +1114,8 @@
      "name": "IMAGE",
      "type": "IMAGE",
      "links": [
-      20,
-      122
+      100019,
+      100121
      ],
      "slot_index": 0
     }
@@ -1126,7 +1126,7 @@
    "widgets_values": []
   },
   {
-   "id": 30,
+   "id": 10029,
    "type": "SaveImage",
    "pos": [
     2860,
@@ -1143,7 +1143,7 @@
     {
      "name": "images",
      "type": "IMAGE",
-     "link": 20
+     "link": 100019
     }
    ],
    "outputs": [
@@ -1162,7 +1162,7 @@
    ]
   },
   {
-   "id": 31,
+   "id": 10030,
    "type": "FluxKontextImageScale",
    "pos": [
     1020,
@@ -1179,7 +1179,7 @@
     {
      "name": "image",
      "type": "IMAGE",
-     "link": 21
+     "link": 100020
     }
    ],
    "outputs": [
@@ -1187,10 +1187,10 @@
      "name": "IMAGE",
      "type": "IMAGE",
      "links": [
-      23,
-      24,
-      25,
-      132
+      100022,
+      100023,
+      100024,
+      100131
      ],
      "slot_index": 0
     }
@@ -1201,7 +1201,7 @@
    "widgets_values": []
   },
   {
-   "id": 32,
+   "id": 10031,
    "type": "TextEncodeQwenImageEditPlus",
    "pos": [
     1480,
@@ -1226,7 +1226,7 @@
      "widget": {
       "name": "prompt"
      },
-     "link": 22
+     "link": 100021
     },
     {
      "name": "vae",
@@ -1236,7 +1236,7 @@
     {
      "name": "image1",
      "type": "IMAGE",
-     "link": 23
+     "link": 100022
     },
     {
      "name": "image2",
@@ -1254,7 +1254,7 @@
      "name": "CONDITIONING",
      "type": "CONDITIONING",
      "links": [
-      27
+      100026
      ],
      "slot_index": 0
     }
@@ -1265,7 +1265,7 @@
    "widgets_values": []
   },
   {
-   "id": 33,
+   "id": 10032,
    "type": "TextEncodeQwenImageEditPlus",
    "pos": [
     1480,
@@ -1292,7 +1292,7 @@
     {
      "name": "image1",
      "type": "IMAGE",
-     "link": 24
+     "link": 100023
     },
     {
      "name": "image2",
@@ -1310,7 +1310,7 @@
      "name": "CONDITIONING",
      "type": "CONDITIONING",
      "links": [
-      28
+      100027
      ],
      "slot_index": 0
     }
@@ -1323,7 +1323,7 @@
    ]
   },
   {
-   "id": 34,
+   "id": 10033,
    "type": "VAEEncode",
    "pos": [
     1480,
@@ -1340,7 +1340,7 @@
     {
      "name": "pixels",
      "type": "IMAGE",
-     "link": 25
+     "link": 100024
     },
     {
      "name": "vae",
@@ -1353,7 +1353,7 @@
      "name": "LATENT",
      "type": "LATENT",
      "links": [
-      125
+      100124
      ],
      "slot_index": 0
     }
@@ -1364,7 +1364,7 @@
    "widgets_values": []
   },
   {
-   "id": 35,
+   "id": 10034,
    "type": "KSampler",
    "pos": [
     2400,
@@ -1381,22 +1381,22 @@
     {
      "name": "model",
      "type": "MODEL",
-     "link": 26
+     "link": 100025
     },
     {
      "name": "positive",
      "type": "CONDITIONING",
-     "link": 27
+     "link": 100026
     },
     {
      "name": "negative",
      "type": "CONDITIONING",
-     "link": 28
+     "link": 100027
     },
     {
      "name": "latent_image",
      "type": "LATENT",
-     "link": 29
+     "link": 100028
     }
    ],
    "outputs": [
@@ -1404,7 +1404,7 @@
      "name": "LATENT",
      "type": "LATENT",
      "links": [
-      30
+      100029
      ],
      "slot_index": 0
     }
@@ -1423,7 +1423,7 @@
    ]
   },
   {
-   "id": 36,
+   "id": 10035,
    "type": "VAEDecode",
    "pos": [
     2860,
@@ -1440,7 +1440,7 @@
     {
      "name": "samples",
      "type": "LATENT",
-     "link": 30
+     "link": 100029
     },
     {
      "name": "vae",
@@ -1453,8 +1453,8 @@
      "name": "IMAGE",
      "type": "IMAGE",
      "links": [
-      31,
-      123
+      100030,
+      100122
      ],
      "slot_index": 0
     }
@@ -1465,7 +1465,7 @@
    "widgets_values": []
   },
   {
-   "id": 37,
+   "id": 10036,
    "type": "SaveImage",
    "pos": [
     3320,
@@ -1482,7 +1482,7 @@
     {
      "name": "images",
      "type": "IMAGE",
-     "link": 31
+     "link": 100030
     }
    ],
    "outputs": [
@@ -1501,7 +1501,7 @@
    ]
   },
   {
-   "id": 38,
+   "id": 10037,
    "type": "FluxKontextImageScale",
    "pos": [
     1020,
@@ -1518,7 +1518,7 @@
     {
      "name": "image",
      "type": "IMAGE",
-     "link": 32
+     "link": 100031
     }
    ],
    "outputs": [
@@ -1526,10 +1526,10 @@
      "name": "IMAGE",
      "type": "IMAGE",
      "links": [
-      33,
-      34,
-      35,
-      141
+      100032,
+      100033,
+      100034,
+      100140
      ],
      "slot_index": 0
     }
@@ -1540,7 +1540,7 @@
    "widgets_values": []
   },
   {
-   "id": 39,
+   "id": 10038,
    "type": "TextEncodeQwenImageEditPlus",
    "pos": [
     1480,
@@ -1567,7 +1567,7 @@
     {
      "name": "image1",
      "type": "IMAGE",
-     "link": 33
+     "link": 100032
     },
     {
      "name": "image2",
@@ -1585,7 +1585,7 @@
      "name": "CONDITIONING",
      "type": "CONDITIONING",
      "links": [
-      37
+      100036
      ],
      "slot_index": 0
     }
@@ -1598,7 +1598,7 @@
    ]
   },
   {
-   "id": 40,
+   "id": 10039,
    "type": "TextEncodeQwenImageEditPlus",
    "pos": [
     1480,
@@ -1625,7 +1625,7 @@
     {
      "name": "image1",
      "type": "IMAGE",
-     "link": 34
+     "link": 100033
     },
     {
      "name": "image2",
@@ -1643,7 +1643,7 @@
      "name": "CONDITIONING",
      "type": "CONDITIONING",
      "links": [
-      38
+      100037
      ],
      "slot_index": 0
     }
@@ -1656,7 +1656,7 @@
    ]
   },
   {
-   "id": 41,
+   "id": 10040,
    "type": "VAEEncode",
    "pos": [
     1480,
@@ -1673,7 +1673,7 @@
     {
      "name": "pixels",
      "type": "IMAGE",
-     "link": 35
+     "link": 100034
     },
     {
      "name": "vae",
@@ -1686,7 +1686,7 @@
      "name": "LATENT",
      "type": "LATENT",
      "links": [
-      127
+      100126
      ],
      "slot_index": 0
     }
@@ -1697,7 +1697,7 @@
    "widgets_values": []
   },
   {
-   "id": 42,
+   "id": 10041,
    "type": "KSampler",
    "pos": [
     2400,
@@ -1714,22 +1714,22 @@
     {
      "name": "model",
      "type": "MODEL",
-     "link": 36
+     "link": 100035
     },
     {
      "name": "positive",
      "type": "CONDITIONING",
-     "link": 37
+     "link": 100036
     },
     {
      "name": "negative",
      "type": "CONDITIONING",
-     "link": 38
+     "link": 100037
     },
     {
      "name": "latent_image",
      "type": "LATENT",
-     "link": 39
+     "link": 100038
     }
    ],
    "outputs": [
@@ -1737,7 +1737,7 @@
      "name": "LATENT",
      "type": "LATENT",
      "links": [
-      40
+      100039
      ],
      "slot_index": 0
     }
@@ -1756,7 +1756,7 @@
    ]
   },
   {
-   "id": 43,
+   "id": 10042,
    "type": "VAEDecode",
    "pos": [
     2860,
@@ -1773,7 +1773,7 @@
     {
      "name": "samples",
      "type": "LATENT",
-     "link": 40
+     "link": 100039
     },
     {
      "name": "vae",
@@ -1786,8 +1786,8 @@
      "name": "IMAGE",
      "type": "IMAGE",
      "links": [
-      41,
-      124
+      100040,
+      100123
      ],
      "slot_index": 0
     }
@@ -1798,7 +1798,7 @@
    "widgets_values": []
   },
   {
-   "id": 44,
+   "id": 10043,
    "type": "SaveImage",
    "pos": [
     3320,
@@ -1815,7 +1815,7 @@
     {
      "name": "images",
      "type": "IMAGE",
-     "link": 41
+     "link": 100040
     }
    ],
    "outputs": [
@@ -1834,7 +1834,7 @@
    ]
   },
   {
-   "id": 45,
+   "id": 10044,
    "type": "[Comfy3D] Load StableGen Trellis Pipeline",
    "pos": [
     1020,
@@ -1853,7 +1853,7 @@
      "name": "trellis_pipe",
      "type": "DIFFUSERS_PIPE",
      "links": [
-      42
+      100041
      ],
      "slot_index": 0
     }
@@ -1872,7 +1872,7 @@
    ]
   },
   {
-   "id": 46,
+   "id": 10045,
    "type": "[Comfy3D] StableGen Trellis Image To 3D",
    "pos": [
     1480,
@@ -1889,12 +1889,12 @@
     {
      "name": "trellis_pipe",
      "type": "DIFFUSERS_PIPE",
-     "link": 42
+     "link": 100041
     },
     {
      "name": "images",
      "type": "IMAGE",
-     "link": 43
+     "link": 100042
     }
    ],
    "outputs": [
@@ -1902,8 +1902,8 @@
      "name": "mesh",
      "type": "MESH",
      "links": [
-      44,
-      151
+      100043,
+      100150
      ],
      "slot_index": 0
     }
@@ -1923,7 +1923,7 @@
    ]
   },
   {
-   "id": 47,
+   "id": 10046,
    "type": "[Comfy3D] Decimate Mesh",
    "pos": [
     1940,
@@ -1940,7 +1940,7 @@
     {
      "name": "mesh",
      "type": "MESH",
-     "link": 44
+     "link": 100043
     }
    ],
    "outputs": [
@@ -1948,7 +1948,7 @@
      "name": "mesh",
      "type": "MESH",
      "links": [
-      45
+      100044
      ],
      "slot_index": 0
     }
@@ -1963,7 +1963,7 @@
    ]
   },
   {
-   "id": 48,
+   "id": 10047,
    "type": "[Comfy3D] Save 3D Mesh",
    "pos": [
     2400,
@@ -1980,7 +1980,7 @@
     {
      "name": "mesh",
      "type": "MESH",
-     "link": 45
+     "link": 100044
     }
    ],
    "outputs": [
@@ -1988,12 +1988,12 @@
      "name": "save_path",
      "type": "STRING",
      "links": [
-      104,
-      108,
-      112,
-      167,
-      176,
-      185
+      100103,
+      100107,
+      100111,
+      100166,
+      100175,
+      100184
      ],
      "slot_index": 0
     }
@@ -2006,7 +2006,7 @@
    ]
   },
   {
-   "id": 49,
+   "id": 10048,
    "type": "[Comfy3D] Load Hunyuan3D 21 ShapeGen Pipeline",
    "pos": [
     1020,
@@ -2025,7 +2025,7 @@
      "name": "shapegen_pipe",
      "type": "DIFFUSERS_PIPE",
      "links": [
-      46
+      100045
      ],
      "slot_index": 0
     }
@@ -2038,7 +2038,7 @@
    ]
   },
   {
-   "id": 50,
+   "id": 10049,
    "type": "[Comfy3D] Hunyuan3D 21 ShapeGen",
    "pos": [
     1480,
@@ -2055,12 +2055,12 @@
     {
      "name": "shapegen_pipe",
      "type": "DIFFUSERS_PIPE",
-     "link": 46
+     "link": 100045
     },
     {
      "name": "image",
      "type": "IMAGE",
-     "link": 47
+     "link": 100046
     }
    ],
    "outputs": [
@@ -2068,8 +2068,8 @@
      "name": "mesh",
      "type": "MESH",
      "links": [
-      48,
-      152
+      100047,
+      100151
      ],
      "slot_index": 0
     },
@@ -2094,7 +2094,7 @@
    ]
   },
   {
-   "id": 51,
+   "id": 10050,
    "type": "[Comfy3D] Decimate Mesh",
    "pos": [
     1940,
@@ -2111,7 +2111,7 @@
     {
      "name": "mesh",
      "type": "MESH",
-     "link": 48
+     "link": 100047
     }
    ],
    "outputs": [
@@ -2119,7 +2119,7 @@
      "name": "mesh",
      "type": "MESH",
      "links": [
-      49
+      100048
      ],
      "slot_index": 0
     }
@@ -2134,7 +2134,7 @@
    ]
   },
   {
-   "id": 52,
+   "id": 10051,
    "type": "[Comfy3D] Save 3D Mesh",
    "pos": [
     2400,
@@ -2151,7 +2151,7 @@
     {
      "name": "mesh",
      "type": "MESH",
-     "link": 49
+     "link": 100048
     }
    ],
    "outputs": [
@@ -2159,12 +2159,12 @@
      "name": "save_path",
      "type": "STRING",
      "links": [
-      105,
-      109,
-      113,
-      168,
-      177,
-      186
+      100104,
+      100108,
+      100112,
+      100167,
+      100176,
+      100185
      ],
      "slot_index": 0
     }
@@ -2177,7 +2177,7 @@
    ]
   },
   {
-   "id": 53,
+   "id": 10052,
    "type": "[Comfy3D] Load Hunyuan3D 21 TexGen Pipeline",
    "pos": [
     1020,
@@ -2196,7 +2196,7 @@
      "name": "texgen_pipe",
      "type": "DIFFUSERS_PIPE",
      "links": [
-      50
+      100049
      ],
      "slot_index": 0
     }
@@ -2211,7 +2211,7 @@
    ]
   },
   {
-   "id": 54,
+   "id": 10053,
    "type": "[Comfy3D] Hunyuan3D 21 TexGen",
    "pos": [
     1480,
@@ -2228,7 +2228,7 @@
     {
      "name": "texgen_pipe",
      "type": "DIFFUSERS_PIPE",
-     "link": 50
+     "link": 100049
     },
     {
      "name": "mesh_path",
@@ -2236,12 +2236,12 @@
      "widget": {
       "name": "mesh_path"
      },
-     "link": 51
+     "link": 100050
     },
     {
      "name": "image",
      "type": "IMAGE",
-     "link": 52
+     "link": 100051
     }
    ],
    "outputs": [
@@ -2249,9 +2249,9 @@
      "name": "textured_mesh",
      "type": "MESH",
      "links": [
-      53,
-      153,
-      164
+      100052,
+      100152,
+      100163
      ],
      "slot_index": 0
     }
@@ -2265,7 +2265,7 @@
    ]
   },
   {
-   "id": 55,
+   "id": 10054,
    "type": "[Comfy3D] Save 3D Mesh",
    "pos": [
     1940,
@@ -2282,7 +2282,7 @@
     {
      "name": "mesh",
      "type": "MESH",
-     "link": 53
+     "link": 100052
     }
    ],
    "outputs": [
@@ -2290,10 +2290,10 @@
      "name": "save_path",
      "type": "STRING",
      "links": [
-      107,
-      111,
-      175,
-      184
+      100106,
+      100110,
+      100174,
+      100183
      ],
      "slot_index": 0
     }
@@ -2306,7 +2306,7 @@
    ]
   },
   {
-   "id": 56,
+   "id": 10055,
    "type": "[Comfy3D] Load 3D Mesh",
    "pos": [
     1020,
@@ -2326,7 +2326,7 @@
      "widget": {
       "name": "mesh_file_path"
      },
-     "link": 54
+     "link": 100053
     }
    ],
    "outputs": [
@@ -2334,8 +2334,8 @@
      "name": "mesh",
      "type": "MESH",
      "links": [
-      55,
-      172
+      100054,
+      100171
      ],
      "slot_index": 0
     }
@@ -2353,7 +2353,7 @@
    ]
   },
   {
-   "id": 57,
+   "id": 10056,
    "type": "[Comfy3D] Stack Orbit Camera Poses",
    "pos": [
     1020,
@@ -2372,7 +2372,7 @@
      "name": "orbit_camposes",
      "type": "ORBIT_CAMPOSES",
      "links": [
-      56
+      100055
      ],
      "slot_index": 0
     },
@@ -2438,7 +2438,7 @@
    ]
   },
   {
-   "id": 58,
+   "id": 10057,
    "type": "[Comfy3D] Mesh Orbit Renderer",
    "pos": [
     1480,
@@ -2455,12 +2455,12 @@
     {
      "name": "mesh",
      "type": "MESH",
-     "link": 55
+     "link": 100054
     },
     {
      "name": "render_orbit_camera_poses",
      "type": "ORBIT_CAMPOSES",
-     "link": 56
+     "link": 100055
     }
    ],
    "outputs": [
@@ -2468,7 +2468,7 @@
      "name": "rendered_mesh_images",
      "type": "IMAGE",
      "links": [
-      57
+      100056
      ],
      "slot_index": 0
     },
@@ -2476,7 +2476,7 @@
      "name": "rendered_mesh_masks",
      "type": "MASK",
      "links": [
-      58
+      100057
      ],
      "slot_index": 1
     },
@@ -2515,7 +2515,7 @@
    ]
   },
   {
-   "id": 59,
+   "id": 10058,
    "type": "SaveImage",
    "pos": [
     1940,
@@ -2532,7 +2532,7 @@
     {
      "name": "images",
      "type": "IMAGE",
-     "link": 57
+     "link": 100056
     }
    ],
    "outputs": [
@@ -2551,7 +2551,7 @@
    ]
   },
   {
-   "id": 60,
+   "id": 10059,
    "type": "MaskToImage",
    "pos": [
     1940,
@@ -2568,7 +2568,7 @@
     {
      "name": "mask",
      "type": "MASK",
-     "link": 58
+     "link": 100057
     }
    ],
    "outputs": [
@@ -2576,7 +2576,7 @@
      "name": "IMAGE",
      "type": "IMAGE",
      "links": [
-      59
+      100058
      ],
      "slot_index": 0
     }
@@ -2587,7 +2587,7 @@
    "widgets_values": []
   },
   {
-   "id": 61,
+   "id": 10060,
    "type": "SaveImage",
    "pos": [
     2400,
@@ -2604,7 +2604,7 @@
     {
      "name": "images",
      "type": "IMAGE",
-     "link": 59
+     "link": 100058
     }
    ],
    "outputs": [
@@ -2623,7 +2623,7 @@
    ]
   },
   {
-   "id": 62,
+   "id": 10061,
    "type": "UniRigLoadMesh",
    "pos": [
     1020,
@@ -2643,7 +2643,7 @@
      "widget": {
       "name": "file_path"
      },
-     "link": 60
+     "link": 100059
     }
    ],
    "outputs": [
@@ -2651,8 +2651,8 @@
      "name": "mesh",
      "type": "TRIMESH",
      "links": [
-      61,
-      181
+      100060,
+      100180
      ],
      "slot_index": 0
     }
@@ -2665,7 +2665,7 @@
    ]
   },
   {
-   "id": 63,
+   "id": 10062,
    "type": "UniRigLoadModel",
    "pos": [
     1020,
@@ -2684,7 +2684,7 @@
      "name": "model",
      "type": "UNIRIG_MODEL",
      "links": [
-      62
+      100061
      ],
      "slot_index": 0
     }
@@ -2698,7 +2698,7 @@
    ]
   },
   {
-   "id": 64,
+   "id": 10063,
    "type": "UniRigAutoRig",
    "pos": [
     1480,
@@ -2715,12 +2715,12 @@
     {
      "name": "trimesh",
      "type": "TRIMESH",
-     "link": 61
+     "link": 100060
     },
     {
      "name": "model",
      "type": "UNIRIG_MODEL",
-     "link": 62
+     "link": 100061
     }
    ],
    "outputs": [
@@ -2728,7 +2728,7 @@
      "name": "fbx_output_path",
      "type": "STRING",
      "links": [
-      63
+      100062
      ],
      "slot_index": 0
     }
@@ -2744,7 +2744,7 @@
    ]
   },
   {
-   "id": 65,
+   "id": 10064,
    "type": "UniRigPreviewRiggedMesh",
    "pos": [
     1940,
@@ -2764,7 +2764,7 @@
      "widget": {
       "name": "fbx_output_path"
      },
-     "link": 63
+     "link": 100062
     }
    ],
    "outputs": [],
@@ -2774,7 +2774,7 @@
    "widgets_values": []
   },
   {
-   "id": 66,
+   "id": 10065,
    "type": "LoraLoaderModelOnly",
    "pos": [
     1480,
@@ -2791,7 +2791,7 @@
     {
      "name": "model",
      "type": "MODEL",
-     "link": 64
+     "link": 100063
     }
    ],
    "outputs": [
@@ -2799,7 +2799,7 @@
      "name": "MODEL",
      "type": "MODEL",
      "links": [
-      66
+      100065
      ],
      "slot_index": 0
     }
@@ -2813,7 +2813,7 @@
    ]
   },
   {
-   "id": 67,
+   "id": 10066,
    "type": "LoraLoaderModelOnly",
    "pos": [
     1480,
@@ -2830,7 +2830,7 @@
     {
      "name": "model",
      "type": "MODEL",
-     "link": 65
+     "link": 100064
     }
    ],
    "outputs": [
@@ -2838,7 +2838,7 @@
      "name": "MODEL",
      "type": "MODEL",
      "links": [
-      67
+      100066
      ],
      "slot_index": 0
     }
@@ -2852,7 +2852,7 @@
    ]
   },
   {
-   "id": 68,
+   "id": 10067,
    "type": "ModelSamplingSD3",
    "pos": [
     1940,
@@ -2869,7 +2869,7 @@
     {
      "name": "model",
      "type": "MODEL",
-     "link": 66
+     "link": 100065
     }
    ],
    "outputs": [
@@ -2877,7 +2877,7 @@
      "name": "MODEL",
      "type": "MODEL",
      "links": [
-      75
+      100074
      ],
      "slot_index": 0
     }
@@ -2890,7 +2890,7 @@
    ]
   },
   {
-   "id": 69,
+   "id": 10068,
    "type": "ModelSamplingSD3",
    "pos": [
     1940,
@@ -2907,7 +2907,7 @@
     {
      "name": "model",
      "type": "MODEL",
-     "link": 67
+     "link": 100066
     }
    ],
    "outputs": [
@@ -2915,7 +2915,7 @@
      "name": "MODEL",
      "type": "MODEL",
      "links": [
-      79
+      100078
      ],
      "slot_index": 0
     }
@@ -2928,7 +2928,7 @@
    ]
   },
   {
-   "id": 70,
+   "id": 10069,
    "type": "CLIPTextEncode",
    "pos": [
     1480,
@@ -2948,12 +2948,12 @@
      "widget": {
       "name": "text"
      },
-     "link": 68
+     "link": 100067
     },
     {
      "name": "clip",
      "type": "CLIP",
-     "link": 69
+     "link": 100068
     }
    ],
    "outputs": [
@@ -2961,7 +2961,7 @@
      "name": "CONDITIONING",
      "type": "CONDITIONING",
      "links": [
-      71
+      100070
      ],
      "slot_index": 0
     }
@@ -2972,7 +2972,7 @@
    "widgets_values": []
   },
   {
-   "id": 71,
+   "id": 10070,
    "type": "CLIPTextEncode",
    "pos": [
     1480,
@@ -2989,7 +2989,7 @@
     {
      "name": "clip",
      "type": "CLIP",
-     "link": 70
+     "link": 100069
     }
    ],
    "outputs": [
@@ -2997,7 +2997,7 @@
      "name": "CONDITIONING",
      "type": "CONDITIONING",
      "links": [
-      72
+      100071
      ],
      "slot_index": 0
     }
@@ -3010,7 +3010,7 @@
    ]
   },
   {
-   "id": 72,
+   "id": 10071,
    "type": "WanImageToVideo",
    "pos": [
     1940,
@@ -3027,17 +3027,17 @@
     {
      "name": "positive",
      "type": "CONDITIONING",
-     "link": 71
+     "link": 100070
     },
     {
      "name": "negative",
      "type": "CONDITIONING",
-     "link": 72
+     "link": 100071
     },
     {
      "name": "vae",
      "type": "VAE",
-     "link": 73
+     "link": 100072
     },
     {
      "name": "clip_vision_output",
@@ -3047,7 +3047,7 @@
     {
      "name": "start_image",
      "type": "IMAGE",
-     "link": 74
+     "link": 100073
     }
    ],
    "outputs": [
@@ -3055,9 +3055,9 @@
      "name": "positive",
      "type": "CONDITIONING",
      "links": [
-      76,
-      80,
-      190
+      100075,
+      100079,
+      100189
      ],
      "slot_index": 0
     },
@@ -3065,8 +3065,8 @@
      "name": "negative",
      "type": "CONDITIONING",
      "links": [
-      77,
-      81
+      100076,
+      100080
      ],
      "slot_index": 1
     },
@@ -3074,7 +3074,7 @@
      "name": "latent",
      "type": "LATENT",
      "links": [
-      78
+      100077
      ],
      "slot_index": 2
     }
@@ -3090,7 +3090,7 @@
    ]
   },
   {
-   "id": 73,
+   "id": 10072,
    "type": "KSamplerAdvanced",
    "pos": [
     2400,
@@ -3107,22 +3107,22 @@
     {
      "name": "model",
      "type": "MODEL",
-     "link": 75
+     "link": 100074
     },
     {
      "name": "positive",
      "type": "CONDITIONING",
-     "link": 76
+     "link": 100075
     },
     {
      "name": "negative",
      "type": "CONDITIONING",
-     "link": 77
+     "link": 100076
     },
     {
      "name": "latent_image",
      "type": "LATENT",
-     "link": 78
+     "link": 100077
     }
    ],
    "outputs": [
@@ -3130,7 +3130,7 @@
      "name": "LATENT",
      "type": "LATENT",
      "links": [
-      82
+      100081
      ],
      "slot_index": 0
     }
@@ -3152,7 +3152,7 @@
    ]
   },
   {
-   "id": 74,
+   "id": 10073,
    "type": "KSamplerAdvanced",
    "pos": [
     2860,
@@ -3169,22 +3169,22 @@
     {
      "name": "model",
      "type": "MODEL",
-     "link": 79
+     "link": 100078
     },
     {
      "name": "positive",
      "type": "CONDITIONING",
-     "link": 80
+     "link": 100079
     },
     {
      "name": "negative",
      "type": "CONDITIONING",
-     "link": 81
+     "link": 100080
     },
     {
      "name": "latent_image",
      "type": "LATENT",
-     "link": 82
+     "link": 100081
     }
    ],
    "outputs": [
@@ -3192,7 +3192,7 @@
      "name": "LATENT",
      "type": "LATENT",
      "links": [
-      83
+      100082
      ],
      "slot_index": 0
     }
@@ -3214,7 +3214,7 @@
    ]
   },
   {
-   "id": 75,
+   "id": 10074,
    "type": "VAEDecode",
    "pos": [
     3320,
@@ -3231,12 +3231,12 @@
     {
      "name": "samples",
      "type": "LATENT",
-     "link": 83
+     "link": 100082
     },
     {
      "name": "vae",
      "type": "VAE",
-     "link": 84
+     "link": 100083
     }
    ],
    "outputs": [
@@ -3244,9 +3244,9 @@
      "name": "IMAGE",
      "type": "IMAGE",
      "links": [
-      85,
-      86,
-      87
+      100084,
+      100085,
+      100086
      ],
      "slot_index": 0
     }
@@ -3257,7 +3257,7 @@
    "widgets_values": []
   },
   {
-   "id": 76,
+   "id": 10075,
    "type": "SaveWEBM",
    "pos": [
     3780,
@@ -3274,7 +3274,7 @@
     {
      "name": "images",
      "type": "IMAGE",
-     "link": 85
+     "link": 100084
     }
    ],
    "outputs": [
@@ -3296,7 +3296,7 @@
    ]
   },
   {
-   "id": 77,
+   "id": 10076,
    "type": "SaveAnimatedWEBP",
    "pos": [
     3780,
@@ -3313,7 +3313,7 @@
     {
      "name": "images",
      "type": "IMAGE",
-     "link": 86
+     "link": 100085
     }
    ],
    "outputs": [
@@ -3336,7 +3336,7 @@
    ]
   },
   {
-   "id": 78,
+   "id": 10077,
    "type": "ImageFromBatch",
    "pos": [
     3780,
@@ -3353,7 +3353,7 @@
     {
      "name": "image",
      "type": "IMAGE",
-     "link": 87
+     "link": 100086
     }
    ],
    "outputs": [
@@ -3361,7 +3361,7 @@
      "name": "IMAGE",
      "type": "IMAGE",
      "links": [
-      88
+      100087
      ],
      "slot_index": 0
     }
@@ -3375,7 +3375,7 @@
    ]
   },
   {
-   "id": 79,
+   "id": 10078,
    "type": "SaveImage",
    "pos": [
     4240,
@@ -3392,7 +3392,7 @@
     {
      "name": "images",
      "type": "IMAGE",
-     "link": 88
+     "link": 100087
     }
    ],
    "outputs": [
@@ -3411,7 +3411,7 @@
    ]
   },
   {
-   "id": 80,
+   "id": 10079,
    "type": "LoadImageOutput",
    "pos": [
     40,
@@ -3430,8 +3430,8 @@
      "name": "IMAGE",
      "type": "IMAGE",
      "links": [
-      92,
-      139
+      100091,
+      100138
      ],
      "slot_index": 0
     },
@@ -3451,7 +3451,7 @@
    "title": "2. Edit: image to edit"
   },
   {
-   "id": 81,
+   "id": 10080,
    "type": "Any Switch (rgthree)",
    "pos": [
     40,
@@ -3468,22 +3468,22 @@
     {
      "name": "any_01",
      "type": "IMAGE",
-     "link": 89
+     "link": 100088
     },
     {
      "name": "any_02",
      "type": "IMAGE",
-     "link": 90
+     "link": 100089
     },
     {
      "name": "any_03",
      "type": "IMAGE",
-     "link": 91
+     "link": 100090
     },
     {
      "name": "any_04",
      "type": "IMAGE",
-     "link": 92
+     "link": 100091
     },
     {
      "name": "any_05",
@@ -3497,7 +3497,7 @@
      "label": "IMAGE",
      "type": "IMAGE",
      "links": [
-      21
+      100020
      ],
      "slot_index": 0
     }
@@ -3509,7 +3509,7 @@
    "title": "2. Edit takes"
   },
   {
-   "id": 82,
+   "id": 10081,
    "type": "PrimitiveString",
    "pos": [
     40,
@@ -3528,8 +3528,8 @@
      "name": "STRING",
      "type": "STRING",
      "links": [
-      133,
-      138
+      100132,
+      100137
      ],
      "slot_index": 0
     }
@@ -3543,7 +3543,7 @@
    "title": "2. Edit takes: flag, active while its stage is off"
   },
   {
-   "id": 83,
+   "id": 10082,
    "type": "LoadImageOutput",
    "pos": [
     480,
@@ -3562,8 +3562,8 @@
      "name": "IMAGE",
      "type": "IMAGE",
      "links": [
-      97,
-      149
+      100096,
+      100148
      ],
      "slot_index": 0
     },
@@ -3583,7 +3583,7 @@
    "title": "3. Simplify: image to simplify"
   },
   {
-   "id": 84,
+   "id": 10083,
    "type": "Any Switch (rgthree)",
    "pos": [
     40,
@@ -3600,27 +3600,27 @@
     {
      "name": "any_01",
      "type": "IMAGE",
-     "link": 93
+     "link": 100092
     },
     {
      "name": "any_02",
      "type": "IMAGE",
-     "link": 94
+     "link": 100093
     },
     {
      "name": "any_03",
      "type": "IMAGE",
-     "link": 95
+     "link": 100094
     },
     {
      "name": "any_04",
      "type": "IMAGE",
-     "link": 96
+     "link": 100095
     },
     {
      "name": "any_05",
      "type": "IMAGE",
-     "link": 97
+     "link": 100096
     },
     {
      "name": "any_06",
@@ -3634,7 +3634,7 @@
      "label": "IMAGE",
      "type": "IMAGE",
      "links": [
-      32
+      100031
      ],
      "slot_index": 0
     }
@@ -3646,7 +3646,7 @@
    "title": "3. Simplify takes"
   },
   {
-   "id": 85,
+   "id": 10084,
    "type": "PrimitiveString",
    "pos": [
     40,
@@ -3665,8 +3665,8 @@
      "name": "STRING",
      "type": "STRING",
      "links": [
-      142,
-      148
+      100141,
+      100147
      ],
      "slot_index": 0
     }
@@ -3680,7 +3680,7 @@
    "title": "3. Simplify takes: flag, active while its stage is off"
   },
   {
-   "id": 86,
+   "id": 10085,
    "type": "LoadImageOutput",
    "pos": [
     920,
@@ -3699,8 +3699,8 @@
      "name": "IMAGE",
      "type": "IMAGE",
      "links": [
-      103,
-      162
+      100102,
+      100161
      ],
      "slot_index": 0
     },
@@ -3720,7 +3720,7 @@
    "title": "4. Mesh and 5. Texture: concept image"
   },
   {
-   "id": 87,
+   "id": 10086,
    "type": "Any Switch (rgthree)",
    "pos": [
     40,
@@ -3737,32 +3737,32 @@
     {
      "name": "any_01",
      "type": "IMAGE",
-     "link": 98
+     "link": 100097
     },
     {
      "name": "any_02",
      "type": "IMAGE",
-     "link": 99
+     "link": 100098
     },
     {
      "name": "any_03",
      "type": "IMAGE",
-     "link": 100
+     "link": 100099
     },
     {
      "name": "any_04",
      "type": "IMAGE",
-     "link": 101
+     "link": 100100
     },
     {
      "name": "any_05",
      "type": "IMAGE",
-     "link": 102
+     "link": 100101
     },
     {
      "name": "any_06",
      "type": "IMAGE",
-     "link": 103
+     "link": 100102
     },
     {
      "name": "any_07",
@@ -3776,9 +3776,9 @@
      "label": "IMAGE",
      "type": "IMAGE",
      "links": [
-      43,
-      47,
-      52
+      100042,
+      100046,
+      100051
      ],
      "slot_index": 0
     }
@@ -3790,7 +3790,7 @@
    "title": "4. Mesh and 5. Texture take"
   },
   {
-   "id": 88,
+   "id": 10087,
    "type": "PrimitiveString",
    "pos": [
     40,
@@ -3809,8 +3809,8 @@
      "name": "STRING",
      "type": "STRING",
      "links": [
-      154,
-      161
+      100153,
+      100160
      ],
      "slot_index": 0
     }
@@ -3824,7 +3824,7 @@
    "title": "4. Mesh and 5. Texture take: flag, active while its stage is off"
   },
   {
-   "id": 89,
+   "id": 10088,
    "type": "PrimitiveString",
    "pos": [
     1360,
@@ -3843,8 +3843,8 @@
      "name": "STRING",
      "type": "STRING",
      "links": [
-      106,
-      170
+      100105,
+      100169
      ],
      "slot_index": 0
     }
@@ -3858,7 +3858,7 @@
    "title": "5. Texture: mesh to texture (container path)"
   },
   {
-   "id": 90,
+   "id": 10089,
    "type": "Any Switch (rgthree)",
    "pos": [
     40,
@@ -3875,17 +3875,17 @@
     {
      "name": "any_01",
      "type": "STRING",
-     "link": 104
+     "link": 100103
     },
     {
      "name": "any_02",
      "type": "STRING",
-     "link": 105
+     "link": 100104
     },
     {
      "name": "any_03",
      "type": "STRING",
-     "link": 106
+     "link": 100105
     },
     {
      "name": "any_04",
@@ -3899,7 +3899,7 @@
      "label": "STRING",
      "type": "STRING",
      "links": [
-      51
+      100050
      ],
      "slot_index": 0
     }
@@ -3911,7 +3911,7 @@
    "title": "5. Texture mesh"
   },
   {
-   "id": 91,
+   "id": 10090,
    "type": "PrimitiveString",
    "pos": [
     40,
@@ -3930,8 +3930,8 @@
      "name": "STRING",
      "type": "STRING",
      "links": [
-      165,
-      169
+      100164,
+      100168
      ],
      "slot_index": 0
     }
@@ -3945,7 +3945,7 @@
    "title": "5. Texture mesh: flag, active while its stage is off"
   },
   {
-   "id": 92,
+   "id": 10091,
    "type": "PrimitiveString",
    "pos": [
     1800,
@@ -3964,8 +3964,8 @@
      "name": "STRING",
      "type": "STRING",
      "links": [
-      110,
-      179
+      100109,
+      100178
      ],
      "slot_index": 0
     }
@@ -3979,7 +3979,7 @@
    "title": "6. Turntable: mesh to render (container path)"
   },
   {
-   "id": 93,
+   "id": 10092,
    "type": "Any Switch (rgthree)",
    "pos": [
     40,
@@ -3996,22 +3996,22 @@
     {
      "name": "any_01",
      "type": "STRING",
-     "link": 107
+     "link": 100106
     },
     {
      "name": "any_02",
      "type": "STRING",
-     "link": 108
+     "link": 100107
     },
     {
      "name": "any_03",
      "type": "STRING",
-     "link": 109
+     "link": 100108
     },
     {
      "name": "any_04",
      "type": "STRING",
-     "link": 110
+     "link": 100109
     },
     {
      "name": "any_05",
@@ -4025,7 +4025,7 @@
      "label": "STRING",
      "type": "STRING",
      "links": [
-      54
+      100053
      ],
      "slot_index": 0
     }
@@ -4037,7 +4037,7 @@
    "title": "6. Turntable mesh"
   },
   {
-   "id": 94,
+   "id": 10093,
    "type": "PrimitiveString",
    "pos": [
     40,
@@ -4056,8 +4056,8 @@
      "name": "STRING",
      "type": "STRING",
      "links": [
-      173,
-      178
+      100172,
+      100177
      ],
      "slot_index": 0
     }
@@ -4071,7 +4071,7 @@
    "title": "6. Turntable mesh: flag, active while its stage is off"
   },
   {
-   "id": 95,
+   "id": 10094,
    "type": "PrimitiveString",
    "pos": [
     2240,
@@ -4090,8 +4090,8 @@
      "name": "STRING",
      "type": "STRING",
      "links": [
-      114,
-      188
+      100113,
+      100187
      ],
      "slot_index": 0
     }
@@ -4105,7 +4105,7 @@
    "title": "7. Rig: mesh to rig (container path)"
   },
   {
-   "id": 96,
+   "id": 10095,
    "type": "Any Switch (rgthree)",
    "pos": [
     40,
@@ -4122,22 +4122,22 @@
     {
      "name": "any_01",
      "type": "STRING",
-     "link": 111
+     "link": 100110
     },
     {
      "name": "any_02",
      "type": "STRING",
-     "link": 112
+     "link": 100111
     },
     {
      "name": "any_03",
      "type": "STRING",
-     "link": 113
+     "link": 100112
     },
     {
      "name": "any_04",
      "type": "STRING",
-     "link": 114
+     "link": 100113
     },
     {
      "name": "any_05",
@@ -4151,7 +4151,7 @@
      "label": "STRING",
      "type": "STRING",
      "links": [
-      60
+      100059
      ],
      "slot_index": 0
     }
@@ -4163,7 +4163,7 @@
    "title": "7. Rig mesh"
   },
   {
-   "id": 97,
+   "id": 10096,
    "type": "PrimitiveString",
    "pos": [
     40,
@@ -4182,8 +4182,8 @@
      "name": "STRING",
      "type": "STRING",
      "links": [
-      182,
-      187
+      100181,
+      100186
      ],
      "slot_index": 0
     }
@@ -4197,7 +4197,7 @@
    "title": "7. Rig mesh: flag, active while its stage is off"
   },
   {
-   "id": 98,
+   "id": 10097,
    "type": "LoadImageOutput",
    "pos": [
     2680,
@@ -4216,8 +4216,8 @@
      "name": "IMAGE",
      "type": "IMAGE",
      "links": [
-      120,
-      199
+      100119,
+      100198
      ],
      "slot_index": 0
     },
@@ -4237,7 +4237,7 @@
    "title": "8. Animate: start frame"
   },
   {
-   "id": 99,
+   "id": 10098,
    "type": "Any Switch (rgthree)",
    "pos": [
     40,
@@ -4254,32 +4254,32 @@
     {
      "name": "any_01",
      "type": "IMAGE",
-     "link": 115
+     "link": 100114
     },
     {
      "name": "any_02",
      "type": "IMAGE",
-     "link": 116
+     "link": 100115
     },
     {
      "name": "any_03",
      "type": "IMAGE",
-     "link": 117
+     "link": 100116
     },
     {
      "name": "any_04",
      "type": "IMAGE",
-     "link": 118
+     "link": 100117
     },
     {
      "name": "any_05",
      "type": "IMAGE",
-     "link": 119
+     "link": 100118
     },
     {
      "name": "any_06",
      "type": "IMAGE",
-     "link": 120
+     "link": 100119
     },
     {
      "name": "any_07",
@@ -4293,7 +4293,7 @@
      "label": "IMAGE",
      "type": "IMAGE",
      "links": [
-      74
+      100073
      ],
      "slot_index": 0
     }
@@ -4305,7 +4305,7 @@
    "title": "8. Animate takes"
   },
   {
-   "id": 100,
+   "id": 10099,
    "type": "PrimitiveString",
    "pos": [
     40,
@@ -4324,8 +4324,8 @@
      "name": "STRING",
      "type": "STRING",
      "links": [
-      191,
-      198
+      100190,
+      100197
      ],
      "slot_index": 0
     }
@@ -4339,7 +4339,7 @@
    "title": "8. Animate takes: flag, active while its stage is off"
   },
   {
-   "id": 101,
+   "id": 10100,
    "type": "Image Filter",
    "pos": [
     2860,
@@ -4356,7 +4356,7 @@
     {
      "name": "images",
      "type": "IMAGE",
-     "link": 121
+     "link": 100120
     },
     {
      "name": "latents",
@@ -4374,14 +4374,14 @@
      "name": "images",
      "type": "IMAGE",
      "links": [
-      90,
-      95,
-      101,
-      118,
-      136,
-      146,
-      159,
-      196
+      100089,
+      100094,
+      100100,
+      100117,
+      100135,
+      100145,
+      100158,
+      100195
      ],
      "slot_index": 0
     },
@@ -4441,7 +4441,7 @@
    "title": "1. Concept, fast: pick the take"
   },
   {
-   "id": 102,
+   "id": 10101,
    "type": "Image Filter",
    "pos": [
     2860,
@@ -4458,7 +4458,7 @@
     {
      "name": "images",
      "type": "IMAGE",
-     "link": 122
+     "link": 100121
     },
     {
      "name": "latents",
@@ -4476,14 +4476,14 @@
      "name": "images",
      "type": "IMAGE",
      "links": [
-      89,
-      94,
-      100,
-      117,
-      135,
-      145,
-      158,
-      195
+      100088,
+      100093,
+      100099,
+      100116,
+      100134,
+      100144,
+      100157,
+      100194
      ],
      "slot_index": 0
     },
@@ -4543,7 +4543,7 @@
    "title": "1. Concept, full: pick the take"
   },
   {
-   "id": 103,
+   "id": 10102,
    "type": "Image Filter",
    "pos": [
     3320,
@@ -4560,7 +4560,7 @@
     {
      "name": "images",
      "type": "IMAGE",
-     "link": 123
+     "link": 100122
     },
     {
      "name": "latents",
@@ -4578,12 +4578,12 @@
      "name": "images",
      "type": "IMAGE",
      "links": [
-      93,
-      99,
-      116,
-      144,
-      157,
-      194
+      100092,
+      100098,
+      100115,
+      100143,
+      100156,
+      100193
      ],
      "slot_index": 0
     },
@@ -4643,7 +4643,7 @@
    "title": "2. Edit: pick the take"
   },
   {
-   "id": 104,
+   "id": 10103,
    "type": "Image Filter",
    "pos": [
     3320,
@@ -4660,7 +4660,7 @@
     {
      "name": "images",
      "type": "IMAGE",
-     "link": 124
+     "link": 100123
     },
     {
      "name": "latents",
@@ -4678,10 +4678,10 @@
      "name": "images",
      "type": "IMAGE",
      "links": [
-      98,
-      115,
-      156,
-      193
+      100097,
+      100114,
+      100155,
+      100192
      ],
      "slot_index": 0
     },
@@ -4741,7 +4741,7 @@
    "title": "3. Simplify: pick the take"
   },
   {
-   "id": 105,
+   "id": 10104,
    "type": "RepeatLatentBatch",
    "pos": [
     1940,
@@ -4758,7 +4758,7 @@
     {
      "name": "samples",
      "type": "LATENT",
-     "link": 125
+     "link": 100124
     },
     {
      "name": "amount",
@@ -4766,7 +4766,7 @@
      "widget": {
       "name": "amount"
      },
-     "link": 126
+     "link": 100125
     }
    ],
    "outputs": [
@@ -4774,7 +4774,7 @@
      "name": "LATENT",
      "type": "LATENT",
      "links": [
-      29
+      100028
      ],
      "slot_index": 0
     }
@@ -4785,7 +4785,7 @@
    "widgets_values": []
   },
   {
-   "id": 106,
+   "id": 10105,
    "type": "RepeatLatentBatch",
    "pos": [
     1940,
@@ -4802,7 +4802,7 @@
     {
      "name": "samples",
      "type": "LATENT",
-     "link": 127
+     "link": 100126
     },
     {
      "name": "amount",
@@ -4810,7 +4810,7 @@
      "widget": {
       "name": "amount"
      },
-     "link": 128
+     "link": 100127
     }
    ],
    "outputs": [
@@ -4818,7 +4818,7 @@
      "name": "LATENT",
      "type": "LATENT",
      "links": [
-      39
+      100038
      ],
      "slot_index": 0
     }
@@ -4829,7 +4829,7 @@
    "widgets_values": []
   },
   {
-   "id": 107,
+   "id": 10106,
    "type": "Anything Everywhere",
    "pos": [
     2240,
@@ -4850,7 +4850,7 @@
      "name": "anything",
      "shape": 7,
      "type": "CLIP",
-     "link": 129
+     "link": 100128
     },
     {
      "label": "anything",
@@ -4883,7 +4883,7 @@
    }
   },
   {
-   "id": 108,
+   "id": 10107,
    "type": "Anything Everywhere",
    "pos": [
     2240,
@@ -4904,7 +4904,7 @@
      "name": "anything",
      "shape": 7,
      "type": "VAE",
-     "link": 130
+     "link": 100129
     },
     {
      "label": "anything",
@@ -4937,7 +4937,7 @@
    }
   },
   {
-   "id": 109,
+   "id": 10108,
    "type": "Mute / Bypass Relay (rgthree)",
    "pos": [
     40,
@@ -4958,7 +4958,7 @@
      "dir": 3,
      "name": "edit",
      "type": "*",
-     "link": 132
+     "link": 100131
     },
     {
      "dir": 3,
@@ -4974,7 +4974,7 @@
      "shape": 5,
      "type": "_NODE_REPEATER_",
      "links": [
-      131
+      100130
      ],
      "color_on": "#Fc0",
      "color_off": "#a80"
@@ -4988,7 +4988,7 @@
    "widgets_values": null
   },
   {
-   "id": 110,
+   "id": 10109,
    "type": "Mute / Bypass Repeater (rgthree)",
    "pos": [
     40,
@@ -5007,13 +5007,13 @@
      "dir": 3,
      "name": "Mute / Bypass Relay (rgthree)",
      "type": "*",
-     "link": 131
+     "link": 100130
     },
     {
      "dir": 3,
      "name": "flag",
      "type": "*",
-     "link": 133
+     "link": 100132
     },
     {
      "dir": 3,
@@ -5027,7 +5027,7 @@
    "widgets_values": null
   },
   {
-   "id": 111,
+   "id": 10110,
    "type": "Mute / Bypass Relay (rgthree)",
    "pos": [
     40,
@@ -5048,25 +5048,25 @@
      "dir": 3,
      "name": "concept",
      "type": "*",
-     "link": 135
+     "link": 100134
     },
     {
      "dir": 3,
      "name": "concept_fast",
      "type": "*",
-     "link": 136
+     "link": 100135
     },
     {
      "dir": 3,
      "name": "own_image",
      "type": "*",
-     "link": 137
+     "link": 100136
     },
     {
      "dir": 3,
      "name": "stage off",
      "type": "*",
-     "link": 138
+     "link": 100137
     },
     {
      "dir": 3,
@@ -5082,7 +5082,7 @@
      "shape": 5,
      "type": "_NODE_REPEATER_",
      "links": [
-      134
+      100133
      ],
      "color_on": "#Fc0",
      "color_off": "#a80"
@@ -5096,7 +5096,7 @@
    "widgets_values": null
   },
   {
-   "id": 112,
+   "id": 10111,
    "type": "Mute / Bypass Repeater (rgthree)",
    "pos": [
     40,
@@ -5115,13 +5115,13 @@
      "dir": 3,
      "name": "Mute / Bypass Relay (rgthree)",
      "type": "*",
-     "link": 134
+     "link": 100133
     },
     {
      "dir": 3,
      "name": "picker",
      "type": "*",
-     "link": 139
+     "link": 100138
     },
     {
      "dir": 3,
@@ -5135,7 +5135,7 @@
    "widgets_values": null
   },
   {
-   "id": 113,
+   "id": 10112,
    "type": "Mute / Bypass Relay (rgthree)",
    "pos": [
     40,
@@ -5156,7 +5156,7 @@
      "dir": 3,
      "name": "simplify",
      "type": "*",
-     "link": 141
+     "link": 100140
     },
     {
      "dir": 3,
@@ -5172,7 +5172,7 @@
      "shape": 5,
      "type": "_NODE_REPEATER_",
      "links": [
-      140
+      100139
      ],
      "color_on": "#Fc0",
      "color_off": "#a80"
@@ -5186,7 +5186,7 @@
    "widgets_values": null
   },
   {
-   "id": 114,
+   "id": 10113,
    "type": "Mute / Bypass Repeater (rgthree)",
    "pos": [
     40,
@@ -5205,13 +5205,13 @@
      "dir": 3,
      "name": "Mute / Bypass Relay (rgthree)",
      "type": "*",
-     "link": 140
+     "link": 100139
     },
     {
      "dir": 3,
      "name": "flag",
      "type": "*",
-     "link": 142
+     "link": 100141
     },
     {
      "dir": 3,
@@ -5225,7 +5225,7 @@
    "widgets_values": null
   },
   {
-   "id": 115,
+   "id": 10114,
    "type": "Mute / Bypass Relay (rgthree)",
    "pos": [
     40,
@@ -5246,31 +5246,31 @@
      "dir": 3,
      "name": "edit",
      "type": "*",
-     "link": 144
+     "link": 100143
     },
     {
      "dir": 3,
      "name": "concept",
      "type": "*",
-     "link": 145
+     "link": 100144
     },
     {
      "dir": 3,
      "name": "concept_fast",
      "type": "*",
-     "link": 146
+     "link": 100145
     },
     {
      "dir": 3,
      "name": "own_image",
      "type": "*",
-     "link": 147
+     "link": 100146
     },
     {
      "dir": 3,
      "name": "stage off",
      "type": "*",
-     "link": 148
+     "link": 100147
     },
     {
      "dir": 3,
@@ -5286,7 +5286,7 @@
      "shape": 5,
      "type": "_NODE_REPEATER_",
      "links": [
-      143
+      100142
      ],
      "color_on": "#Fc0",
      "color_off": "#a80"
@@ -5300,7 +5300,7 @@
    "widgets_values": null
   },
   {
-   "id": 116,
+   "id": 10115,
    "type": "Mute / Bypass Repeater (rgthree)",
    "pos": [
     40,
@@ -5319,13 +5319,13 @@
      "dir": 3,
      "name": "Mute / Bypass Relay (rgthree)",
      "type": "*",
-     "link": 143
+     "link": 100142
     },
     {
      "dir": 3,
      "name": "picker",
      "type": "*",
-     "link": 149
+     "link": 100148
     },
     {
      "dir": 3,
@@ -5339,7 +5339,7 @@
    "widgets_values": null
   },
   {
-   "id": 117,
+   "id": 10116,
    "type": "Mute / Bypass Relay (rgthree)",
    "pos": [
     40,
@@ -5360,19 +5360,19 @@
      "dir": 3,
      "name": "mesh_trellis",
      "type": "*",
-     "link": 151
+     "link": 100150
     },
     {
      "dir": 3,
      "name": "mesh_hunyuan",
      "type": "*",
-     "link": 152
+     "link": 100151
     },
     {
      "dir": 3,
      "name": "texture",
      "type": "*",
-     "link": 153
+     "link": 100152
     },
     {
      "dir": 3,
@@ -5388,7 +5388,7 @@
      "shape": 5,
      "type": "_NODE_REPEATER_",
      "links": [
-      150
+      100149
      ],
      "color_on": "#Fc0",
      "color_off": "#a80"
@@ -5402,7 +5402,7 @@
    "widgets_values": null
   },
   {
-   "id": 118,
+   "id": 10117,
    "type": "Mute / Bypass Repeater (rgthree)",
    "pos": [
     40,
@@ -5421,13 +5421,13 @@
      "dir": 3,
      "name": "Mute / Bypass Relay (rgthree)",
      "type": "*",
-     "link": 150
+     "link": 100149
     },
     {
      "dir": 3,
      "name": "flag",
      "type": "*",
-     "link": 154
+     "link": 100153
     },
     {
      "dir": 3,
@@ -5441,7 +5441,7 @@
    "widgets_values": null
   },
   {
-   "id": 119,
+   "id": 10118,
    "type": "Mute / Bypass Relay (rgthree)",
    "pos": [
     40,
@@ -5462,37 +5462,37 @@
      "dir": 3,
      "name": "simplify",
      "type": "*",
-     "link": 156
+     "link": 100155
     },
     {
      "dir": 3,
      "name": "edit",
      "type": "*",
-     "link": 157
+     "link": 100156
     },
     {
      "dir": 3,
      "name": "concept",
      "type": "*",
-     "link": 158
+     "link": 100157
     },
     {
      "dir": 3,
      "name": "concept_fast",
      "type": "*",
-     "link": 159
+     "link": 100158
     },
     {
      "dir": 3,
      "name": "own_image",
      "type": "*",
-     "link": 160
+     "link": 100159
     },
     {
      "dir": 3,
      "name": "stage off",
      "type": "*",
-     "link": 161
+     "link": 100160
     },
     {
      "dir": 3,
@@ -5508,7 +5508,7 @@
      "shape": 5,
      "type": "_NODE_REPEATER_",
      "links": [
-      155
+      100154
      ],
      "color_on": "#Fc0",
      "color_off": "#a80"
@@ -5522,7 +5522,7 @@
    "widgets_values": null
   },
   {
-   "id": 120,
+   "id": 10119,
    "type": "Mute / Bypass Repeater (rgthree)",
    "pos": [
     40,
@@ -5541,13 +5541,13 @@
      "dir": 3,
      "name": "Mute / Bypass Relay (rgthree)",
      "type": "*",
-     "link": 155
+     "link": 100154
     },
     {
      "dir": 3,
      "name": "picker",
      "type": "*",
-     "link": 162
+     "link": 100161
     },
     {
      "dir": 3,
@@ -5561,7 +5561,7 @@
    "widgets_values": null
   },
   {
-   "id": 121,
+   "id": 10120,
    "type": "Mute / Bypass Relay (rgthree)",
    "pos": [
     40,
@@ -5582,7 +5582,7 @@
      "dir": 3,
      "name": "texture",
      "type": "*",
-     "link": 164
+     "link": 100163
     },
     {
      "dir": 3,
@@ -5598,7 +5598,7 @@
      "shape": 5,
      "type": "_NODE_REPEATER_",
      "links": [
-      163
+      100162
      ],
      "color_on": "#Fc0",
      "color_off": "#a80"
@@ -5612,7 +5612,7 @@
    "widgets_values": null
   },
   {
-   "id": 122,
+   "id": 10121,
    "type": "Mute / Bypass Repeater (rgthree)",
    "pos": [
     40,
@@ -5631,13 +5631,13 @@
      "dir": 3,
      "name": "Mute / Bypass Relay (rgthree)",
      "type": "*",
-     "link": 163
+     "link": 100162
     },
     {
      "dir": 3,
      "name": "flag",
      "type": "*",
-     "link": 165
+     "link": 100164
     },
     {
      "dir": 3,
@@ -5651,7 +5651,7 @@
    "widgets_values": null
   },
   {
-   "id": 123,
+   "id": 10122,
    "type": "Mute / Bypass Relay (rgthree)",
    "pos": [
     40,
@@ -5672,19 +5672,19 @@
      "dir": 3,
      "name": "mesh_trellis",
      "type": "*",
-     "link": 167
+     "link": 100166
     },
     {
      "dir": 3,
      "name": "mesh_hunyuan",
      "type": "*",
-     "link": 168
+     "link": 100167
     },
     {
      "dir": 3,
      "name": "stage off",
      "type": "*",
-     "link": 169
+     "link": 100168
     },
     {
      "dir": 3,
@@ -5700,7 +5700,7 @@
      "shape": 5,
      "type": "_NODE_REPEATER_",
      "links": [
-      166
+      100165
      ],
      "color_on": "#Fc0",
      "color_off": "#a80"
@@ -5714,7 +5714,7 @@
    "widgets_values": null
   },
   {
-   "id": 124,
+   "id": 10123,
    "type": "Mute / Bypass Repeater (rgthree)",
    "pos": [
     40,
@@ -5733,13 +5733,13 @@
      "dir": 3,
      "name": "Mute / Bypass Relay (rgthree)",
      "type": "*",
-     "link": 166
+     "link": 100165
     },
     {
      "dir": 3,
      "name": "picker",
      "type": "*",
-     "link": 170
+     "link": 100169
     },
     {
      "dir": 3,
@@ -5753,7 +5753,7 @@
    "widgets_values": null
   },
   {
-   "id": 125,
+   "id": 10124,
    "type": "Mute / Bypass Relay (rgthree)",
    "pos": [
     40,
@@ -5774,7 +5774,7 @@
      "dir": 3,
      "name": "turntable",
      "type": "*",
-     "link": 172
+     "link": 100171
     },
     {
      "dir": 3,
@@ -5790,7 +5790,7 @@
      "shape": 5,
      "type": "_NODE_REPEATER_",
      "links": [
-      171
+      100170
      ],
      "color_on": "#Fc0",
      "color_off": "#a80"
@@ -5804,7 +5804,7 @@
    "widgets_values": null
   },
   {
-   "id": 126,
+   "id": 10125,
    "type": "Mute / Bypass Repeater (rgthree)",
    "pos": [
     40,
@@ -5823,13 +5823,13 @@
      "dir": 3,
      "name": "Mute / Bypass Relay (rgthree)",
      "type": "*",
-     "link": 171
+     "link": 100170
     },
     {
      "dir": 3,
      "name": "flag",
      "type": "*",
-     "link": 173
+     "link": 100172
     },
     {
      "dir": 3,
@@ -5843,7 +5843,7 @@
    "widgets_values": null
   },
   {
-   "id": 127,
+   "id": 10126,
    "type": "Mute / Bypass Relay (rgthree)",
    "pos": [
     40,
@@ -5864,25 +5864,25 @@
      "dir": 3,
      "name": "texture",
      "type": "*",
-     "link": 175
+     "link": 100174
     },
     {
      "dir": 3,
      "name": "mesh_trellis",
      "type": "*",
-     "link": 176
+     "link": 100175
     },
     {
      "dir": 3,
      "name": "mesh_hunyuan",
      "type": "*",
-     "link": 177
+     "link": 100176
     },
     {
      "dir": 3,
      "name": "stage off",
      "type": "*",
-     "link": 178
+     "link": 100177
     },
     {
      "dir": 3,
@@ -5898,7 +5898,7 @@
      "shape": 5,
      "type": "_NODE_REPEATER_",
      "links": [
-      174
+      100173
      ],
      "color_on": "#Fc0",
      "color_off": "#a80"
@@ -5912,7 +5912,7 @@
    "widgets_values": null
   },
   {
-   "id": 128,
+   "id": 10127,
    "type": "Mute / Bypass Repeater (rgthree)",
    "pos": [
     40,
@@ -5931,13 +5931,13 @@
      "dir": 3,
      "name": "Mute / Bypass Relay (rgthree)",
      "type": "*",
-     "link": 174
+     "link": 100173
     },
     {
      "dir": 3,
      "name": "picker",
      "type": "*",
-     "link": 179
+     "link": 100178
     },
     {
      "dir": 3,
@@ -5951,7 +5951,7 @@
    "widgets_values": null
   },
   {
-   "id": 129,
+   "id": 10128,
    "type": "Mute / Bypass Relay (rgthree)",
    "pos": [
     40,
@@ -5972,7 +5972,7 @@
      "dir": 3,
      "name": "rig",
      "type": "*",
-     "link": 181
+     "link": 100180
     },
     {
      "dir": 3,
@@ -5988,7 +5988,7 @@
      "shape": 5,
      "type": "_NODE_REPEATER_",
      "links": [
-      180
+      100179
      ],
      "color_on": "#Fc0",
      "color_off": "#a80"
@@ -6002,7 +6002,7 @@
    "widgets_values": null
   },
   {
-   "id": 130,
+   "id": 10129,
    "type": "Mute / Bypass Repeater (rgthree)",
    "pos": [
     40,
@@ -6021,13 +6021,13 @@
      "dir": 3,
      "name": "Mute / Bypass Relay (rgthree)",
      "type": "*",
-     "link": 180
+     "link": 100179
     },
     {
      "dir": 3,
      "name": "flag",
      "type": "*",
-     "link": 182
+     "link": 100181
     },
     {
      "dir": 3,
@@ -6041,7 +6041,7 @@
    "widgets_values": null
   },
   {
-   "id": 131,
+   "id": 10130,
    "type": "Mute / Bypass Relay (rgthree)",
    "pos": [
     40,
@@ -6062,25 +6062,25 @@
      "dir": 3,
      "name": "texture",
      "type": "*",
-     "link": 184
+     "link": 100183
     },
     {
      "dir": 3,
      "name": "mesh_trellis",
      "type": "*",
-     "link": 185
+     "link": 100184
     },
     {
      "dir": 3,
      "name": "mesh_hunyuan",
      "type": "*",
-     "link": 186
+     "link": 100185
     },
     {
      "dir": 3,
      "name": "stage off",
      "type": "*",
-     "link": 187
+     "link": 100186
     },
     {
      "dir": 3,
@@ -6096,7 +6096,7 @@
      "shape": 5,
      "type": "_NODE_REPEATER_",
      "links": [
-      183
+      100182
      ],
      "color_on": "#Fc0",
      "color_off": "#a80"
@@ -6110,7 +6110,7 @@
    "widgets_values": null
   },
   {
-   "id": 132,
+   "id": 10131,
    "type": "Mute / Bypass Repeater (rgthree)",
    "pos": [
     40,
@@ -6129,13 +6129,13 @@
      "dir": 3,
      "name": "Mute / Bypass Relay (rgthree)",
      "type": "*",
-     "link": 183
+     "link": 100182
     },
     {
      "dir": 3,
      "name": "picker",
      "type": "*",
-     "link": 188
+     "link": 100187
     },
     {
      "dir": 3,
@@ -6149,7 +6149,7 @@
    "widgets_values": null
   },
   {
-   "id": 133,
+   "id": 10132,
    "type": "Mute / Bypass Relay (rgthree)",
    "pos": [
     40,
@@ -6170,7 +6170,7 @@
      "dir": 3,
      "name": "animate",
      "type": "*",
-     "link": 190
+     "link": 100189
     },
     {
      "dir": 3,
@@ -6186,7 +6186,7 @@
      "shape": 5,
      "type": "_NODE_REPEATER_",
      "links": [
-      189
+      100188
      ],
      "color_on": "#Fc0",
      "color_off": "#a80"
@@ -6200,7 +6200,7 @@
    "widgets_values": null
   },
   {
-   "id": 134,
+   "id": 10133,
    "type": "Mute / Bypass Repeater (rgthree)",
    "pos": [
     40,
@@ -6219,13 +6219,13 @@
      "dir": 3,
      "name": "Mute / Bypass Relay (rgthree)",
      "type": "*",
-     "link": 189
+     "link": 100188
     },
     {
      "dir": 3,
      "name": "flag",
      "type": "*",
-     "link": 191
+     "link": 100190
     },
     {
      "dir": 3,
@@ -6239,7 +6239,7 @@
    "widgets_values": null
   },
   {
-   "id": 135,
+   "id": 10134,
    "type": "Mute / Bypass Relay (rgthree)",
    "pos": [
     40,
@@ -6260,37 +6260,37 @@
      "dir": 3,
      "name": "simplify",
      "type": "*",
-     "link": 193
+     "link": 100192
     },
     {
      "dir": 3,
      "name": "edit",
      "type": "*",
-     "link": 194
+     "link": 100193
     },
     {
      "dir": 3,
      "name": "concept",
      "type": "*",
-     "link": 195
+     "link": 100194
     },
     {
      "dir": 3,
      "name": "concept_fast",
      "type": "*",
-     "link": 196
+     "link": 100195
     },
     {
      "dir": 3,
      "name": "own_image",
      "type": "*",
-     "link": 197
+     "link": 100196
     },
     {
      "dir": 3,
      "name": "stage off",
      "type": "*",
-     "link": 198
+     "link": 100197
     },
     {
      "dir": 3,
@@ -6306,7 +6306,7 @@
      "shape": 5,
      "type": "_NODE_REPEATER_",
      "links": [
-      192
+      100191
      ],
      "color_on": "#Fc0",
      "color_off": "#a80"
@@ -6320,7 +6320,7 @@
    "widgets_values": null
   },
   {
-   "id": 136,
+   "id": 10135,
    "type": "Mute / Bypass Repeater (rgthree)",
    "pos": [
     40,
@@ -6339,13 +6339,13 @@
      "dir": 3,
      "name": "Mute / Bypass Relay (rgthree)",
      "type": "*",
-     "link": 192
+     "link": 100191
     },
     {
      "dir": 3,
      "name": "picker",
      "type": "*",
-     "link": 199
+     "link": 100198
     },
     {
      "dir": 3,
@@ -6359,7 +6359,7 @@
    "widgets_values": null
   },
   {
-   "id": 137,
+   "id": 10136,
    "type": "Fast Groups Muter (rgthree)",
    "pos": [
     1220,
@@ -6392,7 +6392,7 @@
    }
   },
   {
-   "id": 138,
+   "id": 10137,
    "type": "MarkdownNote",
    "pos": [
     40,
@@ -6415,7 +6415,7 @@
    "bgcolor": "#653"
   },
   {
-   "id": 139,
+   "id": 10138,
    "type": "Note",
    "pos": [
     560,
@@ -6438,7 +6438,7 @@
    "bgcolor": "#653"
   },
   {
-   "id": 140,
+   "id": 10139,
    "type": "Note",
    "pos": [
     560,
@@ -6461,7 +6461,7 @@
    "bgcolor": "#653"
   },
   {
-   "id": 141,
+   "id": 10140,
    "type": "Note",
    "pos": [
     560,
@@ -6484,7 +6484,7 @@
    "bgcolor": "#653"
   },
   {
-   "id": 142,
+   "id": 10141,
    "type": "Note",
    "pos": [
     560,
@@ -6507,7 +6507,7 @@
    "bgcolor": "#653"
   },
   {
-   "id": 143,
+   "id": 10142,
    "type": "Note",
    "pos": [
     560,
@@ -6530,7 +6530,7 @@
    "bgcolor": "#653"
   },
   {
-   "id": 144,
+   "id": 10143,
    "type": "Note",
    "pos": [
     560,
@@ -6553,7 +6553,7 @@
    "bgcolor": "#653"
   },
   {
-   "id": 145,
+   "id": 10144,
    "type": "Note",
    "pos": [
     560,
@@ -6576,7 +6576,7 @@
    "bgcolor": "#653"
   },
   {
-   "id": 146,
+   "id": 10145,
    "type": "Note",
    "pos": [
     560,
@@ -6599,7 +6599,7 @@
    "bgcolor": "#653"
   },
   {
-   "id": 147,
+   "id": 10146,
    "type": "Note",
    "pos": [
     560,
@@ -6622,7 +6622,7 @@
    "bgcolor": "#653"
   },
   {
-   "id": 148,
+   "id": 10147,
    "type": "Note",
    "pos": [
     560,
@@ -6645,7 +6645,7 @@
    "bgcolor": "#653"
   },
   {
-   "id": 149,
+   "id": 10148,
    "type": "Note",
    "pos": [
     560,
@@ -6670,1594 +6670,1594 @@
  ],
  "links": [
   [
-   1,
-   5,
+   100000,
+   10004,
    0,
-   8,
-   0,
-   "MODEL"
-  ],
-  [
-   2,
-   9,
-   0,
-   10,
+   10007,
    0,
    "MODEL"
   ],
   [
-   3,
-   11,
+   100001,
+   10008,
    0,
-   12,
-   0,
-   "MODEL"
-  ],
-  [
-   4,
-   12,
-   0,
-   13,
+   10009,
    0,
    "MODEL"
   ],
   [
-   5,
-   1,
+   100002,
+   10010,
    0,
-   19,
+   10011,
+   0,
+   "MODEL"
+  ],
+  [
+   100003,
+   10011,
+   0,
+   10012,
+   0,
+   "MODEL"
+  ],
+  [
+   100004,
+   10000,
+   0,
+   10018,
    0,
    "STRING"
   ],
   [
-   6,
-   4,
+   100005,
+   10003,
    0,
-   21,
+   10020,
    0,
    "INT"
   ],
   [
-   7,
-   8,
+   100006,
+   10007,
    0,
-   22,
+   10021,
    0,
    "MODEL"
   ],
   [
-   8,
-   19,
+   100007,
+   10018,
    0,
-   22,
+   10021,
    1,
    "CONDITIONING"
   ],
   [
-   9,
-   20,
+   100008,
+   10019,
    0,
-   22,
+   10021,
    2,
    "CONDITIONING"
   ],
   [
-   10,
-   21,
+   100009,
+   10020,
    0,
-   22,
+   10021,
    3,
    "LATENT"
   ],
   [
-   11,
-   22,
+   100010,
+   10021,
    0,
-   23,
+   10022,
    0,
    "LATENT"
   ],
   [
-   12,
-   23,
+   100011,
+   10022,
    0,
-   24,
+   10023,
    0,
    "IMAGE"
   ],
   [
-   13,
-   1,
+   100012,
+   10000,
    0,
-   25,
+   10024,
    0,
    "STRING"
   ],
   [
-   14,
-   4,
+   100013,
+   10003,
    0,
-   27,
+   10026,
    0,
    "INT"
   ],
   [
-   15,
-   10,
+   100014,
+   10009,
    0,
-   28,
-   0,
-   "MODEL"
-  ],
-  [
-   16,
-   25,
-   0,
-   28,
-   1,
-   "CONDITIONING"
-  ],
-  [
-   17,
-   26,
-   0,
-   28,
-   2,
-   "CONDITIONING"
-  ],
-  [
-   18,
-   27,
-   0,
-   28,
-   3,
-   "LATENT"
-  ],
-  [
-   19,
-   28,
-   0,
-   29,
-   0,
-   "LATENT"
-  ],
-  [
-   20,
-   29,
-   0,
-   30,
-   0,
-   "IMAGE"
-  ],
-  [
-   21,
-   81,
-   0,
-   31,
-   0,
-   "IMAGE"
-  ],
-  [
-   22,
-   2,
-   0,
-   32,
-   1,
-   "STRING"
-  ],
-  [
-   23,
-   31,
-   0,
-   32,
-   3,
-   "IMAGE"
-  ],
-  [
-   24,
-   31,
-   0,
-   33,
-   2,
-   "IMAGE"
-  ],
-  [
-   25,
-   31,
-   0,
-   34,
-   0,
-   "IMAGE"
-  ],
-  [
-   26,
-   13,
-   0,
-   35,
+   10027,
    0,
    "MODEL"
   ],
   [
-   27,
-   32,
+   100015,
+   10024,
    0,
-   35,
+   10027,
    1,
    "CONDITIONING"
   ],
   [
-   28,
-   33,
+   100016,
+   10025,
    0,
-   35,
+   10027,
    2,
    "CONDITIONING"
   ],
   [
-   29,
-   105,
+   100017,
+   10026,
    0,
-   35,
+   10027,
    3,
    "LATENT"
   ],
   [
-   30,
-   35,
+   100018,
+   10027,
    0,
-   36,
+   10028,
    0,
    "LATENT"
   ],
   [
-   31,
-   36,
+   100019,
+   10028,
    0,
-   37,
-   0,
-   "IMAGE"
-  ],
-  [
-   32,
-   84,
-   0,
-   38,
+   10029,
    0,
    "IMAGE"
   ],
   [
-   33,
-   38,
+   100020,
+   10080,
    0,
-   39,
+   10030,
+   0,
+   "IMAGE"
+  ],
+  [
+   100021,
+   10001,
+   0,
+   10031,
+   1,
+   "STRING"
+  ],
+  [
+   100022,
+   10030,
+   0,
+   10031,
+   3,
+   "IMAGE"
+  ],
+  [
+   100023,
+   10030,
+   0,
+   10032,
    2,
    "IMAGE"
   ],
   [
-   34,
-   38,
+   100024,
+   10030,
    0,
-   40,
-   2,
-   "IMAGE"
-  ],
-  [
-   35,
-   38,
-   0,
-   41,
+   10033,
    0,
    "IMAGE"
   ],
   [
-   36,
-   13,
+   100025,
+   10012,
    0,
-   42,
+   10034,
    0,
    "MODEL"
   ],
   [
-   37,
-   39,
+   100026,
+   10031,
    0,
-   42,
+   10034,
    1,
    "CONDITIONING"
   ],
   [
-   38,
-   40,
+   100027,
+   10032,
    0,
-   42,
+   10034,
    2,
    "CONDITIONING"
   ],
   [
-   39,
-   106,
+   100028,
+   10104,
    0,
-   42,
+   10034,
    3,
    "LATENT"
   ],
   [
-   40,
-   42,
+   100029,
+   10034,
    0,
-   43,
+   10035,
    0,
    "LATENT"
   ],
   [
-   41,
-   43,
+   100030,
+   10035,
    0,
-   44,
+   10036,
    0,
    "IMAGE"
   ],
   [
-   42,
-   45,
+   100031,
+   10083,
    0,
-   46,
+   10037,
    0,
-   "DIFFUSERS_PIPE"
-  ],
-  [
-   43,
-   87,
-   0,
-   46,
-   1,
    "IMAGE"
   ],
   [
-   44,
-   46,
+   100032,
+   10037,
    0,
-   47,
-   0,
-   "MESH"
-  ],
-  [
-   45,
-   47,
-   0,
-   48,
-   0,
-   "MESH"
-  ],
-  [
-   46,
-   49,
-   0,
-   50,
-   0,
-   "DIFFUSERS_PIPE"
-  ],
-  [
-   47,
-   87,
-   0,
-   50,
-   1,
-   "IMAGE"
-  ],
-  [
-   48,
-   50,
-   0,
-   51,
-   0,
-   "MESH"
-  ],
-  [
-   49,
-   51,
-   0,
-   52,
-   0,
-   "MESH"
-  ],
-  [
-   50,
-   53,
-   0,
-   54,
-   0,
-   "DIFFUSERS_PIPE"
-  ],
-  [
-   51,
-   90,
-   0,
-   54,
-   1,
-   "STRING"
-  ],
-  [
-   52,
-   87,
-   0,
-   54,
+   10038,
    2,
    "IMAGE"
   ],
   [
-   53,
-   54,
+   100033,
+   10037,
    0,
-   55,
+   10039,
+   2,
+   "IMAGE"
+  ],
+  [
+   100034,
+   10037,
+   0,
+   10040,
+   0,
+   "IMAGE"
+  ],
+  [
+   100035,
+   10012,
+   0,
+   10041,
+   0,
+   "MODEL"
+  ],
+  [
+   100036,
+   10038,
+   0,
+   10041,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   100037,
+   10039,
+   0,
+   10041,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   100038,
+   10105,
+   0,
+   10041,
+   3,
+   "LATENT"
+  ],
+  [
+   100039,
+   10041,
+   0,
+   10042,
+   0,
+   "LATENT"
+  ],
+  [
+   100040,
+   10042,
+   0,
+   10043,
+   0,
+   "IMAGE"
+  ],
+  [
+   100041,
+   10044,
+   0,
+   10045,
+   0,
+   "DIFFUSERS_PIPE"
+  ],
+  [
+   100042,
+   10086,
+   0,
+   10045,
+   1,
+   "IMAGE"
+  ],
+  [
+   100043,
+   10045,
+   0,
+   10046,
    0,
    "MESH"
   ],
   [
-   54,
-   93,
+   100044,
+   10046,
    0,
-   56,
+   10047,
+   0,
+   "MESH"
+  ],
+  [
+   100045,
+   10048,
+   0,
+   10049,
+   0,
+   "DIFFUSERS_PIPE"
+  ],
+  [
+   100046,
+   10086,
+   0,
+   10049,
+   1,
+   "IMAGE"
+  ],
+  [
+   100047,
+   10049,
+   0,
+   10050,
+   0,
+   "MESH"
+  ],
+  [
+   100048,
+   10050,
+   0,
+   10051,
+   0,
+   "MESH"
+  ],
+  [
+   100049,
+   10052,
+   0,
+   10053,
+   0,
+   "DIFFUSERS_PIPE"
+  ],
+  [
+   100050,
+   10089,
+   0,
+   10053,
+   1,
+   "STRING"
+  ],
+  [
+   100051,
+   10086,
+   0,
+   10053,
+   2,
+   "IMAGE"
+  ],
+  [
+   100052,
+   10053,
+   0,
+   10054,
+   0,
+   "MESH"
+  ],
+  [
+   100053,
+   10092,
+   0,
+   10055,
    0,
    "STRING"
   ],
   [
-   55,
-   56,
+   100054,
+   10055,
    0,
-   58,
+   10057,
    0,
    "MESH"
   ],
   [
-   56,
-   57,
+   100055,
+   10056,
    0,
-   58,
+   10057,
    1,
    "ORBIT_CAMPOSES"
   ],
   [
-   57,
-   58,
+   100056,
+   10057,
    0,
-   59,
+   10058,
    0,
    "IMAGE"
   ],
   [
-   58,
-   58,
+   100057,
+   10057,
    1,
-   60,
+   10059,
    0,
    "MASK"
   ],
   [
-   59,
-   60,
+   100058,
+   10059,
    0,
-   61,
+   10060,
    0,
    "IMAGE"
   ],
   [
-   60,
-   96,
+   100059,
+   10095,
    0,
-   62,
+   10061,
    0,
    "STRING"
   ],
   [
-   61,
-   62,
+   100060,
+   10061,
    0,
-   64,
+   10063,
    0,
    "TRIMESH"
   ],
   [
-   62,
-   63,
+   100061,
+   10062,
    0,
-   64,
+   10063,
    1,
    "UNIRIG_MODEL"
   ],
   [
-   63,
-   64,
+   100062,
+   10063,
    0,
-   65,
-   0,
-   "STRING"
-  ],
-  [
-   64,
-   15,
-   0,
-   66,
-   0,
-   "MODEL"
-  ],
-  [
-   65,
-   16,
-   0,
-   67,
-   0,
-   "MODEL"
-  ],
-  [
-   66,
-   66,
-   0,
-   68,
-   0,
-   "MODEL"
-  ],
-  [
-   67,
-   67,
-   0,
-   69,
-   0,
-   "MODEL"
-  ],
-  [
-   68,
-   3,
-   0,
-   70,
+   10064,
    0,
    "STRING"
   ],
   [
-   69,
-   14,
+   100063,
+   10014,
    0,
-   70,
+   10065,
+   0,
+   "MODEL"
+  ],
+  [
+   100064,
+   10015,
+   0,
+   10066,
+   0,
+   "MODEL"
+  ],
+  [
+   100065,
+   10065,
+   0,
+   10067,
+   0,
+   "MODEL"
+  ],
+  [
+   100066,
+   10066,
+   0,
+   10068,
+   0,
+   "MODEL"
+  ],
+  [
+   100067,
+   10002,
+   0,
+   10069,
+   0,
+   "STRING"
+  ],
+  [
+   100068,
+   10013,
+   0,
+   10069,
    1,
    "CLIP"
   ],
   [
-   70,
-   14,
+   100069,
+   10013,
    0,
-   71,
+   10070,
    0,
    "CLIP"
   ],
   [
-   71,
-   70,
+   100070,
+   10069,
    0,
-   72,
+   10071,
    0,
    "CONDITIONING"
   ],
   [
-   72,
-   71,
+   100071,
+   10070,
    0,
-   72,
+   10071,
    1,
    "CONDITIONING"
   ],
   [
-   73,
-   17,
+   100072,
+   10016,
    0,
-   72,
+   10071,
    2,
    "VAE"
   ],
   [
-   74,
-   99,
+   100073,
+   10098,
    0,
-   72,
+   10071,
    4,
    "IMAGE"
   ],
   [
-   75,
-   68,
+   100074,
+   10067,
    0,
-   73,
-   0,
-   "MODEL"
-  ],
-  [
-   76,
-   72,
-   0,
-   73,
-   1,
-   "CONDITIONING"
-  ],
-  [
-   77,
-   72,
-   1,
-   73,
-   2,
-   "CONDITIONING"
-  ],
-  [
-   78,
-   72,
-   2,
-   73,
-   3,
-   "LATENT"
-  ],
-  [
-   79,
-   69,
-   0,
-   74,
+   10072,
    0,
    "MODEL"
   ],
   [
-   80,
-   72,
+   100075,
+   10071,
    0,
-   74,
+   10072,
    1,
    "CONDITIONING"
   ],
   [
-   81,
-   72,
+   100076,
+   10071,
    1,
-   74,
+   10072,
    2,
    "CONDITIONING"
   ],
   [
-   82,
-   73,
-   0,
-   74,
+   100077,
+   10071,
+   2,
+   10072,
    3,
    "LATENT"
   ],
   [
-   83,
-   74,
+   100078,
+   10068,
    0,
-   75,
+   10073,
+   0,
+   "MODEL"
+  ],
+  [
+   100079,
+   10071,
+   0,
+   10073,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   100080,
+   10071,
+   1,
+   10073,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   100081,
+   10072,
+   0,
+   10073,
+   3,
+   "LATENT"
+  ],
+  [
+   100082,
+   10073,
+   0,
+   10074,
    0,
    "LATENT"
   ],
   [
-   84,
-   17,
+   100083,
+   10016,
    0,
-   75,
+   10074,
    1,
    "VAE"
   ],
   [
-   85,
-   75,
+   100084,
+   10074,
    0,
-   76,
-   0,
-   "IMAGE"
-  ],
-  [
-   86,
-   75,
-   0,
-   77,
+   10075,
    0,
    "IMAGE"
   ],
   [
-   87,
-   75,
+   100085,
+   10074,
    0,
-   78,
-   0,
-   "IMAGE"
-  ],
-  [
-   88,
-   78,
-   0,
-   79,
+   10076,
    0,
    "IMAGE"
   ],
   [
-   89,
-   102,
+   100086,
+   10074,
    0,
-   81,
+   10077,
    0,
    "IMAGE"
   ],
   [
-   90,
-   101,
+   100087,
+   10077,
    0,
-   81,
+   10078,
+   0,
+   "IMAGE"
+  ],
+  [
+   100088,
+   10101,
+   0,
+   10080,
+   0,
+   "IMAGE"
+  ],
+  [
+   100089,
+   10100,
+   0,
+   10080,
    1,
    "IMAGE"
   ],
   [
-   91,
-   18,
+   100090,
+   10017,
    0,
-   81,
+   10080,
    2,
    "IMAGE"
   ],
   [
-   92,
-   80,
+   100091,
+   10079,
    0,
-   81,
+   10080,
    3,
    "IMAGE"
   ],
   [
-   93,
-   103,
+   100092,
+   10102,
    0,
-   84,
+   10083,
    0,
    "IMAGE"
   ],
   [
-   94,
-   102,
+   100093,
+   10101,
    0,
-   84,
+   10083,
    1,
    "IMAGE"
   ],
   [
-   95,
-   101,
+   100094,
+   10100,
    0,
-   84,
+   10083,
    2,
    "IMAGE"
   ],
   [
-   96,
-   18,
+   100095,
+   10017,
    0,
-   84,
+   10083,
    3,
    "IMAGE"
   ],
   [
-   97,
-   83,
+   100096,
+   10082,
    0,
-   84,
+   10083,
    4,
    "IMAGE"
   ],
   [
-   98,
-   104,
+   100097,
+   10103,
    0,
-   87,
+   10086,
    0,
    "IMAGE"
   ],
   [
-   99,
-   103,
+   100098,
+   10102,
    0,
-   87,
+   10086,
    1,
    "IMAGE"
   ],
   [
-   100,
-   102,
+   100099,
+   10101,
    0,
-   87,
+   10086,
    2,
    "IMAGE"
   ],
   [
-   101,
-   101,
+   100100,
+   10100,
    0,
-   87,
+   10086,
    3,
    "IMAGE"
   ],
   [
-   102,
-   18,
+   100101,
+   10017,
    0,
-   87,
+   10086,
    4,
    "IMAGE"
   ],
   [
-   103,
-   86,
+   100102,
+   10085,
    0,
-   87,
+   10086,
    5,
    "IMAGE"
   ],
   [
-   104,
-   48,
+   100103,
+   10047,
    0,
-   90,
+   10089,
    0,
    "STRING"
   ],
   [
-   105,
-   52,
+   100104,
+   10051,
    0,
-   90,
+   10089,
    1,
    "STRING"
   ],
   [
-   106,
-   89,
+   100105,
+   10088,
    0,
-   90,
+   10089,
    2,
    "STRING"
   ],
   [
-   107,
-   55,
+   100106,
+   10054,
    0,
-   93,
+   10092,
    0,
    "STRING"
   ],
   [
-   108,
-   48,
+   100107,
+   10047,
    0,
-   93,
+   10092,
    1,
    "STRING"
   ],
   [
-   109,
-   52,
+   100108,
+   10051,
    0,
-   93,
+   10092,
    2,
    "STRING"
   ],
   [
-   110,
-   92,
+   100109,
+   10091,
    0,
-   93,
+   10092,
    3,
    "STRING"
   ],
   [
-   111,
-   55,
+   100110,
+   10054,
    0,
-   96,
+   10095,
    0,
    "STRING"
   ],
   [
-   112,
-   48,
+   100111,
+   10047,
    0,
-   96,
+   10095,
    1,
    "STRING"
   ],
   [
-   113,
-   52,
+   100112,
+   10051,
    0,
-   96,
+   10095,
    2,
    "STRING"
   ],
   [
-   114,
-   95,
+   100113,
+   10094,
    0,
-   96,
+   10095,
    3,
    "STRING"
   ],
   [
-   115,
-   104,
+   100114,
+   10103,
    0,
-   99,
+   10098,
    0,
    "IMAGE"
   ],
   [
-   116,
-   103,
+   100115,
+   10102,
    0,
-   99,
+   10098,
    1,
    "IMAGE"
   ],
   [
-   117,
-   102,
+   100116,
+   10101,
    0,
-   99,
+   10098,
    2,
    "IMAGE"
   ],
   [
-   118,
-   101,
+   100117,
+   10100,
    0,
-   99,
+   10098,
    3,
    "IMAGE"
   ],
   [
-   119,
-   18,
+   100118,
+   10017,
    0,
-   99,
+   10098,
    4,
    "IMAGE"
   ],
   [
-   120,
-   98,
+   100119,
+   10097,
    0,
-   99,
+   10098,
    5,
    "IMAGE"
   ],
   [
-   121,
-   23,
+   100120,
+   10022,
    0,
-   101,
-   0,
-   "IMAGE"
-  ],
-  [
-   122,
-   29,
-   0,
-   102,
+   10100,
    0,
    "IMAGE"
   ],
   [
-   123,
-   36,
+   100121,
+   10028,
    0,
-   103,
-   0,
-   "IMAGE"
-  ],
-  [
-   124,
-   43,
-   0,
-   104,
+   10101,
    0,
    "IMAGE"
   ],
   [
-   125,
-   34,
+   100122,
+   10035,
    0,
-   105,
+   10102,
+   0,
+   "IMAGE"
+  ],
+  [
+   100123,
+   10042,
+   0,
+   10103,
+   0,
+   "IMAGE"
+  ],
+  [
+   100124,
+   10033,
+   0,
+   10104,
    0,
    "LATENT"
   ],
   [
-   126,
-   4,
+   100125,
+   10003,
    0,
-   105,
+   10104,
    1,
    "INT"
   ],
   [
-   127,
-   41,
+   100126,
+   10040,
    0,
-   106,
+   10105,
    0,
    "LATENT"
   ],
   [
-   128,
-   4,
+   100127,
+   10003,
    0,
-   106,
+   10105,
    1,
    "INT"
   ],
   [
-   129,
-   6,
+   100128,
+   10005,
    0,
-   107,
+   10106,
    0,
    "CLIP"
   ],
   [
-   130,
-   7,
+   100129,
+   10006,
    0,
-   108,
+   10107,
    0,
    "VAE"
   ],
   [
-   131,
-   109,
+   100130,
+   10108,
    0,
-   110,
+   10109,
    0,
    "_NODE_REPEATER_"
   ],
   [
-   132,
-   31,
+   100131,
+   10030,
    0,
-   109,
+   10108,
    0,
    "IMAGE"
   ],
   [
-   133,
-   82,
+   100132,
+   10081,
    0,
-   110,
+   10109,
    1,
    "STRING"
   ],
   [
-   134,
-   111,
+   100133,
+   10110,
    0,
-   112,
+   10111,
    0,
    "_NODE_REPEATER_"
   ],
   [
-   135,
-   102,
+   100134,
+   10101,
    0,
-   111,
+   10110,
    0,
    "IMAGE"
   ],
   [
-   136,
-   101,
+   100135,
+   10100,
    0,
-   111,
+   10110,
    1,
    "IMAGE"
   ],
   [
-   137,
-   18,
+   100136,
+   10017,
    0,
-   111,
+   10110,
    2,
    "IMAGE"
   ],
   [
-   138,
-   82,
+   100137,
+   10081,
    0,
-   111,
+   10110,
    3,
    "STRING"
   ],
   [
-   139,
-   80,
+   100138,
+   10079,
    0,
-   112,
+   10111,
    1,
    "IMAGE"
   ],
   [
-   140,
-   113,
+   100139,
+   10112,
    0,
-   114,
+   10113,
    0,
    "_NODE_REPEATER_"
   ],
   [
-   141,
-   38,
+   100140,
+   10037,
    0,
-   113,
+   10112,
    0,
    "IMAGE"
   ],
   [
-   142,
-   85,
+   100141,
+   10084,
    0,
-   114,
+   10113,
    1,
    "STRING"
   ],
   [
-   143,
-   115,
+   100142,
+   10114,
    0,
-   116,
+   10115,
    0,
    "_NODE_REPEATER_"
   ],
   [
-   144,
-   103,
+   100143,
+   10102,
    0,
-   115,
+   10114,
    0,
    "IMAGE"
   ],
   [
-   145,
-   102,
+   100144,
+   10101,
    0,
-   115,
+   10114,
    1,
    "IMAGE"
   ],
   [
-   146,
-   101,
+   100145,
+   10100,
    0,
-   115,
+   10114,
    2,
    "IMAGE"
   ],
   [
-   147,
-   18,
+   100146,
+   10017,
    0,
-   115,
+   10114,
    3,
    "IMAGE"
   ],
   [
-   148,
-   85,
+   100147,
+   10084,
    0,
-   115,
+   10114,
    4,
    "STRING"
   ],
   [
-   149,
-   83,
+   100148,
+   10082,
    0,
-   116,
+   10115,
    1,
    "IMAGE"
   ],
   [
-   150,
-   117,
+   100149,
+   10116,
    0,
-   118,
+   10117,
    0,
    "_NODE_REPEATER_"
   ],
   [
-   151,
-   46,
+   100150,
+   10045,
    0,
-   117,
+   10116,
    0,
    "MESH"
   ],
   [
-   152,
-   50,
+   100151,
+   10049,
    0,
-   117,
+   10116,
    1,
    "MESH"
   ],
   [
-   153,
-   54,
+   100152,
+   10053,
    0,
-   117,
+   10116,
    2,
    "MESH"
   ],
   [
-   154,
-   88,
+   100153,
+   10087,
    0,
-   118,
+   10117,
    1,
    "STRING"
   ],
   [
-   155,
-   119,
+   100154,
+   10118,
    0,
-   120,
+   10119,
    0,
    "_NODE_REPEATER_"
   ],
   [
-   156,
-   104,
+   100155,
+   10103,
    0,
-   119,
+   10118,
    0,
    "IMAGE"
   ],
   [
-   157,
-   103,
+   100156,
+   10102,
    0,
-   119,
+   10118,
    1,
    "IMAGE"
   ],
   [
-   158,
-   102,
+   100157,
+   10101,
    0,
-   119,
+   10118,
    2,
    "IMAGE"
   ],
   [
-   159,
-   101,
+   100158,
+   10100,
    0,
-   119,
+   10118,
    3,
    "IMAGE"
   ],
   [
-   160,
-   18,
+   100159,
+   10017,
    0,
-   119,
+   10118,
    4,
    "IMAGE"
   ],
   [
-   161,
-   88,
+   100160,
+   10087,
    0,
-   119,
+   10118,
    5,
    "STRING"
   ],
   [
-   162,
-   86,
+   100161,
+   10085,
    0,
-   120,
+   10119,
    1,
    "IMAGE"
   ],
   [
-   163,
-   121,
+   100162,
+   10120,
    0,
-   122,
+   10121,
    0,
    "_NODE_REPEATER_"
   ],
   [
-   164,
-   54,
+   100163,
+   10053,
    0,
-   121,
+   10120,
    0,
    "MESH"
   ],
   [
-   165,
-   91,
+   100164,
+   10090,
    0,
-   122,
+   10121,
    1,
    "STRING"
   ],
   [
-   166,
-   123,
+   100165,
+   10122,
    0,
-   124,
+   10123,
    0,
    "_NODE_REPEATER_"
   ],
   [
-   167,
-   48,
+   100166,
+   10047,
    0,
-   123,
+   10122,
    0,
    "STRING"
   ],
   [
-   168,
-   52,
+   100167,
+   10051,
    0,
-   123,
+   10122,
    1,
    "STRING"
   ],
   [
-   169,
-   91,
+   100168,
+   10090,
    0,
-   123,
+   10122,
    2,
    "STRING"
   ],
   [
-   170,
-   89,
+   100169,
+   10088,
    0,
-   124,
+   10123,
    1,
    "STRING"
   ],
   [
-   171,
-   125,
+   100170,
+   10124,
    0,
-   126,
+   10125,
    0,
    "_NODE_REPEATER_"
   ],
   [
-   172,
-   56,
+   100171,
+   10055,
    0,
-   125,
+   10124,
    0,
    "MESH"
   ],
   [
-   173,
-   94,
+   100172,
+   10093,
    0,
-   126,
+   10125,
    1,
    "STRING"
   ],
   [
-   174,
-   127,
+   100173,
+   10126,
    0,
-   128,
+   10127,
    0,
    "_NODE_REPEATER_"
   ],
   [
-   175,
-   55,
+   100174,
+   10054,
    0,
-   127,
+   10126,
    0,
    "STRING"
   ],
   [
-   176,
-   48,
+   100175,
+   10047,
    0,
-   127,
+   10126,
    1,
    "STRING"
   ],
   [
-   177,
-   52,
+   100176,
+   10051,
    0,
-   127,
+   10126,
    2,
    "STRING"
   ],
   [
-   178,
-   94,
+   100177,
+   10093,
    0,
-   127,
+   10126,
    3,
    "STRING"
   ],
   [
-   179,
-   92,
+   100178,
+   10091,
    0,
-   128,
+   10127,
    1,
    "STRING"
   ],
   [
-   180,
-   129,
+   100179,
+   10128,
    0,
-   130,
+   10129,
    0,
    "_NODE_REPEATER_"
   ],
   [
-   181,
-   62,
+   100180,
+   10061,
    0,
-   129,
+   10128,
    0,
    "TRIMESH"
   ],
   [
-   182,
-   97,
+   100181,
+   10096,
    0,
-   130,
+   10129,
    1,
    "STRING"
   ],
   [
-   183,
-   131,
+   100182,
+   10130,
    0,
-   132,
+   10131,
    0,
    "_NODE_REPEATER_"
   ],
   [
-   184,
-   55,
+   100183,
+   10054,
    0,
-   131,
+   10130,
    0,
    "STRING"
   ],
   [
-   185,
-   48,
+   100184,
+   10047,
    0,
-   131,
+   10130,
    1,
    "STRING"
   ],
   [
-   186,
-   52,
+   100185,
+   10051,
    0,
-   131,
+   10130,
    2,
    "STRING"
   ],
   [
-   187,
-   97,
+   100186,
+   10096,
    0,
-   131,
+   10130,
    3,
    "STRING"
   ],
   [
-   188,
-   95,
+   100187,
+   10094,
    0,
-   132,
+   10131,
    1,
    "STRING"
   ],
   [
-   189,
-   133,
+   100188,
+   10132,
    0,
-   134,
+   10133,
    0,
    "_NODE_REPEATER_"
   ],
   [
-   190,
-   72,
+   100189,
+   10071,
    0,
-   133,
+   10132,
    0,
    "CONDITIONING"
   ],
   [
-   191,
-   100,
+   100190,
+   10099,
    0,
-   134,
+   10133,
    1,
    "STRING"
   ],
   [
-   192,
-   135,
+   100191,
+   10134,
    0,
-   136,
+   10135,
    0,
    "_NODE_REPEATER_"
   ],
   [
-   193,
-   104,
+   100192,
+   10103,
    0,
-   135,
+   10134,
    0,
    "IMAGE"
   ],
   [
-   194,
-   103,
+   100193,
+   10102,
    0,
-   135,
+   10134,
    1,
    "IMAGE"
   ],
   [
-   195,
-   102,
+   100194,
+   10101,
    0,
-   135,
+   10134,
    2,
    "IMAGE"
   ],
   [
-   196,
-   101,
+   100195,
+   10100,
    0,
-   135,
+   10134,
    3,
    "IMAGE"
   ],
   [
-   197,
-   18,
+   100196,
+   10017,
    0,
-   135,
+   10134,
    4,
    "IMAGE"
   ],
   [
-   198,
-   100,
+   100197,
+   10099,
    0,
-   135,
+   10134,
    5,
    "STRING"
   ],
   [
-   199,
-   98,
+   100198,
+   10097,
    0,
-   136,
+   10135,
    1,
    "IMAGE"
   ]
