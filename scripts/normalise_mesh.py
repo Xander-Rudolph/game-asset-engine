@@ -59,7 +59,7 @@ def load(path):
     elif p.endswith(".obj"):
         bpy.ops.wm.obj_import(filepath=path)
     else:
-        bpy.ops.import_scene.gltf(filepath=path)
+        bpy.ops.import_scene.gltf(filepath=path, bone_heuristic="TEMPERANCE")
     meshes = [o for o in bpy.data.objects if o.type == "MESH"]
     if not meshes:
         raise SystemExit("no mesh in " + path)

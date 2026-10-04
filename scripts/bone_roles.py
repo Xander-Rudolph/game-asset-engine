@@ -166,7 +166,7 @@ ext = os.path.splitext(path)[1].lower()
 if ext == ".fbx":
     bpy.ops.import_scene.fbx(filepath=path)
 elif ext in (".glb", ".gltf"):
-    bpy.ops.import_scene.gltf(filepath=path)
+    bpy.ops.import_scene.gltf(filepath=path, bone_heuristic="TEMPERANCE")
 else:
     raise SystemExit(f"unsupported rig format: {ext}")
 arms = [o for o in bpy.data.objects if o.type == "ARMATURE"]
