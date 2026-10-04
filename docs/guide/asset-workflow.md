@@ -113,7 +113,7 @@ Simplify repeat the encoded source that many times before sampling, so each
 take is a new seed on the same input.
 
 The Image Filter node comes from cg-image-filter, which the Dockerfile added on
-2026-10-02 and image 0.1.5 (built and pushed 2026-10-03) is the first to carry. Image 0.1.6 (built and pushed later on 2026-10-03, digest `e83e51df`) is the first to carry the graph with its own-image start, Stage 0.
+2026-10-02 and image 0.1.5 (built and pushed 2026-10-03) is the first to carry. Image 0.1.6 (built and pushed later on 2026-10-03, digest `e83e51df`) is the first to carry the graph with its own-image start, Stage 0, and 0.1.7 (2026-10-04, digest `914a3ab9`) the first whose graph numbers its nodes from 10000, so its relays cannot reach `complete_workflow.json` (the relay warning below).
 An earlier image lacks it, and the editor then opens
 this graph with four missing nodes; the stages still run, but nothing pauses
 and nothing flows between them. Rebuild the image, or clone the pack into
