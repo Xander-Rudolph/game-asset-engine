@@ -3,7 +3,7 @@
  "researched": "2026-10-03",
  "checked": "2026-10-03",
  "statuses": {
-  "confirmed": 31,
+  "confirmed": 32,
   "unsettled": 2,
   "corrected": 4,
   "unchecked": 3
@@ -949,12 +949,41 @@
    "status": "unchecked",
    "kind": "mechanism",
    "load_bearing": true,
-   "claim": "A .pak in the game's Mods folder that carries a file at the same virtual path as a vanilla file replaces that file when the mod is enabled, and a meta.lsx under Mods/<Name>/ with ModuleInfo attributes (Folder, Name, UUID, Version64 packed as major<<55 | minor<<47 | revision<<31 | build, Type Add-on, a PublishVersion node and a Story TargetModes entry) is what the in-game Mod Manager needs to list it. The game's Mods folder on a Steam Play install is in the Proton prefix at compatdata/1086940/pfx/drive_c/users/steamuser/AppData/Local/Larian Studios/Baldur's Gate 3/Mods. This is the modding community's practice as recalled when writing bg3_pack.py; no Larian or community document was read for it in this session, and the pak has not been loaded in the game.",
+   "claim": "A .pak in the game's Mods folder that carries a file at the same virtual path as a vanilla file replaces that file when the mod is enabled, and a meta.lsx under Mods/<Name>/ with ModuleInfo attributes (Folder, Name, UUID, Version64 packed as major<<55 | minor<<47 | revision<<31 | build, Type Add-on, a PublishVersion node and a Story TargetModes entry) is what the in-game Mod Manager needs to list it. This is the modding community's practice as recalled when writing bg3_pack.py; no Larian or community document was read for it in this session, and the pak has not been loaded in the game. What was read on this host: the game's profile folder is ~/.local/share/Larian Studios/Baldur's Gate 3/ for its native Linux build (a Steam Play install keeps the same tree inside the Proton prefix), its Mods/ folder held five mod.io paks, and PlayerProfiles/Public/modsettings.lsx (version 4.8.0.700) lists an enabled mod as a ModuleShortDesc node with Folder, MD5, Name, PublishHandle, UUID (type guid) and Version64, which is the node bg3_pack.py --enable writes.",
    "sources": [
     "scripts/bg3_pack.py (what it writes)"
    ],
-   "checks": [],
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "unchecked",
+     "read": "The profile folder, Mods folder and modsettings.lsx were read on this host on 2026-10-03, and the Mods-folder sentence corrected from the Proton prefix to the native build's path; the override mechanism itself remains unread and unrun.",
+     "evidence": "ls and cat in the session.",
+     "notes": ""
+    }
+   ],
    "as_first_reported": "A .pak in the game's Mods folder that carries a file at the same virtual path as a vanilla file replaces that file when the mod is enabled, and a meta.lsx under Mods/<Name>/ with ModuleInfo attributes (Folder, Name, UUID, Version64 packed as major<<55 | minor<<47 | revision<<31 | build, Type Add-on, a PublishVersion node and a Story TargetModes entry) is what the in-game Mod Manager needs to list it. The game's Mods folder on a Steam Play install is in the Proton prefix at compatdata/1086940/pfx/drive_c/users/steamuser/AppData/Local/Larian Studios/Baldur's Gate 3/Mods. This is the modding community's practice as recalled when writing bg3_pack.py; no Larian or community document was read for it in this session, and the pak has not been loaded in the game."
+  },
+  {
+   "id": "BG3-041",
+   "status": "confirmed",
+   "kind": "measurement",
+   "load_bearing": true,
+   "claim": "Read on this host on 2026-10-03: Baldur's Gate 3 as installed by Steam at steamapps/common/Baldurs Gate 3/ is a native Linux build (file reports bin/bg3 as an ELF 64-bit x86-64 PIE executable, beside libOsiris.so, libParty.so, libSDL2.so, libBink2x64.so and NVIDIA NGX .so files, with no .exe in bin/), the game's compatdata/1086940 folder is empty, and its profile lives at ~/.local/share/Larian Studios/Baldur's Gate 3/ with Mods/ (five mod.io paks), PlayerProfiles/Public/modsettings.lsx and LevelCache/, with logs under ~/.local/state/Larian Studios/. The Toolkit (app 2934770) runs under Proton in its own prefix, whose dosdevices map S: to the Steam library and Z: to the Linux root.",
+   "sources": [
+    "file(1) and ls on this host, 2026-10-03",
+    "~/.steam/debian-installation/steamapps/appmanifest_1086940.acf and appmanifest_2934770.acf"
+   ],
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "Measured on this host on 2026-10-03.",
+     "evidence": "file(1) output, directory listings, dosdevices symlinks.",
+     "notes": ""
+    }
+   ],
+   "as_first_reported": "Read on this host on 2026-10-03: Baldur's Gate 3 as installed by Steam at steamapps/common/Baldurs Gate 3/ is a native Linux build (file reports bin/bg3 as an ELF 64-bit x86-64 PIE executable, beside libOsiris.so, libParty.so, libSDL2.so, libBink2x64.so and NVIDIA NGX .so files, with no .exe in bin/), the game's compatdata/1086940 folder is empty, and its profile lives at ~/.local/share/Larian Studios/Baldur's Gate 3/ with Mods/ (five mod.io paks), PlayerProfiles/Public/modsettings.lsx and LevelCache/, with logs under ~/.local/state/Larian Studios/. The Toolkit (app 2934770) runs under Proton in its own prefix, whose dosdevices map S: to the Steam library and Z: to the Linux root."
   }
  ]
 }

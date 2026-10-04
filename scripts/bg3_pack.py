@@ -24,11 +24,14 @@ What the script does:
    repacking keeps the game's mod entry, and a Version64 from `--version`.
 3. Packs the staging folder with Divine (`create-package`, lz4) into
    `output/bg3/<Name>.pak` and lists the result back.
-4. With `--install`, copies the pak into the game's Mods folder, which for a
-   Steam Play install is inside the game's Proton prefix:
-   `steamapps/compatdata/1086940/pfx/drive_c/users/steamuser/AppData/Local/Larian Studios/Baldur's Gate 3/Mods`.
-   Enable it in the in-game Mod Manager.  Pass `--mods-dir` for any other
-   layout.
+4. With `--install`, copies the pak into the game's Mods folder, beside the
+   mod.io downloads: `~/.local/share/Larian Studios/Baldur's Gate 3/Mods` for
+   the native Linux build, or the same path inside the Proton prefix
+   (`steamapps/compatdata/1086940/pfx/drive_c/users/steamuser/AppData/Local/...`)
+   for a Steam Play install; `--mods-dir` names any other.  Enable it in the
+   main menu's Mod Manager, or pass `--enable`, which adds a ModuleShortDesc
+   entry for it to `PlayerProfiles/Public/modsettings.lsx` next to the Mods
+   folder, after saving a `.bak` copy of that file.
 
 Divine runs the way `docs/reference/bg3-toolkit.md` describes: LSLib's
 `Divine.dll` from `tools/lslib/` under Wine with the Windows .NET 8 runtime in
@@ -58,7 +61,8 @@ OUT = ROOT / "output" / "bg3"
 MODELS_PAK_LIST = OUT / "models_pak_list.txt"
 GAME_APP_ID = "1086940"
 STEAM_ROOTS = ["~/.steam/steam", "~/.steam/debian-installation", "~/.local/share/Steam"]
-MODS_IN_PREFIX = Path("pfx/drive_c/users/steamuser/AppData/Local/Larian Studios/Baldur's Gate 3/Mods")
+PROFILE_NATIVE = Path("~/.local/share/Larian Studios/Baldur's Gate 3").expanduser()
+PROFILE_IN_PREFIX = Path("pfx/drive_c/users/steamuser/AppData/Local/Larian Studios/Baldur's Gate 3")
 
 
 # ---- Divine under Wine --------------------------------------------------------
@@ -204,11 +208,50 @@ def meta_lsx(name: str, author: str, description: str, mod_uuid: str, ver: int) 
 
 
 # ---- main ----------------------------------------------------------------------
-def mods_dir() -> Path | None:
+def profile_dir() -> Path | None:
+    """The game's profile folder, which holds Mods/ and PlayerProfiles/: the
+    native build's XDG path when it exists, else the Proton prefix's."""
+    if PROFILE_NATIVE.is_dir():
+        return PROFILE_NATIVE
     root = steam_root()
     if root is None:
         return None
-    return root / "steamapps/compatdata" / GAME_APP_ID / MODS_IN_PREFIX
+    p = root / "steamapps/compatdata" / GAME_APP_ID / PROFILE_IN_PREFIX
+    return p if p.is_dir() else None
+
+
+def enable_in_modsettings(profile: Path, name: str, mod_uuid: str, ver: int) -> str:
+    """Add a ModuleShortDesc for the mod to modsettings.lsx, after a backup.
+    The node shape is the one the game writes for its own entries (Folder,
+    MD5, Name, PublishHandle, UUID, Version64)."""
+    import xml.etree.ElementTree as ET
+    path = profile / "PlayerProfiles/Public/modsettings.lsx"
+    if not path.exists():
+        return f"not enabled: {path} does not exist (start the game once)"
+    tree = ET.parse(path)
+    mods = None
+    for node in tree.iter("node"):
+        if node.get("id") == "Mods":
+            mods = node
+    if mods is None:
+        return f"not enabled: no Mods node in {path}"
+    children = mods.find("children")
+    if children is None:
+        children = ET.SubElement(mods, "children")
+    for desc in children.findall("node"):
+        u = desc.find("attribute[@id='UUID']")
+        if u is not None and u.get("value") == mod_uuid:
+            return f"already enabled in {path}"
+    desc = ET.SubElement(children, "node", id="ModuleShortDesc")
+    for i, t, v in (("Folder", "LSString", name), ("MD5", "LSString", ""), ("Name", "LSString", name),
+                    ("PublishHandle", "uint64", "0"), ("UUID", "guid", mod_uuid),
+                    ("Version64", "int64", str(ver))):
+        ET.SubElement(desc, "attribute", id=i, type=t, value=v)
+    ET.indent(tree, space="    ")
+    backup = path.with_suffix(".lsx.bak")
+    shutil.copy2(path, backup)
+    tree.write(path, encoding="UTF-8", xml_declaration=True)
+    return f"enabled in {path} (backup {backup.name})"
 
 
 def main() -> int:
@@ -226,7 +269,10 @@ def main() -> int:
     ap.add_argument("--models-pak-list", help="a Divine list-package listing of Models.pak "
                                               "(default output/bg3/models_pak_list.txt)")
     ap.add_argument("--install", action="store_true", help="copy the pak into the game's Mods folder")
-    ap.add_argument("--mods-dir", help="the Mods folder --install copies to (default: the game's Proton prefix)")
+    ap.add_argument("--mods-dir", help="the Mods folder --install copies to (default: the game's own, "
+                                       "see above)")
+    ap.add_argument("--enable", action="store_true",
+                    help="also list the mod in modsettings.lsx, after backing that file up")
     args = ap.parse_args()
 
     if args.models_pak_list:
@@ -285,16 +331,27 @@ def main() -> int:
 
     record = {"name": name, "uuid": mod_uuid, "version": args.version, "version64": ver,
               "pak": str(out), "files": [{"path": v, "from": str(f)} for v, f in staged]}
-    if args.install:
-        target = Path(args.mods_dir).expanduser() if args.mods_dir else mods_dir()
-        if target is None:
-            sys.exit("no Steam install found for --install; pass --mods-dir")
-        target.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(out, target / out.name)
-        record["installed"] = str(target / out.name)
-        print(f"  installed  {target / out.name}")
-        print("             enable it in the game's Mod Manager (main menu); if the game has never run on "
-              "this machine the folder was just created and the first launch may rebuild its prefix")
+    if args.install or args.enable:
+        profile = profile_dir()
+        if args.mods_dir:
+            target = Path(args.mods_dir).expanduser()
+        elif profile is not None:
+            target = profile / "Mods"
+        else:
+            sys.exit("the game's profile folder was not found (it appears after the game has run once); "
+                     "pass --mods-dir")
+        if args.install:
+            target.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(out, target / out.name)
+            record["installed"] = str(target / out.name)
+            print(f"  installed  {target / out.name}")
+            print("             enable it in the main menu's Mod Manager, or rerun with --enable")
+        if args.enable:
+            if profile is None:
+                sys.exit("--enable needs the game's profile folder; it was not found")
+            note = enable_in_modsettings(profile, name, mod_uuid, ver)
+            record["enabled"] = note
+            print(f"  enable     {note}")
     (OUT / f"{name}_pak.json").write_text(json.dumps(record, indent=1))
     print(f"  record     {OUT / f'{name}_pak.json'}")
     return 0
