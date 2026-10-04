@@ -148,7 +148,7 @@ Four things the build found that the research had not said, each measured on the
 ## Called off on 2026-09-23
 
 ::: warning The owner called this route off
-On 2026-09-23 the owner called off the procedural hair generator as the route for hair and beards, after looking at the settled generator on the figure beside a Virt-A-Mate groom on the same figure at the same framing (`output/daz/h_cards_vs_strands.png`). The owner's words: the procedural results "still look terrible", and the route is now "hair objs instead. same with beards". <!-- HAIR-153 --> That is a decision, not a measurement. The generator is not deleted, `scripts/make_hair.py` still runs and still carries the settle described below, and nothing above this section was withdrawn.
+On 2026-09-23 the owner called off the procedural hair generator as the route for hair and beards, after looking at the settled generator on the figure beside a third-party strand groom on the same figure at the same framing (`output/daz/h_cards_vs_strands.png`). The owner's words: the procedural results "still look terrible", and the route is now "hair objs instead. same with beards". <!-- HAIR-153 --> That is a decision, not a measurement. The generator is not deleted, `scripts/make_hair.py` still runs and still carries the settle described below, and nothing above this section was withdrawn.
 :::
 
 The search for ready-made hair and beard meshes that replaces this route is in [hair and beard meshes](/reference/hair-meshes).
@@ -158,7 +158,7 @@ Everything in this section was run on 2026-09-23 on the reference machine, on th
 ### What was tried that day
 
 1. **A strand groom in Blender on the bundled CC0 hair node groups**, rejected on measurement. `Shrinkwrap Hair Curves` is a projection, not a collision: the per-node probe wrapped a straight 17 cm strand down to a median of 2.72 cm on the first pass, and a `Restore Curve Segment Length` after it re-extended a crumpled strand, so the turning angle climbed 4 to 12 to 38 degrees over successive passes and the reach over length fell to 0.44. <!-- HAIR-154, HAIR-109 -->
-2. **A position-based settle in numpy**, in the solver order a third-party reimplementation attributes to Virt-A-Mate: a Verlet step with drag, a rigidity pull toward a rest pose with a root-to-tip rolloff, inextensible segments solved root first, then a one-sided collision with friction. This worked, and is what [the Virt-A-Mate note](/reference/vam-assets#the-settle-and-the-clump-spike) records.
+2. **A position-based settle in numpy**, in the solver order a third-party reimplementation attributes to a commercial strand-hair runtime, read and not run: a Verlet step with drag, a rigidity pull toward a rest pose, relative to the root, with a root-to-tip rolloff, inextensible segments solved root first, then a one-sided collision with friction. This worked. That runtime stores a groom's styled pose and simulates from it, <!-- HAIR-160 --> and run from a third-party groom's authored pose with that part's own stored rolloff of 8, only the first three points of a 24-point strand stayed rigid and 200 frames of gravity flattened the top, while a rolloff of 2 with main rigidity 0.75 kept the crown and let the ends drape. <!-- HAIR-162, HAIR-161 -->
 3. **That settle lifted into `scripts/make_hair.py`**, against the generator's own analytic stand-ins (the scalp sphere, the five body capsules, the jaw ellipsoid) rather than a KD-tree of the Daz figure's skin, so it needs neither scipy nor Blender nor the figure. What it measured is below.
 4. **A card density change**, proposed and costed but not built: [the density lever](#the-density-lever-costed-but-never-built).
 
@@ -172,7 +172,7 @@ The plan said to remove the fake gravity from `strand_path()`, which blends the 
 | comb, then settle | 26.42 x 23.78 x 24.07 | 13.8 |
 | settle alone, comb removed | 31.00 x 23.92 x 28.15 | 23.9 |
 
-The cause is the opposite of hair falling twice: with the comb gone the rest pose is a spike standing off the scalp, and a main rigidity of 0.75 holds it there. Dropping main rigidity to 0.10 brought the span under the baseline but took the turning angle to 10.1 degrees, which is the wave ironed flat. In a Virt-A-Mate groom the creator combs the guides and the solver only refines them, so the comb is the styled pose, not the gravity. <!-- HAIR-155 --> Once `--comb` and `--settle` were separated and both left on, every acceptance test passed. That was settled by measurement: two separate agents had stopped at the same fork and declined to guess.
+The cause is the opposite of hair falling twice: with the comb gone the rest pose is a spike standing off the scalp, and a main rigidity of 0.75 holds it there. Dropping main rigidity to 0.10 brought the span under the baseline but took the turning angle to 10.1 degrees, which is the wave ironed flat. In the third-party strand grooms measured, the creator combs the guides and the solver only refines them, so the comb is the styled pose, not the gravity. <!-- HAIR-155, HAIR-160 --> Once `--comb` and `--settle` were separated and both left on, every acceptance test passed. That was settled by measurement: two separate agents had stopped at the same fork and declined to guess.
 
 What landed in `scripts/make_hair.py`, which went from 1,979 to 2,331 lines, all defaults on:
 
@@ -185,18 +185,18 @@ The rigidity defaults are carried over from a 24-point strand onto this file's 8
 
 ### Why it was called off anyway
 
-The settle improved the numbers and the silhouette and did not fix the look. On the figure the cards read as slats. The gap against the Virt-A-Mate groom is filament count, at the same camera and framing:
+The settle improved the numbers and the silhouette and did not fix the look. On the figure the cards read as slats. The gap against the third-party strand groom is filament count, at the same camera and framing:
 
 | | visible filaments |
 |---|---|
 | procedural hair, settled | 310 cards |
 | procedural beard, settled | 160 cards |
-| Virt-A-Mate hair | 4,005 curves from 267 guides |
-| Virt-A-Mate beard | 12,969 curves from 1,179 guides |
+| third-party strand hair | 4,005 curves from 267 guides |
+| third-party strand beard | 12,969 curves from 1,179 guides |
 
-<!-- HAIR-156 -->
+<!-- HAIR-156, HAIR-163 -->
 
-Where the two Virt-A-Mate rows come from, how those grooms were fitted, and the licence that keeps them out of the repo as 3D data are all in [Virt-A-Mate hair packages](/reference/vam-assets). At 310 pieces every silhouette edge is a card edge, and a card is centimetres wide on an 18 cm head. No solver changes that, because it is the representation and not the physics. And every acceptance test above passed on the run the owner rejected.
+The two strand rows are curve counts from third-party grooms fitted to the same Genesis 9 figure and grown in the container's Blender on 2026-09-23; none of that groom data is in the repo. <!-- HAIR-163 --> At 310 pieces every silhouette edge is a card edge, and a card is centimetres wide on an 18 cm head. No solver changes that, because it is the representation and not the physics. And every acceptance test above passed on the run the owner rejected.
 
 ### The density lever, costed but never built
 
@@ -218,13 +218,16 @@ The most useful thing on this page for whoever picks hair up next.
 4. **Closed lens shells are expensive.** 124 triangles against 20 for a flat card, so 29 per cent of the pieces ate 77 per cent of the budget.
 5. **Judge hair by looking at it on the figure, not by its numbers.** Every acceptance test passed on the run the owner rejected. The numbers were necessary and nowhere near sufficient. <!-- HAIR-157 -->
 6. **When two agents stop at the same fork, the fork is usually measurable.** The comb question was answered by running all three combinations, not by arguing about it.
+7. **Fit a groom made on another figure by landmarks spanning the whole head, not by scale.** Moving third-party grooms authored on another figure onto Genesis 9 on 2026-09-23, a sphere through the hair roots fitted the hair, not the head (radius 10.39 cm against the 8.26 cm skull sphere measured 2026-09-22, so scale 0.795), and ICP of the embedded scalp mesh slid 7.7 cm up the forehead, because a smooth cranium gives a low residual almost anywhere. What worked was a fit to skin landmarks: the moustache root centroid to the lip skin, the beard roots' left and right deciles to the two ear regions, and the hair's top decile to the crown, giving scale 0.9899 and offset (0, -0.30, -6.92) cm, residuals 1.68, 2.03, 1.97 and 2.23 cm. Bone joints sit about 1.5 cm behind the skin, and a lip-and-chin pair alone, a 3.2 cm baseline, swung the scale from 0.678 to 1.148. The transform belongs to the creator's authoring figure: four of one creator's packages put their moustache root centroids within 4 mm of one another. <!-- HAIR-164, HAIR-165, HAIR-166 -->
+8. **A beard's parts need their own placement, and a beard that wraps the mouth cannot be rescued.** After the fit, one beard's moustache roots sat 1.56 cm behind the lip and 0.62 cm above it, and its chin roots 1.44 cm behind and 0.93 cm below, so no single nudge fixes both. Of eight fixes measured, the one accepted was a looser beard. A root snap to the skin cancels any translation, so turn it off when moving a part. <!-- HAIR-167, HAIR-168, HAIR-169 -->
+9. **Imported guide curves must skip clumping.** They carry no `surface_uv_coordinate` attribute, so `Create Guide Index Map` puts every curve at UV (0, 0) and `Clump Hair Curves` pulls the whole head into one spike. <!-- HAIR-170 -->
+10. **A creator's licence on a groom covers the strands they authored, not the scalp under them.** Treat a groom whose roots index into the runtime's own scalp, or into a scalp mesh embedded in the package that the creator did not author, as not shippable as 3D data on the creator's licence alone. <!-- HAIR-171 -->
 
 ### What exists for the route the owner chose
 
 Hair and beard meshes already on this machine, none of them in the repo. This is an inventory, not a design: how the OBJ route should work has not been worked out here.
 
 - **The MakeHuman system assets pack**, CC0, <!-- HAIR-137 --> extracted to the gitignored `input/_devtools/makehuman/hair/`: ten styles, each an `.obj` with an `.mhclo`, an `.mhmat` and an RGBA diffuse, named afro01, bob01, bob02, braid01, long01, ponytail01, short01, short02, short03 and short04. <!-- HAIR-158 -->
-- **Six Virt-A-Mate `.var` packages** in `~/Downloads`, all CC BY, which hold guide curves rather than meshes. [Virt-A-Mate hair packages](/reference/vam-assets#licences) covers them and the licence limit on them.
 
 What was already learned about fitting a hair OBJ, earlier in the same session and not re-measured since: a MakeHuman hair OBJ is not in the body's frame and needs its `.mhclo` weights and offsets applied, which moved bob02 up 5.2 cm; MakeHuman helper geometry skews a sphere fit, so fit on the `g body` faces only; and the fitted bob02's fringe intersected the Genesis 9 forehead, which `--declip-skip` hid but did not fix. The proper fix, a shrinkwrapped donor head with weights, was never built. <!-- HAIR-159 -->
 
@@ -239,7 +242,7 @@ What was already learned about fitting a hair OBJ, earlier in the same session a
 - **The MakeHuman community pack** is labelled CC0 by its page and contradicted by its own headers. <!-- HAIR-137 --> Only the system pack is relied on.
 - **The card density lever was never built or measured.** The 2.8 times figure is arithmetic on the triangle budget, not a render. <!-- HAIR-016 -->
 - **The settle's rigidity defaults are a judgement.** They come from a 24-point strand and are used on 8, 6, 4 and 5 point layers, and nothing measured them on those layers.
-- **The 2026-09-23 claims are unchecked.** HAIR-153 to HAIR-159 record a decision, one node-group probe, two lessons and what is on disk; none has been through a second reader.
+- **HAIR-153 to HAIR-159 are unchecked.** They record a decision, one node-group probe, two lessons and what is on disk; none has been through a second reader. HAIR-160 to HAIR-168 and HAIR-170, from the same day's strand-groom work, were each checked once, through the fact lens; HAIR-169 and HAIR-171, that work's two recommendations, are unchecked.
 - **The 'reads as hair' criterion is still an eye.** The arXiv extractor scores cards against strand renders with PSNR and LPIPS; <!-- HAIR-101 --> the repo could score its cards against a Cycles render of hair curves grown from the same guides, and has not.
 
 ## Sources worth reading
@@ -253,4 +256,3 @@ What was already learned about fitting a hair OBJ, earlier in the same session a
 - Kajiya and Kay 1989 and Scheuermann's GDC 2004 slides, for tangent shading. <!-- HAIR-082 -->
 - The MakeHuman system asset pack and OwlishMedia's alphas, both CC0. <!-- HAIR-137, HAIR-148 -->
 - The VRoid CC0 sample, as the one measured piece of stylised hair. <!-- HAIR-150 -->
-- [Virt-A-Mate hair packages](/reference/vam-assets), for the groom this generator was compared against, the filament counts behind that comparison and the licence limit on the packages.

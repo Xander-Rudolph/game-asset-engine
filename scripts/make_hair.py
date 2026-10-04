@@ -36,14 +36,14 @@ layer's bounds (HAIR-101).
 HOW IT FALLS, in two stages.  First the guides are grown in a STYLED POSE: the
 flow, the exit angle, the parting, the waves, the curl and the comb that lays
 the heading over the skull, all of it shape rather than physics.  Then that
-pose is dropped by a position-based settle, the solver the Virt-A-Mate work was
-run with (docs/reference/vam-assets.md, VAM-031, run 2026-09-23): a Verlet step
-with drag, a rigidity pull back towards the styled pose with a root-to-tip
-rolloff, inextensible segments solved root first, and a collision against the
-scalp sphere, the body capsules and the jaw ellipsoid, run until the strands
-stop moving.  This is how a Virt-A-Mate groom works and why the two stages are
-separate: the creator combs the guides and the solver only refines them
-(VAM-030).  Measured on the wavy bob on 2026-09-23, combing and then settling
+pose is dropped by a position-based settle, the solver a third-party strand
+groom was run with (docs/reference/hair-cards.md, HAIR-162, run 2026-09-23): a
+Verlet step with drag, a rigidity pull back towards the styled pose with a
+root-to-tip rolloff, inextensible segments solved root first, and a collision
+against the scalp sphere, the body capsules and the jaw ellipsoid, run until
+the strands stop moving.  This is how that groom's format works and why the
+two stages are separate: the creator combs the guides and the solver only refines
+them (HAIR-160).  Measured on the wavy bob on 2026-09-23, combing and then settling
 gives a span of 26.42 x 23.78 x 24.07 cm against 27.58 x 23.18 x 25.03 cm for
 the comb alone, while settling WITHOUT the comb gives 31.00 x 23.92 x 28.15 cm,
 because the rest pose is then a spike standing off the scalp and the rigidity
@@ -811,8 +811,8 @@ class Jaw:
 
 
 # THE SETTLE.  Lifted from output/hair/_exp/groom2.py's settle(), the
-# position-based solver the Virt-A-Mate work was measured with
-# (docs/reference/vam-assets.md, VAM-031, run 2026-09-23): a Verlet step with
+# position-based solver a third-party strand groom was measured with
+# (docs/reference/hair-cards.md, HAIR-162, run 2026-09-23): a Verlet step with
 # drag, a rigidity pull toward the rest pose with a root-to-tip rolloff,
 # inextensible segments solved root first, then a one-sided collision and
 # friction.  Two things changed on the way in.  The collision no longer
@@ -842,8 +842,9 @@ SETTLE_STOP_CM = 5e-5 * M_TO_CM                   # groom2's 5e-5 m early-out
 SETTLE_MOVING_CM = 1e-3 * M_TO_CM                 # groom2's 1 mm "still moving" test
 # The solver's own numbers.  root_rigidity, main_rigidity, tip_rigidity,
 # rigidity_rolloff and frames are behind flags; the rest are groom2's values,
-# which are the ones read verbatim out of the VaM packages' .vaj storables
-# (docs/reference/vam-assets.md, VAM-015, read 2026-09-23).  There is no
+# which are the ones read verbatim out of the third-party hair packages'
+# stored parameters (docs/reference/hair-cards.md, HAIR-161, measured
+# 2026-09-23).  There is no
 # collision radius here: groom2 pushed a point out to 1 mm clear of the skin
 # mesh, 6 mm after the first point, and the stand-ins below carry their own
 # clearance instead (the layer's offset plus `volume` by the tip off the
@@ -938,13 +939,14 @@ class JawCollider:
 
 
 def settle(X: np.ndarray, sim: dict, collider) -> tuple:
-    """Position-based settle of every strand, in the order vkit says VaM's
-    solver runs (read, not run, 2026-09-23): Verlet step with drag, a rigidity
-    pull toward the PLANTED pose (root rigidity at point 1, then tip + (main -
-    tip) * (1 - (i-1)/(n-2))^rolloff), inextensible segments root-first, then a
-    one-sided collision with `collider` whose friction damps the point.  X is
-    (n, m, 3) centimetres in the hair frame, root first.  Returns the settled
-    X, the numbers to report and the per-strand arrays behind them.
+    """Position-based settle of every strand, in the order a third-party
+    reimplementation gives a commercial strand-hair solver (read, not run,
+    2026-09-23): Verlet step with drag, a rigidity pull toward the PLANTED pose
+    (root rigidity at point 1, then tip + (main - tip) * (1 - (i-1)/(n-2))^rolloff),
+    inextensible segments root-first, then a one-sided collision with
+    `collider` whose friction damps the point.  X is (n, m, 3) centimetres in
+    the hair frame, root first.  Returns the settled X, the numbers to report
+    and the per-strand arrays behind them.
     """
     n, m, _ = X.shape
     rest = X.copy()
@@ -969,7 +971,7 @@ def settle(X: np.ndarray, sim: dict, collider) -> tuple:
             V *= (1.0 - drag / its)
             Xp = X + V * dt + G * dt * dt
             Xp[:, 0] = X[:, 0]
-            # rigidity toward the planted pose (VaM: relative to the root, not a bend angle)
+            # rigidity toward the planted pose, relative to the root, not a bend angle
             Xp = Xp + rig[None, :, None] * (rest - Xp)
             if bend > 0:
                 for k in range(2, m):
@@ -1566,9 +1568,9 @@ def grow(args, layers: list, plan: dict, jaw: Jaw | None = None, shape: dict | N
     curl = (args.curl, args.curl_turns, args.curl_start) if jaw is None else (0.0, 0.0, 0.0)
     # with a settle the rest pose is the styled pose and the solver does the
     # falling, so strand_path keeps its comb out of it (see strand_path)
-    # The comb is the STYLED POSE, not gravity: a VaM creator combs the guides and
-    # the solver only refines them (vam-assets.md, VAM-030).  Decoupled from
-    # --settle so the two can be measured apart.
+    # The comb is the STYLED POSE, not gravity: in the third-party grooms measured
+    # the creator combs the guides and the solver only refines them (hair-cards.md,
+    # HAIR-160).  Decoupled from --settle so the two can be measured apart.
     comb = args.comb
     if jaw is not None:
         R = jaw.mean_radius
@@ -1870,27 +1872,26 @@ def main() -> int:
                          "the styling, which measured a wider silhouette on 2026-09-23")
     ap.add_argument("--settle", action=argparse.BooleanOptionalAction, default=True,
                     help="drop the styled hair under gravity with the position-based solver "
-                         "lifted from the Virt-A-Mate work (default on; docs/reference/vam-assets.md, "
-                         "VAM-031, run 2026-09-23). Off, the styled pose is written as grown"
-                         "down as it is grown instead, which is what the generator did before there "
-                         "was a solver")
+                         "lifted from the strand-groom work (default on; docs/reference/hair-cards.md, "
+                         "HAIR-162, run 2026-09-23). Off, the styled pose is written as grown, "
+                         "which is what the generator did before there was a solver")
     ap.add_argument("--root-rigidity", type=float, default=0.2,
                     help="how hard the first point off the root is held to the styled pose, 0 to 1 "
-                         "(default 0.2, which cleanleft and vikingtop ship; vikingchin ships 0.4997, "
-                         "VAM-015, read 2026-09-23)")
+                         "(default 0.2, which a short-hair side part and a hair top part ship; a "
+                         "beard chin part ships 0.4997, HAIR-161, measured 2026-09-23)")
     ap.add_argument("--main-rigidity", type=float, default=0.75,
                     help="how hard the rest of the strand is held to the styled pose before the "
                          "rolloff (default 0.75: at 0.75 with a rolloff of 2 the crown survived "
-                         "200 frames of gravity and the ends still fell, VAM-031, run 2026-09-23. "
+                         "200 frames of gravity and the ends still fell, HAIR-162, run 2026-09-23. "
                          "That was on a 24-point strand; this file's layers are 8, 6, 4 and 5 "
                          "points, so carrying the value over is a judgement, not a measurement)")
     ap.add_argument("--tip-rigidity", type=float, default=0.0,
-                    help="what the rigidity falls to by the tip (default 0.0, free; the packages "
-                         "ship 0 to 0.5, VAM-015, read 2026-09-23)")
+                    help="what the rigidity falls to by the tip (default 0.0, free; the measured "
+                         "third-party parts ship 0 to 0.5, HAIR-161, measured 2026-09-23)")
     ap.add_argument("--rigidity-rolloff", type=float, default=2.0,
-                    help="the power the rigidity falls off at from root to tip (default 2.0; the "
-                         "packages ship 8, which leaves only the first three points of a 24-point "
-                         "strand rigid and let 200 frames of gravity flatten the crown, VAM-031, "
+                    help="the power the rigidity falls off at from root to tip (default 2.0; the measured "
+                         "third-party parts ship 8, which leaves only the first three points of a 24-point "
+                         "strand rigid and let 200 frames of gravity flatten the crown, HAIR-162, "
                          "run 2026-09-23, on a 24-point strand)")
     ap.add_argument("--settle-frames", type=int, default=240, metavar="N",
                     help="how many frames of gravity to run at most; the solver stops early once "
