@@ -1,8 +1,8 @@
 {
  "id": "asset_workflow",
  "revision": 0,
- "last_node_id": 147,
- "last_link_id": 191,
+ "last_node_id": 149,
+ "last_link_id": 199,
  "nodes": [
   {
    "id": 1,
@@ -126,8 +126,8 @@
      "links": [
       6,
       14,
-      122,
-      124
+      126,
+      128
      ],
      "slot_index": 0
     }
@@ -146,14 +146,14 @@
    "type": "UNETLoader",
    "pos": [
     1020,
-    1940
+    2292
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 21,
+   "order": 23,
    "mode": 0,
    "inputs": [],
    "outputs": [
@@ -194,7 +194,7 @@
      "name": "CLIP",
      "type": "CLIP",
      "links": [
-      125
+      129
      ],
      "slot_index": 0
     }
@@ -228,7 +228,7 @@
      "name": "VAE",
      "type": "VAE",
      "links": [
-      126
+      130
      ],
      "slot_index": 0
     }
@@ -245,14 +245,14 @@
    "type": "ModelSamplingAuraFlow",
    "pos": [
     1480,
-    1940
+    2292
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 22,
+   "order": 24,
    "mode": 0,
    "inputs": [
     {
@@ -283,14 +283,14 @@
    "type": "UNETLoader",
    "pos": [
     1020,
-    2832
+    3184
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 31,
+   "order": 33,
    "mode": 2,
    "inputs": [],
    "outputs": [
@@ -316,14 +316,14 @@
    "type": "ModelSamplingAuraFlow",
    "pos": [
     1480,
-    2832
+    3184
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 32,
+   "order": 34,
    "mode": 2,
    "inputs": [
     {
@@ -465,14 +465,14 @@
    "type": "CLIPLoader",
    "pos": [
     1020,
-    11402
+    11886
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 124,
+   "order": 126,
    "mode": 2,
    "inputs": [],
    "outputs": [
@@ -500,14 +500,14 @@
    "type": "UNETLoader",
    "pos": [
     1020,
-    11608
+    12092
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 134,
+   "order": 136,
    "mode": 2,
    "inputs": [],
    "outputs": [
@@ -533,14 +533,14 @@
    "type": "UNETLoader",
    "pos": [
     1020,
-    11786
+    12270
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 139,
+   "order": 141,
    "mode": 2,
    "inputs": [],
    "outputs": [
@@ -566,14 +566,14 @@
    "type": "VAELoader",
    "pos": [
     1020,
-    11964
+    12448
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 143,
+   "order": 145,
    "mode": 2,
    "inputs": [],
    "outputs": [
@@ -596,17 +596,62 @@
   },
   {
    "id": 18,
-   "type": "CLIPTextEncode",
+   "type": "LoadImage",
    "pos": [
     1020,
-    2118
+    1940
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 27,
+   "order": 21,
+   "mode": 2,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      91,
+      96,
+      102,
+      119,
+      137,
+      147,
+      160,
+      197
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "MASK",
+     "type": "MASK",
+     "links": [],
+     "slot_index": 1
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "LoadImage"
+   },
+   "widgets_values": [
+    "example.png"
+   ]
+  },
+  {
+   "id": 19,
+   "type": "CLIPTextEncode",
+   "pos": [
+    1020,
+    2470
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 29,
    "mode": 0,
    "inputs": [
     {
@@ -639,18 +684,18 @@
    "widgets_values": []
   },
   {
-   "id": 19,
+   "id": 20,
    "type": "CLIPTextEncode",
    "pos": [
     1020,
-    2262
+    2614
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 28,
+   "order": 30,
    "mode": 0,
    "inputs": [
     {
@@ -677,18 +722,18 @@
    ]
   },
   {
-   "id": 20,
+   "id": 21,
    "type": "EmptySD3LatentImage",
    "pos": [
     1020,
-    2412
+    2764
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 29,
+   "order": 31,
    "mode": 0,
    "inputs": [
     {
@@ -719,18 +764,18 @@
    ]
   },
   {
-   "id": 21,
+   "id": 22,
    "type": "KSampler",
    "pos": [
     1940,
-    1940
+    2292
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 23,
+   "order": 25,
    "mode": 0,
    "inputs": [
     {
@@ -778,18 +823,18 @@
    ]
   },
   {
-   "id": 22,
+   "id": 23,
    "type": "VAEDecode",
    "pos": [
     2400,
-    1940
+    2292
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 24,
+   "order": 26,
    "mode": 0,
    "inputs": [
     {
@@ -809,7 +854,7 @@
      "type": "IMAGE",
      "links": [
       12,
-      117
+      121
      ],
      "slot_index": 0
     }
@@ -820,18 +865,18 @@
    "widgets_values": []
   },
   {
-   "id": 23,
+   "id": 24,
    "type": "SaveImage",
    "pos": [
     2860,
-    1940
+    2292
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 25,
+   "order": 27,
    "mode": 0,
    "inputs": [
     {
@@ -856,18 +901,18 @@
    ]
   },
   {
-   "id": 24,
+   "id": 25,
    "type": "CLIPTextEncode",
    "pos": [
     1020,
-    3010
+    3362
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 37,
+   "order": 39,
    "mode": 2,
    "inputs": [
     {
@@ -900,18 +945,18 @@
    "widgets_values": []
   },
   {
-   "id": 25,
+   "id": 26,
    "type": "CLIPTextEncode",
    "pos": [
     1020,
-    3154
+    3506
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 38,
+   "order": 40,
    "mode": 2,
    "inputs": [
     {
@@ -938,18 +983,18 @@
    ]
   },
   {
-   "id": 26,
+   "id": 27,
    "type": "EmptySD3LatentImage",
    "pos": [
     1020,
-    3304
+    3656
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 39,
+   "order": 41,
    "mode": 2,
    "inputs": [
     {
@@ -980,18 +1025,18 @@
    ]
   },
   {
-   "id": 27,
+   "id": 28,
    "type": "KSampler",
    "pos": [
     1940,
-    2832
+    3184
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 33,
+   "order": 35,
    "mode": 2,
    "inputs": [
     {
@@ -1039,18 +1084,18 @@
    ]
   },
   {
-   "id": 28,
+   "id": 29,
    "type": "VAEDecode",
    "pos": [
     2400,
-    2832
+    3184
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 34,
+   "order": 36,
    "mode": 2,
    "inputs": [
     {
@@ -1070,7 +1115,7 @@
      "type": "IMAGE",
      "links": [
       20,
-      118
+      122
      ],
      "slot_index": 0
     }
@@ -1081,18 +1126,18 @@
    "widgets_values": []
   },
   {
-   "id": 29,
+   "id": 30,
    "type": "SaveImage",
    "pos": [
     2860,
-    2832
+    3184
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 35,
+   "order": 37,
    "mode": 2,
    "inputs": [
     {
@@ -1117,18 +1162,18 @@
    ]
   },
   {
-   "id": 30,
+   "id": 31,
    "type": "FluxKontextImageScale",
    "pos": [
     1020,
-    3724
+    4076
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 42,
+   "order": 44,
    "mode": 2,
    "inputs": [
     {
@@ -1145,7 +1190,7 @@
       23,
       24,
       25,
-      128
+      132
      ],
      "slot_index": 0
     }
@@ -1156,18 +1201,18 @@
    "widgets_values": []
   },
   {
-   "id": 31,
+   "id": 32,
    "type": "TextEncodeQwenImageEditPlus",
    "pos": [
     1480,
-    3724
+    4076
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 43,
+   "order": 45,
    "mode": 2,
    "inputs": [
     {
@@ -1220,18 +1265,18 @@
    "widgets_values": []
   },
   {
-   "id": 32,
+   "id": 33,
    "type": "TextEncodeQwenImageEditPlus",
    "pos": [
     1480,
-    3956
+    4308
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 50,
+   "order": 52,
    "mode": 2,
    "inputs": [
     {
@@ -1278,18 +1323,18 @@
    ]
   },
   {
-   "id": 33,
+   "id": 34,
    "type": "VAEEncode",
    "pos": [
     1480,
-    4194
+    4546
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 52,
+   "order": 54,
    "mode": 2,
    "inputs": [
     {
@@ -1308,7 +1353,7 @@
      "name": "LATENT",
      "type": "LATENT",
      "links": [
-      121
+      125
      ],
      "slot_index": 0
     }
@@ -1319,18 +1364,18 @@
    "widgets_values": []
   },
   {
-   "id": 34,
+   "id": 35,
    "type": "KSampler",
    "pos": [
     2400,
-    3724
+    4076
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 45,
+   "order": 47,
    "mode": 2,
    "inputs": [
     {
@@ -1378,18 +1423,18 @@
    ]
   },
   {
-   "id": 35,
+   "id": 36,
    "type": "VAEDecode",
    "pos": [
     2860,
-    3724
+    4076
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 46,
+   "order": 48,
    "mode": 2,
    "inputs": [
     {
@@ -1409,7 +1454,7 @@
      "type": "IMAGE",
      "links": [
       31,
-      119
+      123
      ],
      "slot_index": 0
     }
@@ -1420,18 +1465,18 @@
    "widgets_values": []
   },
   {
-   "id": 36,
+   "id": 37,
    "type": "SaveImage",
    "pos": [
     3320,
-    3724
+    4076
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 47,
+   "order": 49,
    "mode": 2,
    "inputs": [
     {
@@ -1456,18 +1501,18 @@
    ]
   },
   {
-   "id": 37,
+   "id": 38,
    "type": "FluxKontextImageScale",
    "pos": [
     1020,
-    4866
+    5262
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 58,
+   "order": 60,
    "mode": 2,
    "inputs": [
     {
@@ -1484,7 +1529,7 @@
       33,
       34,
       35,
-      136
+      141
      ],
      "slot_index": 0
     }
@@ -1495,18 +1540,18 @@
    "widgets_values": []
   },
   {
-   "id": 38,
+   "id": 39,
    "type": "TextEncodeQwenImageEditPlus",
    "pos": [
     1480,
-    4866
+    5262
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 59,
+   "order": 61,
    "mode": 2,
    "inputs": [
     {
@@ -1553,18 +1598,18 @@
    ]
   },
   {
-   "id": 39,
+   "id": 40,
    "type": "TextEncodeQwenImageEditPlus",
    "pos": [
     1480,
-    5104
+    5500
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 66,
+   "order": 68,
    "mode": 2,
    "inputs": [
     {
@@ -1611,18 +1656,18 @@
    ]
   },
   {
-   "id": 40,
+   "id": 41,
    "type": "VAEEncode",
    "pos": [
     1480,
-    5342
+    5738
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 68,
+   "order": 70,
    "mode": 2,
    "inputs": [
     {
@@ -1641,7 +1686,7 @@
      "name": "LATENT",
      "type": "LATENT",
      "links": [
-      123
+      127
      ],
      "slot_index": 0
     }
@@ -1652,18 +1697,18 @@
    "widgets_values": []
   },
   {
-   "id": 41,
+   "id": 42,
    "type": "KSampler",
    "pos": [
     2400,
-    4866
+    5262
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 61,
+   "order": 63,
    "mode": 2,
    "inputs": [
     {
@@ -1711,18 +1756,18 @@
    ]
   },
   {
-   "id": 42,
+   "id": 43,
    "type": "VAEDecode",
    "pos": [
     2860,
-    4866
+    5262
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 62,
+   "order": 64,
    "mode": 2,
    "inputs": [
     {
@@ -1742,7 +1787,7 @@
      "type": "IMAGE",
      "links": [
       41,
-      120
+      124
      ],
      "slot_index": 0
     }
@@ -1753,18 +1798,18 @@
    "widgets_values": []
   },
   {
-   "id": 43,
+   "id": 44,
    "type": "SaveImage",
    "pos": [
     3320,
-    4866
+    5262
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 63,
+   "order": 65,
    "mode": 2,
    "inputs": [
     {
@@ -1789,18 +1834,18 @@
    ]
   },
   {
-   "id": 44,
+   "id": 45,
    "type": "[Comfy3D] Load StableGen Trellis Pipeline",
    "pos": [
     1020,
-    6052
+    6492
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 74,
+   "order": 76,
    "mode": 2,
    "inputs": [],
    "outputs": [
@@ -1827,18 +1872,18 @@
    ]
   },
   {
-   "id": 45,
+   "id": 46,
    "type": "[Comfy3D] StableGen Trellis Image To 3D",
    "pos": [
     1480,
-    6052
+    6492
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 75,
+   "order": 77,
    "mode": 2,
    "inputs": [
     {
@@ -1858,7 +1903,7 @@
      "type": "MESH",
      "links": [
       44,
-      145
+      151
      ],
      "slot_index": 0
     }
@@ -1878,18 +1923,18 @@
    ]
   },
   {
-   "id": 46,
+   "id": 47,
    "type": "[Comfy3D] Decimate Mesh",
    "pos": [
     1940,
-    6052
+    6492
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 76,
+   "order": 78,
    "mode": 2,
    "inputs": [
     {
@@ -1918,18 +1963,18 @@
    ]
   },
   {
-   "id": 47,
+   "id": 48,
    "type": "[Comfy3D] Save 3D Mesh",
    "pos": [
     2400,
-    6052
+    6492
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 77,
+   "order": 79,
    "mode": 2,
    "inputs": [
     {
@@ -1943,12 +1988,12 @@
      "name": "save_path",
      "type": "STRING",
      "links": [
-      101,
-      105,
-      109,
-      160,
-      169,
-      178
+      104,
+      108,
+      112,
+      167,
+      176,
+      185
      ],
      "slot_index": 0
     }
@@ -1961,18 +2006,18 @@
    ]
   },
   {
-   "id": 48,
+   "id": 49,
    "type": "[Comfy3D] Load Hunyuan3D 21 ShapeGen Pipeline",
    "pos": [
     1020,
-    7326
+    7810
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 84,
+   "order": 86,
    "mode": 2,
    "inputs": [],
    "outputs": [
@@ -1993,18 +2038,18 @@
    ]
   },
   {
-   "id": 49,
+   "id": 50,
    "type": "[Comfy3D] Hunyuan3D 21 ShapeGen",
    "pos": [
     1480,
-    7326
+    7810
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 85,
+   "order": 87,
    "mode": 2,
    "inputs": [
     {
@@ -2024,7 +2069,7 @@
      "type": "MESH",
      "links": [
       48,
-      146
+      152
      ],
      "slot_index": 0
     },
@@ -2049,18 +2094,18 @@
    ]
   },
   {
-   "id": 50,
+   "id": 51,
    "type": "[Comfy3D] Decimate Mesh",
    "pos": [
     1940,
-    7326
+    7810
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 86,
+   "order": 88,
    "mode": 2,
    "inputs": [
     {
@@ -2089,18 +2134,18 @@
    ]
   },
   {
-   "id": 51,
+   "id": 52,
    "type": "[Comfy3D] Save 3D Mesh",
    "pos": [
     2400,
-    7326
+    7810
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 87,
+   "order": 89,
    "mode": 2,
    "inputs": [
     {
@@ -2114,12 +2159,12 @@
      "name": "save_path",
      "type": "STRING",
      "links": [
-      102,
-      106,
-      110,
-      161,
-      170,
-      179
+      105,
+      109,
+      113,
+      168,
+      177,
+      186
      ],
      "slot_index": 0
     }
@@ -2132,18 +2177,18 @@
    ]
   },
   {
-   "id": 52,
+   "id": 53,
    "type": "[Comfy3D] Load Hunyuan3D 21 TexGen Pipeline",
    "pos": [
     1020,
-    7846
+    8330
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 90,
+   "order": 92,
    "mode": 2,
    "inputs": [],
    "outputs": [
@@ -2166,18 +2211,18 @@
    ]
   },
   {
-   "id": 53,
+   "id": 54,
    "type": "[Comfy3D] Hunyuan3D 21 TexGen",
    "pos": [
     1480,
-    7846
+    8330
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 91,
+   "order": 93,
    "mode": 2,
    "inputs": [
     {
@@ -2205,8 +2250,8 @@
      "type": "MESH",
      "links": [
       53,
-      147,
-      157
+      153,
+      164
      ],
      "slot_index": 0
     }
@@ -2220,18 +2265,18 @@
    ]
   },
   {
-   "id": 54,
+   "id": 55,
    "type": "[Comfy3D] Save 3D Mesh",
    "pos": [
     1940,
-    7846
+    8330
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 92,
+   "order": 94,
    "mode": 2,
    "inputs": [
     {
@@ -2245,10 +2290,10 @@
      "name": "save_path",
      "type": "STRING",
      "links": [
-      104,
-      108,
-      168,
-      177
+      107,
+      111,
+      175,
+      184
      ],
      "slot_index": 0
     }
@@ -2261,18 +2306,18 @@
    ]
   },
   {
-   "id": 55,
+   "id": 56,
    "type": "[Comfy3D] Load 3D Mesh",
    "pos": [
     1020,
-    8988
+    9472
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 100,
+   "order": 102,
    "mode": 2,
    "inputs": [
     {
@@ -2290,7 +2335,7 @@
      "type": "MESH",
      "links": [
       55,
-      165
+      172
      ],
      "slot_index": 0
     }
@@ -2308,18 +2353,18 @@
    ]
   },
   {
-   "id": 56,
+   "id": 57,
    "type": "[Comfy3D] Stack Orbit Camera Poses",
    "pos": [
     1020,
-    9278
+    9762
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 106,
+   "order": 108,
    "mode": 2,
    "inputs": [],
    "outputs": [
@@ -2393,18 +2438,18 @@
    ]
   },
   {
-   "id": 57,
+   "id": 58,
    "type": "[Comfy3D] Mesh Orbit Renderer",
    "pos": [
     1480,
-    8988
+    9472
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 101,
+   "order": 103,
    "mode": 2,
    "inputs": [
     {
@@ -2470,18 +2515,18 @@
    ]
   },
   {
-   "id": 58,
+   "id": 59,
    "type": "SaveImage",
    "pos": [
     1940,
-    8988
+    9472
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 102,
+   "order": 104,
    "mode": 2,
    "inputs": [
     {
@@ -2506,18 +2551,18 @@
    ]
   },
   {
-   "id": 59,
+   "id": 60,
    "type": "MaskToImage",
    "pos": [
     1940,
-    9138
+    9622
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 104,
+   "order": 106,
    "mode": 2,
    "inputs": [
     {
@@ -2542,18 +2587,18 @@
    "widgets_values": []
   },
   {
-   "id": 60,
+   "id": 61,
    "type": "SaveImage",
    "pos": [
     2400,
-    8988
+    9472
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 103,
+   "order": 105,
    "mode": 2,
    "inputs": [
     {
@@ -2578,18 +2623,18 @@
    ]
   },
   {
-   "id": 61,
+   "id": 62,
    "type": "UniRigLoadMesh",
    "pos": [
     1020,
-    10216
+    10700
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 113,
+   "order": 115,
    "mode": 2,
    "inputs": [
     {
@@ -2607,7 +2652,7 @@
      "type": "TRIMESH",
      "links": [
       61,
-      174
+      181
      ],
      "slot_index": 0
     }
@@ -2620,18 +2665,18 @@
    ]
   },
   {
-   "id": 62,
+   "id": 63,
    "type": "UniRigLoadModel",
    "pos": [
     1020,
-    10366
+    10850
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 116,
+   "order": 118,
    "mode": 2,
    "inputs": [],
    "outputs": [
@@ -2653,18 +2698,18 @@
    ]
   },
   {
-   "id": 63,
+   "id": 64,
    "type": "UniRigAutoRig",
    "pos": [
     1480,
-    10216
+    10700
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 114,
+   "order": 116,
    "mode": 2,
    "inputs": [
     {
@@ -2699,18 +2744,18 @@
    ]
   },
   {
-   "id": 64,
+   "id": 65,
    "type": "UniRigPreviewRiggedMesh",
    "pos": [
     1940,
-    10216
+    10700
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 115,
+   "order": 117,
    "mode": 2,
    "inputs": [
     {
@@ -2729,18 +2774,18 @@
    "widgets_values": []
   },
   {
-   "id": 65,
+   "id": 66,
    "type": "LoraLoaderModelOnly",
    "pos": [
     1480,
-    11402
+    11886
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 125,
+   "order": 127,
    "mode": 2,
    "inputs": [
     {
@@ -2768,18 +2813,18 @@
    ]
   },
   {
-   "id": 66,
+   "id": 67,
    "type": "LoraLoaderModelOnly",
    "pos": [
     1480,
-    11580
+    12064
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 133,
+   "order": 135,
    "mode": 2,
    "inputs": [
     {
@@ -2807,18 +2852,18 @@
    ]
   },
   {
-   "id": 67,
+   "id": 68,
    "type": "ModelSamplingSD3",
    "pos": [
     1940,
-    11402
+    11886
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 126,
+   "order": 128,
    "mode": 2,
    "inputs": [
     {
@@ -2845,18 +2890,18 @@
    ]
   },
   {
-   "id": 68,
+   "id": 69,
    "type": "ModelSamplingSD3",
    "pos": [
     1940,
-    11552
+    12036
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 132,
+   "order": 134,
    "mode": 2,
    "inputs": [
     {
@@ -2883,18 +2928,18 @@
    ]
   },
   {
-   "id": 69,
+   "id": 70,
    "type": "CLIPTextEncode",
    "pos": [
     1480,
-    11758
+    12242
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 138,
+   "order": 140,
    "mode": 2,
    "inputs": [
     {
@@ -2927,18 +2972,18 @@
    "widgets_values": []
   },
   {
-   "id": 70,
+   "id": 71,
    "type": "CLIPTextEncode",
    "pos": [
     1480,
-    11902
+    12386
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 142,
+   "order": 143,
    "mode": 2,
    "inputs": [
     {
@@ -2965,18 +3010,18 @@
    ]
   },
   {
-   "id": 71,
+   "id": 72,
    "type": "WanImageToVideo",
    "pos": [
     1940,
-    11702
+    12186
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 137,
+   "order": 139,
    "mode": 2,
    "inputs": [
     {
@@ -3012,7 +3057,7 @@
      "links": [
       76,
       80,
-      183
+      190
      ],
      "slot_index": 0
     },
@@ -3045,18 +3090,18 @@
    ]
   },
   {
-   "id": 72,
+   "id": 73,
    "type": "KSamplerAdvanced",
    "pos": [
     2400,
-    11402
+    11886
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 127,
+   "order": 129,
    "mode": 2,
    "inputs": [
     {
@@ -3107,18 +3152,18 @@
    ]
   },
   {
-   "id": 73,
+   "id": 74,
    "type": "KSamplerAdvanced",
    "pos": [
     2860,
-    11402
+    11886
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 128,
+   "order": 130,
    "mode": 2,
    "inputs": [
     {
@@ -3169,18 +3214,18 @@
    ]
   },
   {
-   "id": 74,
+   "id": 75,
    "type": "VAEDecode",
    "pos": [
     3320,
-    11402
+    11886
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 129,
+   "order": 131,
    "mode": 2,
    "inputs": [
     {
@@ -3212,18 +3257,18 @@
    "widgets_values": []
   },
   {
-   "id": 75,
+   "id": 76,
    "type": "SaveWEBM",
    "pos": [
     3780,
-    11402
+    11886
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 130,
+   "order": 132,
    "mode": 2,
    "inputs": [
     {
@@ -3251,18 +3296,18 @@
    ]
   },
   {
-   "id": 76,
+   "id": 77,
    "type": "SaveAnimatedWEBP",
    "pos": [
     3780,
-    11636
+    12120
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 136,
+   "order": 137,
    "mode": 2,
    "inputs": [
     {
@@ -3291,18 +3336,18 @@
    ]
   },
   {
-   "id": 77,
+   "id": 78,
    "type": "ImageFromBatch",
    "pos": [
     3780,
-    11898
+    12382
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 141,
+   "order": 142,
    "mode": 2,
    "inputs": [
     {
@@ -3330,18 +3375,18 @@
    ]
   },
   {
-   "id": 78,
+   "id": 79,
    "type": "SaveImage",
    "pos": [
     4240,
-    11402
+    11886
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 131,
+   "order": 133,
    "mode": 2,
    "inputs": [
     {
@@ -3366,7 +3411,7 @@
    ]
   },
   {
-   "id": 79,
+   "id": 80,
    "type": "LoadImageOutput",
    "pos": [
     40,
@@ -3385,8 +3430,8 @@
      "name": "IMAGE",
      "type": "IMAGE",
      "links": [
-      91,
-      134
+      92,
+      139
      ],
      "slot_index": 0
     },
@@ -3406,18 +3451,18 @@
    "title": "2. Edit: image to edit"
   },
   {
-   "id": 80,
+   "id": 81,
    "type": "Any Switch (rgthree)",
    "pos": [
     40,
-    3724
+    4076
    ],
    "size": [
     400,
-    148
+    170
    ],
    "flags": {},
-   "order": 40,
+   "order": 42,
    "mode": 0,
    "inputs": [
     {
@@ -3437,6 +3482,11 @@
     },
     {
      "name": "any_04",
+     "type": "IMAGE",
+     "link": 92
+    },
+    {
+     "name": "any_05",
      "type": "IMAGE",
      "link": null
     }
@@ -3459,18 +3509,18 @@
    "title": "2. Edit takes"
   },
   {
-   "id": 81,
+   "id": 82,
    "type": "PrimitiveString",
    "pos": [
     40,
-    4576
+    4972
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 55,
+   "order": 57,
    "mode": 0,
    "inputs": [],
    "outputs": [
@@ -3478,8 +3528,8 @@
      "name": "STRING",
      "type": "STRING",
      "links": [
-      129,
-      133
+      133,
+      138
      ],
      "slot_index": 0
     }
@@ -3493,7 +3543,7 @@
    "title": "2. Edit takes: flag, active while its stage is off"
   },
   {
-   "id": 82,
+   "id": 83,
    "type": "LoadImageOutput",
    "pos": [
     480,
@@ -3512,8 +3562,8 @@
      "name": "IMAGE",
      "type": "IMAGE",
      "links": [
-      95,
-      143
+      97,
+      149
      ],
      "slot_index": 0
     },
@@ -3533,42 +3583,47 @@
    "title": "3. Simplify: image to simplify"
   },
   {
-   "id": 83,
+   "id": 84,
    "type": "Any Switch (rgthree)",
    "pos": [
     40,
-    4866
+    5262
    ],
    "size": [
     400,
-    170
+    192
    ],
    "flags": {},
-   "order": 56,
+   "order": 58,
    "mode": 0,
    "inputs": [
     {
      "name": "any_01",
      "type": "IMAGE",
-     "link": 92
+     "link": 93
     },
     {
      "name": "any_02",
      "type": "IMAGE",
-     "link": 93
+     "link": 94
     },
     {
      "name": "any_03",
      "type": "IMAGE",
-     "link": 94
+     "link": 95
     },
     {
      "name": "any_04",
      "type": "IMAGE",
-     "link": 95
+     "link": 96
     },
     {
      "name": "any_05",
+     "type": "IMAGE",
+     "link": 97
+    },
+    {
+     "name": "any_06",
      "type": "IMAGE",
      "link": null
     }
@@ -3591,18 +3646,18 @@
    "title": "3. Simplify takes"
   },
   {
-   "id": 84,
+   "id": 85,
    "type": "PrimitiveString",
    "pos": [
     40,
-    5762
+    6202
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 71,
+   "order": 73,
    "mode": 0,
    "inputs": [],
    "outputs": [
@@ -3610,8 +3665,8 @@
      "name": "STRING",
      "type": "STRING",
      "links": [
-      137,
-      142
+      142,
+      148
      ],
      "slot_index": 0
     }
@@ -3625,7 +3680,7 @@
    "title": "3. Simplify takes: flag, active while its stage is off"
   },
   {
-   "id": 85,
+   "id": 86,
    "type": "LoadImageOutput",
    "pos": [
     920,
@@ -3644,8 +3699,8 @@
      "name": "IMAGE",
      "type": "IMAGE",
      "links": [
-      100,
-      155
+      103,
+      162
      ],
      "slot_index": 0
     },
@@ -3665,47 +3720,52 @@
    "title": "4. Mesh and 5. Texture: concept image"
   },
   {
-   "id": 86,
+   "id": 87,
    "type": "Any Switch (rgthree)",
    "pos": [
     40,
-    6052
+    6492
    ],
    "size": [
     400,
-    192
+    214
    ],
    "flags": {},
-   "order": 72,
+   "order": 74,
    "mode": 0,
    "inputs": [
     {
      "name": "any_01",
      "type": "IMAGE",
-     "link": 96
+     "link": 98
     },
     {
      "name": "any_02",
      "type": "IMAGE",
-     "link": 97
+     "link": 99
     },
     {
      "name": "any_03",
      "type": "IMAGE",
-     "link": 98
+     "link": 100
     },
     {
      "name": "any_04",
      "type": "IMAGE",
-     "link": 99
+     "link": 101
     },
     {
      "name": "any_05",
      "type": "IMAGE",
-     "link": 100
+     "link": 102
     },
     {
      "name": "any_06",
+     "type": "IMAGE",
+     "link": 103
+    },
+    {
+     "name": "any_07",
      "type": "IMAGE",
      "link": null
     }
@@ -3730,18 +3790,18 @@
    "title": "4. Mesh and 5. Texture take"
   },
   {
-   "id": 87,
+   "id": 88,
    "type": "PrimitiveString",
    "pos": [
     40,
-    7036
+    7520
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 82,
+   "order": 84,
    "mode": 0,
    "inputs": [],
    "outputs": [
@@ -3749,8 +3809,8 @@
      "name": "STRING",
      "type": "STRING",
      "links": [
-      148,
-      154
+      154,
+      161
      ],
      "slot_index": 0
     }
@@ -3764,7 +3824,7 @@
    "title": "4. Mesh and 5. Texture take: flag, active while its stage is off"
   },
   {
-   "id": 88,
+   "id": 89,
    "type": "PrimitiveString",
    "pos": [
     1360,
@@ -3783,8 +3843,8 @@
      "name": "STRING",
      "type": "STRING",
      "links": [
-      103,
-      163
+      106,
+      170
      ],
      "slot_index": 0
     }
@@ -3798,34 +3858,34 @@
    "title": "5. Texture: mesh to texture (container path)"
   },
   {
-   "id": 89,
+   "id": 90,
    "type": "Any Switch (rgthree)",
    "pos": [
     40,
-    7846
+    8330
    ],
    "size": [
     400,
     148
    ],
    "flags": {},
-   "order": 88,
+   "order": 90,
    "mode": 0,
    "inputs": [
     {
      "name": "any_01",
      "type": "STRING",
-     "link": 101
+     "link": 104
     },
     {
      "name": "any_02",
      "type": "STRING",
-     "link": 102
+     "link": 105
     },
     {
      "name": "any_03",
      "type": "STRING",
-     "link": 103
+     "link": 106
     },
     {
      "name": "any_04",
@@ -3851,18 +3911,18 @@
    "title": "5. Texture mesh"
   },
   {
-   "id": 90,
+   "id": 91,
    "type": "PrimitiveString",
    "pos": [
     40,
-    8698
+    9182
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 97,
+   "order": 99,
    "mode": 0,
    "inputs": [],
    "outputs": [
@@ -3870,8 +3930,8 @@
      "name": "STRING",
      "type": "STRING",
      "links": [
-      158,
-      162
+      165,
+      169
      ],
      "slot_index": 0
     }
@@ -3885,7 +3945,7 @@
    "title": "5. Texture mesh: flag, active while its stage is off"
   },
   {
-   "id": 91,
+   "id": 92,
    "type": "PrimitiveString",
    "pos": [
     1800,
@@ -3904,8 +3964,8 @@
      "name": "STRING",
      "type": "STRING",
      "links": [
-      107,
-      172
+      110,
+      179
      ],
      "slot_index": 0
     }
@@ -3919,39 +3979,39 @@
    "title": "6. Turntable: mesh to render (container path)"
   },
   {
-   "id": 92,
+   "id": 93,
    "type": "Any Switch (rgthree)",
    "pos": [
     40,
-    8988
+    9472
    ],
    "size": [
     400,
     170
    ],
    "flags": {},
-   "order": 98,
+   "order": 100,
    "mode": 0,
    "inputs": [
     {
      "name": "any_01",
      "type": "STRING",
-     "link": 104
+     "link": 107
     },
     {
      "name": "any_02",
      "type": "STRING",
-     "link": 105
+     "link": 108
     },
     {
      "name": "any_03",
      "type": "STRING",
-     "link": 106
+     "link": 109
     },
     {
      "name": "any_04",
      "type": "STRING",
-     "link": 107
+     "link": 110
     },
     {
      "name": "any_05",
@@ -3977,18 +4037,18 @@
    "title": "6. Turntable mesh"
   },
   {
-   "id": 93,
+   "id": 94,
    "type": "PrimitiveString",
    "pos": [
     40,
-    9884
+    10368
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 110,
+   "order": 112,
    "mode": 0,
    "inputs": [],
    "outputs": [
@@ -3996,8 +4056,8 @@
      "name": "STRING",
      "type": "STRING",
      "links": [
-      166,
-      171
+      173,
+      178
      ],
      "slot_index": 0
     }
@@ -4011,7 +4071,7 @@
    "title": "6. Turntable mesh: flag, active while its stage is off"
   },
   {
-   "id": 94,
+   "id": 95,
    "type": "PrimitiveString",
    "pos": [
     2240,
@@ -4030,8 +4090,8 @@
      "name": "STRING",
      "type": "STRING",
      "links": [
-      111,
-      181
+      114,
+      188
      ],
      "slot_index": 0
     }
@@ -4045,39 +4105,39 @@
    "title": "7. Rig: mesh to rig (container path)"
   },
   {
-   "id": 95,
+   "id": 96,
    "type": "Any Switch (rgthree)",
    "pos": [
     40,
-    10216
+    10700
    ],
    "size": [
     400,
     170
    ],
    "flags": {},
-   "order": 111,
+   "order": 113,
    "mode": 0,
    "inputs": [
     {
      "name": "any_01",
      "type": "STRING",
-     "link": 108
+     "link": 111
     },
     {
      "name": "any_02",
      "type": "STRING",
-     "link": 109
+     "link": 112
     },
     {
      "name": "any_03",
      "type": "STRING",
-     "link": 110
+     "link": 113
     },
     {
      "name": "any_04",
      "type": "STRING",
-     "link": 111
+     "link": 114
     },
     {
      "name": "any_05",
@@ -4103,18 +4163,18 @@
    "title": "7. Rig mesh"
   },
   {
-   "id": 96,
+   "id": 97,
    "type": "PrimitiveString",
    "pos": [
     40,
-    11112
+    11596
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 121,
+   "order": 123,
    "mode": 0,
    "inputs": [],
    "outputs": [
@@ -4122,8 +4182,8 @@
      "name": "STRING",
      "type": "STRING",
      "links": [
-      175,
-      180
+      182,
+      187
      ],
      "slot_index": 0
     }
@@ -4137,7 +4197,7 @@
    "title": "7. Rig mesh: flag, active while its stage is off"
   },
   {
-   "id": 97,
+   "id": 98,
    "type": "LoadImageOutput",
    "pos": [
     2680,
@@ -4156,8 +4216,8 @@
      "name": "IMAGE",
      "type": "IMAGE",
      "links": [
-      116,
-      191
+      120,
+      199
      ],
      "slot_index": 0
     },
@@ -4177,47 +4237,52 @@
    "title": "8. Animate: start frame"
   },
   {
-   "id": 98,
+   "id": 99,
    "type": "Any Switch (rgthree)",
    "pos": [
     40,
-    11402
+    11886
    ],
    "size": [
     400,
-    192
+    214
    ],
    "flags": {},
-   "order": 122,
+   "order": 124,
    "mode": 0,
    "inputs": [
     {
      "name": "any_01",
      "type": "IMAGE",
-     "link": 112
+     "link": 115
     },
     {
      "name": "any_02",
      "type": "IMAGE",
-     "link": 113
+     "link": 116
     },
     {
      "name": "any_03",
      "type": "IMAGE",
-     "link": 114
+     "link": 117
     },
     {
      "name": "any_04",
      "type": "IMAGE",
-     "link": 115
+     "link": 118
     },
     {
      "name": "any_05",
      "type": "IMAGE",
-     "link": 116
+     "link": 119
     },
     {
      "name": "any_06",
+     "type": "IMAGE",
+     "link": 120
+    },
+    {
+     "name": "any_07",
      "type": "IMAGE",
      "link": null
     }
@@ -4240,18 +4305,18 @@
    "title": "8. Animate takes"
   },
   {
-   "id": 99,
+   "id": 100,
    "type": "PrimitiveString",
    "pos": [
     40,
-    12342
+    12870
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 146,
+   "order": 148,
    "mode": 0,
    "inputs": [],
    "outputs": [
@@ -4259,8 +4324,8 @@
      "name": "STRING",
      "type": "STRING",
      "links": [
-      184,
-      190
+      191,
+      198
      ],
      "slot_index": 0
     }
@@ -4274,24 +4339,24 @@
    "title": "8. Animate takes: flag, active while its stage is off"
   },
   {
-   "id": 100,
+   "id": 101,
    "type": "Image Filter",
    "pos": [
     2860,
-    2090
+    2442
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 26,
+   "order": 28,
    "mode": 0,
    "inputs": [
     {
      "name": "images",
      "type": "IMAGE",
-     "link": 117
+     "link": 121
     },
     {
      "name": "latents",
@@ -4310,13 +4375,13 @@
      "type": "IMAGE",
      "links": [
       90,
-      94,
-      99,
-      115,
-      132,
-      141,
-      153,
-      189
+      95,
+      101,
+      118,
+      136,
+      146,
+      159,
+      196
      ],
      "slot_index": 0
     },
@@ -4376,24 +4441,24 @@
    "title": "1. Concept, fast: pick the take"
   },
   {
-   "id": 101,
+   "id": 102,
    "type": "Image Filter",
    "pos": [
     2860,
-    2982
+    3334
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 36,
+   "order": 38,
    "mode": 2,
    "inputs": [
     {
      "name": "images",
      "type": "IMAGE",
-     "link": 118
+     "link": 122
     },
     {
      "name": "latents",
@@ -4412,13 +4477,13 @@
      "type": "IMAGE",
      "links": [
       89,
-      93,
-      98,
-      114,
-      131,
-      140,
-      152,
-      188
+      94,
+      100,
+      117,
+      135,
+      145,
+      158,
+      195
      ],
      "slot_index": 0
     },
@@ -4478,24 +4543,24 @@
    "title": "1. Concept, full: pick the take"
   },
   {
-   "id": 102,
+   "id": 103,
    "type": "Image Filter",
    "pos": [
     3320,
-    3874
+    4226
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 48,
+   "order": 50,
    "mode": 2,
    "inputs": [
     {
      "name": "images",
      "type": "IMAGE",
-     "link": 119
+     "link": 123
     },
     {
      "name": "latents",
@@ -4513,12 +4578,12 @@
      "name": "images",
      "type": "IMAGE",
      "links": [
-      92,
-      97,
-      113,
-      139,
-      151,
-      187
+      93,
+      99,
+      116,
+      144,
+      157,
+      194
      ],
      "slot_index": 0
     },
@@ -4578,24 +4643,24 @@
    "title": "2. Edit: pick the take"
   },
   {
-   "id": 103,
+   "id": 104,
    "type": "Image Filter",
    "pos": [
     3320,
-    5016
+    5412
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 64,
+   "order": 66,
    "mode": 2,
    "inputs": [
     {
      "name": "images",
      "type": "IMAGE",
-     "link": 120
+     "link": 124
     },
     {
      "name": "latents",
@@ -4613,10 +4678,10 @@
      "name": "images",
      "type": "IMAGE",
      "links": [
-      96,
-      112,
-      150,
-      186
+      98,
+      115,
+      156,
+      193
      ],
      "slot_index": 0
     },
@@ -4676,24 +4741,24 @@
    "title": "3. Simplify: pick the take"
   },
   {
-   "id": 104,
+   "id": 105,
    "type": "RepeatLatentBatch",
    "pos": [
     1940,
-    3724
+    4076
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 44,
+   "order": 46,
    "mode": 2,
    "inputs": [
     {
      "name": "samples",
      "type": "LATENT",
-     "link": 121
+     "link": 125
     },
     {
      "name": "amount",
@@ -4701,7 +4766,7 @@
      "widget": {
       "name": "amount"
      },
-     "link": 122
+     "link": 126
     }
    ],
    "outputs": [
@@ -4720,24 +4785,24 @@
    "widgets_values": []
   },
   {
-   "id": 105,
+   "id": 106,
    "type": "RepeatLatentBatch",
    "pos": [
     1940,
-    4866
+    5262
    ],
    "size": [
     400,
     120
    ],
    "flags": {},
-   "order": 60,
+   "order": 62,
    "mode": 2,
    "inputs": [
     {
      "name": "samples",
      "type": "LATENT",
-     "link": 123
+     "link": 127
     },
     {
      "name": "amount",
@@ -4745,7 +4810,7 @@
      "widget": {
       "name": "amount"
      },
-     "link": 124
+     "link": 128
     }
    ],
    "outputs": [
@@ -4764,7 +4829,7 @@
    "widgets_values": []
   },
   {
-   "id": 106,
+   "id": 107,
    "type": "Anything Everywhere",
    "pos": [
     2240,
@@ -4785,61 +4850,7 @@
      "name": "anything",
      "shape": 7,
      "type": "CLIP",
-     "link": 125
-    },
-    {
-     "label": "anything",
-     "name": "anything2",
-     "type": "*",
-     "link": null
-    }
-   ],
-   "outputs": [],
-   "properties": {
-    "ue_properties": {
-     "version": "7.8",
-     "group_restricted": 0,
-     "color_restricted": 0,
-     "widget_ue_connectable": {},
-     "input_ue_unconnectable": {},
-     "title_regex": null,
-     "input_regex": null,
-     "group_regex": null,
-     "title_regex_invert": false,
-     "input_regex_invert": false,
-     "group_regex_invert": false,
-     "repeated_type_rule": 0,
-     "apply_to_unrepeated": 0,
-     "string_to_combo": 0,
-     "send_to_any": 0,
-     "next_input_index": 3
-    },
-    "Node name for S&R": "Anything Everywhere"
-   }
-  },
-  {
-   "id": 107,
-   "type": "Anything Everywhere",
-   "pos": [
-    2240,
-    354
-   ],
-   "size": [
-    400,
-    60
-   ],
-   "flags": {},
-   "order": 8,
-   "mode": 0,
-   "title": "VAE to every stage",
-   "inputs": [
-    {
-     "label": "VAE",
-     "localized_name": "anything",
-     "name": "anything",
-     "shape": 7,
-     "type": "VAE",
-     "link": 126
+     "link": 129
     },
     {
      "label": "anything",
@@ -4873,10 +4884,64 @@
   },
   {
    "id": 108,
+   "type": "Anything Everywhere",
+   "pos": [
+    2240,
+    354
+   ],
+   "size": [
+    400,
+    60
+   ],
+   "flags": {},
+   "order": 8,
+   "mode": 0,
+   "title": "VAE to every stage",
+   "inputs": [
+    {
+     "label": "VAE",
+     "localized_name": "anything",
+     "name": "anything",
+     "shape": 7,
+     "type": "VAE",
+     "link": 130
+    },
+    {
+     "label": "anything",
+     "name": "anything2",
+     "type": "*",
+     "link": null
+    }
+   ],
+   "outputs": [],
+   "properties": {
+    "ue_properties": {
+     "version": "7.8",
+     "group_restricted": 0,
+     "color_restricted": 0,
+     "widget_ue_connectable": {},
+     "input_ue_unconnectable": {},
+     "title_regex": null,
+     "input_regex": null,
+     "group_regex": null,
+     "title_regex_invert": false,
+     "input_regex_invert": false,
+     "group_regex_invert": false,
+     "repeated_type_rule": 0,
+     "apply_to_unrepeated": 0,
+     "string_to_combo": 0,
+     "send_to_any": 0,
+     "next_input_index": 3
+    },
+    "Node name for S&R": "Anything Everywhere"
+   }
+  },
+  {
+   "id": 109,
    "type": "Mute / Bypass Relay (rgthree)",
    "pos": [
     40,
-    4266
+    4662
    ],
    "size": [
     400,
@@ -4885,7 +4950,7 @@
    "flags": {
     "collapsed": false
    },
-   "order": 53,
+   "order": 55,
    "mode": 0,
    "title": "2. Edit takes: flag on while every stage reading it is off",
    "inputs": [
@@ -4893,7 +4958,7 @@
      "dir": 3,
      "name": "edit",
      "type": "*",
-     "link": 128
+     "link": 132
     },
     {
      "dir": 3,
@@ -4909,7 +4974,7 @@
      "shape": 5,
      "type": "_NODE_REPEATER_",
      "links": [
-      127
+      131
      ],
      "color_on": "#Fc0",
      "color_off": "#a80"
@@ -4923,18 +4988,18 @@
    "widgets_values": null
   },
   {
-   "id": 109,
+   "id": 110,
    "type": "Mute / Bypass Repeater (rgthree)",
    "pos": [
     40,
-    4410
+    4806
    ],
    "size": [
     400,
     90
    ],
    "flags": {},
-   "order": 54,
+   "order": 56,
    "mode": 0,
    "title": "2. Edit takes: flag switch",
    "inputs": [
@@ -4942,58 +5007,11 @@
      "dir": 3,
      "name": "Mute / Bypass Relay (rgthree)",
      "type": "*",
-     "link": 127
-    },
-    {
-     "dir": 3,
-     "name": "flag",
-     "type": "*",
-     "link": 129
-    },
-    {
-     "dir": 3,
-     "name": "",
-     "type": "*",
-     "link": null
-    }
-   ],
-   "outputs": [],
-   "properties": {},
-   "widgets_values": null
-  },
-  {
-   "id": 110,
-   "type": "Mute / Bypass Relay (rgthree)",
-   "pos": [
-    40,
-    3912
-   ],
-   "size": [
-    400,
-    148
-   ],
-   "flags": {
-    "collapsed": false
-   },
-   "order": 49,
-   "mode": 0,
-   "title": "2. Edit takes: picker off while a source is on or its stage is off",
-   "inputs": [
-    {
-     "dir": 3,
-     "name": "concept",
-     "type": "*",
      "link": 131
     },
     {
      "dir": 3,
-     "name": "concept_fast",
-     "type": "*",
-     "link": 132
-    },
-    {
-     "dir": 3,
-     "name": "stage off",
+     "name": "flag",
      "type": "*",
      "link": 133
     },
@@ -5004,161 +5022,16 @@
      "link": null
     }
    ],
-   "outputs": [
-    {
-     "name": "REPEATER",
-     "dir": 4,
-     "shape": 5,
-     "type": "_NODE_REPEATER_",
-     "links": [
-      130
-     ],
-     "color_on": "#Fc0",
-     "color_off": "#a80"
-    }
-   ],
-   "properties": {
-    "on_muted_inputs": "ACTIVE",
-    "on_bypassed_inputs": "ACTIVE",
-    "on_any_active_inputs": "MUTE"
-   },
+   "outputs": [],
+   "properties": {},
    "widgets_values": null
   },
   {
    "id": 111,
-   "type": "Mute / Bypass Repeater (rgthree)",
-   "pos": [
-    40,
-    4100
-   ],
-   "size": [
-    400,
-    90
-   ],
-   "flags": {},
-   "order": 51,
-   "mode": 0,
-   "title": "2. Edit takes: picker switch",
-   "inputs": [
-    {
-     "dir": 3,
-     "name": "Mute / Bypass Relay (rgthree)",
-     "type": "*",
-     "link": 130
-    },
-    {
-     "dir": 3,
-     "name": "picker",
-     "type": "*",
-     "link": 134
-    },
-    {
-     "dir": 3,
-     "name": "",
-     "type": "*",
-     "link": null
-    }
-   ],
-   "outputs": [],
-   "properties": {},
-   "widgets_values": null
-  },
-  {
-   "id": 112,
    "type": "Mute / Bypass Relay (rgthree)",
    "pos": [
     40,
-    5452
-   ],
-   "size": [
-    400,
-    104
-   ],
-   "flags": {
-    "collapsed": false
-   },
-   "order": 69,
-   "mode": 0,
-   "title": "3. Simplify takes: flag on while every stage reading it is off",
-   "inputs": [
-    {
-     "dir": 3,
-     "name": "simplify",
-     "type": "*",
-     "link": 136
-    },
-    {
-     "dir": 3,
-     "name": "",
-     "type": "*",
-     "link": null
-    }
-   ],
-   "outputs": [
-    {
-     "name": "REPEATER",
-     "dir": 4,
-     "shape": 5,
-     "type": "_NODE_REPEATER_",
-     "links": [
-      135
-     ],
-     "color_on": "#Fc0",
-     "color_off": "#a80"
-    }
-   ],
-   "properties": {
-    "on_muted_inputs": "ACTIVE",
-    "on_bypassed_inputs": "ACTIVE",
-    "on_any_active_inputs": "MUTE"
-   },
-   "widgets_values": null
-  },
-  {
-   "id": 113,
-   "type": "Mute / Bypass Repeater (rgthree)",
-   "pos": [
-    40,
-    5596
-   ],
-   "size": [
-    400,
-    90
-   ],
-   "flags": {},
-   "order": 70,
-   "mode": 0,
-   "title": "3. Simplify takes: flag switch",
-   "inputs": [
-    {
-     "dir": 3,
-     "name": "Mute / Bypass Relay (rgthree)",
-     "type": "*",
-     "link": 135
-    },
-    {
-     "dir": 3,
-     "name": "flag",
-     "type": "*",
-     "link": 137
-    },
-    {
-     "dir": 3,
-     "name": "",
-     "type": "*",
-     "link": null
-    }
-   ],
-   "outputs": [],
-   "properties": {},
-   "widgets_values": null
-  },
-  {
-   "id": 114,
-   "type": "Mute / Bypass Relay (rgthree)",
-   "pos": [
-    40,
-    5076
+    4286
    ],
    "size": [
     400,
@@ -5167,31 +5040,176 @@
    "flags": {
     "collapsed": false
    },
-   "order": 65,
+   "order": 51,
    "mode": 0,
-   "title": "3. Simplify takes: picker off while a source is on or its stage is off",
+   "title": "2. Edit takes: picker off while a source is on or its stage is off",
    "inputs": [
-    {
-     "dir": 3,
-     "name": "edit",
-     "type": "*",
-     "link": 139
-    },
     {
      "dir": 3,
      "name": "concept",
      "type": "*",
-     "link": 140
+     "link": 135
     },
     {
      "dir": 3,
      "name": "concept_fast",
      "type": "*",
-     "link": 141
+     "link": 136
+    },
+    {
+     "dir": 3,
+     "name": "own_image",
+     "type": "*",
+     "link": 137
     },
     {
      "dir": 3,
      "name": "stage off",
+     "type": "*",
+     "link": 138
+    },
+    {
+     "dir": 3,
+     "name": "",
+     "type": "*",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "REPEATER",
+     "dir": 4,
+     "shape": 5,
+     "type": "_NODE_REPEATER_",
+     "links": [
+      134
+     ],
+     "color_on": "#Fc0",
+     "color_off": "#a80"
+    }
+   ],
+   "properties": {
+    "on_muted_inputs": "ACTIVE",
+    "on_bypassed_inputs": "ACTIVE",
+    "on_any_active_inputs": "MUTE"
+   },
+   "widgets_values": null
+  },
+  {
+   "id": 112,
+   "type": "Mute / Bypass Repeater (rgthree)",
+   "pos": [
+    40,
+    4496
+   ],
+   "size": [
+    400,
+    90
+   ],
+   "flags": {},
+   "order": 53,
+   "mode": 0,
+   "title": "2. Edit takes: picker switch",
+   "inputs": [
+    {
+     "dir": 3,
+     "name": "Mute / Bypass Relay (rgthree)",
+     "type": "*",
+     "link": 134
+    },
+    {
+     "dir": 3,
+     "name": "picker",
+     "type": "*",
+     "link": 139
+    },
+    {
+     "dir": 3,
+     "name": "",
+     "type": "*",
+     "link": null
+    }
+   ],
+   "outputs": [],
+   "properties": {},
+   "widgets_values": null
+  },
+  {
+   "id": 113,
+   "type": "Mute / Bypass Relay (rgthree)",
+   "pos": [
+    40,
+    5892
+   ],
+   "size": [
+    400,
+    104
+   ],
+   "flags": {
+    "collapsed": false
+   },
+   "order": 71,
+   "mode": 0,
+   "title": "3. Simplify takes: flag on while every stage reading it is off",
+   "inputs": [
+    {
+     "dir": 3,
+     "name": "simplify",
+     "type": "*",
+     "link": 141
+    },
+    {
+     "dir": 3,
+     "name": "",
+     "type": "*",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "REPEATER",
+     "dir": 4,
+     "shape": 5,
+     "type": "_NODE_REPEATER_",
+     "links": [
+      140
+     ],
+     "color_on": "#Fc0",
+     "color_off": "#a80"
+    }
+   ],
+   "properties": {
+    "on_muted_inputs": "ACTIVE",
+    "on_bypassed_inputs": "ACTIVE",
+    "on_any_active_inputs": "MUTE"
+   },
+   "widgets_values": null
+  },
+  {
+   "id": 114,
+   "type": "Mute / Bypass Repeater (rgthree)",
+   "pos": [
+    40,
+    6036
+   ],
+   "size": [
+    400,
+    90
+   ],
+   "flags": {},
+   "order": 72,
+   "mode": 0,
+   "title": "3. Simplify takes: flag switch",
+   "inputs": [
+    {
+     "dir": 3,
+     "name": "Mute / Bypass Relay (rgthree)",
+     "type": "*",
+     "link": 140
+    },
+    {
+     "dir": 3,
+     "name": "flag",
      "type": "*",
      "link": 142
     },
@@ -5202,153 +5220,55 @@
      "link": null
     }
    ],
-   "outputs": [
-    {
-     "name": "REPEATER",
-     "dir": 4,
-     "shape": 5,
-     "type": "_NODE_REPEATER_",
-     "links": [
-      138
-     ],
-     "color_on": "#Fc0",
-     "color_off": "#a80"
-    }
-   ],
-   "properties": {
-    "on_muted_inputs": "ACTIVE",
-    "on_bypassed_inputs": "ACTIVE",
-    "on_any_active_inputs": "MUTE"
-   },
-   "widgets_values": null
-  },
-  {
-   "id": 115,
-   "type": "Mute / Bypass Repeater (rgthree)",
-   "pos": [
-    40,
-    5286
-   ],
-   "size": [
-    400,
-    90
-   ],
-   "flags": {},
-   "order": 67,
-   "mode": 0,
-   "title": "3. Simplify takes: picker switch",
-   "inputs": [
-    {
-     "dir": 3,
-     "name": "Mute / Bypass Relay (rgthree)",
-     "type": "*",
-     "link": 138
-    },
-    {
-     "dir": 3,
-     "name": "picker",
-     "type": "*",
-     "link": 143
-    },
-    {
-     "dir": 3,
-     "name": "",
-     "type": "*",
-     "link": null
-    }
-   ],
    "outputs": [],
    "properties": {},
    "widgets_values": null
   },
   {
-   "id": 116,
+   "id": 115,
    "type": "Mute / Bypass Relay (rgthree)",
    "pos": [
     40,
-    6682
+    5494
    ],
    "size": [
     400,
-    148
+    192
    ],
    "flags": {
     "collapsed": false
    },
-   "order": 80,
+   "order": 67,
    "mode": 0,
-   "title": "4. Mesh and 5. Texture take: flag on while every stage reading it is off",
+   "title": "3. Simplify takes: picker off while a source is on or its stage is off",
    "inputs": [
     {
      "dir": 3,
-     "name": "mesh_trellis",
-     "type": "*",
-     "link": 145
-    },
-    {
-     "dir": 3,
-     "name": "mesh_hunyuan",
-     "type": "*",
-     "link": 146
-    },
-    {
-     "dir": 3,
-     "name": "texture",
-     "type": "*",
-     "link": 147
-    },
-    {
-     "dir": 3,
-     "name": "",
-     "type": "*",
-     "link": null
-    }
-   ],
-   "outputs": [
-    {
-     "name": "REPEATER",
-     "dir": 4,
-     "shape": 5,
-     "type": "_NODE_REPEATER_",
-     "links": [
-      144
-     ],
-     "color_on": "#Fc0",
-     "color_off": "#a80"
-    }
-   ],
-   "properties": {
-    "on_muted_inputs": "ACTIVE",
-    "on_bypassed_inputs": "ACTIVE",
-    "on_any_active_inputs": "MUTE"
-   },
-   "widgets_values": null
-  },
-  {
-   "id": 117,
-   "type": "Mute / Bypass Repeater (rgthree)",
-   "pos": [
-    40,
-    6870
-   ],
-   "size": [
-    400,
-    90
-   ],
-   "flags": {},
-   "order": 81,
-   "mode": 0,
-   "title": "4. Mesh and 5. Texture take: flag switch",
-   "inputs": [
-    {
-     "dir": 3,
-     "name": "Mute / Bypass Relay (rgthree)",
+     "name": "edit",
      "type": "*",
      "link": 144
     },
     {
      "dir": 3,
-     "name": "flag",
+     "name": "concept",
+     "type": "*",
+     "link": 145
+    },
+    {
+     "dir": 3,
+     "name": "concept_fast",
+     "type": "*",
+     "link": 146
+    },
+    {
+     "dir": 3,
+     "name": "own_image",
+     "type": "*",
+     "link": 147
+    },
+    {
+     "dir": 3,
+     "name": "stage off",
      "type": "*",
      "link": 148
     },
@@ -5359,55 +5279,153 @@
      "link": null
     }
    ],
+   "outputs": [
+    {
+     "name": "REPEATER",
+     "dir": 4,
+     "shape": 5,
+     "type": "_NODE_REPEATER_",
+     "links": [
+      143
+     ],
+     "color_on": "#Fc0",
+     "color_off": "#a80"
+    }
+   ],
+   "properties": {
+    "on_muted_inputs": "ACTIVE",
+    "on_bypassed_inputs": "ACTIVE",
+    "on_any_active_inputs": "MUTE"
+   },
+   "widgets_values": null
+  },
+  {
+   "id": 116,
+   "type": "Mute / Bypass Repeater (rgthree)",
+   "pos": [
+    40,
+    5726
+   ],
+   "size": [
+    400,
+    90
+   ],
+   "flags": {},
+   "order": 69,
+   "mode": 0,
+   "title": "3. Simplify takes: picker switch",
+   "inputs": [
+    {
+     "dir": 3,
+     "name": "Mute / Bypass Relay (rgthree)",
+     "type": "*",
+     "link": 143
+    },
+    {
+     "dir": 3,
+     "name": "picker",
+     "type": "*",
+     "link": 149
+    },
+    {
+     "dir": 3,
+     "name": "",
+     "type": "*",
+     "link": null
+    }
+   ],
    "outputs": [],
    "properties": {},
    "widgets_values": null
   },
   {
-   "id": 118,
+   "id": 117,
    "type": "Mute / Bypass Relay (rgthree)",
    "pos": [
     40,
-    6284
+    7166
    ],
    "size": [
     400,
-    192
+    148
    ],
    "flags": {
     "collapsed": false
    },
-   "order": 78,
+   "order": 82,
    "mode": 0,
-   "title": "4. Mesh and 5. Texture take: picker off while a source is on or its stage is off",
+   "title": "4. Mesh and 5. Texture take: flag on while every stage reading it is off",
    "inputs": [
     {
      "dir": 3,
-     "name": "simplify",
-     "type": "*",
-     "link": 150
-    },
-    {
-     "dir": 3,
-     "name": "edit",
+     "name": "mesh_trellis",
      "type": "*",
      "link": 151
     },
     {
      "dir": 3,
-     "name": "concept",
+     "name": "mesh_hunyuan",
      "type": "*",
      "link": 152
     },
     {
      "dir": 3,
-     "name": "concept_fast",
+     "name": "texture",
      "type": "*",
      "link": 153
     },
     {
      "dir": 3,
-     "name": "stage off",
+     "name": "",
+     "type": "*",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "REPEATER",
+     "dir": 4,
+     "shape": 5,
+     "type": "_NODE_REPEATER_",
+     "links": [
+      150
+     ],
+     "color_on": "#Fc0",
+     "color_off": "#a80"
+    }
+   ],
+   "properties": {
+    "on_muted_inputs": "ACTIVE",
+    "on_bypassed_inputs": "ACTIVE",
+    "on_any_active_inputs": "MUTE"
+   },
+   "widgets_values": null
+  },
+  {
+   "id": 118,
+   "type": "Mute / Bypass Repeater (rgthree)",
+   "pos": [
+    40,
+    7354
+   ],
+   "size": [
+    400,
+    90
+   ],
+   "flags": {},
+   "order": 83,
+   "mode": 0,
+   "title": "4. Mesh and 5. Texture take: flag switch",
+   "inputs": [
+    {
+     "dir": 3,
+     "name": "Mute / Bypass Relay (rgthree)",
+     "type": "*",
+     "link": 150
+    },
+    {
+     "dir": 3,
+     "name": "flag",
      "type": "*",
      "link": 154
     },
@@ -5418,6 +5436,71 @@
      "link": null
     }
    ],
+   "outputs": [],
+   "properties": {},
+   "widgets_values": null
+  },
+  {
+   "id": 119,
+   "type": "Mute / Bypass Relay (rgthree)",
+   "pos": [
+    40,
+    6746
+   ],
+   "size": [
+    400,
+    214
+   ],
+   "flags": {
+    "collapsed": false
+   },
+   "order": 80,
+   "mode": 0,
+   "title": "4. Mesh and 5. Texture take: picker off while a source is on or its stage is off",
+   "inputs": [
+    {
+     "dir": 3,
+     "name": "simplify",
+     "type": "*",
+     "link": 156
+    },
+    {
+     "dir": 3,
+     "name": "edit",
+     "type": "*",
+     "link": 157
+    },
+    {
+     "dir": 3,
+     "name": "concept",
+     "type": "*",
+     "link": 158
+    },
+    {
+     "dir": 3,
+     "name": "concept_fast",
+     "type": "*",
+     "link": 159
+    },
+    {
+     "dir": 3,
+     "name": "own_image",
+     "type": "*",
+     "link": 160
+    },
+    {
+     "dir": 3,
+     "name": "stage off",
+     "type": "*",
+     "link": 161
+    },
+    {
+     "dir": 3,
+     "name": "",
+     "type": "*",
+     "link": null
+    }
+   ],
    "outputs": [
     {
      "name": "REPEATER",
@@ -5425,7 +5508,7 @@
      "shape": 5,
      "type": "_NODE_REPEATER_",
      "links": [
-      149
+      155
      ],
      "color_on": "#Fc0",
      "color_off": "#a80"
@@ -5439,18 +5522,18 @@
    "widgets_values": null
   },
   {
-   "id": 119,
+   "id": 120,
    "type": "Mute / Bypass Repeater (rgthree)",
    "pos": [
     40,
-    6516
+    7000
    ],
    "size": [
     400,
     90
    ],
    "flags": {},
-   "order": 79,
+   "order": 81,
    "mode": 0,
    "title": "4. Mesh and 5. Texture take: picker switch",
    "inputs": [
@@ -5458,148 +5541,11 @@
      "dir": 3,
      "name": "Mute / Bypass Relay (rgthree)",
      "type": "*",
-     "link": 149
-    },
-    {
-     "dir": 3,
-     "name": "picker",
-     "type": "*",
      "link": 155
     },
     {
      "dir": 3,
-     "name": "",
-     "type": "*",
-     "link": null
-    }
-   ],
-   "outputs": [],
-   "properties": {},
-   "widgets_values": null
-  },
-  {
-   "id": 120,
-   "type": "Mute / Bypass Relay (rgthree)",
-   "pos": [
-    40,
-    8388
-   ],
-   "size": [
-    400,
-    104
-   ],
-   "flags": {
-    "collapsed": false
-   },
-   "order": 95,
-   "mode": 0,
-   "title": "5. Texture mesh: flag on while every stage reading it is off",
-   "inputs": [
-    {
-     "dir": 3,
-     "name": "texture",
-     "type": "*",
-     "link": 157
-    },
-    {
-     "dir": 3,
-     "name": "",
-     "type": "*",
-     "link": null
-    }
-   ],
-   "outputs": [
-    {
-     "name": "REPEATER",
-     "dir": 4,
-     "shape": 5,
-     "type": "_NODE_REPEATER_",
-     "links": [
-      156
-     ],
-     "color_on": "#Fc0",
-     "color_off": "#a80"
-    }
-   ],
-   "properties": {
-    "on_muted_inputs": "ACTIVE",
-    "on_bypassed_inputs": "ACTIVE",
-    "on_any_active_inputs": "MUTE"
-   },
-   "widgets_values": null
-  },
-  {
-   "id": 121,
-   "type": "Mute / Bypass Repeater (rgthree)",
-   "pos": [
-    40,
-    8532
-   ],
-   "size": [
-    400,
-    90
-   ],
-   "flags": {},
-   "order": 96,
-   "mode": 0,
-   "title": "5. Texture mesh: flag switch",
-   "inputs": [
-    {
-     "dir": 3,
-     "name": "Mute / Bypass Relay (rgthree)",
-     "type": "*",
-     "link": 156
-    },
-    {
-     "dir": 3,
-     "name": "flag",
-     "type": "*",
-     "link": 158
-    },
-    {
-     "dir": 3,
-     "name": "",
-     "type": "*",
-     "link": null
-    }
-   ],
-   "outputs": [],
-   "properties": {},
-   "widgets_values": null
-  },
-  {
-   "id": 122,
-   "type": "Mute / Bypass Relay (rgthree)",
-   "pos": [
-    40,
-    8034
-   ],
-   "size": [
-    400,
-    148
-   ],
-   "flags": {
-    "collapsed": false
-   },
-   "order": 93,
-   "mode": 0,
-   "title": "5. Texture mesh: picker off while a source is on or its stage is off",
-   "inputs": [
-    {
-     "dir": 3,
-     "name": "mesh_trellis",
-     "type": "*",
-     "link": 160
-    },
-    {
-     "dir": 3,
-     "name": "mesh_hunyuan",
-     "type": "*",
-     "link": 161
-    },
-    {
-     "dir": 3,
-     "name": "stage off",
+     "name": "picker",
      "type": "*",
      "link": 162
     },
@@ -5610,6 +5556,41 @@
      "link": null
     }
    ],
+   "outputs": [],
+   "properties": {},
+   "widgets_values": null
+  },
+  {
+   "id": 121,
+   "type": "Mute / Bypass Relay (rgthree)",
+   "pos": [
+    40,
+    8872
+   ],
+   "size": [
+    400,
+    104
+   ],
+   "flags": {
+    "collapsed": false
+   },
+   "order": 97,
+   "mode": 0,
+   "title": "5. Texture mesh: flag on while every stage reading it is off",
+   "inputs": [
+    {
+     "dir": 3,
+     "name": "texture",
+     "type": "*",
+     "link": 164
+    },
+    {
+     "dir": 3,
+     "name": "",
+     "type": "*",
+     "link": null
+    }
+   ],
    "outputs": [
     {
      "name": "REPEATER",
@@ -5617,7 +5598,7 @@
      "shape": 5,
      "type": "_NODE_REPEATER_",
      "links": [
-      159
+      163
      ],
      "color_on": "#Fc0",
      "color_off": "#a80"
@@ -5631,65 +5612,30 @@
    "widgets_values": null
   },
   {
-   "id": 123,
+   "id": 122,
    "type": "Mute / Bypass Repeater (rgthree)",
    "pos": [
     40,
-    8222
+    9016
    ],
    "size": [
     400,
     90
    ],
    "flags": {},
-   "order": 94,
+   "order": 98,
    "mode": 0,
-   "title": "5. Texture mesh: picker switch",
+   "title": "5. Texture mesh: flag switch",
    "inputs": [
     {
      "dir": 3,
      "name": "Mute / Bypass Relay (rgthree)",
      "type": "*",
-     "link": 159
-    },
-    {
-     "dir": 3,
-     "name": "picker",
-     "type": "*",
      "link": 163
     },
     {
      "dir": 3,
-     "name": "",
-     "type": "*",
-     "link": null
-    }
-   ],
-   "outputs": [],
-   "properties": {},
-   "widgets_values": null
-  },
-  {
-   "id": 124,
-   "type": "Mute / Bypass Relay (rgthree)",
-   "pos": [
-    40,
-    9574
-   ],
-   "size": [
-    400,
-    104
-   ],
-   "flags": {
-    "collapsed": false
-   },
-   "order": 108,
-   "mode": 0,
-   "title": "6. Turntable mesh: flag on while every stage reading it is off",
-   "inputs": [
-    {
-     "dir": 3,
-     "name": "turntable",
+     "name": "flag",
      "type": "*",
      "link": 165
     },
@@ -5700,6 +5646,53 @@
      "link": null
     }
    ],
+   "outputs": [],
+   "properties": {},
+   "widgets_values": null
+  },
+  {
+   "id": 123,
+   "type": "Mute / Bypass Relay (rgthree)",
+   "pos": [
+    40,
+    8518
+   ],
+   "size": [
+    400,
+    148
+   ],
+   "flags": {
+    "collapsed": false
+   },
+   "order": 95,
+   "mode": 0,
+   "title": "5. Texture mesh: picker off while a source is on or its stage is off",
+   "inputs": [
+    {
+     "dir": 3,
+     "name": "mesh_trellis",
+     "type": "*",
+     "link": 167
+    },
+    {
+     "dir": 3,
+     "name": "mesh_hunyuan",
+     "type": "*",
+     "link": 168
+    },
+    {
+     "dir": 3,
+     "name": "stage off",
+     "type": "*",
+     "link": 169
+    },
+    {
+     "dir": 3,
+     "name": "",
+     "type": "*",
+     "link": null
+    }
+   ],
    "outputs": [
     {
      "name": "REPEATER",
@@ -5707,7 +5700,7 @@
      "shape": 5,
      "type": "_NODE_REPEATER_",
      "links": [
-      164
+      166
      ],
      "color_on": "#Fc0",
      "color_off": "#a80"
@@ -5721,32 +5714,32 @@
    "widgets_values": null
   },
   {
-   "id": 125,
+   "id": 124,
    "type": "Mute / Bypass Repeater (rgthree)",
    "pos": [
     40,
-    9718
+    8706
    ],
    "size": [
     400,
     90
    ],
    "flags": {},
-   "order": 109,
+   "order": 96,
    "mode": 0,
-   "title": "6. Turntable mesh: flag switch",
+   "title": "5. Texture mesh: picker switch",
    "inputs": [
     {
      "dir": 3,
      "name": "Mute / Bypass Relay (rgthree)",
      "type": "*",
-     "link": 164
+     "link": 166
     },
     {
      "dir": 3,
-     "name": "flag",
+     "name": "picker",
      "type": "*",
-     "link": 166
+     "link": 170
     },
     {
      "dir": 3,
@@ -5760,99 +5753,26 @@
    "widgets_values": null
   },
   {
-   "id": 126,
+   "id": 125,
    "type": "Mute / Bypass Relay (rgthree)",
    "pos": [
     40,
-    9198
+    10058
    ],
    "size": [
     400,
-    170
+    104
    ],
    "flags": {
     "collapsed": false
    },
-   "order": 105,
+   "order": 110,
    "mode": 0,
-   "title": "6. Turntable mesh: picker off while a source is on or its stage is off",
+   "title": "6. Turntable mesh: flag on while every stage reading it is off",
    "inputs": [
     {
      "dir": 3,
-     "name": "texture",
-     "type": "*",
-     "link": 168
-    },
-    {
-     "dir": 3,
-     "name": "mesh_trellis",
-     "type": "*",
-     "link": 169
-    },
-    {
-     "dir": 3,
-     "name": "mesh_hunyuan",
-     "type": "*",
-     "link": 170
-    },
-    {
-     "dir": 3,
-     "name": "stage off",
-     "type": "*",
-     "link": 171
-    },
-    {
-     "dir": 3,
-     "name": "",
-     "type": "*",
-     "link": null
-    }
-   ],
-   "outputs": [
-    {
-     "name": "REPEATER",
-     "dir": 4,
-     "shape": 5,
-     "type": "_NODE_REPEATER_",
-     "links": [
-      167
-     ],
-     "color_on": "#Fc0",
-     "color_off": "#a80"
-    }
-   ],
-   "properties": {
-    "on_muted_inputs": "ACTIVE",
-    "on_bypassed_inputs": "ACTIVE",
-    "on_any_active_inputs": "MUTE"
-   },
-   "widgets_values": null
-  },
-  {
-   "id": 127,
-   "type": "Mute / Bypass Repeater (rgthree)",
-   "pos": [
-    40,
-    9408
-   ],
-   "size": [
-    400,
-    90
-   ],
-   "flags": {},
-   "order": 107,
-   "mode": 0,
-   "title": "6. Turntable mesh: picker switch",
-   "inputs": [
-    {
-     "dir": 3,
-     "name": "Mute / Bypass Relay (rgthree)",
-     "type": "*",
-     "link": 167
-    },
-    {
-     "dir": 3,
-     "name": "picker",
+     "name": "turntable",
      "type": "*",
      "link": 172
     },
@@ -5863,41 +5783,6 @@
      "link": null
     }
    ],
-   "outputs": [],
-   "properties": {},
-   "widgets_values": null
-  },
-  {
-   "id": 128,
-   "type": "Mute / Bypass Relay (rgthree)",
-   "pos": [
-    40,
-    10802
-   ],
-   "size": [
-    400,
-    104
-   ],
-   "flags": {
-    "collapsed": false
-   },
-   "order": 119,
-   "mode": 0,
-   "title": "7. Rig mesh: flag on while every stage reading it is off",
-   "inputs": [
-    {
-     "dir": 3,
-     "name": "rig",
-     "type": "*",
-     "link": 174
-    },
-    {
-     "dir": 3,
-     "name": "",
-     "type": "*",
-     "link": null
-    }
-   ],
    "outputs": [
     {
      "name": "REPEATER",
@@ -5905,7 +5790,7 @@
      "shape": 5,
      "type": "_NODE_REPEATER_",
      "links": [
-      173
+      171
      ],
      "color_on": "#Fc0",
      "color_off": "#a80"
@@ -5919,32 +5804,32 @@
    "widgets_values": null
   },
   {
-   "id": 129,
+   "id": 126,
    "type": "Mute / Bypass Repeater (rgthree)",
    "pos": [
     40,
-    10946
+    10202
    ],
    "size": [
     400,
     90
    ],
    "flags": {},
-   "order": 120,
+   "order": 111,
    "mode": 0,
-   "title": "7. Rig mesh: flag switch",
+   "title": "6. Turntable mesh: flag switch",
    "inputs": [
     {
      "dir": 3,
      "name": "Mute / Bypass Relay (rgthree)",
      "type": "*",
-     "link": 173
+     "link": 171
     },
     {
      "dir": 3,
      "name": "flag",
      "type": "*",
-     "link": 175
+     "link": 173
     },
     {
      "dir": 3,
@@ -5958,11 +5843,11 @@
    "widgets_values": null
   },
   {
-   "id": 130,
+   "id": 127,
    "type": "Mute / Bypass Relay (rgthree)",
    "pos": [
     40,
-    10426
+    9682
    ],
    "size": [
     400,
@@ -5971,33 +5856,33 @@
    "flags": {
     "collapsed": false
    },
-   "order": 117,
+   "order": 107,
    "mode": 0,
-   "title": "7. Rig mesh: picker off while a source is on or its stage is off",
+   "title": "6. Turntable mesh: picker off while a source is on or its stage is off",
    "inputs": [
     {
      "dir": 3,
      "name": "texture",
      "type": "*",
-     "link": 177
+     "link": 175
     },
     {
      "dir": 3,
      "name": "mesh_trellis",
      "type": "*",
-     "link": 178
+     "link": 176
     },
     {
      "dir": 3,
      "name": "mesh_hunyuan",
      "type": "*",
-     "link": 179
+     "link": 177
     },
     {
      "dir": 3,
      "name": "stage off",
      "type": "*",
-     "link": 180
+     "link": 178
     },
     {
      "dir": 3,
@@ -6013,7 +5898,7 @@
      "shape": 5,
      "type": "_NODE_REPEATER_",
      "links": [
-      176
+      174
      ],
      "color_on": "#Fc0",
      "color_off": "#a80"
@@ -6027,30 +5912,65 @@
    "widgets_values": null
   },
   {
-   "id": 131,
+   "id": 128,
    "type": "Mute / Bypass Repeater (rgthree)",
    "pos": [
     40,
-    10636
+    9892
    ],
    "size": [
     400,
     90
    ],
    "flags": {},
-   "order": 118,
+   "order": 109,
    "mode": 0,
-   "title": "7. Rig mesh: picker switch",
+   "title": "6. Turntable mesh: picker switch",
    "inputs": [
     {
      "dir": 3,
      "name": "Mute / Bypass Relay (rgthree)",
      "type": "*",
-     "link": 176
+     "link": 174
     },
     {
      "dir": 3,
      "name": "picker",
+     "type": "*",
+     "link": 179
+    },
+    {
+     "dir": 3,
+     "name": "",
+     "type": "*",
+     "link": null
+    }
+   ],
+   "outputs": [],
+   "properties": {},
+   "widgets_values": null
+  },
+  {
+   "id": 129,
+   "type": "Mute / Bypass Relay (rgthree)",
+   "pos": [
+    40,
+    11286
+   ],
+   "size": [
+    400,
+    104
+   ],
+   "flags": {
+    "collapsed": false
+   },
+   "order": 121,
+   "mode": 0,
+   "title": "7. Rig mesh: flag on while every stage reading it is off",
+   "inputs": [
+    {
+     "dir": 3,
+     "name": "rig",
      "type": "*",
      "link": 181
     },
@@ -6061,33 +5981,106 @@
      "link": null
     }
    ],
+   "outputs": [
+    {
+     "name": "REPEATER",
+     "dir": 4,
+     "shape": 5,
+     "type": "_NODE_REPEATER_",
+     "links": [
+      180
+     ],
+     "color_on": "#Fc0",
+     "color_off": "#a80"
+    }
+   ],
+   "properties": {
+    "on_muted_inputs": "ACTIVE",
+    "on_bypassed_inputs": "ACTIVE",
+    "on_any_active_inputs": "MUTE"
+   },
+   "widgets_values": null
+  },
+  {
+   "id": 130,
+   "type": "Mute / Bypass Repeater (rgthree)",
+   "pos": [
+    40,
+    11430
+   ],
+   "size": [
+    400,
+    90
+   ],
+   "flags": {},
+   "order": 122,
+   "mode": 0,
+   "title": "7. Rig mesh: flag switch",
+   "inputs": [
+    {
+     "dir": 3,
+     "name": "Mute / Bypass Relay (rgthree)",
+     "type": "*",
+     "link": 180
+    },
+    {
+     "dir": 3,
+     "name": "flag",
+     "type": "*",
+     "link": 182
+    },
+    {
+     "dir": 3,
+     "name": "",
+     "type": "*",
+     "link": null
+    }
+   ],
    "outputs": [],
    "properties": {},
    "widgets_values": null
   },
   {
-   "id": 132,
+   "id": 131,
    "type": "Mute / Bypass Relay (rgthree)",
    "pos": [
     40,
-    12032
+    10910
    ],
    "size": [
     400,
-    104
+    170
    ],
    "flags": {
     "collapsed": false
    },
-   "order": 144,
+   "order": 119,
    "mode": 0,
-   "title": "8. Animate takes: flag on while every stage reading it is off",
+   "title": "7. Rig mesh: picker off while a source is on or its stage is off",
    "inputs": [
     {
      "dir": 3,
-     "name": "animate",
+     "name": "texture",
      "type": "*",
-     "link": 183
+     "link": 184
+    },
+    {
+     "dir": 3,
+     "name": "mesh_trellis",
+     "type": "*",
+     "link": 185
+    },
+    {
+     "dir": 3,
+     "name": "mesh_hunyuan",
+     "type": "*",
+     "link": 186
+    },
+    {
+     "dir": 3,
+     "name": "stage off",
+     "type": "*",
+     "link": 187
     },
     {
      "dir": 3,
@@ -6103,7 +6096,7 @@
      "shape": 5,
      "type": "_NODE_REPEATER_",
      "links": [
-      182
+      183
      ],
      "color_on": "#Fc0",
      "color_off": "#a80"
@@ -6117,32 +6110,32 @@
    "widgets_values": null
   },
   {
-   "id": 133,
+   "id": 132,
    "type": "Mute / Bypass Repeater (rgthree)",
    "pos": [
     40,
-    12176
+    11120
    ],
    "size": [
     400,
     90
    ],
    "flags": {},
-   "order": 145,
+   "order": 120,
    "mode": 0,
-   "title": "8. Animate takes: flag switch",
+   "title": "7. Rig mesh: picker switch",
    "inputs": [
     {
      "dir": 3,
      "name": "Mute / Bypass Relay (rgthree)",
      "type": "*",
-     "link": 182
+     "link": 183
     },
     {
      "dir": 3,
-     "name": "flag",
+     "name": "picker",
      "type": "*",
-     "link": 184
+     "link": 188
     },
     {
      "dir": 3,
@@ -6156,50 +6149,26 @@
    "widgets_values": null
   },
   {
-   "id": 134,
+   "id": 133,
    "type": "Mute / Bypass Relay (rgthree)",
    "pos": [
     40,
-    11634
+    12560
    ],
    "size": [
     400,
-    192
+    104
    ],
    "flags": {
     "collapsed": false
    },
-   "order": 135,
+   "order": 146,
    "mode": 0,
-   "title": "8. Animate takes: picker off while a source is on or its stage is off",
+   "title": "8. Animate takes: flag on while every stage reading it is off",
    "inputs": [
     {
      "dir": 3,
-     "name": "simplify",
-     "type": "*",
-     "link": 186
-    },
-    {
-     "dir": 3,
-     "name": "edit",
-     "type": "*",
-     "link": 187
-    },
-    {
-     "dir": 3,
-     "name": "concept",
-     "type": "*",
-     "link": 188
-    },
-    {
-     "dir": 3,
-     "name": "concept_fast",
-     "type": "*",
-     "link": 189
-    },
-    {
-     "dir": 3,
-     "name": "stage off",
+     "name": "animate",
      "type": "*",
      "link": 190
     },
@@ -6217,7 +6186,7 @@
      "shape": 5,
      "type": "_NODE_REPEATER_",
      "links": [
-      185
+      189
      ],
      "color_on": "#Fc0",
      "color_off": "#a80"
@@ -6231,30 +6200,30 @@
    "widgets_values": null
   },
   {
-   "id": 135,
+   "id": 134,
    "type": "Mute / Bypass Repeater (rgthree)",
    "pos": [
     40,
-    11866
+    12704
    ],
    "size": [
     400,
     90
    ],
    "flags": {},
-   "order": 140,
+   "order": 147,
    "mode": 0,
-   "title": "8. Animate takes: picker switch",
+   "title": "8. Animate takes: flag switch",
    "inputs": [
     {
      "dir": 3,
      "name": "Mute / Bypass Relay (rgthree)",
      "type": "*",
-     "link": 185
+     "link": 189
     },
     {
      "dir": 3,
-     "name": "picker",
+     "name": "flag",
      "type": "*",
      "link": 191
     },
@@ -6270,7 +6239,127 @@
    "widgets_values": null
   },
   {
+   "id": 135,
+   "type": "Mute / Bypass Relay (rgthree)",
+   "pos": [
+    40,
+    12140
+   ],
+   "size": [
+    400,
+    214
+   ],
+   "flags": {
+    "collapsed": false
+   },
+   "order": 138,
+   "mode": 0,
+   "title": "8. Animate takes: picker off while a source is on or its stage is off",
+   "inputs": [
+    {
+     "dir": 3,
+     "name": "simplify",
+     "type": "*",
+     "link": 193
+    },
+    {
+     "dir": 3,
+     "name": "edit",
+     "type": "*",
+     "link": 194
+    },
+    {
+     "dir": 3,
+     "name": "concept",
+     "type": "*",
+     "link": 195
+    },
+    {
+     "dir": 3,
+     "name": "concept_fast",
+     "type": "*",
+     "link": 196
+    },
+    {
+     "dir": 3,
+     "name": "own_image",
+     "type": "*",
+     "link": 197
+    },
+    {
+     "dir": 3,
+     "name": "stage off",
+     "type": "*",
+     "link": 198
+    },
+    {
+     "dir": 3,
+     "name": "",
+     "type": "*",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "REPEATER",
+     "dir": 4,
+     "shape": 5,
+     "type": "_NODE_REPEATER_",
+     "links": [
+      192
+     ],
+     "color_on": "#Fc0",
+     "color_off": "#a80"
+    }
+   ],
+   "properties": {
+    "on_muted_inputs": "ACTIVE",
+    "on_bypassed_inputs": "ACTIVE",
+    "on_any_active_inputs": "MUTE"
+   },
+   "widgets_values": null
+  },
+  {
    "id": 136,
+   "type": "Mute / Bypass Repeater (rgthree)",
+   "pos": [
+    40,
+    12394
+   ],
+   "size": [
+    400,
+    90
+   ],
+   "flags": {},
+   "order": 144,
+   "mode": 0,
+   "title": "8. Animate takes: picker switch",
+   "inputs": [
+    {
+     "dir": 3,
+     "name": "Mute / Bypass Relay (rgthree)",
+     "type": "*",
+     "link": 192
+    },
+    {
+     "dir": 3,
+     "name": "picker",
+     "type": "*",
+     "link": 199
+    },
+    {
+     "dir": 3,
+     "name": "",
+     "type": "*",
+     "link": null
+    }
+   ],
+   "outputs": [],
+   "properties": {},
+   "widgets_values": null
+  },
+  {
+   "id": 137,
    "type": "Fast Groups Muter (rgthree)",
    "pos": [
     1220,
@@ -6303,7 +6392,7 @@
    }
   },
   {
-   "id": 137,
+   "id": 138,
    "type": "MarkdownNote",
    "pos": [
     40,
@@ -6320,13 +6409,13 @@
    "outputs": [],
    "properties": {},
    "widgets_values": [
-    "## Asset pipeline\n\nWrite the subject in **Prompt**, switch stages on in the **Stages** panel, and queue.\nOnly Stage 1, fast, is on when the graph opens.\n\n**Handing over.** Each stage takes its input from the nearest stage above it that\nis on. With Concept, Edit and Mesh all on, one queue goes from prompt to mesh.\n\n**Takes and picks.** Each image stage (1 to 3) makes **Takes** images per queue,\nand saves them all. When a stage below it is on, the queue pauses after the\nstage, shows the takes, and carries on with the one you click and Send. Escape\ncancels the queue; left alone for an hour it carries on with the first take.\nClick one take: Mesh and Animate expect one image. A stage with nothing below it\non never pauses, so a stage on its own just makes its takes.\n\n**Picking up at any stage.** The **Stage inputs** row below holds one picker per\nstage, in stage order. A picker is read only when its stage is on and no stage\nabove it is on, and it is muted otherwise, so the pickers lit up are exactly the\nones the next queue reads. Switch on one stage, pick its input, and queue as often\nas it takes. Then switch it off, switch on the next stage, and press that picker's\nrefresh arrow: it selects the newest file, which is the take you just made, or pick\nany earlier one. To edit an edit, pick the last edit in Edit's own picker.\n\n**Pickers** list the top of `output/`, where every image stage here saves as\n`asset_<stage>_NNNNN_.png`. Meshes save to `output/mesh/`, rigs to\n`output/rigged/` and video to `output/video/`; the mesh pickers are path boxes\nholding a container path such as `/app/output/mesh/asset.glb`.\n\n**Seeds** are set to randomise, so each queue of a stage is a new take.\n\n**Models.** A loader only one stage uses sits in that stage. The shared ones sit\nin Models, which is never muted: a loader there runs only when a stage that is on\nneeds it. The Qwen text encoder and VAE reach every stage through the two Use\nEverywhere nodes in Models, so their wires are not drawn.\n\n**Memory, on a 16 GB card and a 31 GB host.** Each Qwen stage loads a 20 GB\ndiffusion model, and a queue that runs two of them loads both: not yet run\ntogether on the reference machine. Mesh and Texture in one queue run out of\nVRAM, because 3D-Pack keeps its pipelines outside ComfyUI's model management:\nrun Mesh, restart ComfyUI, then run Texture with Mesh off.\n\n**Licences.** The Hunyuan3D stages are under a licence that excludes the EU, the\nUK and South Korea; TRELLIS is MIT; Wan 2.2 is Apache-2.0. See docs/guide/licensing.\n\n**7. Rig** hands UniRig the mesh path from the Mesh or Texture stage, or from its\npath box, so the mesh need not be in the loader's file list. Its skeleton is\n`articulationxl`, whose bones are `bone_N`; `scripts/bone_roles.py map` names them.\n\n**8. Animate** makes five seconds of video of the image with Wan 2.2, under\n`output/video/`, and its last frame at the top of `output/`. Its settings are\nthe ones that ran on the 16 GB reference card: 480x640 and 20 steps, with the\n4-step LoRAs in the graph at strength 0, because at strength 1 that card ran out\nof memory merging them into the fp8 weights. It makes a video, not a clip:\nnothing in this image turns the video into motion for the rig.\ndocs/reference/video-mocap.md is the state of that.\n\nBuilt by scripts/build_asset_workflow.py from the graphs in workflows/api/.\nChange those, not this."
+    "## Asset pipeline\n\nWrite the subject in **Prompt**, switch stages on in the **Stages** panel, and queue.\nOnly Stage 1, fast, is on when the graph opens.\n\n**Handing over.** Each stage takes its input from the nearest stage above it that\nis on. With Concept, Edit and Mesh all on, one queue goes from prompt to mesh.\n\n**Starting from your own concept art.** Switch on **0. Your image**, upload the\nfile there or pick one already in `input/`, leave the Concept stages off, and\nswitch on the stages to run: Edit, Simplify, Mesh, Texture, Animate. The Stage\ninputs row does the same for a file already in `output/`.\n\n**Takes and picks.** Each image stage (1 to 3) makes **Takes** images per queue,\nand saves them all. When a stage below it is on, the queue pauses after the\nstage, shows the takes, and carries on with the one you click and Send. Escape\ncancels the queue; left alone for an hour it carries on with the first take.\nClick one take: Mesh and Animate expect one image. A stage with nothing below it\non never pauses, so a stage on its own just makes its takes.\n\n**Picking up at any stage.** The **Stage inputs** row below holds one picker per\nstage, in stage order. A picker is read only when its stage is on and no stage\nabove it is on, and it is muted otherwise, so the pickers lit up are exactly the\nones the next queue reads. Switch on one stage, pick its input, and queue as often\nas it takes. Then switch it off, switch on the next stage, and press that picker's\nrefresh arrow: it selects the newest file, which is the take you just made, or pick\nany earlier one. To edit an edit, pick the last edit in Edit's own picker.\n\n**Pickers** list the top of `output/`, where every image stage here saves as\n`asset_<stage>_NNNNN_.png`. Meshes save to `output/mesh/`, rigs to\n`output/rigged/` and video to `output/video/`; the mesh pickers are path boxes\nholding a container path such as `/app/output/mesh/asset.glb`.\n\n**Seeds** are set to randomise, so each queue of a stage is a new take.\n\n**Models.** A loader only one stage uses sits in that stage. The shared ones sit\nin Models, which is never muted: a loader there runs only when a stage that is on\nneeds it. The Qwen text encoder and VAE reach every stage through the two Use\nEverywhere nodes in Models, so their wires are not drawn.\n\n**Memory, on a 16 GB card and a 31 GB host.** Each Qwen stage loads a 20 GB\ndiffusion model, and a queue that runs two of them loads both: not yet run\ntogether on the reference machine. Mesh and Texture in one queue run out of\nVRAM, because 3D-Pack keeps its pipelines outside ComfyUI's model management:\nrun Mesh, restart ComfyUI, then run Texture with Mesh off.\n\n**Licences.** The Hunyuan3D stages are under a licence that excludes the EU, the\nUK and South Korea; TRELLIS is MIT; Wan 2.2 is Apache-2.0. See docs/guide/licensing.\n\n**7. Rig** hands UniRig the mesh path from the Mesh or Texture stage, or from its\npath box, so the mesh need not be in the loader's file list. Its skeleton is\n`articulationxl`, whose bones are `bone_N`; `scripts/bone_roles.py map` names them.\n\n**8. Animate** makes five seconds of video of the image with Wan 2.2, under\n`output/video/`, and its last frame at the top of `output/`. Its settings are\nthe ones that ran on the 16 GB reference card: 480x640 and 20 steps, with the\n4-step LoRAs in the graph at strength 0, because at strength 1 that card ran out\nof memory merging them into the fp8 weights. It makes a video, not a clip:\nnothing in this image turns the video into motion for the rig.\ndocs/reference/video-mocap.md is the state of that.\n\nBuilt by scripts/build_asset_workflow.py from the graphs in workflows/api/.\nChange those, not this."
    ],
    "color": "#432",
    "bgcolor": "#653"
   },
   {
-   "id": 138,
+   "id": 139,
    "type": "Note",
    "pos": [
     560,
@@ -6334,10 +6423,33 @@
    ],
    "size": [
     420,
-    273
+    154
    ],
    "flags": {},
    "order": 20,
+   "mode": 2,
+   "inputs": [],
+   "outputs": [],
+   "properties": {},
+   "widgets_values": [
+    "Concept art you already have. Upload it here, or pick a file\nalready in input/. With this stage on and the Concept stages\noff, Edit, Simplify, Mesh and Animate start from it."
+   ],
+   "color": "#432",
+   "bgcolor": "#653"
+  },
+  {
+   "id": 140,
+   "type": "Note",
+   "pos": [
+    560,
+    2292
+   ],
+   "size": [
+    420,
+    273
+   ],
+   "flags": {},
+   "order": 22,
    "mode": 0,
    "inputs": [],
    "outputs": [],
@@ -6349,18 +6461,18 @@
    "bgcolor": "#653"
   },
   {
-   "id": 139,
+   "id": 141,
    "type": "Note",
    "pos": [
     560,
-    2832
+    3184
    ],
    "size": [
     420,
     511
    ],
    "flags": {},
-   "order": 30,
+   "order": 32,
    "mode": 2,
    "inputs": [],
    "outputs": [],
@@ -6372,18 +6484,18 @@
    "bgcolor": "#653"
   },
   {
-   "id": 140,
+   "id": 142,
    "type": "Note",
    "pos": [
     560,
-    3724
+    4076
    ],
    "size": [
     420,
     307
    ],
    "flags": {},
-   "order": 41,
+   "order": 43,
    "mode": 2,
    "inputs": [],
    "outputs": [],
@@ -6395,18 +6507,18 @@
    "bgcolor": "#653"
   },
   {
-   "id": 141,
+   "id": 143,
    "type": "Note",
    "pos": [
     560,
-    4866
+    5262
    ],
    "size": [
     420,
     256
    ],
    "flags": {},
-   "order": 57,
+   "order": 59,
    "mode": 2,
    "inputs": [],
    "outputs": [],
@@ -6418,18 +6530,18 @@
    "bgcolor": "#653"
   },
   {
-   "id": 142,
+   "id": 144,
    "type": "Note",
    "pos": [
     560,
-    6052
+    6492
    ],
    "size": [
     420,
     545
    ],
    "flags": {},
-   "order": 73,
+   "order": 75,
    "mode": 2,
    "inputs": [],
    "outputs": [],
@@ -6441,18 +6553,18 @@
    "bgcolor": "#653"
   },
   {
-   "id": 143,
+   "id": 145,
    "type": "Note",
    "pos": [
     560,
-    7326
+    7810
    ],
    "size": [
     420,
     324
    ],
    "flags": {},
-   "order": 83,
+   "order": 85,
    "mode": 2,
    "inputs": [],
    "outputs": [],
@@ -6464,18 +6576,18 @@
    "bgcolor": "#653"
   },
   {
-   "id": 144,
+   "id": 146,
    "type": "Note",
    "pos": [
     560,
-    7846
+    8330
    ],
    "size": [
     420,
     290
    ],
    "flags": {},
-   "order": 89,
+   "order": 91,
    "mode": 2,
    "inputs": [],
    "outputs": [],
@@ -6487,18 +6599,18 @@
    "bgcolor": "#653"
   },
   {
-   "id": 145,
+   "id": 147,
    "type": "Note",
    "pos": [
     560,
-    8988
+    9472
    ],
    "size": [
     420,
     256
    ],
    "flags": {},
-   "order": 99,
+   "order": 101,
    "mode": 2,
    "inputs": [],
    "outputs": [],
@@ -6510,18 +6622,18 @@
    "bgcolor": "#653"
   },
   {
-   "id": 146,
+   "id": 148,
    "type": "Note",
    "pos": [
     560,
-    10216
+    10700
    ],
    "size": [
     420,
     375
    ],
    "flags": {},
-   "order": 112,
+   "order": 114,
    "mode": 2,
    "inputs": [],
    "outputs": [],
@@ -6533,18 +6645,18 @@
    "bgcolor": "#653"
   },
   {
-   "id": 147,
+   "id": 149,
    "type": "Note",
    "pos": [
     560,
-    11402
+    11886
    ],
    "size": [
     420,
     545
    ],
    "flags": {},
-   "order": 123,
+   "order": 125,
    "mode": 2,
    "inputs": [],
    "outputs": [],
@@ -6593,7 +6705,7 @@
    5,
    1,
    0,
-   18,
+   19,
    0,
    "STRING"
   ],
@@ -6601,7 +6713,7 @@
    6,
    4,
    0,
-   20,
+   21,
    0,
    "INT"
   ],
@@ -6609,47 +6721,47 @@
    7,
    8,
    0,
-   21,
+   22,
    0,
    "MODEL"
   ],
   [
    8,
-   18,
+   19,
    0,
-   21,
+   22,
    1,
    "CONDITIONING"
   ],
   [
    9,
-   19,
+   20,
    0,
-   21,
+   22,
    2,
    "CONDITIONING"
   ],
   [
    10,
-   20,
-   0,
    21,
+   0,
+   22,
    3,
    "LATENT"
   ],
   [
    11,
-   21,
-   0,
    22,
+   0,
+   23,
    0,
    "LATENT"
   ],
   [
    12,
-   22,
-   0,
    23,
+   0,
+   24,
    0,
    "IMAGE"
   ],
@@ -6657,7 +6769,7 @@
    13,
    1,
    0,
-   24,
+   25,
    0,
    "STRING"
   ],
@@ -6665,7 +6777,7 @@
    14,
    4,
    0,
-   26,
+   27,
    0,
    "INT"
   ],
@@ -6673,55 +6785,55 @@
    15,
    10,
    0,
-   27,
+   28,
    0,
    "MODEL"
   ],
   [
    16,
-   24,
+   25,
    0,
-   27,
+   28,
    1,
    "CONDITIONING"
   ],
   [
    17,
-   25,
+   26,
    0,
-   27,
+   28,
    2,
    "CONDITIONING"
   ],
   [
    18,
-   26,
-   0,
    27,
+   0,
+   28,
    3,
    "LATENT"
   ],
   [
    19,
-   27,
-   0,
    28,
+   0,
+   29,
    0,
    "LATENT"
   ],
   [
    20,
-   28,
-   0,
    29,
+   0,
+   30,
    0,
    "IMAGE"
   ],
   [
    21,
-   80,
+   81,
    0,
-   30,
+   31,
    0,
    "IMAGE"
   ],
@@ -6729,31 +6841,31 @@
    22,
    2,
    0,
-   31,
+   32,
    1,
    "STRING"
   ],
   [
    23,
-   30,
-   0,
    31,
+   0,
+   32,
    3,
    "IMAGE"
   ],
   [
    24,
-   30,
+   31,
    0,
-   32,
+   33,
    2,
    "IMAGE"
   ],
   [
    25,
-   30,
+   31,
    0,
-   33,
+   34,
    0,
    "IMAGE"
   ],
@@ -6761,79 +6873,79 @@
    26,
    13,
    0,
-   34,
+   35,
    0,
    "MODEL"
   ],
   [
    27,
-   31,
+   32,
    0,
-   34,
+   35,
    1,
    "CONDITIONING"
   ],
   [
    28,
-   32,
+   33,
    0,
-   34,
+   35,
    2,
    "CONDITIONING"
   ],
   [
    29,
-   104,
+   105,
    0,
-   34,
+   35,
    3,
    "LATENT"
   ],
   [
    30,
-   34,
-   0,
    35,
+   0,
+   36,
    0,
    "LATENT"
   ],
   [
    31,
-   35,
-   0,
    36,
+   0,
+   37,
    0,
    "IMAGE"
   ],
   [
    32,
-   83,
+   84,
    0,
-   37,
+   38,
    0,
    "IMAGE"
   ],
   [
    33,
-   37,
-   0,
    38,
-   2,
-   "IMAGE"
-  ],
-  [
-   34,
-   37,
    0,
    39,
    2,
    "IMAGE"
   ],
   [
-   35,
-   37,
+   34,
+   38,
    0,
    40,
+   2,
+   "IMAGE"
+  ],
+  [
+   35,
+   38,
+   0,
+   41,
    0,
    "IMAGE"
   ],
@@ -6841,76 +6953,68 @@
    36,
    13,
    0,
-   41,
+   42,
    0,
    "MODEL"
   ],
   [
    37,
-   38,
+   39,
    0,
-   41,
+   42,
    1,
    "CONDITIONING"
   ],
   [
    38,
-   39,
+   40,
    0,
-   41,
+   42,
    2,
    "CONDITIONING"
   ],
   [
    39,
-   105,
+   106,
    0,
-   41,
+   42,
    3,
    "LATENT"
   ],
   [
    40,
-   41,
-   0,
    42,
+   0,
+   43,
    0,
    "LATENT"
   ],
   [
    41,
-   42,
-   0,
    43,
+   0,
+   44,
    0,
    "IMAGE"
   ],
   [
    42,
-   44,
-   0,
    45,
+   0,
+   46,
    0,
    "DIFFUSERS_PIPE"
   ],
   [
    43,
-   86,
+   87,
    0,
-   45,
+   46,
    1,
    "IMAGE"
   ],
   [
    44,
-   45,
-   0,
-   46,
-   0,
-   "MESH"
-  ],
-  [
-   45,
    46,
    0,
    47,
@@ -6918,31 +7022,31 @@
    "MESH"
   ],
   [
-   46,
-   48,
-   0,
-   49,
-   0,
-   "DIFFUSERS_PIPE"
-  ],
-  [
+   45,
    47,
-   86,
    0,
-   49,
-   1,
-   "IMAGE"
+   48,
+   0,
+   "MESH"
   ],
   [
-   48,
+   46,
    49,
    0,
    50,
    0,
-   "MESH"
+   "DIFFUSERS_PIPE"
   ],
   [
-   49,
+   47,
+   87,
+   0,
+   50,
+   1,
+   "IMAGE"
+  ],
+  [
+   48,
    50,
    0,
    51,
@@ -6950,114 +7054,122 @@
    "MESH"
   ],
   [
-   50,
+   49,
+   51,
+   0,
    52,
    0,
+   "MESH"
+  ],
+  [
+   50,
    53,
+   0,
+   54,
    0,
    "DIFFUSERS_PIPE"
   ],
   [
    51,
-   89,
+   90,
    0,
-   53,
+   54,
    1,
    "STRING"
   ],
   [
    52,
-   86,
+   87,
    0,
-   53,
+   54,
    2,
    "IMAGE"
   ],
   [
    53,
-   53,
-   0,
    54,
+   0,
+   55,
    0,
    "MESH"
   ],
   [
    54,
-   92,
+   93,
    0,
-   55,
+   56,
    0,
    "STRING"
   ],
   [
    55,
-   55,
+   56,
    0,
-   57,
+   58,
    0,
    "MESH"
   ],
   [
    56,
-   56,
-   0,
    57,
+   0,
+   58,
    1,
    "ORBIT_CAMPOSES"
   ],
   [
    57,
-   57,
-   0,
    58,
+   0,
+   59,
    0,
    "IMAGE"
   ],
   [
    58,
-   57,
+   58,
    1,
-   59,
+   60,
    0,
    "MASK"
   ],
   [
    59,
-   59,
-   0,
    60,
+   0,
+   61,
    0,
    "IMAGE"
   ],
   [
    60,
-   95,
+   96,
    0,
-   61,
+   62,
    0,
    "STRING"
   ],
   [
    61,
-   61,
+   62,
    0,
-   63,
+   64,
    0,
    "TRIMESH"
   ],
   [
    62,
-   62,
-   0,
    63,
+   0,
+   64,
    1,
    "UNIRIG_MODEL"
   ],
   [
    63,
-   63,
-   0,
    64,
+   0,
+   65,
    0,
    "STRING"
   ],
@@ -7065,7 +7177,7 @@
    64,
    15,
    0,
-   65,
+   66,
    0,
    "MODEL"
   ],
@@ -7073,23 +7185,23 @@
    65,
    16,
    0,
-   66,
-   0,
-   "MODEL"
-  ],
-  [
-   66,
-   65,
-   0,
    67,
    0,
    "MODEL"
   ],
   [
-   67,
+   66,
    66,
    0,
    68,
+   0,
+   "MODEL"
+  ],
+  [
+   67,
+   67,
+   0,
+   69,
    0,
    "MODEL"
   ],
@@ -7097,7 +7209,7 @@
    68,
    3,
    0,
-   69,
+   70,
    0,
    "STRING"
   ],
@@ -7105,7 +7217,7 @@
    69,
    14,
    0,
-   69,
+   70,
    1,
    "CLIP"
   ],
@@ -7113,23 +7225,23 @@
    70,
    14,
    0,
-   70,
+   71,
    0,
    "CLIP"
   ],
   [
    71,
-   69,
+   70,
    0,
-   71,
+   72,
    0,
    "CONDITIONING"
   ],
   [
    72,
-   70,
-   0,
    71,
+   0,
+   72,
    1,
    "CONDITIONING"
   ],
@@ -7137,52 +7249,20 @@
    73,
    17,
    0,
-   71,
+   72,
    2,
    "VAE"
   ],
   [
    74,
-   98,
+   99,
    0,
-   71,
+   72,
    4,
    "IMAGE"
   ],
   [
    75,
-   67,
-   0,
-   72,
-   0,
-   "MODEL"
-  ],
-  [
-   76,
-   71,
-   0,
-   72,
-   1,
-   "CONDITIONING"
-  ],
-  [
-   77,
-   71,
-   1,
-   72,
-   2,
-   "CONDITIONING"
-  ],
-  [
-   78,
-   71,
-   2,
-   72,
-   3,
-   "LATENT"
-  ],
-  [
-   79,
    68,
    0,
    73,
@@ -7190,34 +7270,66 @@
    "MODEL"
   ],
   [
-   80,
-   71,
+   76,
+   72,
    0,
    73,
    1,
    "CONDITIONING"
   ],
   [
-   81,
-   71,
+   77,
+   72,
    1,
    73,
    2,
    "CONDITIONING"
   ],
   [
-   82,
+   78,
    72,
-   0,
+   2,
    73,
    3,
    "LATENT"
   ],
   [
-   83,
+   79,
+   69,
+   0,
+   74,
+   0,
+   "MODEL"
+  ],
+  [
+   80,
+   72,
+   0,
+   74,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   81,
+   72,
+   1,
+   74,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   82,
    73,
    0,
    74,
+   3,
+   "LATENT"
+  ],
+  [
+   83,
+   74,
+   0,
+   75,
    0,
    "LATENT"
   ],
@@ -7225,863 +7337,927 @@
    84,
    17,
    0,
-   74,
+   75,
    1,
    "VAE"
   ],
   [
    85,
-   74,
-   0,
    75,
-   0,
-   "IMAGE"
-  ],
-  [
-   86,
-   74,
    0,
    76,
    0,
    "IMAGE"
   ],
   [
-   87,
-   74,
+   86,
+   75,
    0,
    77,
    0,
    "IMAGE"
   ],
   [
-   88,
-   77,
+   87,
+   75,
    0,
    78,
    0,
    "IMAGE"
   ],
   [
-   89,
-   101,
+   88,
+   78,
    0,
-   80,
+   79,
+   0,
+   "IMAGE"
+  ],
+  [
+   89,
+   102,
+   0,
+   81,
    0,
    "IMAGE"
   ],
   [
    90,
-   100,
+   101,
    0,
-   80,
+   81,
    1,
    "IMAGE"
   ],
   [
    91,
-   79,
+   18,
    0,
-   80,
+   81,
    2,
    "IMAGE"
   ],
   [
    92,
-   102,
+   80,
    0,
-   83,
-   0,
+   81,
+   3,
    "IMAGE"
   ],
   [
    93,
-   101,
+   103,
    0,
-   83,
-   1,
+   84,
+   0,
    "IMAGE"
   ],
   [
    94,
-   100,
+   102,
    0,
-   83,
-   2,
+   84,
+   1,
    "IMAGE"
   ],
   [
    95,
-   82,
+   101,
    0,
-   83,
-   3,
+   84,
+   2,
    "IMAGE"
   ],
   [
    96,
-   103,
+   18,
    0,
-   86,
-   0,
+   84,
+   3,
    "IMAGE"
   ],
   [
    97,
-   102,
+   83,
    0,
-   86,
-   1,
+   84,
+   4,
    "IMAGE"
   ],
   [
    98,
-   101,
+   104,
    0,
-   86,
-   2,
+   87,
+   0,
    "IMAGE"
   ],
   [
    99,
-   100,
+   103,
    0,
-   86,
-   3,
+   87,
+   1,
    "IMAGE"
   ],
   [
    100,
-   85,
+   102,
    0,
-   86,
-   4,
+   87,
+   2,
    "IMAGE"
   ],
   [
    101,
-   47,
+   101,
    0,
-   89,
-   0,
-   "STRING"
+   87,
+   3,
+   "IMAGE"
   ],
   [
    102,
-   51,
+   18,
    0,
-   89,
-   1,
-   "STRING"
+   87,
+   4,
+   "IMAGE"
   ],
   [
    103,
-   88,
+   86,
    0,
-   89,
-   2,
-   "STRING"
+   87,
+   5,
+   "IMAGE"
   ],
   [
    104,
-   54,
+   48,
    0,
-   92,
+   90,
    0,
    "STRING"
   ],
   [
    105,
-   47,
+   52,
    0,
-   92,
+   90,
    1,
    "STRING"
   ],
   [
    106,
-   51,
+   89,
    0,
-   92,
+   90,
    2,
    "STRING"
   ],
   [
    107,
-   91,
+   55,
    0,
-   92,
-   3,
+   93,
+   0,
    "STRING"
   ],
   [
    108,
-   54,
+   48,
    0,
-   95,
-   0,
+   93,
+   1,
    "STRING"
   ],
   [
    109,
-   47,
+   52,
    0,
-   95,
-   1,
+   93,
+   2,
    "STRING"
   ],
   [
    110,
-   51,
+   92,
    0,
-   95,
-   2,
+   93,
+   3,
    "STRING"
   ],
   [
    111,
-   94,
+   55,
    0,
-   95,
-   3,
+   96,
+   0,
    "STRING"
   ],
   [
    112,
-   103,
+   48,
    0,
-   98,
-   0,
-   "IMAGE"
+   96,
+   1,
+   "STRING"
   ],
   [
    113,
-   102,
+   52,
    0,
-   98,
-   1,
-   "IMAGE"
+   96,
+   2,
+   "STRING"
   ],
   [
    114,
-   101,
+   95,
    0,
-   98,
-   2,
-   "IMAGE"
+   96,
+   3,
+   "STRING"
   ],
   [
    115,
-   100,
+   104,
    0,
-   98,
-   3,
+   99,
+   0,
    "IMAGE"
   ],
   [
    116,
-   97,
+   103,
    0,
-   98,
-   4,
+   99,
+   1,
    "IMAGE"
   ],
   [
    117,
-   22,
+   102,
    0,
-   100,
-   0,
+   99,
+   2,
    "IMAGE"
   ],
   [
    118,
-   28,
+   101,
+   0,
+   99,
+   3,
+   "IMAGE"
+  ],
+  [
+   119,
+   18,
+   0,
+   99,
+   4,
+   "IMAGE"
+  ],
+  [
+   120,
+   98,
+   0,
+   99,
+   5,
+   "IMAGE"
+  ],
+  [
+   121,
+   23,
    0,
    101,
    0,
    "IMAGE"
   ],
   [
-   119,
-   35,
+   122,
+   29,
    0,
    102,
    0,
    "IMAGE"
   ],
   [
-   120,
-   42,
+   123,
+   36,
    0,
    103,
    0,
    "IMAGE"
   ],
   [
-   121,
-   33,
-   0,
-   104,
-   0,
-   "LATENT"
-  ],
-  [
-   122,
-   4,
-   0,
-   104,
-   1,
-   "INT"
-  ],
-  [
-   123,
-   40,
-   0,
-   105,
-   0,
-   "LATENT"
-  ],
-  [
    124,
-   4,
+   43,
    0,
-   105,
-   1,
-   "INT"
+   104,
+   0,
+   "IMAGE"
   ],
   [
    125,
-   6,
+   34,
+   0,
+   105,
+   0,
+   "LATENT"
+  ],
+  [
+   126,
+   4,
+   0,
+   105,
+   1,
+   "INT"
+  ],
+  [
+   127,
+   41,
    0,
    106,
+   0,
+   "LATENT"
+  ],
+  [
+   128,
+   4,
+   0,
+   106,
+   1,
+   "INT"
+  ],
+  [
+   129,
+   6,
+   0,
+   107,
    0,
    "CLIP"
   ],
   [
-   126,
+   130,
    7,
    0,
-   107,
+   108,
    0,
    "VAE"
   ],
   [
-   127,
-   108,
-   0,
-   109,
-   0,
-   "_NODE_REPEATER_"
-  ],
-  [
-   128,
-   30,
-   0,
-   108,
-   0,
-   "IMAGE"
-  ],
-  [
-   129,
-   81,
-   0,
-   109,
-   1,
-   "STRING"
-  ],
-  [
-   130,
-   110,
-   0,
-   111,
-   0,
-   "_NODE_REPEATER_"
-  ],
-  [
    131,
-   101,
+   109,
    0,
    110,
    0,
-   "IMAGE"
+   "_NODE_REPEATER_"
   ],
   [
    132,
-   100,
+   31,
    0,
-   110,
-   1,
+   109,
+   0,
    "IMAGE"
   ],
   [
    133,
-   81,
+   82,
    0,
    110,
-   2,
+   1,
    "STRING"
   ],
   [
    134,
-   79,
-   0,
    111,
-   1,
-   "IMAGE"
-  ],
-  [
-   135,
-   112,
    0,
-   113,
+   112,
    0,
    "_NODE_REPEATER_"
   ],
   [
+   135,
+   102,
+   0,
+   111,
+   0,
+   "IMAGE"
+  ],
+  [
    136,
-   37,
+   101,
    0,
-   112,
-   0,
+   111,
+   1,
    "IMAGE"
   ],
   [
    137,
-   84,
+   18,
    0,
-   113,
-   1,
-   "STRING"
+   111,
+   2,
+   "IMAGE"
   ],
   [
    138,
-   114,
+   82,
    0,
-   115,
-   0,
-   "_NODE_REPEATER_"
+   111,
+   3,
+   "STRING"
   ],
   [
    139,
-   102,
+   80,
    0,
-   114,
-   0,
+   112,
+   1,
    "IMAGE"
   ],
   [
    140,
-   101,
+   113,
    0,
    114,
-   1,
-   "IMAGE"
+   0,
+   "_NODE_REPEATER_"
   ],
   [
    141,
-   100,
+   38,
    0,
-   114,
-   2,
+   113,
+   0,
    "IMAGE"
   ],
   [
    142,
-   84,
+   85,
    0,
    114,
-   3,
+   1,
    "STRING"
   ],
   [
    143,
-   82,
+   115,
+   0,
+   116,
+   0,
+   "_NODE_REPEATER_"
+  ],
+  [
+   144,
+   103,
+   0,
+   115,
+   0,
+   "IMAGE"
+  ],
+  [
+   145,
+   102,
    0,
    115,
    1,
    "IMAGE"
   ],
   [
-   144,
-   116,
-   0,
-   117,
-   0,
-   "_NODE_REPEATER_"
-  ],
-  [
-   145,
-   45,
-   0,
-   116,
-   0,
-   "MESH"
-  ],
-  [
    146,
-   49,
+   101,
    0,
-   116,
-   1,
-   "MESH"
+   115,
+   2,
+   "IMAGE"
   ],
   [
    147,
-   53,
+   18,
    0,
-   116,
-   2,
-   "MESH"
+   115,
+   3,
+   "IMAGE"
   ],
   [
    148,
-   87,
+   85,
    0,
-   117,
-   1,
+   115,
+   4,
    "STRING"
   ],
   [
    149,
-   118,
+   83,
    0,
-   119,
-   0,
-   "_NODE_REPEATER_"
-  ],
-  [
-   150,
-   103,
-   0,
-   118,
-   0,
-   "IMAGE"
-  ],
-  [
-   151,
-   102,
-   0,
-   118,
+   116,
    1,
    "IMAGE"
   ],
   [
-   152,
-   101,
+   150,
+   117,
    0,
    118,
-   2,
-   "IMAGE"
+   0,
+   "_NODE_REPEATER_"
+  ],
+  [
+   151,
+   46,
+   0,
+   117,
+   0,
+   "MESH"
+  ],
+  [
+   152,
+   50,
+   0,
+   117,
+   1,
+   "MESH"
   ],
   [
    153,
-   100,
+   54,
    0,
-   118,
-   3,
-   "IMAGE"
+   117,
+   2,
+   "MESH"
   ],
   [
    154,
-   87,
+   88,
    0,
    118,
-   4,
+   1,
    "STRING"
   ],
   [
    155,
-   85,
+   119,
+   0,
+   120,
+   0,
+   "_NODE_REPEATER_"
+  ],
+  [
+   156,
+   104,
+   0,
+   119,
+   0,
+   "IMAGE"
+  ],
+  [
+   157,
+   103,
    0,
    119,
    1,
    "IMAGE"
   ],
   [
-   156,
-   120,
-   0,
-   121,
-   0,
-   "_NODE_REPEATER_"
-  ],
-  [
-   157,
-   53,
-   0,
-   120,
-   0,
-   "MESH"
-  ],
-  [
    158,
-   90,
+   102,
    0,
-   121,
-   1,
-   "STRING"
+   119,
+   2,
+   "IMAGE"
   ],
   [
    159,
-   122,
+   101,
    0,
-   123,
-   0,
-   "_NODE_REPEATER_"
+   119,
+   3,
+   "IMAGE"
   ],
   [
    160,
-   47,
+   18,
    0,
-   122,
-   0,
-   "STRING"
+   119,
+   4,
+   "IMAGE"
   ],
   [
    161,
-   51,
+   88,
    0,
-   122,
-   1,
+   119,
+   5,
    "STRING"
   ],
   [
    162,
-   90,
+   86,
    0,
-   122,
-   2,
-   "STRING"
+   120,
+   1,
+   "IMAGE"
   ],
   [
    163,
-   88,
+   121,
+   0,
+   122,
+   0,
+   "_NODE_REPEATER_"
+  ],
+  [
+   164,
+   54,
+   0,
+   121,
+   0,
+   "MESH"
+  ],
+  [
+   165,
+   91,
+   0,
+   122,
+   1,
+   "STRING"
+  ],
+  [
+   166,
+   123,
+   0,
+   124,
+   0,
+   "_NODE_REPEATER_"
+  ],
+  [
+   167,
+   48,
+   0,
+   123,
+   0,
+   "STRING"
+  ],
+  [
+   168,
+   52,
    0,
    123,
    1,
    "STRING"
   ],
   [
-   164,
-   124,
-   0,
-   125,
-   0,
-   "_NODE_REPEATER_"
-  ],
-  [
-   165,
-   55,
-   0,
-   124,
-   0,
-   "MESH"
-  ],
-  [
-   166,
-   93,
-   0,
-   125,
-   1,
-   "STRING"
-  ],
-  [
-   167,
-   126,
-   0,
-   127,
-   0,
-   "_NODE_REPEATER_"
-  ],
-  [
-   168,
-   54,
-   0,
-   126,
-   0,
-   "STRING"
-  ],
-  [
    169,
-   47,
+   91,
    0,
-   126,
-   1,
+   123,
+   2,
    "STRING"
   ],
   [
    170,
-   51,
+   89,
    0,
-   126,
-   2,
+   124,
+   1,
    "STRING"
   ],
   [
    171,
-   93,
+   125,
    0,
    126,
-   3,
-   "STRING"
+   0,
+   "_NODE_REPEATER_"
   ],
   [
    172,
-   91,
+   56,
+   0,
+   125,
+   0,
+   "MESH"
+  ],
+  [
+   173,
+   94,
+   0,
+   126,
+   1,
+   "STRING"
+  ],
+  [
+   174,
+   127,
+   0,
+   128,
+   0,
+   "_NODE_REPEATER_"
+  ],
+  [
+   175,
+   55,
+   0,
+   127,
+   0,
+   "STRING"
+  ],
+  [
+   176,
+   48,
    0,
    127,
    1,
    "STRING"
   ],
   [
-   173,
-   128,
-   0,
-   129,
-   0,
-   "_NODE_REPEATER_"
-  ],
-  [
-   174,
-   61,
-   0,
-   128,
-   0,
-   "TRIMESH"
-  ],
-  [
-   175,
-   96,
-   0,
-   129,
-   1,
-   "STRING"
-  ],
-  [
-   176,
-   130,
-   0,
-   131,
-   0,
-   "_NODE_REPEATER_"
-  ],
-  [
    177,
-   54,
+   52,
    0,
-   130,
-   0,
+   127,
+   2,
    "STRING"
   ],
   [
    178,
-   47,
+   94,
+   0,
+   127,
+   3,
+   "STRING"
+  ],
+  [
+   179,
+   92,
+   0,
+   128,
+   1,
+   "STRING"
+  ],
+  [
+   180,
+   129,
+   0,
+   130,
+   0,
+   "_NODE_REPEATER_"
+  ],
+  [
+   181,
+   62,
+   0,
+   129,
+   0,
+   "TRIMESH"
+  ],
+  [
+   182,
+   97,
    0,
    130,
    1,
    "STRING"
   ],
   [
-   179,
-   51,
+   183,
+   131,
    0,
-   130,
-   2,
+   132,
+   0,
+   "_NODE_REPEATER_"
+  ],
+  [
+   184,
+   55,
+   0,
+   131,
+   0,
    "STRING"
   ],
   [
-   180,
-   96,
-   0,
-   130,
-   3,
-   "STRING"
-  ],
-  [
-   181,
-   94,
+   185,
+   48,
    0,
    131,
    1,
    "STRING"
   ],
   [
-   182,
-   132,
+   186,
+   52,
    0,
+   131,
+   2,
+   "STRING"
+  ],
+  [
+   187,
+   97,
+   0,
+   131,
+   3,
+   "STRING"
+  ],
+  [
+   188,
+   95,
+   0,
+   132,
+   1,
+   "STRING"
+  ],
+  [
+   189,
    133,
+   0,
+   134,
    0,
    "_NODE_REPEATER_"
   ],
   [
-   183,
-   71,
+   190,
+   72,
    0,
-   132,
+   133,
    0,
    "CONDITIONING"
   ],
   [
-   184,
-   99,
+   191,
+   100,
    0,
-   133,
+   134,
    1,
    "STRING"
   ],
   [
-   185,
-   134,
-   0,
+   192,
    135,
+   0,
+   136,
    0,
    "_NODE_REPEATER_"
   ],
   [
-   186,
-   103,
+   193,
+   104,
    0,
-   134,
+   135,
    0,
    "IMAGE"
   ],
   [
-   187,
-   102,
+   194,
+   103,
    0,
-   134,
+   135,
    1,
    "IMAGE"
   ],
   [
-   188,
-   101,
+   195,
+   102,
    0,
-   134,
+   135,
    2,
    "IMAGE"
   ],
   [
-   189,
-   100,
+   196,
+   101,
    0,
-   134,
+   135,
    3,
    "IMAGE"
   ],
   [
-   190,
-   99,
+   197,
+   18,
    0,
-   134,
+   135,
    4,
+   "IMAGE"
+  ],
+  [
+   198,
+   100,
+   0,
+   135,
+   5,
    "STRING"
   ],
   [
-   191,
-   97,
+   199,
+   98,
    0,
-   135,
+   136,
    1,
    "IMAGE"
   ]
@@ -8128,10 +8304,23 @@
   },
   {
    "id": 4,
-   "title": "1. Concept, fast: Qwen-Image 4-step",
+   "title": "0. Your image: start from concept art you already have",
    "bounding": [
     520,
     1880,
+    960,
+    272
+   ],
+   "color": "#3f789e",
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 5,
+   "title": "1. Concept, fast: Qwen-Image 4-step",
+   "bounding": [
+    520,
+    2232,
     2800,
     812
    ],
@@ -8140,11 +8329,11 @@
    "flags": {}
   },
   {
-   "id": 5,
+   "id": 6,
    "title": "1. Concept, full: Qwen-Image 20 steps",
    "bounding": [
     520,
-    2772,
+    3124,
     2800,
     812
    ],
@@ -8153,24 +8342,11 @@
    "flags": {}
   },
   {
-   "id": 6,
+   "id": 7,
    "title": "2. Edit: Qwen-Image-Edit 2509",
    "bounding": [
     520,
-    3664,
-    3260,
-    812
-   ],
-   "color": "#3f789e",
-   "font_size": 24,
-   "flags": {}
-  },
-  {
-   "id": 7,
-   "title": "3. Simplify: game-ready shapes, Qwen-Image-Edit 2509",
-   "bounding": [
-    520,
-    4806,
+    4016,
     3260,
     812
    ],
@@ -8180,10 +8356,23 @@
   },
   {
    "id": 8,
+   "title": "3. Simplify: game-ready shapes, Qwen-Image-Edit 2509",
+   "bounding": [
+    520,
+    5202,
+    3260,
+    812
+   ],
+   "color": "#3f789e",
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 9,
    "title": "4. Mesh: TRELLIS (MIT)",
    "bounding": [
     520,
-    5992,
+    6432,
     2340,
     645
    ],
@@ -8192,11 +8381,11 @@
    "flags": {}
   },
   {
-   "id": 9,
+   "id": 10,
    "title": "4. Mesh: Hunyuan3D 2.1 (excludes EU, UK, South Korea)",
    "bounding": [
     520,
-    7266,
+    7750,
     2340,
     440
    ],
@@ -8205,11 +8394,11 @@
    "flags": {}
   },
   {
-   "id": 10,
+   "id": 11,
    "title": "5. Texture: Hunyuan3D 2.1 (excludes EU, UK, South Korea)",
    "bounding": [
     520,
-    7786,
+    8270,
     1880,
     390
    ],
@@ -8218,11 +8407,11 @@
    "flags": {}
   },
   {
-   "id": 11,
+   "id": 12,
    "title": "6. Turntable: 8 flat frames to check the silhouette",
    "bounding": [
     520,
-    8928,
+    9412,
     2340,
     1148
    ],
@@ -8231,11 +8420,11 @@
    "flags": {}
   },
   {
-   "id": 12,
+   "id": 13,
    "title": "7. Rig: UniRig, articulationxl skeleton",
    "bounding": [
     520,
-    10156,
+    10640,
     1880,
     475
    ],
@@ -8244,11 +8433,11 @@
    "flags": {}
   },
   {
-   "id": 13,
+   "id": 14,
    "title": "8. Animate: Wan 2.2 image to video, five seconds",
    "bounding": [
     520,
-    11342,
+    11826,
     4180,
     812
    ],

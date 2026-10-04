@@ -103,6 +103,13 @@ STAGE_TITLE = r"^[0-9]+\. "
 #           below reads it, so a stage run on its own never pauses
 # on:       switched on when the graph opens
 STAGES = [
+    # No base graph: one LoadImage, for concept art made elsewhere.  On, it
+    # is the stage above every image stage, so Edit, Simplify, Mesh and
+    # Animate read it when nothing nearer is on; its upload button puts the
+    # file in input/.
+    {"key": "own_image",
+     "title": "0. Your image: start from concept art you already have",
+     "result": ("1", 0)},
     {"key": "concept_fast", "src": "txt2img_qwen_fast", "on": True,
      "title": "1. Concept, fast: Qwen-Image 4-step",
      "feed": {"4.text": "prompt"}, "takes": "6.batch_size", "pick": True,
@@ -155,6 +162,15 @@ STAGES = [
      "save": ("19", "asset_animate_last")},
 ]
 
+# Stage 0's graph, the one stage with no file in workflows/api/.
+OWN_IMAGE_GRAPH = {
+    "_comment": "Concept art you already have. Upload it here, or pick a file "
+                "already in input/. With this stage on and the Concept stages "
+                "off, Edit, Simplify, Mesh and Animate start from it.",
+    "1": {"class_type": "LoadImage", "inputs": {"image": "example.png"},
+          "_meta": {"title": "Your image"}},
+}
+
 # The texts typed at the top: key -> (stage, node, input, title).  Each takes
 # its default from the base graph it feeds.
 TEXTS = {
@@ -176,15 +192,16 @@ PICK = "Image Filter"
 # one present.  The picker comes last, muted while any source is on.
 SWITCHES = {
     "image_switch:edit": {
-        "type": "IMAGE", "sources": ["concept", "concept_fast"],
+        "type": "IMAGE", "sources": ["concept", "concept_fast", "own_image"],
         "title": "2. Edit takes",
         "picker": "2. Edit: image to edit"},
     "image_switch:simplify": {
-        "type": "IMAGE", "sources": ["edit", "concept", "concept_fast"],
+        "type": "IMAGE", "sources": ["edit", "concept", "concept_fast", "own_image"],
         "title": "3. Simplify takes",
         "picker": "3. Simplify: image to simplify"},
     "image_switch:mesh": {
-        "type": "IMAGE", "sources": ["simplify", "edit", "concept", "concept_fast"],
+        "type": "IMAGE",
+        "sources": ["simplify", "edit", "concept", "concept_fast", "own_image"],
         "title": "4. Mesh and 5. Texture take",
         "picker": "4. Mesh and 5. Texture: concept image"},
     "path_switch:texture": {
@@ -200,7 +217,8 @@ SWITCHES = {
         "title": "7. Rig mesh",
         "picker": "7. Rig: mesh to rig (container path)"},
     "image_switch:animate": {
-        "type": "IMAGE", "sources": ["simplify", "edit", "concept", "concept_fast"],
+        "type": "IMAGE",
+        "sources": ["simplify", "edit", "concept", "concept_fast", "own_image"],
         "title": "8. Animate takes",
         "picker": "8. Animate: start frame"},
 }
@@ -212,6 +230,11 @@ Only Stage 1, fast, is on when the graph opens.
 
 **Handing over.** Each stage takes its input from the nearest stage above it that
 is on. With Concept, Edit and Mesh all on, one queue goes from prompt to mesh.
+
+**Starting from your own concept art.** Switch on **0. Your image**, upload the
+file there or pick one already in `input/`, leave the Concept stages off, and
+switch on the stages to run: Edit, Simplify, Mesh, Texture, Animate. The Stage
+inputs row does the same for a file already in `output/`.
 
 **Takes and picks.** Each image stage (1 to 3) makes **Takes** images per queue,
 and saves them all. When a stage below it is on, the queue pauses after the
@@ -303,7 +326,8 @@ def build(info):
             title[nid] = name
         return nid
 
-    base = {s["key"]: json.loads((API_DIR / f"{s['src']}.json").read_text())
+    base = {s["key"]: (json.loads((API_DIR / f"{s['src']}.json").read_text())
+                       if "src" in s else OWN_IMAGE_GRAPH)
             for s in STAGES}
 
     # The texts typed at the top.  Their defaults are the base graphs' own.
@@ -670,14 +694,16 @@ def to_ui(api, group_of, title, wiring, info):
     group_of[str(muter["id"])] = group_of[str(readme["id"])] = "inputs"
 
     for s in STAGES:
-        src = json.loads((API_DIR / f"{s['src']}.json").read_text())
-        text = api_to_ui.NOTES.get(s["src"])
+        src = (json.loads((API_DIR / f"{s['src']}.json").read_text())
+               if "src" in s else OWN_IMAGE_GRAPH)
+        text = api_to_ui.NOTES.get(s.get("src"))
         comment = src.get("_comment", "")
         if isinstance(comment, list):
             comment = " ".join(comment)
         if not text:
             text = "\n".join(textwrap.wrap(comment, 64))
-        text += f"\n\n(From workflows/api/{s['src']}.json.)"
+        if "src" in s:
+            text += f"\n\n(From workflows/api/{s['src']}.json.)"
         note = note_node(fresh_id(), text, [0, 0], [420, 120 + 17 * text.count("\n")])
         nodes.append(note)
         group_of[str(note["id"])] = s["key"]
