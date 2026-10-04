@@ -328,6 +328,13 @@ say(f"aligned source by {mode}, x{scale:.4f}, {how}; cut {n_cut:,} head verts ab
     f"now height {shi.z - slo.z:.3f} on base {bhi.z - blo.z:.3f}, width {shi.x - slo.x:.3f} on "
     f"{bhi.x - blo.x:.3f}, depth {shi.y - slo.y:.3f} on {bhi.y - blo.y:.3f}")
 
+# An unposed copy of the aligned source, for lining things up by hand.
+select_only([source])
+bpy.ops.object.duplicate()
+source_rest = bpy.context.view_layer.objects.active
+source_rest.name = "source_rest"
+source_rest.hide_render = True
+
 # ---- pose the source into the base's rest pose -----------------------------
 # A concept is never drawn at exactly the rig's rest pose, and a wrap cannot
 # cross a pose difference: an arm twenty degrees too high becomes a web.  So
@@ -450,11 +457,12 @@ if cfg.get("check"):
     # The posed source beside the untouched base, for looking at the pose
     # match itself; nothing downstream reads it.
     os.makedirs(os.path.dirname(cfg["out"]) or ".", exist_ok=True)
-    select_only([source, base], base)
+    select_only([source, source_rest, base] + ([arm] if arm else []), base)
     bpy.ops.export_scene.gltf(filepath=f"{cfg['out']}_check.glb", export_format="GLB",
-                              use_selection=True, export_skins=False, export_animations=False,
+                              use_selection=True, export_skins=bool(arm), export_animations=False,
                               export_yup=True, export_materials="NONE")
-    say(f"wrote {cfg['out']}_check.glb: the posed source with the untouched base")
+    say(f"wrote {cfg['out']}_check.glb: the posed and the unposed source with the untouched base "
+        "and its armature")
 
 # ---- a wrap target without the source's layers ----------------------------
 # A drawn figure wears clothes, and a generated mesh keeps them as layers: a
@@ -483,6 +491,16 @@ if remesh > 0:
     target.hide_render = True
     say(f"wrap target: voxel remesh of the source at {voxel * 1000:.1f} mm, "
         f"{len(target.data.vertices):,} verts, {len(target.data.polygons):,} faces")
+
+# ---- a Blender file of this moment, for lining up by hand -------------------
+# Everything is in place and nothing has moved yet: the armature, the base and
+# its LODs with their weights, the source as posed (source), as aligned but
+# unposed (source_rest) and as the wrap sees it (wrap_target).
+if cfg.get("blend"):
+    os.makedirs(os.path.dirname(cfg["blend"]) or ".", exist_ok=True)
+    bpy.ops.wm.save_as_mainfile(filepath=cfg["blend"], copy=True)
+    say(f"wrote {cfg['blend']}: armature, base and LODs with weights, source posed, "
+        "source_rest unposed, wrap_target remeshed")
 
 # ---- an untouched copy, for the normals bake and as a record ---------------
 select_only([base])
@@ -1036,6 +1054,10 @@ def main() -> int:
     ap.add_argument("--dds", action="store_true",
                     help="also write each baked map as DDS (DXT5, with mipmaps) through "
                          "ImageMagick's convert, when it is on the PATH")
+    ap.add_argument("--blend", metavar="PATH",
+                    help="also save a .blend (Blender 4.5) of the lined-up scene before the wrap: "
+                         "armature, base and LODs with weights, the source posed and unposed, "
+                         "and the remeshed wrap target")
     ap.add_argument("--check", action="store_true",
                     help="also write <out>_check.glb: the posed source beside the untouched base")
     ap.add_argument("--free-slide", action="store_true",
@@ -1071,7 +1093,7 @@ def main() -> int:
         "align": args.align, "cut_margin": args.cut_margin, "pose_match": not args.no_pose_match,
         "free_slide": args.free_slide,
         "remesh": args.remesh, "seam": args.seam,
-        "check": args.check,
+        "check": args.check, "blend": to_container(args.blend) if args.blend else None,
         "wrap_method": args.wrap_method, "smooth_radius": args.smooth_radius,
         "smooth_passes": args.smooth_passes,
         "metal": args.metal, "rough": args.rough, "ray": args.ray,
@@ -1098,6 +1120,8 @@ def main() -> int:
             info["written"][name] = dds
             print(f"  wrote      {dds}")
     record.write_text(json.dumps(info, indent=1))
+    if args.blend:
+        print(f"  wrote      {args.blend}")
     print(f"  record     {args.out}.json")
     return 0
 
