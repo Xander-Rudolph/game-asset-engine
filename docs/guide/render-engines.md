@@ -31,7 +31,7 @@ recreating the container. It has not been tried.
 
 ## What it costs
 
-The same 16 cell sheet, `output/assets/alchemist_warrior/rig.fbx` with a
+The same 16 cell sheet, `output/assets/fighter/rig.fbx` with a
 compiled walk, four poses across four angles:
 
 | | EEVEE, `llvmpipe` | Cycles, CUDA |

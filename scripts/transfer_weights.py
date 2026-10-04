@@ -48,7 +48,7 @@ def load(path):
     elif p.endswith(".obj"):
         bpy.ops.wm.obj_import(filepath=path)
     else:
-        bpy.ops.import_scene.gltf(filepath=path)
+        bpy.ops.import_scene.gltf(filepath=path, bone_heuristic="TEMPERANCE")
 
 
 def join_meshes(objs):

@@ -7,13 +7,14 @@ below. On 2026-10-02 its stage panel, relays and switches were driven there for
 twenty combinations of stages, and the prompt the editor would send was captured
 with the submit call stubbed out, then checked against the server's node
 definitions; on 2026-10-03, after the picks were added, six combinations were
-captured and checked again. Seven runs have been queued on the reference
+captured and checked again. Eight runs have been queued on the reference
 machine: on 2026-09-30, Concept, fast; Edit, twice, from its picker; TRELLIS and
 Turntable from a picked edit; and Concept, Edit and TRELLIS as one queue; on
 2026-10-02, Rig on a saved TRELLIS mesh, and Animate, which ran once given the
 owner's 20-step route without the 4-step LoRAs, at 480x640, after four
 out-of-memory failures with the LoRAs on; on 2026-10-03, Concept, fast, and Edit
-as one queue with two takes each, pausing for the pick. The figures are under
+as one queue with two takes each, pausing for the pick, and Your image straight
+to TRELLIS. The figures are under
 [Measured runs](#measured-runs). Concept, full, Simplify, the Hunyuan3D mesh and
 Texture have not been queued from this graph. `complete_workflow.json` was built
 by the owner, and the prompt for each of its seven flows was captured and checked
@@ -38,6 +39,8 @@ open from the sidebar under **Workflows**:
 1. Write the subject in **Prompt**. It feeds both Concept stages. **Edit
    instruction** feeds Stage 2 and **Motion prompt** Stage 8. **Takes** is how
    many images each of Stages 1 to 3 makes per queue; two when the graph opens.
+   Already have concept art? Switch on **0. Your image** instead, upload the file
+   there or pick one already in `input/`, and leave the Concept stages off.
 2. Switch stages on in the **Stages** panel. Only Stage 1, fast, is on when the
    graph opens. The arrow on each row jumps to that stage.
 3. To start anywhere but Concept, pick that stage's input in the **Stage
@@ -59,9 +62,28 @@ and muted a switch of the new graph, which then vanished from the prompt; on
 2026-10-03 the same thing muted the CLIP broadcaster, and every text encoder
 was sent without a CLIP. Read in `node_mode_relay.js` at the commit the
 Dockerfile pins: `stabilize()` reschedules itself and never checks that its node
-is still in a graph. Seen when a graph is loaded into a tab in place of another;
-whether switching between workflow tabs is safe was not checked. Open this
-graph in a new tab, and if nodes mute themselves for no reason, reload the page.
+is still in a graph.
+
+On 2026-10-04 it reached `complete_workflow.json`: opened after this graph's
+stages had been switched, its CLIP switch was muted and its LoRA loader
+bypassed, so Basic Image Editing failed validation with `Required input is
+missing: clip` and Image Edit + LoRA failed with `'NoneType' object has no
+attribute 'tokenize'`. It began with image 0.1.5: the 10 relays and repeaters of
+0.1.3 and 0.1.4 held no link number that a relay could follow into those nodes,
+while the stage-input pickers of 0.1.5 added 18 more, one of which reads link
+135 (in that graph, the muted GGUF CLIP loader into the CLIP switch) and writes
+through link 134 (the checkpoint into the same switch). A relay copies the mode
+of what its input links come from onto what its output links lead to
+(`node_mode_relay.js`, `stabilize()`); a leftover repeater does nothing until its
+own mode changes, which it cannot once its graph is gone. The node packs and
+`complete_workflow.json` are the same in all four images. Since then
+`scripts/build_asset_workflow.py` numbers this
+graph's nodes from 10000 and its links from 100000, which no other graph here
+uses, so its leftover relays find nothing; the same sequence in the editor then
+left both edit groups whole. `complete_workflow.json` has relays of its own,
+numbered from 1, which can still reach a graph opened after it. Open a graph in
+a new tab, and if nodes mute themselves for no reason, close the other graph's
+tab and reload the page.
 :::
 
 ### Picking a take
@@ -91,7 +113,7 @@ Simplify repeat the encoded source that many times before sampling, so each
 take is a new seed on the same input.
 
 The Image Filter node comes from cg-image-filter, which the Dockerfile added on
-2026-10-02 and image 0.1.5 (built and pushed 2026-10-03) is the first to carry.
+2026-10-02 and image 0.1.5 (built and pushed 2026-10-03) is the first to carry. Image 0.1.6 (built and pushed later on 2026-10-03, digest `e83e51df`) is the first to carry the graph with its own-image start, Stage 0, and 0.1.7 (2026-10-04, digest `914a3ab9`) the first whose graph numbers its nodes from 10000, so its relays cannot reach `complete_workflow.json` (the relay warning below).
 An earlier image lacks it, and the editor then opens
 this graph with four missing nodes; the stages still run, but nothing pauses
 and nothing flows between them. Rebuild the image, or clone the pack into
@@ -104,6 +126,7 @@ holds here too.
 
 | Stage | Built from | Saves |
 |---|---|---|
+| 0. Your image | one Load Image node, no base graph | nothing; it reads `input/` |
 | 1. Concept, fast | `txt2img_qwen_fast.json`, **Takes** per queue, then a pick | `output/asset_concept_fast_NNNNN_.png`, one per take |
 | 1. Concept, full | `txt2img_qwen.json`, the same | `output/asset_concept_NNNNN_.png` |
 | 2. Edit | `img_edit_qwen.json`, instruction from **Edit instruction**, **Takes** per queue, then a pick | `output/asset_edit_NNNNN_.png` |
@@ -136,8 +159,10 @@ motion in **Motion prompt**, not the subject again.
 ### How a stage finds its input
 
 Each stage takes its input from the **nearest stage above it that is on**. Edit
-reads a Concept stage, Simplify reads Edit, or a Concept stage if Edit is off,
-and so on down. Texture reads the mesh the Mesh stage saved and the same image
+reads a Concept stage, or Your image, Simplify reads Edit, or a Concept stage if
+Edit is off, and so on down; Your image is the stage above every image stage,
+so with the Concept stages off it feeds whichever of Edit, Simplify, Mesh and
+Animate is nearest. Texture reads the mesh the Mesh stage saved and the same image
 the Mesh stage used; Turntable and Rig read Texture's mesh, or a Mesh stage's;
 Animate reads the same image stages as Mesh does.
 
@@ -316,6 +341,11 @@ the editor. None of it generated anything.
   Concept latents and to a RepeatLatentBatch in Edit and in Simplify. Run G was
   queued from the editor itself, and the pause window was driven through its
   own click handlers.
+- The same day, with Stage 0 added (149 nodes, 199 links), nine combinations
+  were captured and checked, six of them with Your image on: alone, with Mesh,
+  with Edit and Mesh, with Simplify and Texture, with Animate, and with Concept,
+  fast, and Edit on at once, where Edit read the concept and not the image, as
+  the nearest-above rule says.
 
 ### Measured runs
 
@@ -336,6 +366,7 @@ queued on 2026-10-02 from the captured prompts.
 | E | 7. Rig | its path box, set to `TRELLIS_2026-10-01-00-08-06.glb` from C's day | 21.6 | `rigged/asset_articulationxl.fbx`, 2,474,364 bytes, with a skeleton and skinning |
 | F | 8. Animate | its picker, set to A's concept | 604.7 | `video/asset_animate_00001_.webm`, vp9 at 480x640 and 16 fps, its `.webp` twin, and `asset_animate_last_00001_.png` |
 | G | 1. Concept, fast, 2. Edit, Takes 2 | the prompt; the second take clicked at the pause | 289.0, of which 33 to the pause | `asset_concept_fast_00008_.png` and `_00009_`, 1104x1472; `asset_edit_00006_.png` and `_00007_`, 880x1184, both from the second concept |
+| H | 0. Your image, 4. TRELLIS | `input/my_concept.png`, a copy of G's second concept, named in Stage 0 | 33.0, on a cold TRELLIS pipeline after a container start | `mesh/TRELLIS_2026-10-04-02-31-27.glb`, 48,000 triangles |
 
 - **The hand-over worked both ways.** In B, Edit's refresh arrow selected the
   concept A had just made, the newest file, and the two queues ran on different

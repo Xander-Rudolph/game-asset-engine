@@ -60,7 +60,7 @@ ROOT = Path(__file__).resolve().parent.parent
 # checked changed at least 7 px by 8 levels in its busiest angle (the MPFB
 # viseme_aa row at 128 px; the add-jaw and ICT mouth sheets changed more).
 # The floor still holds on Cycles, which render_sheet.py has drawn with since
-# 2026-09-18: `render_sheet.py output/assets/alchemist_warrior/rig.fbx --poses
+# 2026-09-18: `render_sheet.py output/assets/fighter/rig.fbx --poses
 # frames:1,1 --angles 2 --size 128 --check` (2026-09-18) called row 1 the rest
 # pose repeated, `silhouette max difference 0.0000, and no pixel changed by 8
 # levels or more`, so path tracing one scene twice is not noise this has to

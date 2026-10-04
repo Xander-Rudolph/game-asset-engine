@@ -1402,7 +1402,7 @@ about 150 MB and twelve are 1.8 GB.
 A rolled character is named after what it is made of, `04-ty-basics`. One that
 has been kept is somebody: give a roster entry a `"name"` and the slug, the
 folder, the two images and the label on the sheet all take it, as
-`01-warrior`, `06-lord-entropy`, `11-alchemist`.
+`01-warrior`, `06-lord`, `11-mage`.
 
 ### Keeping four of twelve
 

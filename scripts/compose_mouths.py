@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Cut a talking portrait's mouths out of whole-image edits, and prove the rest is untouched.
 
-    scripts/compose_mouths.py output/lipsync/lord_vitriol/portrait.png \\
-        --box 410,440,204,190 --edits output/lipsync/lord_vitriol/edits --feather 8
+    scripts/compose_mouths.py output/lipsync/herald/portrait.png \\
+        --box 410,440,204,190 --edits output/lipsync/herald/edits --feather 8
 
-    scripts/compose_mouths.py output/lipsync/lord_vitriol/portrait.png \\
-        --box 420,444,184,160 --edits output/lipsync/lord_vitriol/edits \\
-        --out output/lipsync/lord_vitriol/_trials/small_box        # try another box
+    scripts/compose_mouths.py output/lipsync/herald/portrait.png \\
+        --box 420,444,184,160 --edits output/lipsync/herald/edits \\
+        --out output/lipsync/herald/_trials/small_box        # try another box
 
-    scripts/compose_mouths.py --check output/lipsync/lord_vitriol/manifest.json
+    scripts/compose_mouths.py --check output/lipsync/herald/manifest.json
 
     scripts/compose_mouths.py --selftest                       # needs no pictures
 
