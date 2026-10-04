@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """Play a mouth set against a timeline as an MP4, and lay the mouths out on one labelled sheet.
 
-    scripts/preview_lipsync.py output/lipsync/lord_vitriol/manifest.json \\
-        output/lipsync/lord_vitriol/concord.json
+    scripts/preview_lipsync.py output/lipsync/herald/manifest.json \\
+        output/lipsync/herald/concord.json
 
-    scripts/preview_lipsync.py output/lipsync/lord_vitriol/manifest.json \\
-        output/lipsync/lord_vitriol/concord_12fps.json --label --no-sheet
+    scripts/preview_lipsync.py output/lipsync/herald/manifest.json \\
+        output/lipsync/herald/concord_12fps.json --label --no-sheet
 
-    scripts/preview_lipsync.py output/lipsync/lord_vitriol/manifest.json \\
-        output/lipsync/lord_vitriol/vial_12fps.json --height 512 --no-sheet
+    scripts/preview_lipsync.py output/lipsync/herald/manifest.json \\
+        output/lipsync/herald/line_12fps.json --height 512 --no-sheet
 
-    scripts/preview_lipsync.py output/lipsync/lord_vitriol/manifest.json   # sheet only
+    scripts/preview_lipsync.py output/lipsync/herald/manifest.json   # sheet only
 
 WHY: a mouth set is judged in two ways, and neither is a number. Each mouth must
 read as its shape, which needs the nine side by side; and the set must read as

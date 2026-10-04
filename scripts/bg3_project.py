@@ -4,7 +4,7 @@ mesh's topology, UVs and skin weights, and bake the generated colour onto it.
 
     scripts/bg3_project.py BASE.glb SOURCE.glb --out output/bg3/halfling_m \
         [--colour output/textures/<name>/hunyuan_output.jpg] [--size 2048]
-        [--lock eyes,mouth,neck] [--keep front,back]
+        [--lock Finger,Wrist] [--blend PATH] [--extra HEAD.glb]
 
 Why this exists: a generated mesh is triangle soup with no edge loops, its own
 UV atlas and, at best, a `bone_N` skeleton.  A game that animates characters on

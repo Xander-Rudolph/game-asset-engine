@@ -2,14 +2,14 @@
 """Make a talking portrait, then its nine mouths, with the edit graph, and compose them.
 
     # 1. the portrait: a head-and-shoulders crop of the concept, lips closed
-    scripts/make_mouths.py --portrait-from output/assets/lord_vitriol/concept.png \\
-        --crop 372,65,340,340 --out output/lipsync/lord_vitriol
+    scripts/make_mouths.py --portrait-from output/assets/herald/concept.png \\
+        --crop 372,65,340,340 --out output/lipsync/herald
 
     # 2. the mouths, once the portrait is approved and the box chosen
-    scripts/make_mouths.py output/lipsync/lord_vitriol/portrait.png \\
+    scripts/make_mouths.py output/lipsync/herald/portrait.png \\
         --box 410,440,204,190 --shapes XABCDEF --feather 8
 
-    scripts/make_mouths.py output/lipsync/lord_vitriol/portrait.png \\
+    scripts/make_mouths.py output/lipsync/herald/portrait.png \\
         --box 410,440,204,190 --shapes XAB --dry-run      # print the prompts only
 
 Every edit, the portrait's included, runs `workflows/api/img_edit_qwen.json`
@@ -21,12 +21,12 @@ if given, keeps that as `source_crop.png`, and edits it at `--seed` and denoise
 at the portrait, approve it, and choose the box on it. An existing
 `portrait.png` is never replaced; delete it to make it again. Crop a square: the
 graph's FluxKontextImageScale snaps every input to its nearest trained
-resolution, and a square comes back at 1024x1024. lord_vitriol's 340x340 crop
+resolution, and a square comes back at 1024x1024. herald's 340x340 crop
 at 372,65 did, with the lips closed, and a second run at the same seed gave a
 pixel-identical portrait.
 
 THE BOX goes around the mouth and the whole chin, with room for the jaw to
-drop. On lord_vitriol a 184x160 box that stopped 36 px under the resting chin
+drop. On herald a 184x160 box that stopped 36 px under the resting chin
 drifted up to 3.04 on D, 5.41 along its bottom edge where the lowered chin was
 cut; a 204x190 box brought every shape to between 1.48 and 1.74, about what the
 X edit drifts (1.54). compose_mouths.py can be rerun on the same edits with
@@ -43,10 +43,10 @@ as `edits/<S>.png` beside the portrait. Then it calls
 drift in a ring round the box and writes `manifest.json`. Then check it and
 look at it:
 
-    scripts/compose_mouths.py --check output/lipsync/lord_vitriol/manifest.json
-    scripts/preview_lipsync.py output/lipsync/lord_vitriol/manifest.json
+    scripts/compose_mouths.py --check output/lipsync/herald/manifest.json
+    scripts/preview_lipsync.py output/lipsync/herald/manifest.json
 
-lord_vitriol's set is made with `--shapes XABCDEF` because its G and H edits
+herald's set is made with `--shapes XABCDEF` because its G and H edits
 failed and were moved to `_trials/pass2`; asking it for all nine would make
 them again, with the same seed and instructions, and put them back in the set.
 
@@ -61,7 +61,7 @@ memory and prompt of every edit are kept in `make_mouths.json` across runs,
 with the drift from the latest compose.
 
 DENOISE: 0.85 for mouths by default, not the graph's 1.0. On one portrait,
-lord_vitriol, with the same D instruction and seed, 1.0 reshaped the whole face
+herald, with the same D instruction and seed, 1.0 reshaped the whole face
 into a shout and drifted 19.70 round the box, and 0.85 opened the mouth and
 drifted 3.04. That is one shape on one face: rerun a shape that barely changed
 with a higher `--denoise` after deleting its edit. The portrait uses 1.0.

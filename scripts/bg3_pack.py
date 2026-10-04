@@ -2,8 +2,8 @@
 """Pack a Baldur's Gate 3 file-override mod and drop it in the game's Mods folder.
 
     scripts/bg3_pack.py --name HalflingMod \\
-        --replace HFL_F_NKD_Body_A.GR2=output/bg3/halfling_f_v9.gr2 \\
-        --replace HFL_M_NKD_Body_A.GR2=output/bg3/halfling_m_v8.gr2 --install
+        --replace HFL_F_NKD_Body_A.GR2=output/bg3/<name>_f.gr2 \\
+        --replace HFL_M_NKD_Body_A.GR2=output/bg3/<name>_m.gr2 --install
 
 A pak is a folder tree with a `Mods/<Name>/meta.lsx` in it, and the game reads
 a file from the highest-priority pak that carries its path.  So a body made by
@@ -43,7 +43,7 @@ Everything this writes is derived from Larian's content, so it stays under
 body whose shape came through Hunyuan3D is for your own machine, since that
 licence's territory clause does not fit a worldwide mod (BG3-012, BG3-013).
 The override mechanism is the modding community's practice; whether this pak
-loads and shows the body was not yet seen in the game when this was written.
+loads and shows the body was seen on 2026-10-03: the game took it and the bodies changed.
 """
 from __future__ import annotations
 
@@ -287,7 +287,7 @@ def main() -> int:
     ap.add_argument("--name", required=True, help="mod name; also its folder and the pak's file name")
     ap.add_argument("--replace", action="append", default=[], metavar="NAME=FILE",
                     help="put FILE at the virtual path of NAME in Models.pak (e.g. "
-                         "HFL_F_NKD_Body_A.GR2=output/bg3/halfling_f_v9.gr2); repeatable")
+                         "HFL_F_NKD_Body_A.GR2=output/bg3/<name>_f.gr2); repeatable")
     ap.add_argument("--file", action="append", default=[], metavar="VIRTUALPATH=FILE",
                     help="put FILE at this virtual path; repeatable")
     ap.add_argument("--author", default="", help="meta.lsx Author")

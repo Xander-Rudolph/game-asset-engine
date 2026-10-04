@@ -3,7 +3,7 @@
  "researched": "2026-10-03",
  "checked": "2026-10-03",
  "statuses": {
-  "confirmed": 35,
+  "confirmed": 37,
   "unsettled": 2,
   "corrected": 4,
   "unchecked": 2
@@ -1035,6 +1035,50 @@
     }
    ],
    "as_first_reported": "Run on this host on 2026-10-03: Models.pak lists, per halfling body type, six heads HFL_<F|M>_NKD_Head_A to F and an elder head under Generated/Public/Shared/Assets/Characters/_Anims/Halflings/_<Female|Male>/Resources/, and under _Models/Halflings/.../Resources/ the genital sets HFL_<F|M>_NKD_Body_Genital_A, B and C with _NoHair variants, HFL_<F|M>_NKD_Body_Leaf_A and, for the female, HFL_F_NKD_Body_NippleCovers_B. Divine extracted and converted all 29 under Wine. Divine's extract-single-file takes the -f path with forward slashes as list-package prints it; given backslashes it wrote no file and printed nothing at -l warn, and the following convert-model failed with \"Could not find file\". Converted, each head is 8 meshes and about 8,980 vertices and Genital_A 3,988 vertices in 2 meshes; they sit in the body's frame (female Head_A from z 1.155 to 1.226 against the body's 1.064 neck ring; Genital_A from z 0.515 to 0.624)."
+  },
+  {
+   "id": "BG3-044",
+   "status": "confirmed",
+   "kind": "measurement",
+   "load_bearing": false,
+   "claim": "Run on 2026-10-03 in the container's Blender 4.5.9: scripts/bg3_trim.py with its default factors (upper_arm 0.80, forearm 0.85, scapula 0.92, thigh 0.80, shin 0.85, pelvis 0.88, belly 0.80, waist 0.85, chest 0.92) and the neck ring held over 0.08 of the height moved the female body's vertices 0.0050 m on average (max 0.0251) and the male's 0.0051 (max 0.0318); measured at fixed fractions of the height, width by depth, the female waist went from 0.366 by 0.235 m to 0.327 by 0.202, hips 0.383 by 0.199 to 0.343 by 0.159, thigh 0.330 by 0.133 to 0.301 by 0.106, and the male waist 0.330 by 0.297 to 0.294 by 0.253, hips 0.340 by 0.231 to 0.307 by 0.196, thigh 0.319 by 0.152 to 0.291 by 0.122. A first run moved the thighs and upper arms by only 0.008 m because twist bones (Hip_L_Twist_01) end in a number, not the side; the side is now read from any _L or _R part. Posed alike with the original (shoulders 55 degrees down, elbows 40, one hip 45 forward with the knee 70), the trimmed bodies bent without the kinks the projected ones showed. Divine converted the bodies and the trimmed private parts (genital sets A to C with and without hair, the leaf, the female nipple covers) to conformed GR2, and bg3_pack.py packed 18 files, 4,172,101 bytes; the pak was not installed. The owner judged the trimmed bodies out of proportion.",
+   "sources": [
+    "scripts/bg3_trim.py",
+    "output/bg3/halfling_{f,m}_trim.json (not kept)",
+    "shell session on this host, 2026-10-03"
+   ],
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "Run on this host on 2026-10-03; numbers from the scripts' own output; images and renders looked at; the owner's judgements are the owner's.",
+     "evidence": "As stated.",
+     "notes": ""
+    }
+   ],
+   "as_first_reported": "Run on 2026-10-03 in the container's Blender 4.5.9: scripts/bg3_trim.py with its default factors (upper_arm 0.80, forearm 0.85, scapula 0.92, thigh 0.80, shin 0.85, pelvis 0.88, belly 0.80, waist 0.85, chest 0.92) and the neck ring held over 0.08 of the height moved the female body's vertices 0.0050 m on average (max 0.0251) and the male's 0.0051 (max 0.0318); measured at fixed fractions of the height, width by depth, the female waist went from 0.366 by 0.235 m to 0.327 by 0.202, hips 0.383 by 0.199 to 0.343 by 0.159, thigh 0.330 by 0.133 to 0.301 by 0.106, and the male waist 0.330 by 0.297 to 0.294 by 0.253, hips 0.340 by 0.231 to 0.307 by 0.196, thigh 0.319 by 0.152 to 0.291 by 0.122. A first run moved the thighs and upper arms by only 0.008 m because twist bones (Hip_L_Twist_01) end in a number, not the side; the side is now read from any _L or _R part. Posed alike with the original (shoulders 55 degrees down, elbows 40, one hip 45 forward with the knee 70), the trimmed bodies bent without the kinks the projected ones showed. Divine converted the bodies and the trimmed private parts (genital sets A to C with and without hair, the leaf, the female nipple covers) to conformed GR2, and bg3_pack.py packed 18 files, 4,172,101 bytes; the pak was not installed. The owner judged the trimmed bodies out of proportion."
+  },
+  {
+   "id": "BG3-045",
+   "status": "confirmed",
+   "kind": "measurement",
+   "load_bearing": false,
+   "claim": "Run on 2026-10-03 with workflows/api/img_edit_qwen.json's model (Qwen-Image-Edit 2509 fp8, 20 steps, cfg 4, denoise 1.0) on a clay render of HFL_F_NKD_Body_A with head A, at the owner's request: (1) a text instruction to make the figure slender kept the pose and aged the face and body, at seeds 0 and 1 (160 s and 147 s); (2) DWPose on the render (DWPreprocessor from comfyui_controlnet_aux, 1024 px) as image 2 and the bodysuit concept qwenfast_00017_ as image 1 posed the concept to the skeleton and drew a child, at both seeds (233 s, 227 s), and again with adult wording in the prompt and a negative prompt against childlike features; no mesh was made from these; (3) with no skeleton, the clay render as image 2 made the output copy the render's body in the concept's colours (248 s); (4) a text-only instruction on qwenfast_00017_ to lower the arms about 30 degrees and bring the feet to hip width kept the face, build and proportions and lowered the arms, with the feet still wide (152 s). The owner's reading, given for these local trials, is that a clay render carries only pose and silhouette and that the general Fan Content Policy's AI clause excludes BG3 (BG3-004).",
+   "sources": [
+    "workflows/api/img_edit_qwen.json",
+    "output/bg3/qe_text_f_00001_.png (kept)",
+    "shell session on this host, 2026-10-03"
+   ],
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "Run on this host on 2026-10-03; numbers from the scripts' own output; images and renders looked at; the owner's judgements are the owner's.",
+     "evidence": "As stated.",
+     "notes": ""
+    }
+   ],
+   "as_first_reported": "Run on 2026-10-03 with workflows/api/img_edit_qwen.json's model (Qwen-Image-Edit 2509 fp8, 20 steps, cfg 4, denoise 1.0) on a clay render of HFL_F_NKD_Body_A with head A, at the owner's request: (1) a text instruction to make the figure slender kept the pose and aged the face and body, at seeds 0 and 1 (160 s and 147 s); (2) DWPose on the render (DWPreprocessor from comfyui_controlnet_aux, 1024 px) as image 2 and the bodysuit concept qwenfast_00017_ as image 1 posed the concept to the skeleton and drew a child, at both seeds (233 s, 227 s), and again with adult wording in the prompt and a negative prompt against childlike features; no mesh was made from these; (3) with no skeleton, the clay render as image 2 made the output copy the render's body in the concept's colours (248 s); (4) a text-only instruction on qwenfast_00017_ to lower the arms about 30 degrees and bring the feet to hip width kept the face, build and proportions and lowered the arms, with the feet still wide (152 s). The owner's reading, given for these local trials, is that a clay render carries only pose and silhouette and that the general Fan Content Policy's AI clause excludes BG3 (BG3-004)."
   }
  ]
 }
