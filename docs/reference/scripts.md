@@ -43,6 +43,7 @@ Everything in `scripts/`. Each takes `--help`.
 | `decimation_report.py` | Measure what each face budget costs, three ways, or bisect for an answer. |
 | `sheet_check.py` | Check a sprite sheet for the faults that are arithmetic. Exits non-zero on a fault. |
 | `transfer_weights.py` | Move a skeleton from a decimated proxy onto the original mesh. |
+| `bg3_project.py` | Deform a game's own base mesh onto a generated shape, keeping its topology, UVs and weights, and bake the generated colour, normals and AO onto its UVs as BM, NM and PM maps; written for Baldur's Gate 3, run on a stand-in only. See [the note](/reference/bg3-toolkit). |
 | `normalise_mesh.py` | Scale a mesh to a declared world size and record the rule. `--check` gates a whole folder. |
 | `make_seamless.py` | Make a texture tile, and say whether it worked. |
 | `cut_icon.py` | Cut an icon out of its background and size it for a UI. |
