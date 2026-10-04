@@ -90,8 +90,8 @@ character's own left:
 | rig | bones | up, off +Z | toes, off -Y |
 |---|---|---|---|
 | `output/rigged/unit_rogue.fbx` | 24 | 1.6 degrees | 3.0 degrees |
-| `output/assets/alchemist_warrior/rig.fbx` | 28 | 1.8 degrees | 0.0 degrees |
-| `output/rigged/unit_alchemist.fbx` | 30 | 5.0 degrees | 4.3 degrees |
+| `output/assets/fighter/rig.fbx` | 28 | 1.8 degrees | 0.0 degrees |
+| `output/rigged/unit_mage.fbx` | 30 | 5.0 degrees | 4.3 degrees |
 | `output/rigged/unit_beastmaster.fbx` | 30 | 3.6 degrees | 5.4 degrees |
 | `output/rigged/unit_warrior.fbx` | 47 | 1.1 degrees | 3.0 degrees |
 
@@ -136,7 +136,7 @@ follows:
 |---|---|---|---|
 | 24 | `bone_5` | 13.3 of 1470.7 (0.009) | head_end |
 | 28 | `bone_5` | 680.3 of 1113.2 (0.611) | head |
-| 30, unit_alchemist | `bone_5` | 251.9 of 1439.8 (0.175) | head_end |
+| 30, unit_mage | `bone_5` | 251.9 of 1439.8 (0.175) | head_end |
 | 30, unit_beastmaster | `bone_5` | 116.4 of 1457.6 (0.080) | head_end |
 | 47 | `bone_4` | 1436.1 of 306.5 (4.685) | head |
 | `input/3d/mixamo.fbx` | `mixamorig:HeadTop_End` | 0.0 of 523.0 (0.000) | head_end |
@@ -145,7 +145,7 @@ follows:
 Posed in Blender, turning the head role +18 X moves the highest head vertex
 back by 0.070 to 0.083 units on all five test rigs. The same turn on `head_end`,
 which an earlier version of this tool called the head, moved no vertex more
-than 0.004 (24 bones), 0.017 (unit_alchemist) or 0.009 (unit_beastmaster).
+than 0.004 (24 bones), 0.017 (unit_mage) or 0.009 (unit_beastmaster).
 
 ### Character axes
 
@@ -204,7 +204,7 @@ character's axes (`probe` reports the same displacements). On frame 1 of
 |---|---|---|---|---|
 | 24 | +0.466 | +0.317 | -0.767 | -0.222 |
 | 28 | +0.434 | +0.308 | -0.733 | -0.226 |
-| 30, unit_alchemist | +0.470 | +0.317 | -0.777 | -0.220 |
+| 30, unit_mage | +0.470 | +0.317 | -0.777 | -0.220 |
 | 30, unit_beastmaster | +0.469 | +0.313 | -0.787 | -0.219 |
 | 47 | +0.469 | +0.304 | -0.759 | -0.218 |
 

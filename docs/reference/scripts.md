@@ -43,8 +43,8 @@ Everything in `scripts/`. Each takes `--help`.
 | `decimation_report.py` | Measure what each face budget costs, three ways, or bisect for an answer. |
 | `sheet_check.py` | Check a sprite sheet for the faults that are arithmetic. Exits non-zero on a fault. |
 | `transfer_weights.py` | Move a skeleton from a decimated proxy onto the original mesh. |
-| `bg3_pack.py` | Pack a Baldur's Gate 3 file-override mod: stage GR2 or other files at their vanilla virtual paths from the `Models.pak` listing, write `meta.lsx`, pack with Divine under Wine, list it back, with `--install` copy it to the game's Mods folder and with `--enable` list it in `modsettings.lsx`. For testing a projected body on your own machine; not yet loaded in the game. See [the note](/reference/bg3-toolkit). |
-| `bg3_project.py` | Deform a game's own base mesh onto a generated shape, keeping its topology, UVs, weights and neck seam: align by shoulder height, face it the base's way, turn the limbs onto the rig's rest pose, wrap onto a voxel remesh of the shape, smooth the move, bake the shape's colour, normals and AO onto the base's UVs as BM, NM and PM, and write glTF with the `EXT_lslib_profile` metadata Divine needs, FBX and, with `--dds`, DDS. Written for Baldur's Gate 3 and run on its halfling bodies. See [the note](/reference/bg3-toolkit). |
+| `bg3_pack.py` | Pack a Baldur's Gate 3 file-override mod: stage GR2 or other files at their vanilla virtual paths from the `Models.pak` listing, write `meta.lsx`, pack with Divine under Wine, list it back, with `--install` copy it to the game's Mods folder, with `--enable` list it in `modsettings.lsx`, and with `--remove` take both back out. For testing a projected body on your own machine; the game loads it. See [the note](/reference/bg3-toolkit). |
+| `bg3_project.py` | Deform a game's own base mesh onto a generated shape, keeping its topology, UVs, weights and neck seam: align by shoulder height, face it the base's way, turn the limbs onto the rig's rest pose segment by segment in 3D, wrap onto a voxel remesh of the shape without sliding skin along the bones, smooth the move, bake the shape's colour, normals and AO onto the base's UVs as BM, NM and PM, and write glTF with the `EXT_lslib_profile` metadata Divine needs, FBX and, with `--dds`, DDS. Written for Baldur's Gate 3 and run on its halfling bodies. See [the note](/reference/bg3-toolkit). |
 | `normalise_mesh.py` | Scale a mesh to a declared world size and record the rule. `--check` gates a whole folder. |
 | `make_seamless.py` | Make a texture tile, and say whether it worked. |
 | `cut_icon.py` | Cut an icon out of its background and size it for a UI. |
@@ -149,8 +149,8 @@ Cycles path traces on the card, because it needs no GL context. EEVEE
 rasterises on the CPU through llvmpipe in this container, because the NVIDIA
 runtime gives it no GL libraries, and that is why the default changed.
 Measured on 2026-09-18 in `comfyui-packaged`, on the 16 cell sheet
-`scripts/render_sheet.py output/assets/alchemist_warrior/rig.fbx --poses
-transforms:output/poses/alchemist_warrior_walk.json --angles 4 --size 128`:
+`scripts/render_sheet.py output/assets/fighter/rig.fbx --poses
+transforms:output/poses/fighter_walk.json --angles 4 --size 128`:
 EEVEE, then the default, took 108.7 s wall and Cycles 3.12 s wall, which is
 5.97 s against 0.138 s per 128 px cell at 128 samples. Cycles
 took 1,531 MiB of the RTX 4070 Ti SUPER's 16,376 MiB while it ran (nvidia-smi
@@ -214,7 +214,7 @@ sits only in collections that are excluded or switched off for render. A file in
 which nothing is left exits 1 with `no mesh in that file renders: each is hidden
 from render or from the camera, or in a collection that is excluded or switched
 off for render`. Measured on 2026-09-16: the walk sheet (`poses/walk.json` on
-`output/assets/alchemist_warrior/rig.fbx`) rendered 0 pixels different from the
+`output/assets/fighter/rig.fbx`) rendered 0 pixels different from the
 script before `.blend` input was added, and so did the same rig saved as a
 `.blend` with its own lamp, camera, render settings and hidden objects. A `.blend`
 that links objects from a library has not been tried. Opening a `.blend` runs its

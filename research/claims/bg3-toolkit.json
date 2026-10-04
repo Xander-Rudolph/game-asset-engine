@@ -3,10 +3,10 @@
  "researched": "2026-10-03",
  "checked": "2026-10-03",
  "statuses": {
-  "confirmed": 32,
+  "confirmed": 34,
   "unsettled": 2,
   "corrected": 4,
-  "unchecked": 3
+  "unchecked": 2
  },
  "conflicts_found": [
   "BG3-009: Larian's FAQ says 160 GB of disk and recommends 32 GB RAM; the Toolkit Data DLC's Steam record says 150 GB and 16 GB minimum",
@@ -926,9 +926,9 @@
    "status": "confirmed",
    "kind": "capability",
    "load_bearing": false,
-   "claim": "Run on this host on 2026-10-03: Divine v1.20.4 under Wine, with -g bg3 -a create-package -c lz4, packed a staged folder into a .pak ('Package created successfully') and -a list-package read it back; scripts/bg3_pack.py built output/bg3/NimbleHalflings.pak, 1,567,339 bytes and three entries: Generated/Public/Shared/Assets/Characters/_Models/Halflings/_Female/Resources/HFL_F_NKD_Body_A.GR2 (928,268 bytes), the _Male counterpart (867,964 bytes) and Mods/NimbleHalflings/meta.lsx. Those two virtual paths are where Models.pak holds the vanilla bodies (list-package output). Divine's allowed compression methods are zlib, zlibfast, lz4, lz4hc and none (CommandLineArguments.cs).",
+   "claim": "Run on this host on 2026-10-03: Divine v1.20.4 under Wine, with -g bg3 -a create-package -c lz4, packed a staged folder into a .pak ('Package created successfully') and -a list-package read it back; scripts/bg3_pack.py built the halfling mod's pak (output/bg3/<Name>.pak), 1,567,339 bytes and three entries: Generated/Public/Shared/Assets/Characters/_Models/Halflings/_Female/Resources/HFL_F_NKD_Body_A.GR2 (928,268 bytes), the _Male counterpart (867,964 bytes) and Mods/<Name>/meta.lsx. Those two virtual paths are where Models.pak holds the vanilla bodies (list-package output). Divine's allowed compression methods are zlib, zlibfast, lz4, lz4hc and none (CommandLineArguments.cs).",
    "sources": [
-    "output/bg3/NimbleHalflings_pak.json (not in the repository)",
+    "output/bg3/<Name>_pak.json (not in the repository)",
     "output/bg3/models_pak_list.txt (not in the repository)",
     "https://raw.githubusercontent.com/Norbyte/lslib/master/Divine/CLI/CommandLineArguments.cs",
     "shell session on this host, 2026-10-03"
@@ -942,11 +942,11 @@
      "notes": ""
     }
    ],
-   "as_first_reported": "Run on this host on 2026-10-03: Divine v1.20.4 under Wine, with -g bg3 -a create-package -c lz4, packed a staged folder into a .pak ('Package created successfully') and -a list-package read it back; scripts/bg3_pack.py built output/bg3/NimbleHalflings.pak, 1,567,339 bytes and three entries: Generated/Public/Shared/Assets/Characters/_Models/Halflings/_Female/Resources/HFL_F_NKD_Body_A.GR2 (928,268 bytes), the _Male counterpart (867,964 bytes) and Mods/NimbleHalflings/meta.lsx. Those two virtual paths are where Models.pak holds the vanilla bodies (list-package output). Divine's allowed compression methods are zlib, zlibfast, lz4, lz4hc and none (CommandLineArguments.cs)."
+   "as_first_reported": "Run on this host on 2026-10-03: Divine v1.20.4 under Wine, with -g bg3 -a create-package -c lz4, packed a staged folder into a .pak ('Package created successfully') and -a list-package read it back; scripts/bg3_pack.py built the halfling mod's pak (output/bg3/<Name>.pak), 1,567,339 bytes and three entries: Generated/Public/Shared/Assets/Characters/_Models/Halflings/_Female/Resources/HFL_F_NKD_Body_A.GR2 (928,268 bytes), the _Male counterpart (867,964 bytes) and Mods/<Name>/meta.lsx. Those two virtual paths are where Models.pak holds the vanilla bodies (list-package output). Divine's allowed compression methods are zlib, zlibfast, lz4, lz4hc and none (CommandLineArguments.cs)."
   },
   {
    "id": "BG3-040",
-   "status": "unchecked",
+   "status": "confirmed",
    "kind": "mechanism",
    "load_bearing": true,
    "claim": "A .pak in the game's Mods folder that carries a file at the same virtual path as a vanilla file replaces that file when the mod is enabled, and a meta.lsx under Mods/<Name>/ with ModuleInfo attributes (Folder, Name, UUID, Version64 packed as major<<55 | minor<<47 | revision<<31 | build, Type Add-on, a PublishVersion node and a Story TargetModes entry) is what the in-game Mod Manager needs to list it. This is the modding community's practice as recalled when writing bg3_pack.py; no Larian or community document was read for it in this session, and the pak has not been loaded in the game. What was read on this host: the game's profile folder is ~/.local/share/Larian Studios/Baldur's Gate 3/ for its native Linux build (a Steam Play install keeps the same tree inside the Proton prefix), its Mods/ folder held five mod.io paks, and PlayerProfiles/Public/modsettings.lsx (version 4.8.0.700) lists an enabled mod as a ModuleShortDesc node with Folder, MD5, Name, PublishHandle, UUID (type guid) and Version64, which is the node bg3_pack.py --enable writes.",
@@ -960,6 +960,13 @@
      "read": "The profile folder, Mods folder and modsettings.lsx were read on this host on 2026-10-03, and the Mods-folder sentence corrected from the Proton prefix to the native build's path; the override mechanism itself remains unread and unrun.",
      "evidence": "ls and cat in the session.",
      "notes": ""
+    },
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "The owner enabled the pak in the game on 2026-10-03 and reported the halfling bodies changed; the game is the source.",
+     "evidence": "Owner's report in the session: the new bodies showed, with mangled limbs (see BG3-042).",
+     "notes": "Whether every detail of the meta.lsx layout is needed was not isolated; the file as written was accepted."
     }
    ],
    "as_first_reported": "A .pak in the game's Mods folder that carries a file at the same virtual path as a vanilla file replaces that file when the mod is enabled, and a meta.lsx under Mods/<Name>/ with ModuleInfo attributes (Folder, Name, UUID, Version64 packed as major<<55 | minor<<47 | revision<<31 | build, Type Add-on, a PublishVersion node and a Story TargetModes entry) is what the in-game Mod Manager needs to list it. The game's Mods folder on a Steam Play install is in the Proton prefix at compatdata/1086940/pfx/drive_c/users/steamuser/AppData/Local/Larian Studios/Baldur's Gate 3/Mods. This is the modding community's practice as recalled when writing bg3_pack.py; no Larian or community document was read for it in this session, and the pak has not been loaded in the game."
@@ -984,6 +991,28 @@
     }
    ],
    "as_first_reported": "Read on this host on 2026-10-03: Baldur's Gate 3 as installed by Steam at steamapps/common/Baldurs Gate 3/ is a native Linux build (file reports bin/bg3 as an ELF 64-bit x86-64 PIE executable, beside libOsiris.so, libParty.so, libSDL2.so, libBink2x64.so and NVIDIA NGX .so files, with no .exe in bin/), the game's compatdata/1086940 folder is empty, and its profile lives at ~/.local/share/Larian Studios/Baldur's Gate 3/ with Mods/ (five mod.io paks), PlayerProfiles/Public/modsettings.lsx and LevelCache/, with logs under ~/.local/state/Larian Studios/. The Toolkit (app 2934770) runs under Proton in its own prefix, whose dosdevices map S: to the Steam library and Z: to the Linux root."
+  },
+  {
+   "id": "BG3-042",
+   "status": "confirmed",
+   "kind": "measurement",
+   "load_bearing": true,
+   "claim": "On 2026-10-03 the owner loaded the first halfling pak in the game: the bodies changed, but the arms and legs were mangled in motion and the arms looked squashed down. Measured the same day: Divine's glTF of the GR2 has bind matrices, bone translations and rotations identical to the original body's within 0.00001 and the same parent lists for all 82 bones, with per-bone weight sums within 0.4 of the original's (9,389 vertices after export splitting against 9,390); so the skeleton is not the cause. A posed test in the container's Blender 4.5.9 (shoulders turned 55 degrees down, elbows 40, left hip 45 forward with the knee bent 70, right hip 20 back; the vanilla body and the projection posed identically through their skins) showed thin arms kinking at the elbow, a boxy step at the wrist where the held fingers met the thinned forearm, and a crease on the bent thigh. Two faults: the pose match aligned limbs in the front plane only while the base's forearm bends forward (Elbow to Wrist runs +0.055 in Y over 0.17 in X, about 18 degrees), and a nearest-point wrap slid skin along the bones (the along-bone part of the move averaged 5.8 cm per vertex on the female before masking, 2.5 cm across). bg3_project.py now aligns each segment in 3D (female: shoulders 29.4 and 30.1 degrees, elbows 11.1 and 12.5, hips 16.8 and 19.2, knees 20.2 and 21.5, feet 28.4 and 31.1, remaining error at most 3.6; male: shoulders 34.0 and 32.2, elbows 13.2 and 9.7, hips 15.1 twice, knees 10.9 and 9.5, feet 17.0 and 20.0), removes the along-bone part of each move, and the runs held the whole hand (--lock Finger,Wrist --lock-weight 0.5; 3,520 and 3,483 vertices held). Wrap mean move 0.0193 and 0.0172 of the height, max 0.0883 and 0.0750. In the posed test the new bodies bend cleanly at the elbows with the hands joined to the forearm; the bent thigh still creases. The pak built from them (1,566,187 bytes) was not installed or loaded.",
+   "sources": [
+    "output/bg3/halfling_f_v11.json and halfling_m_v10.json (not in the repository)",
+    "output/bg3/posetest/*_posed.png renders (not in the repository)",
+    "owner's report in the session, 2026-10-03"
+   ],
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "Numbers from the script's logs and a glTF comparison in Python on this host; the renders were looked at; the in-game report is the owner's.",
+     "evidence": "As stated.",
+     "notes": "The posed test is a proxy for the game's animation, not the game."
+    }
+   ],
+   "as_first_reported": "On 2026-10-03 the owner loaded the first halfling pak in the game: the bodies changed, but the arms and legs were mangled in motion and the arms looked squashed down. Measured the same day: Divine's glTF of the GR2 has bind matrices, bone translations and rotations identical to the original body's within 0.00001 and the same parent lists for all 82 bones, with per-bone weight sums within 0.4 of the original's (9,389 vertices after export splitting against 9,390); so the skeleton is not the cause. A posed test in the container's Blender 4.5.9 (shoulders turned 55 degrees down, elbows 40, left hip 45 forward with the knee bent 70, right hip 20 back; the vanilla body and the projection posed identically through their skins) showed thin arms kinking at the elbow, a boxy step at the wrist where the held fingers met the thinned forearm, and a crease on the bent thigh. Two faults: the pose match aligned limbs in the front plane only while the base's forearm bends forward (Elbow to Wrist runs +0.055 in Y over 0.17 in X, about 18 degrees), and a nearest-point wrap slid skin along the bones (the along-bone part of the move averaged 5.8 cm per vertex on the female before masking, 2.5 cm across). bg3_project.py now aligns each segment in 3D (female: shoulders 29.4 and 30.1 degrees, elbows 11.1 and 12.5, hips 16.8 and 19.2, knees 20.2 and 21.5, feet 28.4 and 31.1, remaining error at most 3.6; male: shoulders 34.0 and 32.2, elbows 13.2 and 9.7, hips 15.1 twice, knees 10.9 and 9.5, feet 17.0 and 20.0), removes the along-bone part of each move, and the runs held the whole hand (--lock Finger,Wrist --lock-weight 0.5; 3,520 and 3,483 vertices held). Wrap mean move 0.0193 and 0.0172 of the height, max 0.0883 and 0.0750. In the posed test the new bodies bend cleanly at the elbows with the hands joined to the forearm; the bent thigh still creases. The pak built from them (1,566,187 bytes) was not installed or loaded."
   }
  ]
 }

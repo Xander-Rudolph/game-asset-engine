@@ -347,36 +347,30 @@ def centroid(vs):
     return c / len(vs) if vs else None
 
 
-def slab(points, axis, at, half):
-    return [p for p in points if abs(getattr(p, axis) - at) <= half]
-
-
-def xz_angle(v):
-    return math.atan2(v.z, v.x)
-
-
 def pose_match():
     if arm is None or not cfg.get("pose_match", True):
         return
-    pairs = []
-    # (bone to turn, bone at the limb's start, bone at the limb's end, axis the
-    # slabs are cut along, plane the swing is measured in)
+    span = bhi.z - blo.z
+    # Each limb is a chain of segments, parent first: the bone that turns,
+    # the bone at the segment's far end, the axis the slabs are cut across,
+    # and the band that keeps the slabs to this limb.  Every segment is
+    # aligned in 3D, so a forearm that the rig bends forward as well as down
+    # is met in both.
+    segments = []
     for side in ("L", "R"):
         sh, el, wr = bone(f"Shoulder_{side}"), bone(f"Elbow_{side}"), bone(f"Wrist_{side}")
-        hip, kn, ank = bone(f"Hip_{side}"), bone(f"Knee_{side}"), bone(f"Ankle_{side}")
-        toes = bone(f"Toes_{side}")
-        # The forearm and the shin are measured, because slabs cut at the
-        # shoulder or the hip take in the torso; the whole limb is turned.
+        hip, kn, ank, toes = bone(f"Hip_{side}"), bone(f"Knee_{side}"), bone(f"Ankle_{side}"), bone(f"Toes_{side}")
         if sh and el and wr:
-            pairs.append((sh, el, wr, "x", "xz"))
+            arm_band = lambda p, h: abs(p.z - h.z) < 0.3 * span
+            segments += [(sh, el, "x", arm_band, 0.3, 0.9), (el, wr, "x", arm_band, 0.3, 0.9)]
         if hip and kn and ank:
-            pairs.append((hip, kn, ank, "z", "xz"))
-        # The foot is measured heel to toe, seen from above, and turned at
-        # the ankle: a drawn figure's feet point outwards, a rig's forwards.
-        if ank and toes:
-            pairs.append((ank, ank, toes, "y", "xy"))
-    if not pairs:
-        say("pose match: no Shoulder/Wrist or Hip/Ankle bones found; skipped")
+            leg_band = lambda p, h: abs(p.x - h.x) < 0.2 * span
+            segments += [(hip, kn, "z", leg_band, 0.3, 0.9), (kn, ank, "z", leg_band, 0.3, 0.9)]
+            if toes:
+                foot_band = lambda p, h: abs(p.x - h.x) < 0.2 * span and p.z < h.z + 0.08 * span
+                segments.append((ank, toes, "y", foot_band, 0.25, 0.75))
+    if not segments:
+        say("pose match: no Shoulder/Elbow/Wrist or Hip/Knee/Ankle bones found; skipped")
         return
     # The base's weights onto the source, by nearest face, so the armature
     # can move the source's limbs.
@@ -395,74 +389,50 @@ def pose_match():
     bpy.ops.object.modifier_apply(modifier=dt.name)
     am = source.modifiers.new("pose", "ARMATURE")
     am.object = arm
-    pts = [source.matrix_world @ v.co for v in source.data.vertices]
-    span = bhi.z - blo.z
-    for turn, b0, b1, axis, plane in pairs:
-        h0 = arm.matrix_world @ b0.head_local
-        h1 = arm.matrix_world @ b1.head_local
+    rest = [source.matrix_world @ v.co for v in source.data.vertices]
+
+    def posed():
+        dg = bpy.context.evaluated_depsgraph_get()
+        ev = source.evaluated_get(dg)
+        return [source.matrix_world @ v.co for v in ev.data.vertices]
+
+    def angle(u, v):
+        return math.degrees(math.acos(max(-1.0, min(1.0, u.normalized().dot(v.normalized())))))
+
+    for turn, end, axis, band, f0, f1 in segments:
+        h0 = arm.matrix_world @ turn.head_local
+        h1 = arm.matrix_world @ end.head_local
         base_dir = h1 - h0
-        # The source's limb: slabs of its vertices at the limb's start and end,
-        # on the same side of the body, cut across the axis the limb runs along.
-        at0, at1 = getattr(h0, axis), getattr(h1, axis)
-        side = 1.0 if h1.x >= 0 else -1.0
+        side = 1.0 if h0.x >= 0 else -1.0
+        a0, a1 = getattr(h0, axis), getattr(h1, axis)
+        at0, at1 = a0 + f0 * (a1 - a0), a0 + f1 * (a1 - a0)
         half = 0.03 * span
-        if axis == "x":
-            band = lambda p: abs(p.z - h0.z) < 0.3 * span     # the arm's height band
-        elif axis == "z":
-            band = lambda p: abs(p.x - h0.x) < 0.2 * span     # this leg, not the other
-        else:
-            band = lambda p: abs(p.x - h0.x) < 0.2 * span and p.z < h0.z + 0.08 * span   # this foot
-        i0 = [i for i, p in enumerate(pts) if abs(getattr(p, axis) - at0) <= half and p.x * side >= 0 and band(p)]
-        i1 = [i for i, p in enumerate(pts) if abs(getattr(p, axis) - at1) <= half and p.x * side >= 0 and band(p)]
+        # The source's vertices at two stations along this segment, picked
+        # in the source's rest pose and measured where the pose has put them.
+        i0 = [i for i, p in enumerate(rest) if abs(getattr(p, axis) - at0) <= half and p.x * side >= 0 and band(p, h0)]
+        i1 = [i for i, p in enumerate(rest) if abs(getattr(p, axis) - at1) <= half and p.x * side >= 0 and band(p, h0)]
         if not i0 or not i1:
-            say(f"pose match: no source vertices for {turn.name}; skipped")
+            say(f"pose match: no source vertices for {turn.name} to {end.name}; skipped")
             continue
-
-        def wrap_pi(a):
-            return (a + math.pi) % (2 * math.pi) - math.pi
-
-        def front_angle(v):
-            return math.atan2(v.z, v.x) if plane == "xz" else math.atan2(v.y, v.x)
-
-        rot_axis = "Y" if plane == "xz" else "Z"
-
-        def source_dir():
-            # the limb's direction on the source as the armature now poses it
-            dg = bpy.context.evaluated_depsgraph_get()
-            ev = source.evaluated_get(dg)
-            co = [source.matrix_world @ v.co for v in ev.data.vertices]
-            return centroid([co[i] for i in i1]) - centroid([co[i] for i in i0])
-
-        src_dir = source_dir()
-        want = wrap_pi(front_angle(base_dir) - front_angle(src_dir))
-        # The swing in that plane that takes the source's limb onto the
-        # base's, about the turned bone's own head as it is now posed.  The
-        # sense of the rotation through the pose is settled by trying it:
-        # pose, measure, and keep the sign that closed the gap.
+        now = posed()
+        src_dir = centroid([now[i] for i in i1]) - centroid([now[i] for i in i0])
+        rot_axis = src_dir.cross(base_dir)
+        want = angle(src_dir, base_dir)
+        if rot_axis.length < 1e-9 or want < 0.05:
+            pose_log[turn.name] = (0.0, round(want, 1))
+            continue
+        # Turn the segment, and everything below it, about the bone's head
+        # as it is now posed, by the one rotation that lays the measured
+        # direction onto the bone's.
         pb = arm.pose.bones[turn.name]
-        rest_basis = pb.matrix_basis.copy()
-        best = None
-        for cand in (want, -want):
-            pb.matrix_basis = rest_basis
-            bpy.context.view_layer.update()
-            hh = arm.matrix_world @ pb.head
-            R = Matrix.Translation(hh) @ Matrix.Rotation(cand, 4, rot_axis) @ Matrix.Translation(-hh)
-            pb.matrix = arm.matrix_world.inverted() @ R @ arm.matrix_world @ pb.matrix
-            bpy.context.view_layer.update()
-            err = abs(wrap_pi(front_angle(base_dir) - front_angle(source_dir())))
-            if best is None or err < best[0]:
-                best = (err, cand, pb.matrix_basis.copy())
-        pb.matrix_basis = best[2]
         bpy.context.view_layer.update()
-        pose_log[turn.name] = (round(math.degrees(best[1]), 1), round(math.degrees(best[0]), 1))
-        if axis == "z":
-            # The foot came round with the leg; it is turned back level at
-            # the ankle, where the base's own foot is flat.
-            pa = arm.pose.bones[b1.name]
-            ah = arm.matrix_world @ pa.head
-            R = Matrix.Translation(ah) @ Matrix.Rotation(-best[1], 4, "Y") @ Matrix.Translation(-ah)
-            pa.matrix = arm.matrix_world.inverted() @ R @ arm.matrix_world @ pa.matrix
-            bpy.context.view_layer.update()
+        hh = arm.matrix_world @ pb.head
+        R = Matrix.Translation(hh) @ Matrix.Rotation(math.radians(want), 4, rot_axis.normalized()) @ Matrix.Translation(-hh)
+        pb.matrix = arm.matrix_world.inverted() @ R @ arm.matrix_world @ pb.matrix
+        bpy.context.view_layer.update()
+        now = posed()
+        left = angle(centroid([now[i] for i in i1]) - centroid([now[i] for i in i0]), base_dir)
+        pose_log[turn.name] = (round(want, 1), round(left, 1))
     bpy.context.view_layer.update()
     select_only([source])
     bpy.ops.object.modifier_apply(modifier=am.name)
@@ -471,7 +441,7 @@ def pose_match():
     bpy.context.view_layer.update()
     for g in list(source.vertex_groups):
         source.vertex_groups.remove(g)
-    say(f"pose match: turned (degrees, remaining error) {pose_log} in the front plane and applied to the source")
+    say(f"pose match: turned (degrees, remaining error) {pose_log}, segment by segment in 3D, and applied to the source")
 
 
 pose_match()
@@ -624,6 +594,33 @@ def wrap(obj):
         bpy.ops.object.modifier_move_up(modifier=mod.name)
     bpy.ops.object.modifier_apply(modifier=mod.name)
     disp = [v.co - before[i] for i, v in enumerate(obj.data.vertices)]
+
+    # Keep each vertex at its station along its bone.  A shape's limbs are
+    # never quite the base's length, and a nearest-point wrap slides the skin
+    # along the arm towards a shorter wrist, which bunches it at the joints
+    # and bends it in the wrong place once the game animates the base's
+    # bones.  So the part of the move that runs along the vertex's bones is
+    # removed: girth changes, station does not.  --free-slide keeps it.
+    along = across = 0.0
+    if arm is not None and not cfg.get("free_slide"):
+        axes = {}
+        for b in arm.data.bones:
+            gi = obj.vertex_groups.find(b.name)
+            if gi >= 0:
+                ax = (arm.matrix_world @ b.tail_local) - (arm.matrix_world @ b.head_local)
+                axes[gi] = ax.normalized() if ax.length > 1e-9 else None
+        for i, v in enumerate(obj.data.vertices):
+            a = Vector((0.0, 0.0, 0.0))
+            for g in v.groups:
+                ax = axes.get(g.group)
+                if ax is not None:
+                    a += ax * g.weight
+            if a.length > 1e-9:
+                a.normalize()
+                slide = disp[i].dot(a)
+                along += abs(slide)
+                disp[i] = disp[i] - a * slide
+            across += disp[i].length
     radius = float(cfg.get("smooth_radius", 0.02)) * (bhi.z - blo.z)
     passes = int(cfg.get("smooth_passes", 2))
     if radius > 0 and passes > 0:
@@ -670,6 +667,18 @@ def wrap(obj):
     obj.data.normals_split_custom_set_from_vertices(merged)
     obj.data.update()
     moved = [(disp[i] * mask[i]).length for i in range(len(before))]
+    # Where the move went, by each vertex's heaviest group.
+    by_group = {}
+    for i, v in enumerate(obj.data.vertices):
+        if not v.groups:
+            continue
+        g = max(v.groups, key=lambda ge: ge.weight).group
+        by_group.setdefault(obj.vertex_groups[g].name, []).append(moved[i])
+    top = sorted(by_group.items(), key=lambda kv: -sum(kv[1]) / len(kv[1]))[:8]
+    n = max(1, len(before))
+    say(f"{obj.name}: move along the bones removed {along / n:.4f} per vertex on average, "
+        f"{across / n:.4f} kept across them; most moved groups (mean, max): "
+        + ", ".join(f"{k} ({sum(v) / len(v):.3f}, {max(v):.3f})" for k, v in top))
     return moved, n_locked
 
 
@@ -1029,6 +1038,9 @@ def main() -> int:
                          "ImageMagick's convert, when it is on the PATH")
     ap.add_argument("--check", action="store_true",
                     help="also write <out>_check.glb: the posed source beside the untouched base")
+    ap.add_argument("--free-slide", action="store_true",
+                    help="let the wrap move vertices along their bones too (the default removes "
+                         "that part of the move, so limbs keep the base's proportions)")
     ap.add_argument("--no-pose-match", action="store_true",
                     help="do not swing the source's arms and legs onto the base's before "
                          "wrapping (the default does, by borrowing the base's weights)")
@@ -1057,6 +1069,7 @@ def main() -> int:
         "size": args.size, "samples": args.samples,
         "lock": [s for s in args.lock.split(",") if s], "lock_weight": args.lock_weight,
         "align": args.align, "cut_margin": args.cut_margin, "pose_match": not args.no_pose_match,
+        "free_slide": args.free_slide,
         "remesh": args.remesh, "seam": args.seam,
         "check": args.check,
         "wrap_method": args.wrap_method, "smooth_radius": args.smooth_radius,

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Pack a Baldur's Gate 3 file-override mod and drop it in the game's Mods folder.
 
-    scripts/bg3_pack.py --name NimbleHalflings \\
+    scripts/bg3_pack.py --name HalflingMod \\
         --replace HFL_F_NKD_Body_A.GR2=output/bg3/halfling_f_v9.gr2 \\
         --replace HFL_M_NKD_Body_A.GR2=output/bg3/halfling_m_v8.gr2 --install
 
@@ -220,6 +220,34 @@ def profile_dir() -> Path | None:
     return p if p.is_dir() else None
 
 
+def disable_in_modsettings(profile: Path, mod_uuid: str) -> str:
+    """Drop the mod's ModuleShortDesc from modsettings.lsx, after a backup."""
+    import xml.etree.ElementTree as ET
+    path = profile / "PlayerProfiles/Public/modsettings.lsx"
+    if not path.exists():
+        return f"no {path}"
+    tree = ET.parse(path)
+    removed = 0
+    for node in tree.iter("node"):
+        if node.get("id") != "Mods":
+            continue
+        children = node.find("children")
+        if children is None:
+            continue
+        for desc in list(children.findall("node")):
+            u = desc.find("attribute[@id='UUID']")
+            if u is not None and u.get("value") == mod_uuid:
+                children.remove(desc)
+                removed += 1
+    if not removed:
+        return f"no entry for the mod in {path}; left as it is"
+    backup = path.with_suffix(".lsx.bak")
+    shutil.copy2(path, backup)
+    ET.indent(tree, space="    ")
+    tree.write(path, encoding="UTF-8", xml_declaration=True)
+    return f"{removed} entry removed from {path} (backup {backup.name})"
+
+
 def enable_in_modsettings(profile: Path, name: str, mod_uuid: str, ver: int) -> str:
     """Add a ModuleShortDesc for the mod to modsettings.lsx, after a backup.
     The node shape is the one the game writes for its own entries (Folder,
@@ -273,11 +301,29 @@ def main() -> int:
                                        "see above)")
     ap.add_argument("--enable", action="store_true",
                     help="also list the mod in modsettings.lsx, after backing that file up")
+    ap.add_argument("--remove", action="store_true",
+                    help="the reverse: delete <name>.pak from the game's Mods folder and drop the mod's "
+                         "entry from modsettings.lsx (after a backup), then stop")
     args = ap.parse_args()
 
     if args.models_pak_list:
         global MODELS_PAK_LIST
         MODELS_PAK_LIST = Path(args.models_pak_list)
+    if args.remove:
+        profile = profile_dir()
+        target = Path(args.mods_dir).expanduser() if args.mods_dir else (profile / "Mods" if profile else None)
+        if target is None:
+            sys.exit("the game's profile folder was not found; pass --mods-dir")
+        pak = target / f"{args.name}.pak"
+        if pak.exists():
+            pak.unlink()
+            print(f"  removed    {pak}")
+        else:
+            print(f"  absent     {pak}")
+        mod_uuid = str(uuid.uuid5(uuid.NAMESPACE_URL, f"game-asset-engine/bg3/{args.name}"))
+        if profile is not None:
+            print(f"  modsettings {disable_in_modsettings(profile, mod_uuid)}")
+        return 0
     if not args.replace and not args.file:
         ap.error("nothing to pack: give --replace and/or --file")
 
