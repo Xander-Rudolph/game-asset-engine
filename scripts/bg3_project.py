@@ -164,6 +164,45 @@ for o in src_objs:
 say(f"source: {len(source.data.vertices):,} verts, {len(source.data.polygons):,} faces, "
     f"{len(source.data.uv_layers)} uv layers, {len(source.data.materials)} materials")
 
+# ---- extras: the game's other parts, for a clipping check --------------------
+# Heads and private parts sit in the body's own frame already, so they come
+# in as they are: LOD0 only, the mesh kept where its armature put it, the
+# armature dropped, hidden from the bakes, in an "extras" collection.  The
+# --extra ones are shown; the --extra-hidden ones are loaded hidden, to
+# switch on in the outliner.  The shown ones go into the check GLB too.
+extras, extras_shown = [], []
+extra_coll = None
+for path, shown in [(e, True) for e in cfg.get("extras") or []] + \
+                   [(e, False) for e in cfg.get("extras_hidden") or []]:
+    objs = load(path)
+    stem = os.path.splitext(os.path.basename(path))[0]
+    meshes = [o for o in objs if o.type == "MESH" and "_lod" not in o.name.lower()]
+    for o in meshes:
+        mw = o.matrix_world.copy()
+        o.parent = None
+        o.matrix_world = mw
+        for m in list(o.modifiers):
+            o.modifiers.remove(m)
+    for o in objs:
+        if o not in meshes:
+            bpy.data.objects.remove(o, do_unlink=True)
+    if extra_coll is None:
+        extra_coll = bpy.data.collections.new("extras")
+        scene.collection.children.link(extra_coll)
+    for k, o in enumerate(meshes):
+        o.name = stem if k == 0 else f"{stem}.{k}"
+        o.hide_render = True
+        for c in list(o.users_collection):
+            c.objects.unlink(o)
+        extra_coll.objects.link(o)
+        extras.append(o)
+        if shown:
+            extras_shown.append(o)
+        else:
+            o.hide_set(True)
+    say(f"extra{'' if shown else ' (hidden)'}: {stem}, "
+        f"{sum(len(o.data.vertices) for o in meshes):,} verts in {len(meshes)} mesh(es)")
+
 # ---- align the source to the base ------------------------------------------
 # A game body is headless and the generated figure is not, so height is the
 # wrong ruler, and the fingertip span changes with how far the arms hang.  The
@@ -457,7 +496,7 @@ if cfg.get("check"):
     # The posed source beside the untouched base, for looking at the pose
     # match itself; nothing downstream reads it.
     os.makedirs(os.path.dirname(cfg["out"]) or ".", exist_ok=True)
-    select_only([source, source_rest, base] + ([arm] if arm else []), base)
+    select_only([source, source_rest, base] + extras_shown + ([arm] if arm else []), base)
     bpy.ops.export_scene.gltf(filepath=f"{cfg['out']}_check.glb", export_format="GLB",
                               use_selection=True, export_skins=bool(arm), export_animations=False,
                               export_yup=True, export_materials="NONE")
@@ -500,7 +539,7 @@ if cfg.get("blend"):
     os.makedirs(os.path.dirname(cfg["blend"]) or ".", exist_ok=True)
     bpy.ops.wm.save_as_mainfile(filepath=cfg["blend"], copy=True)
     say(f"wrote {cfg['blend']}: armature, base and LODs with weights, source posed, "
-        "source_rest unposed, wrap_target remeshed")
+        f"source_rest unposed, wrap_target remeshed, {len(extras)} extras")
 
 # ---- an untouched copy, for the normals bake and as a record ---------------
 select_only([base])
@@ -1058,6 +1097,12 @@ def main() -> int:
                     help="also save a .blend (Blender 4.5) of the lined-up scene before the wrap: "
                          "armature, base and LODs with weights, the source posed and unposed, "
                          "and the remeshed wrap target")
+    ap.add_argument("--extra", action="append", default=[], metavar="GLB",
+                    help="a game mesh in the body's frame (a head, private parts) to carry into the "
+                         "check GLB and the .blend for a clipping check; repeatable")
+    ap.add_argument("--extra-hidden", action="append", default=[], metavar="GLB",
+                    help="as --extra, but loaded hidden in the .blend and left out of the check GLB; "
+                         "for the other variants (heads B to F, the other genital sets)")
     ap.add_argument("--check", action="store_true",
                     help="also write <out>_check.glb: the posed source beside the untouched base")
     ap.add_argument("--free-slide", action="store_true",
@@ -1094,6 +1139,8 @@ def main() -> int:
         "free_slide": args.free_slide,
         "remesh": args.remesh, "seam": args.seam,
         "check": args.check, "blend": to_container(args.blend) if args.blend else None,
+        "extras": [to_container(e) for e in args.extra],
+        "extras_hidden": [to_container(e) for e in args.extra_hidden],
         "wrap_method": args.wrap_method, "smooth_radius": args.smooth_radius,
         "smooth_passes": args.smooth_passes,
         "metal": args.metal, "rough": args.rough, "ray": args.ray,
