@@ -3,7 +3,7 @@
  "researched": "2026-10-03",
  "checked": "2026-10-03",
  "statuses": {
-  "confirmed": 27,
+  "confirmed": 31,
   "unsettled": 2,
   "corrected": 3,
   "unchecked": 2
@@ -640,6 +640,13 @@
      "read": "Re-read by a second agent on 2026-10-03 against the sources listed (raw wikitext and the wiki's revision API; GitHub APIs; bpy RNA in the container).",
      "evidence": "Reader accepts GR2 versions 6 and 7; README is silent on platform.",
      "notes": "Reader accepts GR2 versions 6 and 7; README is silent on platform."
+    },
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "Run on this host on 2026-10-03 under Wine; the native Linux crash of issue 305 was reproduced first.",
+     "evidence": "See BG3-035 (the runtime) and BG3-036 (the glTF import's requirement).",
+     "notes": "\"Not run here\" in the claim is as first reported; it has since run under Wine."
     }
    ]
   },
@@ -817,6 +824,95 @@
     "docs/reference/daz-genesis.md"
    ],
    "as_first_reported": "Keep Larian's meshes, textures and anything converted from GR2 outside the repository, as the Daz library is kept (CLAUDE.md), in a MODELS_DIR library and a gitignored output/bg3/ that cleanup.py keep refuses for 3D data; commit nothing extracted, compiled or exported from the game; and never put Larian content into an AI stage, which the projection route keeps true by construction, since only the generated mesh touched a model."
+  },
+  {
+   "id": "BG3-035",
+   "status": "confirmed",
+   "kind": "capability",
+   "load_bearing": true,
+   "claim": "Run on this host on 2026-10-03: LSLib v1.20.4's Divine under a Linux .NET 8 runtime fails on every path argument with \"This operation is not supported for a relative URI\" (lslib issue 305), and a file:// form is fatal too; under Wine 10 with Microsoft's Windows x64 .NET 8.0.31 runtime zip unpacked to tools/dotnet-win/ it listed Models.pak (8.9 GB), extracted single files and converted GR2 to glTF. The game's body GR2 files are compressed, and Divine reports \"Granny2.dll is required for compressed GR2 files\" until granny2.dll from the release zip sits beside dotnet.exe, where LoadLibraryA finds it. Form: WINEPREFIX=~/.wine-lslib wine dotnet.exe Divine.dll -g bg3 -a list-package|extract-single-file|convert-model with Z:\\ paths.",
+   "sources": [
+    "https://github.com/Norbyte/lslib/issues/305",
+    "tools/lslib/v1.20.4/Packed/Tools/Divine.dll (fetched release)",
+    "shell session on this host, 2026-10-03"
+   ],
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "Run and measured on this host on 2026-10-03 (reference machine, Wine 10 with the Windows .NET 8.0.31 runtime for Divine, the container's Blender 4.5.9 for meshes); the numbers are the commands' own output.",
+     "evidence": "The native run's exception text and the Wine runs' outputs were read in the session; four GR2 files converted and the glTF files load in Blender with 82-bone armatures.",
+     "notes": ""
+    }
+   ],
+   "as_first_reported": "Run on this host on 2026-10-03: LSLib v1.20.4's Divine under a Linux .NET 8 runtime fails on every path argument with \"This operation is not supported for a relative URI\" (lslib issue 305), and a file:// form is fatal too; under Wine 10 with Microsoft's Windows x64 .NET 8.0.31 runtime zip unpacked to tools/dotnet-win/ it listed Models.pak (8.9 GB), extracted single files and converted GR2 to glTF. The game's body GR2 files are compressed, and Divine reports \"Granny2.dll is required for compressed GR2 files\" until granny2.dll from the release zip sits beside dotnet.exe, where LoadLibraryA finds it. Form: WINEPREFIX=~/.wine-lslib wine dotnet.exe Divine.dll -g bg3 -a list-package|extract-single-file|convert-model with Z:\\ paths."
+  },
+  {
+   "id": "BG3-036",
+   "status": "confirmed",
+   "kind": "capability",
+   "load_bearing": true,
+   "claim": "Run on this host on 2026-10-03: Divine's glTF importer (LSLib/Granny/Model/GLTFImporter.cs, ImportBone) reads the scene's EXT_lslib_profile extension without a null check, so a GLB from Blender 4.5's exporter fails with \"Object reference not set to an instance of an object\"; SharpGLTF also refuses a file holding an empty dictionary (\"ModelRoot Empty dictionary found\"). With the base's scene entry (MetadataVersion 3, LSLibMajor 1, LSLibMinor 20, LSLibPatch 4, BoneOrder for 82 bones, ModelName) and per-mesh entries (LOD, ExportOrder, LODDistance, flags; Rigid true on the LODs) copied into the GLB, as GLTFExtensions.cs and Norbyte's exporter gltf.py define them, convert-model -i glb -o gr2 --conform-path <original GR2> reported \"Export completed successfully\" and wrote 928,328 bytes (female) and 867,964 bytes (male); converting the GR2 back to glTF kept five meshes with COLOR_0, JOINTS_0, NORMAL, POSITION, TANGENT, TEXCOORD_0 and WEIGHTS_0, 82 joints and the scene entry. Whether the Toolkit accepts the file was not tested.",
+   "sources": [
+    "https://raw.githubusercontent.com/Norbyte/lslib/master/LSLib/Granny/Model/GLTFImporter.cs",
+    "https://raw.githubusercontent.com/Norbyte/lslib/master/LSLib/Granny/Model/GLTFExtensions.cs",
+    "https://raw.githubusercontent.com/Norbyte/dos2de_collada_exporter/master/io_scene_dos2de/gltf.py",
+    "scripts/bg3_project.py write_lslib_profile",
+    "shell session on this host, 2026-10-03"
+   ],
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "Run and measured on this host on 2026-10-03 (reference machine, Wine 10 with the Windows .NET 8.0.31 runtime for Divine, the container's Blender 4.5.9 for meshes); the numbers are the commands' own output.",
+     "evidence": "Both failure texts and the success line were read from Divine's output; the round trip's JSON chunk was parsed with Python.",
+     "notes": ""
+    }
+   ],
+   "as_first_reported": "Run on this host on 2026-10-03: Divine's glTF importer (LSLib/Granny/Model/GLTFImporter.cs, ImportBone) reads the scene's EXT_lslib_profile extension without a null check, so a GLB from Blender 4.5's exporter fails with \"Object reference not set to an instance of an object\"; SharpGLTF also refuses a file holding an empty dictionary (\"ModelRoot Empty dictionary found\"). With the base's scene entry (MetadataVersion 3, LSLibMajor 1, LSLibMinor 20, LSLibPatch 4, BoneOrder for 82 bones, ModelName) and per-mesh entries (LOD, ExportOrder, LODDistance, flags; Rigid true on the LODs) copied into the GLB, as GLTFExtensions.cs and Norbyte's exporter gltf.py define them, convert-model -i glb -o gr2 --conform-path <original GR2> reported \"Export completed successfully\" and wrote 928,328 bytes (female) and 867,964 bytes (male); converting the GR2 back to glTF kept five meshes with COLOR_0, JOINTS_0, NORMAL, POSITION, TANGENT, TEXCOORD_0 and WEIGHTS_0, 82 joints and the scene entry. Whether the Toolkit accepts the file was not tested."
+  },
+  {
+   "id": "BG3-037",
+   "status": "confirmed",
+   "kind": "measurement",
+   "load_bearing": true,
+   "claim": "Measured in the container's Blender 4.5.9 on 2026-10-03: HFL_F_NKD_Body_A as Divine's glTF has 9,390 vertices, 16,130 faces, 82 vertex groups, one UV layer, an 82-bone armature and four LODs of 5,114, 2,859, 1,341 and 530 vertices; its open boundary edges form 40 closed loops (shells and splits), the highest a 24-vertex neck ring at z 1.023 to 1.064 whose weights go to Chest_M, Scapula_L, Scapula_R and the shoulder twist bones, with Neck_M summing to 6.2 over the ring; the shoulder bone heads sit at z 0.964 (female) and 0.987 (male); the headless bodies are 1.068 (female) and 1.134 (male) high. Blender's glTF importer with its default bone heuristic adds an Icosphere mesh as every bone's display shape, which the exporter writes back out as a mesh and which inflates a render's framing; bone_heuristic TEMPERANCE does not.",
+   "sources": [
+    "comfyui-packaged: bpy 4.5.9, diagnostics run in the session",
+    "MODELS_DIR/bg3_library/HFL_F_NKD_Body_A.glb and HFL_M_NKD_Body_A.glb (not in the repository)"
+   ],
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "Run and measured on this host on 2026-10-03 (reference machine, Wine 10 with the Windows .NET 8.0.31 runtime for Divine, the container's Blender 4.5.9 for meshes); the numbers are the commands' own output.",
+     "evidence": "Loop and weight counts printed by bmesh scripts in the container; the Icosphere appeared on importing Divine's glTF and this repo's own export alike, and not with TEMPERANCE or FORTUNE.",
+     "notes": ""
+    }
+   ],
+   "as_first_reported": "Measured in the container's Blender 4.5.9 on 2026-10-03: HFL_F_NKD_Body_A as Divine's glTF has 9,390 vertices, 16,130 faces, 82 vertex groups, one UV layer, an 82-bone armature and four LODs of 5,114, 2,859, 1,341 and 530 vertices; its open boundary edges form 40 closed loops (shells and splits), the highest a 24-vertex neck ring at z 1.023 to 1.064 whose weights go to Chest_M, Scapula_L, Scapula_R and the shoulder twist bones, with Neck_M summing to 6.2 over the ring; the shoulder bone heads sit at z 0.964 (female) and 0.987 (male); the headless bodies are 1.068 (female) and 1.134 (male) high. Blender's glTF importer with its default bone heuristic adds an Icosphere mesh as every bone's display shape, which the exporter writes back out as a mesh and which inflates a render's framing; bone_heuristic TEMPERANCE does not."
+  },
+  {
+   "id": "BG3-038",
+   "status": "confirmed",
+   "kind": "measurement",
+   "load_bearing": false,
+   "claim": "Run on 2026-10-03 on the reference machine, container Blender 4.5.9 on the CPU: scripts/bg3_project.py projected HFL_F_NKD_Body_A onto a Hunyuan3D 2.1 mesh of concept qwenfast_00017 (19,898 vertices, 39,960 faces, made in 67 s) and HFL_M_NKD_Body_A onto one of qwenfast_00019 (made in 49 s), with --lock Finger --lock-weight 0.3 --seam 0.1 --cut-margin 0.03 --size 1024 --samples 2: floor-to-shoulder scale 0.6161 and 0.6385; pose turns shoulders 20.3/21.0 and 27.5/26.5 degrees, hips 14.8/13.9 and 11.5/10.2, ankles 21.4/21.0 and 20.2/18.3 with remaining error under 3 degrees; wrap mean move 0.0258 and 0.0253 of the height, max 0.1158 and 0.1564; 3,216 and 3,171 finger vertices held; normal maps 0.0% of texels unreached. Earlier sources from the clothed concepts qwenfast_00012 and 00015 wrapped hems and boots into the body; the bodysuit takes 00016 to 00021 (txt2img_qwen_fast.json, seeds 101 and 202, batch 3) were made for that reason and 00017 and 00019 chosen by Claude. ImageMagick 7.1.2 wrote the TGA maps as DXT5 DDS of 1,398,256 bytes at 1024 px. Judged by eye: slim continuous bodies, a flattened shelf between the held neck ring and the narrower shoulders, blobby feet.",
+   "sources": [
+    "output/bg3/halfling_f_v8.json and halfling_m_v7.json (not in the repository)",
+    "output/bg3/halfling_f_v8_preview_big.png and halfling_m_v7_preview_big.png",
+    "shell session on this host, 2026-10-03"
+   ],
+   "checks": [
+    {
+     "lens": "fact",
+     "verdict": "confirmed",
+     "read": "Run and measured on this host on 2026-10-03 (reference machine, Wine 10 with the Windows .NET 8.0.31 runtime for Divine, the container's Blender 4.5.9 for meshes); the numbers are the commands' own output.",
+     "evidence": "Numbers copied from the scripts' JSON records and printed logs; the renders were looked at.",
+     "notes": ""
+    }
+   ],
+   "as_first_reported": "Run on 2026-10-03 on the reference machine, container Blender 4.5.9 on the CPU: scripts/bg3_project.py projected HFL_F_NKD_Body_A onto a Hunyuan3D 2.1 mesh of concept qwenfast_00017 (19,898 vertices, 39,960 faces, made in 67 s) and HFL_M_NKD_Body_A onto one of qwenfast_00019 (made in 49 s), with --lock Finger --lock-weight 0.3 --seam 0.1 --cut-margin 0.03 --size 1024 --samples 2: floor-to-shoulder scale 0.6161 and 0.6385; pose turns shoulders 20.3/21.0 and 27.5/26.5 degrees, hips 14.8/13.9 and 11.5/10.2, ankles 21.4/21.0 and 20.2/18.3 with remaining error under 3 degrees; wrap mean move 0.0258 and 0.0253 of the height, max 0.1158 and 0.1564; 3,216 and 3,171 finger vertices held; normal maps 0.0% of texels unreached. Earlier sources from the clothed concepts qwenfast_00012 and 00015 wrapped hems and boots into the body; the bodysuit takes 00016 to 00021 (txt2img_qwen_fast.json, seeds 101 and 202, batch 3) were made for that reason and 00017 and 00019 chosen by Claude. ImageMagick 7.1.2 wrote the TGA maps as DXT5 DDS of 1,398,256 bytes at 1024 px. Judged by eye: slim continuous bodies, a flattened shelf between the held neck ring and the narrower shoulders, blobby feet."
   }
  ]
 }

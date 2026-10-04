@@ -272,7 +272,7 @@ if is_blend:
 elif ext == ".fbx":
     bpy.ops.import_scene.fbx(filepath=path)
 elif ext in (".glb", ".gltf"):
-    bpy.ops.import_scene.gltf(filepath=path)
+    bpy.ops.import_scene.gltf(filepath=path, bone_heuristic="TEMPERANCE")
 elif ext == ".obj":
     bpy.ops.wm.obj_import(filepath=path)
 else:

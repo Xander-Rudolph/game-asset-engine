@@ -23,25 +23,39 @@ What comes out, under --out as a prefix:
     <out>_NM.tga      tangent-space normals of the source baked onto the base
     <out>_PM.tga      R metalness (--metal, default 0), G roughness
                       (--rough, default 0.8), B ambient occlusion, baked
+    <out>_preview.glb the fullest mesh alone, for looking at (the LODs overlap
+                      in a render); not for import
     <out>.json        what was done, with every setting and count
 
 The three TGA names follow BG3's material convention (BM, NM, PM packed
-R metal, G rough, B AO, per docs.baldursgate3.game "Creating Armour"); their
-DDS conversion and the GR2 export happen on the Windows side with LSLib and
-the Toolkit, which this repo never carries.
+R metal, G rough, B AO, per docs.baldursgate3.game "Creating Armour");
+--dds writes them as DXT5 DDS through ImageMagick as well.  The glTF carries
+LSLib's EXT_lslib_profile metadata (bone order, LOD and export order, copied
+from the base's glTF), which Divine's glTF importer requires, so Divine
+`convert-model -i glb -o gr2 --conform-path <original GR2>` turns it into
+the GR2 the Toolkit imports; on this host Divine runs under Wine.
 
-The base mesh is the game's, so it lives OUTSIDE the repo, like the Daz
-library (CLAUDE.md), and nothing it produces is committed.  Pass it by an
+The base mesh is the game's, so it lives OUTSIDE the repo, like the other
+content libraries under MODELS_DIR (CLAUDE.md), and nothing it produces is
+committed.  Pass it by an
 absolute path or a path under input/ or output/; the output goes under
 output/bg3/, which `cleanup.py keep` should refuse.
 
-Alignment: the source is scaled uniformly so its height matches the base
-mesh's, and centred on the base's bounding box in X and Y, with both feet on
-the base's floor.  That is a first alignment, not a pose match: the source
-must already stand in roughly the base's rest pose (arms out as the base has
-them), or the wrap folds limbs onto the wrong surface.  --lock names vertex
-groups of the base mesh (comma-separated, substring match on group names) that
-the wrap leaves where they are; eyes, mouth and neck seams are the usual ones.
+Alignment: when both figures hold the arms out, the source is scaled so its
+floor-to-shoulder height matches the base's (the base's shoulder is a bone,
+the source's is read off its arms), because a game body is headless, so
+height would shrink the figure by a head, and the fingertip span changes with
+how far the arms hang.  --align span or height force the other rulers.  Feet
+go on the base's floor, the figure is centred in X and Y, and the head above
+the base's neck line is cut away before the wrap.  The arms and legs are then
+turned onto the base's rest pose (see --no-pose-match); a bent limb or a
+different stance is not matched, and the wrap folds it onto the wrong
+surface.  The neck ring, where the head mesh carries on from the body, is
+held in place by --seam (the open loop highest on the mesh, easing in over
+that fraction of the height).  --lock names vertex groups of the base mesh
+(comma-separated, substring match on group names) that the wrap leaves where
+they are; fingers, toes and ankles are the usual ones, since a generated
+figure's hands and feet are blobs and the game's gloves and boots fit its own.
 
 Everything runs in the container's Blender (bpy 4.5.9) on the CPU, so it never
 contends with ComfyUI for the card.
@@ -80,7 +94,9 @@ def load(path):
     elif p.endswith(".obj"):
         bpy.ops.wm.obj_import(filepath=path)
     else:
-        bpy.ops.import_scene.gltf(filepath=path)
+        # TEMPERANCE: the default bone heuristic adds an Icosphere as every
+        # bone's display shape, which the exporter then writes out as a mesh.
+        bpy.ops.import_scene.gltf(filepath=path, bone_heuristic="TEMPERANCE")
     return [o for o in bpy.data.objects if o not in before]
 
 
@@ -103,18 +119,30 @@ bpy.ops.wm.read_factory_settings(use_empty=True)
 scene = bpy.context.scene
 
 # ---- load ------------------------------------------------------------------
+# A game's body file holds the mesh and its LODs, each skinned to the same
+# armature.  Every mesh skinned to the armature is wrapped, so the LODs
+# follow the shape; the fullest one is the bake target.  Anything unskinned
+# is dropped.
 base_objs = load(cfg["base"])
-base_meshes = [o for o in base_objs if o.type == "MESH"]
 armatures = [o for o in base_objs if o.type == "ARMATURE"]
-if not base_meshes:
-    raise SystemExit("the base file holds no mesh")
-if len(base_meshes) > 1:
-    select_only(base_meshes, base_meshes[0])
-    bpy.ops.object.join()
-    say(f"joined {len(base_meshes)} base meshes into one")
-base = bpy.context.view_layer.objects.active if len(base_meshes) > 1 else base_meshes[0]
-base.name = "base"
 arm = armatures[0] if armatures else None
+base_meshes = [o for o in base_objs if o.type == "MESH"
+               and (arm is None or o.parent == arm or any(m.type == "ARMATURE" for m in o.modifiers))]
+for o in base_objs:
+    if o.type == "MESH" and o not in base_meshes:
+        say(f"dropped {o.name}: {len(o.data.vertices)} verts, not skinned to the armature")
+        me = o.data
+        bpy.data.objects.remove(o, do_unlink=True)
+        if me.users == 0:
+            bpy.data.meshes.remove(me)
+if not base_meshes:
+    raise SystemExit("the base file holds no mesh skinned to its armature")
+base_meshes.sort(key=lambda o: -len(o.data.vertices))
+base = base_meshes[0]
+lods = base_meshes[1:]
+base.name = "base"
+if lods:
+    say(f"base LODs following the wrap: {', '.join(f'{o.name} ({len(o.data.vertices):,} verts)' for o in lods)}")
 say(f"base: {len(base.data.vertices):,} verts, {len(base.data.polygons):,} faces, "
     f"{len(base.vertex_groups)} vertex groups, {len(base.data.uv_layers)} uv layers, "
     f"armature: {arm.name + ' (' + str(len(arm.data.bones)) + ' bones)' if arm else 'none'}")
@@ -137,21 +165,307 @@ say(f"source: {len(source.data.vertices):,} verts, {len(source.data.polygons):,}
     f"{len(source.data.uv_layers)} uv layers, {len(source.data.materials)} materials")
 
 # ---- align the source to the base ------------------------------------------
+# A game body is headless and the generated figure is not, so height is the
+# wrong ruler, and the fingertip span changes with how far the arms hang.  The
+# shoulder is the joint both figures share: the base's is a bone, and the
+# source's is read off its arms (the arm's centre line, fitted across the
+# upper arm and forearm and carried back to the torso's edge).  Floor to
+# shoulder is the ruler, the feet go on the base's floor, and the figure is
+# centred on the base in X and Y.  --align span and height remain for figures
+# that do not hold their arms out.
 blo, bhi = bounds([base])
 slo, shi = bounds([source])
-scale = (bhi.z - blo.z) / max(1e-9, (shi.z - slo.z))
+wide = lambda lo, hi: (hi.x - lo.x) > 0.75 * (hi.z - lo.z)   # arms out: a T-pose with a head spans about 0.85 of its height
+
+
+def bone(*names):
+    if arm is None:
+        return None
+    low = {b.name.lower(): b for b in arm.data.bones}
+    for n in names:
+        if n.lower() in low:
+            return low[n.lower()]
+    return None
+
+
+def shoulder_height(obj, lo, hi):
+    """The height of the shoulder joint read from the arms: the median height
+    of the arm in bins along its length, a line through them, and that line
+    carried back to the torso's edge (0.22 of the half span, where a game
+    body's shoulder bone sits).  Only the upper half of the figure counts,
+    since the feet of a wide stance reach out as well.  None unless the arms
+    are held out."""
+    if not wide(lo, hi):
+        return None
+    hw = (hi.x - lo.x) / 2
+    cx = (lo.x + hi.x) / 2
+    waist = (lo.z + hi.z) / 2          # the feet of a wide stance reach out too
+    bins = {}
+    for v in obj.data.vertices:
+        p = obj.matrix_world @ v.co
+        r = abs(p.x - cx) / hw
+        if 0.4 <= r <= 0.9 and p.z > waist:
+            bins.setdefault(int(r * 20), []).append(p.z)
+    if len(bins) < 3:
+        return None
+    xs, zs = [], []
+    for k, v in sorted(bins.items()):
+        v.sort()
+        xs.append((k + 0.5) / 20)
+        zs.append(v[len(v) // 2])
+    n = len(xs)
+    mx, mz = sum(xs) / n, sum(zs) / n
+    sxx = sum((x - mx) ** 2 for x in xs)
+    slope = sum((x - mx) * (z - mz) for x, z in zip(xs, zs)) / sxx if sxx else 0.0
+    return mz + slope * (0.22 - mx)
+
+
+shoulders = [b for b in (bone("Shoulder_L"), bone("Shoulder_R")) if b]
+if shoulders:
+    z_sh_base = sum((arm.matrix_world @ b.head_local).z for b in shoulders) / len(shoulders)
+    base_how = "shoulder bone"
+else:
+    z_sh_base = shoulder_height(base, blo, bhi)
+    base_how = "arm line"
+z_sh_src = shoulder_height(source, slo, shi)
+mode = cfg.get("align", "auto")
+if mode == "auto":
+    if z_sh_base is not None and z_sh_src is not None:
+        mode = "shoulder"
+    else:
+        mode = "span" if wide(blo, bhi) and wide(slo, shi) else "height"
+if mode == "shoulder":
+    if z_sh_base is None or z_sh_src is None:
+        raise SystemExit("--align shoulder needs the arms held out on both figures")
+    scale = (z_sh_base - blo.z) / max(1e-9, z_sh_src - slo.z)
+    how = (f"floor to shoulder {(z_sh_src - slo.z) * scale:.3f} onto {z_sh_base - blo.z:.3f} "
+           f"(base {base_how})")
+elif mode == "span":
+    scale = (bhi.x - blo.x) / max(1e-9, (shi.x - slo.x))
+    how = "fingertip span"
+else:
+    scale = (bhi.z - blo.z) / max(1e-9, (shi.z - slo.z))
+    how = "height"
 select_only([source])
 source.scale = source.scale * scale
 bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
 slo, shi = bounds([source])
-shift = Vector(((blo.x + bhi.x) / 2 - (slo.x + shi.x) / 2,
-                (blo.y + bhi.y) / 2 - (slo.y + shi.y) / 2,
-                blo.z - slo.z))
+span = bhi.z - blo.z
+shift = Vector(((blo.x + bhi.x) / 2 - (slo.x + shi.x) / 2, 0.0, blo.z - slo.z))
 source.location += shift
 bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
+
+# Cut the head off the source: a game body stops at the neck, and a head or
+# hair left above it is the nearest surface for the whole upper chest, which
+# it then climbs.  Only the head's footprint is cut, so arms above the neck
+# line, which a drawn figure can have, are kept.
+cut = bhi.z + float(cfg.get("cut_margin", 0.0)) * span
+import bmesh
+bm = bmesh.new()
+bm.from_mesh(source.data)
+above = [v for v in bm.verts
+         if (source.matrix_world @ v.co).z > cut and abs((source.matrix_world @ v.co).x) < 0.25 * span]
+n_cut = len(above)
+if above:
+    bmesh.ops.delete(bm, geom=above, context="VERTS")
+bm.to_mesh(source.data)
+bm.free()
+source.data.update()
 slo, shi = bounds([source])
-say(f"aligned source by x{scale:.4f}: height {shi.z - slo.z:.3f} on base {bhi.z - blo.z:.3f}, "
-    f"width {shi.x - slo.x:.3f} on {bhi.x - blo.x:.3f}, depth {shi.y - slo.y:.3f} on {bhi.y - blo.y:.3f}")
+# Centre in depth on what is left, so a mane of hair behind the head does
+# not drag the figure backwards.
+source.location.y += (blo.y + bhi.y) / 2 - (slo.y + shi.y) / 2
+bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
+slo, shi = bounds([source])
+say(f"aligned source by {mode}, x{scale:.4f}, {how}; cut {n_cut:,} head verts above z={cut:.3f}; "
+    f"now height {shi.z - slo.z:.3f} on base {bhi.z - blo.z:.3f}, width {shi.x - slo.x:.3f} on "
+    f"{bhi.x - blo.x:.3f}, depth {shi.y - slo.y:.3f} on {bhi.y - blo.y:.3f}")
+
+# ---- pose the source into the base's rest pose -----------------------------
+# A concept is never drawn at exactly the rig's rest pose, and a wrap cannot
+# cross a pose difference: an arm twenty degrees too high becomes a web.  So
+# the source borrows the base's skin weights by nearest face, the arm and leg
+# directions of both figures are measured, and the base's armature is posed
+# by the difference with the source bound to it, which swings the source's
+# limbs onto the base's.  The pose is then cleared, so the base is untouched.
+import math
+from mathutils import Matrix
+pose_log = {}
+
+
+def centroid(vs):
+    c = Vector((0.0, 0.0, 0.0))
+    for v in vs:
+        c += v
+    return c / len(vs) if vs else None
+
+
+def slab(points, axis, at, half):
+    return [p for p in points if abs(getattr(p, axis) - at) <= half]
+
+
+def xz_angle(v):
+    return math.atan2(v.z, v.x)
+
+
+def pose_match():
+    if arm is None or not cfg.get("pose_match", True):
+        return
+    pairs = []
+    # (bone to turn, bone at the limb's start, bone at the limb's end, axis the
+    # slabs are cut along, plane the swing is measured in)
+    for side in ("L", "R"):
+        sh, el, wr = bone(f"Shoulder_{side}"), bone(f"Elbow_{side}"), bone(f"Wrist_{side}")
+        hip, kn, ank = bone(f"Hip_{side}"), bone(f"Knee_{side}"), bone(f"Ankle_{side}")
+        toes = bone(f"Toes_{side}")
+        # The forearm and the shin are measured, because slabs cut at the
+        # shoulder or the hip take in the torso; the whole limb is turned.
+        if sh and el and wr:
+            pairs.append((sh, el, wr, "x", "xz"))
+        if hip and kn and ank:
+            pairs.append((hip, kn, ank, "z", "xz"))
+        # The foot is measured heel to toe, seen from above, and turned at
+        # the ankle: a drawn figure's feet point outwards, a rig's forwards.
+        if ank and toes:
+            pairs.append((ank, ank, toes, "y", "xy"))
+    if not pairs:
+        say("pose match: no Shoulder/Wrist or Hip/Ankle bones found; skipped")
+        return
+    # The base's weights onto the source, by nearest face, so the armature
+    # can move the source's limbs.
+    for g in base.vertex_groups:
+        if g.name not in source.vertex_groups:
+            source.vertex_groups.new(name=g.name)
+    select_only([base, source], source)
+    dt = source.modifiers.new("borrow_weights", "DATA_TRANSFER")
+    dt.object = base
+    dt.use_vert_data = True
+    dt.data_types_verts = {"VGROUP_WEIGHTS"}
+    dt.vert_mapping = "POLYINTERP_NEAREST"
+    dt.layers_vgroup_select_src = "ALL"
+    dt.layers_vgroup_select_dst = "NAME"
+    bpy.ops.object.datalayout_transfer(modifier=dt.name)
+    bpy.ops.object.modifier_apply(modifier=dt.name)
+    am = source.modifiers.new("pose", "ARMATURE")
+    am.object = arm
+    pts = [source.matrix_world @ v.co for v in source.data.vertices]
+    span = bhi.z - blo.z
+    for turn, b0, b1, axis, plane in pairs:
+        h0 = arm.matrix_world @ b0.head_local
+        h1 = arm.matrix_world @ b1.head_local
+        base_dir = h1 - h0
+        # The source's limb: slabs of its vertices at the limb's start and end,
+        # on the same side of the body, cut across the axis the limb runs along.
+        at0, at1 = getattr(h0, axis), getattr(h1, axis)
+        side = 1.0 if h1.x >= 0 else -1.0
+        half = 0.03 * span
+        if axis == "x":
+            band = lambda p: abs(p.z - h0.z) < 0.3 * span     # the arm's height band
+        elif axis == "z":
+            band = lambda p: abs(p.x - h0.x) < 0.2 * span     # this leg, not the other
+        else:
+            band = lambda p: abs(p.x - h0.x) < 0.2 * span and p.z < h0.z + 0.08 * span   # this foot
+        i0 = [i for i, p in enumerate(pts) if abs(getattr(p, axis) - at0) <= half and p.x * side >= 0 and band(p)]
+        i1 = [i for i, p in enumerate(pts) if abs(getattr(p, axis) - at1) <= half and p.x * side >= 0 and band(p)]
+        if not i0 or not i1:
+            say(f"pose match: no source vertices for {turn.name}; skipped")
+            continue
+
+        def wrap_pi(a):
+            return (a + math.pi) % (2 * math.pi) - math.pi
+
+        def front_angle(v):
+            return math.atan2(v.z, v.x) if plane == "xz" else math.atan2(v.y, v.x)
+
+        rot_axis = "Y" if plane == "xz" else "Z"
+
+        def source_dir():
+            # the limb's direction on the source as the armature now poses it
+            dg = bpy.context.evaluated_depsgraph_get()
+            ev = source.evaluated_get(dg)
+            co = [source.matrix_world @ v.co for v in ev.data.vertices]
+            return centroid([co[i] for i in i1]) - centroid([co[i] for i in i0])
+
+        src_dir = source_dir()
+        want = wrap_pi(front_angle(base_dir) - front_angle(src_dir))
+        # The swing in that plane that takes the source's limb onto the
+        # base's, about the turned bone's own head as it is now posed.  The
+        # sense of the rotation through the pose is settled by trying it:
+        # pose, measure, and keep the sign that closed the gap.
+        pb = arm.pose.bones[turn.name]
+        rest_basis = pb.matrix_basis.copy()
+        best = None
+        for cand in (want, -want):
+            pb.matrix_basis = rest_basis
+            bpy.context.view_layer.update()
+            hh = arm.matrix_world @ pb.head
+            R = Matrix.Translation(hh) @ Matrix.Rotation(cand, 4, rot_axis) @ Matrix.Translation(-hh)
+            pb.matrix = arm.matrix_world.inverted() @ R @ arm.matrix_world @ pb.matrix
+            bpy.context.view_layer.update()
+            err = abs(wrap_pi(front_angle(base_dir) - front_angle(source_dir())))
+            if best is None or err < best[0]:
+                best = (err, cand, pb.matrix_basis.copy())
+        pb.matrix_basis = best[2]
+        bpy.context.view_layer.update()
+        pose_log[turn.name] = (round(math.degrees(best[1]), 1), round(math.degrees(best[0]), 1))
+        if axis == "z":
+            # The foot came round with the leg; it is turned back level at
+            # the ankle, where the base's own foot is flat.
+            pa = arm.pose.bones[b1.name]
+            ah = arm.matrix_world @ pa.head
+            R = Matrix.Translation(ah) @ Matrix.Rotation(-best[1], 4, "Y") @ Matrix.Translation(-ah)
+            pa.matrix = arm.matrix_world.inverted() @ R @ arm.matrix_world @ pa.matrix
+            bpy.context.view_layer.update()
+    bpy.context.view_layer.update()
+    select_only([source])
+    bpy.ops.object.modifier_apply(modifier=am.name)
+    for pb in arm.pose.bones:
+        pb.matrix_basis = Matrix.Identity(4)
+    bpy.context.view_layer.update()
+    for g in list(source.vertex_groups):
+        source.vertex_groups.remove(g)
+    say(f"pose match: turned (degrees, remaining error) {pose_log} in the front plane and applied to the source")
+
+
+pose_match()
+
+if cfg.get("check"):
+    # The posed source beside the untouched base, for looking at the pose
+    # match itself; nothing downstream reads it.
+    os.makedirs(os.path.dirname(cfg["out"]) or ".", exist_ok=True)
+    select_only([source, base], base)
+    bpy.ops.export_scene.gltf(filepath=f"{cfg['out']}_check.glb", export_format="GLB",
+                              use_selection=True, export_skins=False, export_animations=False,
+                              export_yup=True, export_materials="NONE")
+    say(f"wrote {cfg['out']}_check.glb: the posed source with the untouched base")
+
+# ---- a wrap target without the source's layers ----------------------------
+# A drawn figure wears clothes, and a generated mesh keeps them as layers: a
+# hem, a cuff, a collar.  A vertex of the base near a hem snaps to whichever
+# layer is nearer and its neighbour to the other, which tears the loop.  So
+# the wrap aims at a voxel remesh of the source, one closed skin at --remesh
+# of the base's height, while the bake still reads the source itself.
+remesh = float(cfg.get("remesh", 0.005))
+target = source
+if remesh > 0:
+    select_only([source])
+    bpy.ops.object.duplicate()
+    target = bpy.context.view_layer.objects.active
+    target.name = "wrap_target"
+    # close the neck the head cut opened, or the volume has no inside
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.mesh.fill_holes(sides=0)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    voxel = remesh * (bhi.z - blo.z)
+    rm = target.modifiers.new("bg3_project_remesh", "REMESH")
+    rm.mode = "VOXEL"
+    rm.voxel_size = voxel
+    rm.use_smooth_shade = True
+    bpy.ops.object.modifier_apply(modifier=rm.name)
+    target.hide_render = True
+    say(f"wrap target: voxel remesh of the source at {voxel * 1000:.1f} mm, "
+        f"{len(target.data.vertices):,} verts, {len(target.data.polygons):,} faces")
 
 # ---- an untouched copy, for the normals bake and as a record ---------------
 select_only([base])
@@ -161,58 +475,141 @@ pristine.name = "base_pristine"
 pristine.hide_render = True
 
 # ---- lock groups: vertices the wrap must not move ---------------------------
-lock = base.vertex_groups.new(name="bg3_project_lock")
-locked = 0
+# Substrings of vertex-group names; a vertex in any matching group with a
+# weight above --lock-weight stays where it is.  On a body the neck ring,
+# fingers and toes are the usual ones: the generated hands are blobs.
 patterns = [p.strip().lower() for p in cfg.get("lock", []) if p.strip()]
 if patterns:
-    names = {g.index: g.name for g in base.vertex_groups}
-    hits = [g for g in base.vertex_groups if any(p in g.name.lower() for p in patterns)]
-    idx = {g.index for g in hits}
-    for v in base.data.vertices:
-        if any(ge.group in idx and ge.weight > 0.0 for ge in v.groups):
-            lock.add([v.index], 1.0, "REPLACE")
-            locked += 1
-    say(f"locked {locked:,} verts in {len(hits)} groups: {', '.join(g.name for g in hits)[:200]}")
-# The wrap's own mask is the inverse of the lock.
-wrapmask = base.vertex_groups.new(name="bg3_project_wrap")
-for v in base.data.vertices:
-    wrapmask.add([v.index], 1.0, "REPLACE")
-if locked:
-    for v in base.data.vertices:
-        if any(ge.group == lock.index for ge in v.groups):
-            wrapmask.add([v.index], 0.0, "REPLACE")
+    hits = [g.name for g in base.vertex_groups if any(p in g.name.lower() for p in patterns)]
+    say(f"lock groups: {len(hits)} match {patterns}: {', '.join(hits)[:300]}")
 
-# ---- shrinkwrap the base onto the source ------------------------------------
-select_only([base])
-mod = base.modifiers.new("bg3_project", "SHRINKWRAP")
-mod.target = source
-mod.wrap_method = cfg.get("wrap_method", "NEAREST_SURFACEPOINT")
-mod.wrap_mode = "ON_SURFACE"
-mod.offset = float(cfg.get("offset", 0.0))
-mod.vertex_group = wrapmask.name
-smooth_passes = int(cfg.get("smooth", 2))
-if smooth_passes:
-    # A shrinkwrap alone pins every vertex to the nearest point of a dense
-    # surface, which keeps the base's wrinkles but adds the source's facets;
-    # a light Corrective Smooth after it takes the facets out and keeps the
-    # loops even.  Masked the same way, so locked vertices stay put.
-    cs = base.modifiers.new("bg3_project_smooth", "CORRECTIVE_SMOOTH")
-    cs.iterations = smooth_passes * 5
-    cs.smooth_type = "LENGTH_WEIGHTED"
-    cs.vertex_group = wrapmask.name
-    cs.use_pin_boundary = True
-# Apply both so the mesh data itself changes and the weights stay attached.
-# The Armature modifier, if the import added one, is left in place and last.
-before = [v.co.copy() for v in base.data.vertices]
-for m in [m for m in base.modifiers if m.name.startswith("bg3_project")]:
-    bpy.ops.object.modifier_apply(modifier=m.name)
-moved = [(v.co - before[i]).length for i, v in enumerate(base.data.vertices)]
-say(f"wrapped: mean move {sum(moved) / len(moved):.4f}, max {max(moved):.4f}, "
-    f"{sum(1 for d in moved if d < 1e-6):,} verts did not move")
-# Removing a group invalidates every other VertexGroup handle, so look each
-# up by name again rather than reuse the one made above.
-for name in ("bg3_project_wrap", "bg3_project_lock"):
-    base.vertex_groups.remove(base.vertex_groups[name])
+# ---- the neck seam: the open loop highest on the mesh -----------------------
+# A game body ends at the neck in an open ring that the head mesh continues,
+# vertex for vertex, so that ring must not move at all.  It is not found by
+# weight (on this body it is weighted to the chest and shoulders, not the
+# neck), but as the open edge loop with the highest mean height.  Boundary
+# edges are followed into loops first, because a UV split shows as a boundary
+# too.  --seam is the fraction of the height over which the hold eases off.
+def top_loop(obj):
+    import bmesh
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    adj = {}
+    for e in bm.edges:
+        if len(e.link_faces) == 1:
+            a, b = e.verts
+            adj.setdefault(a.index, set()).add(b.index)
+            adj.setdefault(b.index, set()).add(a.index)
+    bm.free()
+    seen, best = set(), None
+    for s in adj:
+        if s in seen:
+            continue
+        stack, comp = [s], []
+        while stack:
+            u = stack.pop()
+            if u in seen:
+                continue
+            seen.add(u)
+            comp.append(u)
+            stack.extend(adj[u] - seen)
+        z = sum(obj.data.vertices[i].co.z for i in comp) / len(comp)
+        if best is None or z > best[0]:
+            best = (z, comp)
+    return [obj.data.vertices[i].co.copy() for i in best[1]] if best else []
+
+
+seam = float(cfg.get("seam", 0.06)) * (bhi.z - blo.z)
+if seam > 0:
+    ring = top_loop(base)
+    if ring:
+        say(f"neck seam: {len(ring)} verts on the open loop at z {min(r.z for r in ring):.3f} to "
+            f"{max(r.z for r in ring):.3f} held, easing off over {seam * 100:.1f} cm")
+    else:
+        say("neck seam: the base has no open edge loop, so nothing is held by position")
+
+
+# ---- shrinkwrap the base (and its LODs) onto the source ---------------------
+def mask_for(obj):
+    """How far each vertex of obj may follow the wrap: 1 everywhere, 0 on a
+    vertex whose weight in the locked groups reaches --lock-weight and between
+    the two below it, and 0 on the neck seam rising to 1 over --seam, so a
+    held ring eases into the wrapped surface instead of stepping off it."""
+    hits = {g.index for g in obj.vertex_groups
+            if any(p in g.name.lower() for p in patterns)} if patterns else set()
+    lw = float(cfg.get("lock_weight", 0.0))
+    ring = top_loop(obj) if seam > 0 else []
+    free = []
+    for v in obj.data.vertices:
+        w = sum(ge.weight for ge in v.groups if ge.group in hits)
+        f = max(0.0, 1.0 - w / lw) if lw > 0 else (0.0 if w > 0 else 1.0)
+        if ring:
+            d = min((v.co - r).length for r in ring)
+            f = min(f, min(1.0, d / seam))
+        free.append(f)
+    return free, sum(1 for f in free if f == 0.0)
+
+
+def wrap(obj):
+    """Move obj onto the target and smooth the move, not the mesh.
+
+    The shrinkwrap puts every vertex on the nearest point of the target, which
+    carries the base's own detail along but adds the target's facets.  The
+    displacement field is then averaged over a radius (tent weights, by the
+    original positions), so facet-scale noise goes and the shape change stays,
+    and the base's knuckles and wrinkles are never smoothed themselves.  A game
+    body is split into shells (this one into forty) whose seam vertices sit
+    on top of each other; coincident vertices get the same displacement and the
+    same average, so the seams stay closed, which a mesh smoother that walks
+    each shell's own edges cannot promise.  The mask scales the move last."""
+    select_only([obj])
+    mask, n_locked = mask_for(obj)
+    before = [v.co.copy() for v in obj.data.vertices]
+    mod = obj.modifiers.new("bg3_project", "SHRINKWRAP")
+    mod.target = target
+    mod.wrap_method = cfg.get("wrap_method", "NEAREST_SURFACEPOINT")
+    mod.wrap_mode = "ON_SURFACE"
+    mod.offset = float(cfg.get("offset", 0.0))
+    # The Armature modifier the import added must stay last, so the wrap is
+    # moved ahead of it before it is applied.
+    while obj.modifiers.find(mod.name) > 0:
+        bpy.ops.object.modifier_move_up(modifier=mod.name)
+    bpy.ops.object.modifier_apply(modifier=mod.name)
+    disp = [v.co - before[i] for i, v in enumerate(obj.data.vertices)]
+    radius = float(cfg.get("smooth_radius", 0.02)) * (bhi.z - blo.z)
+    passes = int(cfg.get("smooth_passes", 2))
+    if radius > 0 and passes > 0:
+        from mathutils import kdtree
+        kd = kdtree.KDTree(len(before))
+        for i, p in enumerate(before):
+            kd.insert(p, i)
+        kd.balance()
+        near = [[(j, 1.0 - dist / radius) for (_, j, dist) in kd.find_range(p, radius)]
+                for p in before]
+        for _ in range(passes):
+            new = []
+            for i in range(len(before)):
+                acc, wsum = Vector((0.0, 0.0, 0.0)), 0.0
+                for j, w in near[i]:
+                    acc += disp[j] * w
+                    wsum += w
+                new.append(acc / wsum if wsum > 0 else disp[i])
+            disp = new
+    for i, v in enumerate(obj.data.vertices):
+        v.co = before[i] + disp[i] * mask[i]
+    obj.data.update()
+    moved = [(disp[i] * mask[i]).length for i in range(len(before))]
+    return moved, n_locked
+
+
+moved, locked = wrap(base)
+say(f"wrapped {base.name}: mean move {sum(moved) / len(moved):.4f}, max {max(moved):.4f}, "
+    f"{locked:,} verts held, {sum(1 for d in moved if d < 1e-6):,} did not move")
+for o in lods:
+    m2, l2 = wrap(o)
+    say(f"wrapped {o.name}: mean move {sum(m2) / len(m2):.4f}, max {max(m2):.4f}, {l2:,} verts held")
+if target is not source:
+    bpy.data.objects.remove(target, do_unlink=True)
 
 # ---- materials for the bake ------------------------------------------------
 size = int(cfg.get("size", 2048))
@@ -356,26 +753,40 @@ written["PM"] = pm.filepath_raw
 say(f"packed PM: R metal {metal}, G rough {rough}, B baked AO")
 
 # ---- export the deformed base with its armature ----------------------------
-base.data.materials.clear()
 bpy.data.objects.remove(pristine, do_unlink=True)
 bpy.data.objects.remove(source, do_unlink=True)
-export = [base] + ([arm] if arm else [])
+for o in [base] + lods:
+    o.data.materials.clear()
+export = [base] + lods + ([arm] if arm else [])
 select_only(export, base)
-bpy.ops.export_scene.gltf(filepath=f"{out}.glb", export_format="GLB", use_selection=True,
-                          export_skins=bool(arm), export_animations=False, export_yup=True,
-                          export_materials="NONE")
+gltf_kw = dict(filepath=f"{out}.glb", export_format="GLB", use_selection=True,
+               export_skins=bool(arm), export_animations=False, export_yup=True,
+               export_materials="NONE")
+try:
+    # The game's masks ride in the vertex colours, so they must travel.
+    bpy.ops.export_scene.gltf(export_vertex_color="ACTIVE", **gltf_kw)
+except TypeError:
+    bpy.ops.export_scene.gltf(**gltf_kw)
 bpy.ops.export_scene.fbx(filepath=f"{out}.fbx", use_selection=True,
                          object_types={"ARMATURE", "MESH"}, add_leaf_bones=False,
                          bake_anim=False, use_armature_deform_only=True,
-                         path_mode="STRIP")
+                         path_mode="STRIP", colors_type="SRGB")
 written["glb"] = f"{out}.glb"
 written["fbx"] = f"{out}.fbx"
+# A viewing copy with the fullest mesh only: the LODs sit on top of each
+# other in a render and read as a broken surface.
+select_only([base] + ([arm] if arm else []), base)
+bpy.ops.export_scene.gltf(filepath=f"{out}_preview.glb", export_format="GLB", use_selection=True,
+                          export_skins=bool(arm), export_animations=False, export_yup=True,
+                          export_materials="NONE")
+written["preview"] = f"{out}_preview.glb"
 
 info = {
     "base": cfg["base"], "source": cfg["source"], "colour": colour,
     "base_verts": len(base.data.vertices), "base_faces": len(base.data.polygons),
     "vertex_groups": len(base.vertex_groups), "bones": len(arm.data.bones) if arm else 0,
-    "scale": scale, "locked": locked, "mean_move": sum(moved) / len(moved),
+    "lods": [o.name for o in lods], "align": mode, "cut_verts": n_cut, "pose_match": pose_log,
+    "scale": scale, "remesh": remesh, "locked": locked, "mean_move": sum(moved) / len(moved),
     "max_move": max(moved), "size": size, "written": written,
     "unreached": misses, "log": log,
 }
@@ -385,15 +796,128 @@ print("BG3PROJECT " + json.dumps(info))
 '''
 
 
+def models_dir() -> Path | None:
+    """MODELS_DIR as the compose file mounts it at /app/models: from the
+    environment, else .env, resolved against the repo root."""
+    import os
+    raw = os.environ.get("MODELS_DIR")
+    if not raw and (ROOT / ".env").exists():
+        for line in (ROOT / ".env").read_text().splitlines():
+            if line.strip().startswith("MODELS_DIR="):
+                raw = line.split("=", 1)[1].strip().strip('"').strip("'")
+    if not raw:
+        return None
+    return (ROOT / raw).resolve() if not Path(raw).is_absolute() else Path(raw)
+
+
+def write_lslib_profile(out_glb: str, base_glb: str) -> str:
+    """Put LSLib's own glTF metadata back into the export.
+
+    Divine's glTF carries an EXT_lslib_profile extension on the scene (the
+    GR2 skeleton's bone order and the LSLib version that wrote it) and on
+    each mesh (LOD, export order, flags).  Blender's importer drops what it
+    does not know, and Divine's glTF importer reads the scene extension
+    without checking for it, so an export without it fails with "Object
+    reference not set to an instance of an object" in ImportBone.  The scene
+    entry is copied from the base, or built from the skin's joint order when
+    the base has none, and each mesh entry is copied by mesh name.
+    """
+    import struct
+
+    def read(path):
+        raw = Path(path).read_bytes()
+        if raw[:4] != b"glTF":
+            return raw, None, b""
+        n = struct.unpack_from("<I", raw, 12)[0]
+        return raw, json.loads(raw[20:20 + n]), raw[20 + n:]
+
+    ext_name = "EXT_lslib_profile"
+    raw, j, rest = read(out_glb)
+    if j is None:
+        return "not written: the export is not a GLB"
+    _, bj, _ = read(base_glb) if Path(base_glb).suffix.lower() == ".glb" else (None, None, None)
+    bj = bj or {}
+    base_scene = ((bj.get("scenes") or [{}])[0].get("extensions") or {}).get(ext_name)
+    if base_scene:
+        profile = dict(base_scene)
+        origin = "copied from the base"
+    else:
+        joints = j["skins"][0]["joints"] if j.get("skins") else []
+        profile = {"MetadataVersion": 3, "LSLibMajor": 1, "LSLibMinor": 20, "LSLibPatch": 4,
+                   "BoneOrder": {j["nodes"][k].get("name", str(k)): i + 1 for i, k in enumerate(joints)},
+                   "ModelName": j["nodes"][joints[0]].get("name", "") if joints else ""}
+        origin = "built from the skin's joint order"
+    # Divine omits empty values, and SharpGLTF refuses a file with an empty
+    # dictionary in it ("ModelRoot Empty dictionary found").
+    profile = {k: v for k, v in profile.items() if v not in ({}, None)}
+    scene = j["scenes"][j.get("scene", 0)]
+    scene.setdefault("extensions", {})[ext_name] = profile
+    base_meshes = {m.get("name"): (m.get("extensions") or {}).get(ext_name) for m in bj.get("meshes", [])}
+    copied = 0
+    for i, m in enumerate(j.get("meshes", [])):
+        ext = base_meshes.get(m.get("name"))
+        if ext is None:
+            ext = {k: False for k in ("Rigid", "Cloth", "MeshProxy", "ProxyGeometry", "Spring", "Occluder",
+                                      "ClothPhysics", "Cloth01", "Cloth02", "Cloth04", "Impostor")}
+            ext.update({"ExportOrder": i, "LOD": i, "LODDistance": 0, "ParentBone": ""})
+        else:
+            copied += 1
+        m.setdefault("extensions", {})[ext_name] = ext
+    used = j.setdefault("extensionsUsed", [])
+    if ext_name not in used:
+        used.append(ext_name)
+    data = json.dumps(j, separators=(",", ":")).encode()
+    data += b" " * (-len(data) % 4)
+    out = bytearray(raw[:12]) + struct.pack("<II", len(data), 0x4E4F534A) + data + rest
+    struct.pack_into("<I", out, 8, len(out))
+    Path(out_glb).write_bytes(out)
+    return (f"BoneOrder for {len(profile.get('BoneOrder', {}))} bones {origin}, "
+            f"{copied} of {len(j.get('meshes', []))} mesh entries from the base")
+
+
+def write_dds(written: dict) -> dict:
+    """Each baked TGA as a DDS beside it, DXT5 with mipmaps, through
+    ImageMagick's convert.  DXT5 is what ImageMagick writes; which block
+    formats the game's own textures use was not checked here, so the maps are
+    a starting point for the Toolkit's import, not a match for Larian's.
+    Returns {map name + "_dds": path} for the maps it wrote."""
+    import shutil
+    import subprocess
+    tool = shutil.which("magick") or shutil.which("convert")
+    if tool is None:
+        print("  dds        skipped: ImageMagick's convert is not on the PATH")
+        return {}
+    out = {}
+    for name, path in list(written.items()):
+        if not str(path).lower().endswith(".tga"):
+            continue
+        host = ROOT / path[len("/app/"):] if str(path).startswith("/app/") else Path(path)
+        dds = host.with_suffix(".dds")
+        r = subprocess.run([tool, str(host), "-define", "dds:compression=dxt5", str(dds)],
+                           capture_output=True, text=True)
+        if r.returncode != 0:
+            print(f"  dds        {host.name}: convert failed: {r.stderr.strip()[:200]}")
+            continue
+        out[f"{name}_dds"] = str(dds.relative_to(ROOT)) if dds.is_relative_to(ROOT) else str(dds)
+    return out
+
+
 def to_container(p: str) -> str:
+    """A host path as the container sees it: output/ and input/ are bind
+    mounts, and MODELS_DIR is /app/models, which is where a game's base mesh
+    kept in MODELS_DIR/bg3_library lands."""
     if p.startswith("/app/"):
         return p
     path = Path(p)
     if not path.is_absolute():
         path = ROOT / path
-    for host, cont in ((ROOT / "output", "/app/output"), (ROOT / "input", "/app/input")):
+    mounts = [(ROOT / "output", "/app/output"), (ROOT / "input", "/app/input")]
+    models = models_dir()
+    if models is not None:
+        mounts.append((models, "/app/models"))
+    for host, cont in mounts:
         try:
-            return f"{cont}/{path.resolve().relative_to(host)}"
+            return f"{cont}/{path.resolve().relative_to(host.resolve())}"
         except ValueError:
             continue
     return str(path)
@@ -414,11 +938,41 @@ def main() -> int:
     ap.add_argument("--lock", default="",
                     help="comma-separated substrings of base vertex-group names whose "
                          "vertices the wrap leaves in place, e.g. eye,mouth,neck")
+    ap.add_argument("--align", default="auto", choices=["auto", "shoulder", "span", "height"],
+                    help="scale the source by floor-to-shoulder height, fingertip span or "
+                         "height; auto picks shoulder when both hold the arms out (default auto)")
+    ap.add_argument("--seam", type=float, default=0.06,
+                    help="hold the neck ring (the open edge loop highest on the base) and ease "
+                         "the hold off over this fraction of the base's height; 0 to not hold "
+                         "it (default 0.06)")
+    ap.add_argument("--remesh", type=float, default=0.005,
+                    help="wrap onto a voxel remesh of the source at this fraction of the base's "
+                         "height, so clothing layers read as one skin; 0 wraps onto the source "
+                         "itself (default 0.005)")
+    ap.add_argument("--cut-margin", type=float, default=0.0,
+                    help="remove source geometry above the base's top plus this fraction of "
+                         "the base's height, so a head above a headless body is not wrapped "
+                         "onto (default 0)")
+    ap.add_argument("--dds", action="store_true",
+                    help="also write each baked map as DDS (DXT5, with mipmaps) through "
+                         "ImageMagick's convert, when it is on the PATH")
+    ap.add_argument("--check", action="store_true",
+                    help="also write <out>_check.glb: the posed source beside the untouched base")
+    ap.add_argument("--no-pose-match", action="store_true",
+                    help="do not swing the source's arms and legs onto the base's before "
+                         "wrapping (the default does, by borrowing the base's weights)")
+    ap.add_argument("--lock-weight", type=float, default=0.0,
+                    help="a vertex is held when its weight in a locked group exceeds this "
+                         "(default 0, any membership)")
     ap.add_argument("--wrap-method", default="NEAREST_SURFACEPOINT",
                     choices=["NEAREST_SURFACEPOINT", "PROJECT", "NEAREST_VERTEX",
                              "TARGET_PROJECT"])
-    ap.add_argument("--smooth", type=int, default=2,
-                    help="corrective-smooth passes after the wrap, 0 for none (default 2)")
+    ap.add_argument("--smooth-radius", type=float, default=0.02,
+                    help="average each vertex's move over this radius, as a fraction of the "
+                         "base's height, so the target's facets do not print through; 0 for "
+                         "none (default 0.02)")
+    ap.add_argument("--smooth-passes", type=int, default=2,
+                    help="how many times the move is averaged (default 2)")
     ap.add_argument("--ray", type=float, default=0.2,
                     help="bake ray reach as a fraction of the base's height (default 0.2)")
     ap.add_argument("--metal", type=float, default=0.0, help="PM red channel (default 0)")
@@ -430,8 +984,12 @@ def main() -> int:
         "base": to_container(args.base), "source": to_container(args.source),
         "out": to_container(args.out), "colour": to_container(args.colour) if args.colour else None,
         "size": args.size, "samples": args.samples,
-        "lock": [s for s in args.lock.split(",") if s],
-        "wrap_method": args.wrap_method, "smooth": args.smooth,
+        "lock": [s for s in args.lock.split(",") if s], "lock_weight": args.lock_weight,
+        "align": args.align, "cut_margin": args.cut_margin, "pose_match": not args.no_pose_match,
+        "remesh": args.remesh, "seam": args.seam,
+        "check": args.check,
+        "wrap_method": args.wrap_method, "smooth_radius": args.smooth_radius,
+        "smooth_passes": args.smooth_passes,
         "metal": args.metal, "rough": args.rough, "ray": args.ray,
     }
     info = exec_json(BLENDER, cfg, "BG3PROJECT ", timeout=args.timeout)
@@ -446,6 +1004,16 @@ def main() -> int:
         print(f"  {name:<10} {share * 100:.1f}% of texels unreached{flag}")
     for k, v in info["written"].items():
         print(f"  wrote      {v}")
+    profile = write_lslib_profile(f"{args.out}.glb", args.base)
+    print(f"  profile    EXT_lslib_profile: {profile}")
+    record = Path(f"{args.out}.json")
+    info = json.loads(record.read_text())
+    info["lslib_profile"] = profile
+    if args.dds:
+        for name, dds in write_dds(info["written"]).items():
+            info["written"][name] = dds
+            print(f"  wrote      {dds}")
+    record.write_text(json.dumps(info, indent=1))
     print(f"  record     {args.out}.json")
     return 0
 
