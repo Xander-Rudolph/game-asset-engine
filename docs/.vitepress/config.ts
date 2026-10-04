@@ -128,6 +128,7 @@ export default defineConfig({
             { text: 'Virt-A-Mate assets', link: '/reference/vam-assets' },
             { text: 'Video to 3D motion', link: '/reference/video-mocap' },
             { text: 'Animation sources', link: '/reference/animation-sources' },
+            { text: "Baldur's Gate 3 Toolkit", link: '/reference/bg3-toolkit' },
           ],
         },
       ],

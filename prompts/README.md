@@ -35,7 +35,7 @@ scenery/      small props
 ground/       tileable overhead ground textures
 icons/        UI icons on a flat background
 music/        instrumental game music: one track file per loop, for generate_music.py
-examples/     one project's filled-in art direction, kept as worked examples
+examples/     a filled-in art direction for a plain fantasy kingdom, kept as worked examples
 ```
 
 `icons/` and `ground/` have no `_style.txt`. Each prompt in them is written out in
