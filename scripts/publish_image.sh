@@ -71,6 +71,24 @@ echo "  seed:          $(du -sh /opt/asset-engine/seed | cut -f1)"
 python3 -c "import torch; assert torch.__version__.startswith(\"2.6.0\"), torch.__version__; print(\"  torch\", torch.__version__)"
 '
 
+# The server runs as the host user, not root (compose's PUID/PGID), and the node
+# packs are root's. A prestartup script that writes into its own pack fails at
+# every start with only a line in the log; UniRig's did up to 0.1.8. Run each one
+# as a non-root user in a fresh container, with ComfyUI on the path as it is
+# when the server runs them.
+docker run --rm --user 1000:1000 --entrypoint bash "$IMAGE:$VERSION" -lc '
+cd /app
+for s in /app/custom_nodes/*/prestartup_script.py; do
+    if PYTHONPATH=/app python3 "$s" >/tmp/prestartup.log 2>&1; then
+        echo "  prestartup as uid 1000: ok   ${s#/app/custom_nodes/}"
+    else
+        echo "  prestartup as uid 1000: FAILED ${s#/app/custom_nodes/}"
+        tail -3 /tmp/prestartup.log
+        exit 1
+    fi
+done
+'
+
 if [ "$DRY" = "--dry" ]; then
     echo
     echo "built and tagged; --dry, so nothing pushed."
