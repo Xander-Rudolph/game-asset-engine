@@ -5,7 +5,7 @@ commits with their compatibility patches applied, the Hunyuan texture extension
 compiled, Blender as a Python module, and every workflow already in the editor
 sidebar.
 
-It is about 28GB (`docker images`, 0.1.8, 2026-10-05) and does **not** contain model weights.
+It is about 28GB (`docker images`, 0.1.9, 2026-10-05) and does **not** contain model weights.
 
 ```
 ghcr.io/xander-rudolph/game-asset-engine-comfy:0.1.1
