@@ -86,7 +86,7 @@ scripts/publish_image.sh 0.1.2
 scripts/publish_image.sh 0.1.2 --dry
 ```
 
-We build locally, not in CI. The image is about 28GB (`docker images`, 0.1.7, 2026-10-04, 27,977,667,655 bytes by `docker inspect`; the 0.1.5 build from a warm cache took 10 minutes on the reference machine, and 0.1.6 and 0.1.7, which each changed one graph, built, smoke-tested and pushed in 5 minutes). A hosted runner has only
+We build locally, not in CI. The image is about 28GB (`docker images`, 0.1.8, 2026-10-05, 27,977,424,139 bytes by `docker inspect`; the 0.1.5 build from a warm cache took 10 minutes on the reference machine, and 0.1.6 and 0.1.7, which each changed one graph, built, smoke-tested and pushed in 5 minutes). A hosted runner has only
 about 14GB free on the disk Docker stores images on, so the build dies partway
 through the CUDA layers with `no space left on device`.
 
