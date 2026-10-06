@@ -98,8 +98,9 @@ encoders, `qwen_image_2512_4steps_merged` and both Wan 2.2 image-to-video models
 (read from their file headers, 2026-10-06). So after one texture run, every Qwen
 and Wan stage fails, in the same run or any later one, until the server restarts.
 
-`scripts/patch_nodes.py` puts the default device back once mmgp is done. The
-published images up to 0.1.9 do not have that patch. On those:
+`scripts/patch_nodes.py` puts the default device back once mmgp is done.
+Image 0.1.10 is the first with that patch: pull it and recreate the container.
+The published images up to 0.1.9 do not have it. On those:
 
 - Run the texture stage on its own, then restart the container before any Qwen
   or Wan stage. A restart clears it until the next texture run.

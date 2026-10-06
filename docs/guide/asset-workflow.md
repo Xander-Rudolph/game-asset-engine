@@ -89,6 +89,17 @@ a new tab, and if nodes mute themselves for no reason, close the other graph's
 tab and reload the page.
 :::
 
+::: tip A new image does not replace the copy you already have
+The container's start-up script copies a graph into the editor's folder only
+when no file of that name is there (`scripts/entrypoint.sh`), so pulling a new
+image leaves your `asset_workflow.json` as it was. Image 0.1.10 is the first
+whose graph has a panel per stage number, with the two Concept stages and the
+two Mesh stages one at a time; an older copy has the single Stages panel, which
+lets both Mesh stages be on. To take the new one, delete `asset_workflow.json`
+in the **Workflows** sidebar, restart the container and reload the page. Save
+anything of yours in it under another name first.
+:::
+
 ### Picking a take
 
 Each image stage, 1 to 3, makes **Takes** images per queue and saves them all.
