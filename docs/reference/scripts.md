@@ -46,6 +46,7 @@ Everything in `scripts/`. Each takes `--help`.
 | `normalise_mesh.py` | Scale a mesh to a declared world size and record the rule. `--check` gates a whole folder. |
 | `make_seamless.py` | Make a texture tile, and say whether it worked. |
 | `cut_icon.py` | Cut an icon out of its background and size it for a UI. |
+| `image_prompt.py` | Print the prompt an image was made from, read from the graph ComfyUI writes into every PNG and WebP it saves. Each text encoder's text is marked positive or negative by the sampler input it reaches, and a prompt typed into a separate string node is followed back to it. `--json` prints the whole graph instead, which `run_workflow.py` takes. An edited or converted copy has usually lost the graph. Stdlib only, on the host. |
 | `make_loop.py` | Make a music track loop without a seam at a set loudness: it chooses where in the take the loop starts and ends, keeps any silence in the take out of the loop, and reports what you would hear where it comes round. |
 | `cleanup.py` | Curate the keepers, then sweep the rest. Folders `keep` cannot claim, such as music takes, icons and mouth sets, are protected from the sweep. `keep --generator --source --licence --licence-url` records provenance rows in `sources.json`. `keep` refuses Daz 3D data, and keeps only renders from `output/daz/` ([below](#cleanup-py)). |
 
