@@ -4,8 +4,8 @@
 The graphs in `workflows/api/` each do one job: paint a concept, edit it, turn
 it into a mesh, texture the mesh, look at it.  Run one at a time, the output of
 one has to be carried to the next by hand.  This builds a single graph for the
-editor with every stage in it, a prompt at the top, and a panel that switches
-the stages on and off.
+editor with every stage in it, a prompt at the top, and panels that switch the
+stages on and off, one at a time where two stages are alternatives.
 
 How the stages hand over, which is the point of the design:
 
@@ -84,9 +84,12 @@ SWITCH = "Any Switch (rgthree)"
 MUTE, ACTIVE = 2, 0
 DROPPED = "<dropped>"
 
-# Group titles the stage panel lists.  It filters groups by this regex, so the
-# Inputs and Models groups, which must never be muted, stay off the panel.
-STAGE_TITLE = r"^[0-9]+\. "
+# Group titles the stage panels list.  Each filters groups by a regex on the
+# stage number, so the Inputs and Models groups, which must never be muted,
+# stay off every panel.  Stages that share a number are alternatives, such as
+# the two Mesh stages, so each such number gets a panel of its own that lets at
+# most one of them be on: TRELLIS and Hunyuan3D in one queue load both models.
+STAGE_TITLE = r"^({})\. "
 
 # ---------------------------------------------------------------- the stages
 # src:      the base graph in workflows/api/
@@ -225,8 +228,10 @@ SWITCHES = {
 
 README = """## Asset pipeline
 
-Write the subject in **Prompt**, switch stages on in the **Stages** panel, and queue.
-Only Stage 1, fast, is on when the graph opens.
+Write the subject in **Prompt**, switch stages on in the **Stage** panels, and queue.
+Only Stage 1, fast, is on when the graph opens. Stages that share a number are
+alternatives, and their panel lets one at a time be on: switching on Hunyuan3D
+switches TRELLIS off, so one queue never loads both.
 
 **Handing over.** Each stage takes its input from the nearest stage above it that
 is on. With Concept, Edit and Mesh all on, one queue goes from prompt to mesh.
@@ -320,6 +325,38 @@ def note_node(nid, text, pos, size, markdown=False):
 # relay finds nothing.
 NODE_ID_BASE = 10000
 LINK_ID_BASE = 100000
+
+
+def stage_rows(numbers):
+    """The stages whose titles start with one of these numbers."""
+    return [s for s in STAGES if s["title"].split(".")[0] in numbers]
+
+
+def stage_panels():
+    """(title, stage numbers, at most one on) for each stage panel, in order."""
+    order = []
+    for s in STAGES:
+        n = s["title"].split(".")[0]
+        if n not in order:
+            order.append(n)
+    panels = []
+    for n in order:
+        rows = stage_rows([n])
+        if len(rows) > 1:
+            name = rows[0]["title"].split(". ", 1)[1].split(",")[0].split(":")[0]
+            panels.append((f"Stage {n}, {name}: one at a time", [n], True))
+        elif panels and not panels[-1][2]:
+            panels[-1][1].append(n)
+        else:
+            panels.append(("", [n], False))
+    out = []
+    for title, numbers, only_one in panels:
+        if not title:
+            title = (f"Stage {numbers[0]}" if len(numbers) == 1 else
+                     f"Stages {numbers[0]} and {numbers[1]}" if len(numbers) == 2 else
+                     f"Stages {numbers[0]} to {numbers[-1]}")
+        out.append((title, numbers, only_one))
+    return out
 
 
 def build(info):
@@ -690,19 +727,26 @@ def to_ui(api, group_of, title, wiring, info):
             group_of[str(n["id"])] = "handoff:" + key
         handoff[key] = column
 
-    # The panel and the notes.
-    muter = {"id": fresh_id(), "type": "Fast Groups Muter (rgthree)",
-             "pos": [0, 0], "size": [440, 380], "flags": {}, "order": 0, "mode": 0,
-             "title": "Stages: switch on what to run",
-             "inputs": [], "outputs": [{"name": "OPT_CONNECTION", "type": "*",
-                                        "links": None}],
-             "properties": {"matchColors": "", "matchTitle": STAGE_TITLE,
-                            "showNav": True, "showAllGraphs": True,
-                            "sort": "position", "customSortAlphabet": "",
-                            "toggleRestriction": "default"}}
+    # The panels and the notes.  One panel per run of stage numbers, in stage
+    # order, so the stack reads top to bottom like the stages: a number two
+    # stages share gets a panel of its own set to "max one", where switching
+    # one on switches the other off; the numbers between share plain panels.
     readme = note_node(fresh_id(), README, [0, 0], [480, 820], markdown=True)
-    nodes += [muter, readme]
-    group_of[str(muter["id"])] = group_of[str(readme["id"])] = "inputs"
+    nodes.append(readme)
+    group_of[str(readme["id"])] = "inputs"
+    for title, numbers, only_one in stage_panels():
+        muter = {"id": fresh_id(), "type": "Fast Groups Muter (rgthree)",
+                 "pos": [0, 0], "size": [440, 40 + 30 * len(stage_rows(numbers))],
+                 "flags": {}, "order": 0, "mode": 0, "title": title,
+                 "inputs": [], "outputs": [{"name": "OPT_CONNECTION", "type": "*",
+                                            "links": None}],
+                 "properties": {"matchColors": "",
+                                "matchTitle": STAGE_TITLE.format("|".join(numbers)),
+                                "showNav": True, "showAllGraphs": True,
+                                "sort": "position", "customSortAlphabet": "",
+                                "toggleRestriction": "max one" if only_one else "default"}}
+        nodes.append(muter)
+        group_of[str(muter["id"])] = "inputs"
 
     for s in STAGES:
         src = (json.loads((API_DIR / f"{s['src']}.json").read_text())
@@ -825,7 +869,8 @@ def layout(nodes, group_of, handoff, pickers):
     inputs = by_group["inputs"]
     readme = [n for n in inputs if n["type"] == "MarkdownNote"]
     prompts = [n for n in inputs if n["type"] == "PrimitiveStringMultiline"]
-    panel = [n for n in inputs if n["type"].startswith("Fast Groups")]
+    panel = sorted((n for n in inputs if n["type"].startswith("Fast Groups")),
+                   key=lambda n: n["id"])
     x, y = 0, 0
     readme[0]["pos"] = [x + GAP, y + 60]
     px = x + GAP + readme[0]["size"][0] + GAP
@@ -838,9 +883,12 @@ def layout(nodes, group_of, handoff, pickers):
         n["size"] = [620, 80]
         n["pos"] = [px, py]
         py += 80 + GAP
-    panel[0]["pos"] = [px + 620 + GAP, y + 60]
-    inputs_right = px + 620 + GAP + panel[0]["size"][0] + GAP
-    inputs_bottom = max(y + 60 + readme[0]["size"][1], py, y + 60 + panel[0]["size"][1])
+    panel_y = y + 60
+    for n in panel:
+        n["pos"] = [px + 620 + GAP, panel_y]
+        panel_y += n["size"][1] + GAP // 2
+    inputs_right = px + 620 + GAP + max(n["size"][0] for n in panel) + GAP
+    inputs_bottom = max(y + 60 + readme[0]["size"][1], py, panel_y)
     groups.append({"id": 1, "title": "Inputs", "color": "#3f789e",
                    "bounding": [x, y, inputs_right - x, inputs_bottom - y + GAP],
                    "font_size": 24, "flags": {}})

@@ -158,9 +158,10 @@ are built for the editor and lean on node packs that do their work in the
 browser: rgthree's stage panels, relays and switches, and Use Everywhere.
 
 - `asset_workflow.json` joins the base graphs above into one pipeline, from a
-  prompt to a rig and a video, with a panel that switches stages on and off, a
-  row of pickers at the top, one per stage, for picking a run up at any stage,
-  and a pause after each image stage to choose which of its takes carries on.
+  prompt to a rig and a video, with panels that switch stages on and off, one
+  at a time for alternatives, a row of pickers at the top, one per stage, for
+  picking a run up at any stage, and a pause after each image stage to choose
+  which of its takes carries on.
   `scripts/build_asset_workflow.py` builds it from the base graphs, so edit
   those, not it.
 - `complete_workflow.json` is the owner's image and video graph on the Rapid AIO

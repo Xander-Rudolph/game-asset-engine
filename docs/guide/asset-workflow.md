@@ -25,9 +25,9 @@ Two graphs are made for the editor rather than for `run_workflow.py`, and both
 open from the sidebar under **Workflows**:
 
 - **`asset_workflow.json`** is the pipeline in one graph: the prompts at the
-  top, a panel that switches stages on and off, a row of pickers for picking a
-  run up at any stage, and every stage from concept to a rig and a video, wired
-  so that each one hands over to the next.
+  top, panels that switch stages on and off, one at a time for alternatives, a
+  row of pickers for picking a run up at any stage, and every stage from
+  concept to a rig and a video, wired so that each one hands over to the next.
 - **`complete_workflow.json`** is the owner's image and video graph on Phr00t's
   Qwen-Image-Edit Rapid AIO merge and Wan 2.2, one flow at a time off a shared
   image and prompt.
@@ -41,8 +41,11 @@ open from the sidebar under **Workflows**:
    many images each of Stages 1 to 3 makes per queue; two when the graph opens.
    Already have concept art? Switch on **0. Your image** instead, upload the file
    there or pick one already in `input/`, and leave the Concept stages off.
-2. Switch stages on in the **Stages** panel. Only Stage 1, fast, is on when the
-   graph opens. The arrow on each row jumps to that stage.
+2. Switch stages on in the **Stage** panels, which list the stages in order.
+   Only Stage 1, fast, is on when the graph opens. Stages that share a number
+   are alternatives, and their panel lets one at a time be on: switching on
+   Hunyuan3D switches TRELLIS off, so one queue never loads both mesh models.
+   The arrow on each row jumps to that stage.
 3. To start anywhere but Concept, pick that stage's input in the **Stage
    inputs** row under the prompts. There is one picker per stage, in stage
    order, and the pickers lit up are exactly the ones the next queue reads.
@@ -346,6 +349,14 @@ the editor. None of it generated anything.
   with Edit and Mesh, with Simplify and Texture, with Animate, and with Concept,
   fast, and Edit on at once, where Edit read the concept and not the image, as
   the nearest-above rule says.
+- On 2026-10-06 the one Stages panel became five, in stage order, with Stage 1
+  and Stage 4 each in a panel that lets one stage at a time be on (153 nodes,
+  199 links). Each panel listed exactly its own groups. Switching on Hunyuan3D
+  muted the TRELLIS group, and the captured prompt held Hunyuan3D's shape nodes
+  and no TRELLIS node, and the same the other way round. Concept, full switched
+  Concept, fast off. Texture with Turntable, and Edit with Simplify, stayed on
+  together. Nothing was queued. That day a queue from the old single panel had
+  both mesh stages on and ran out of GPU memory in Hunyuan3D's shape decoder.
 
 ### Measured runs
 
