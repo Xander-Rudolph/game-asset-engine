@@ -400,8 +400,15 @@ ENV MODELS_DIR=/app/models \
 # $HOME, and /root is unreadable to uid 1000.
 # /app/custom_nodes itself, not what is in it, so the entrypoint can add the
 # pack it fetches at start-up (comfyui_controlnet_aux, see above) as that user.
+# And one folder inside a pack: UniRig's prestartup_script.py copies its FBX
+# viewers into ComfyUI-UniRig/web on every start, and the pack is root's. Without
+# it the script stops at its first copy with "Permission denied", so UniRig's
+# preview widgets have no viewer to load and its sample assets never reach
+# input/ (0.1.8's log on 2026-10-05, and a start-up log from 2026-09-10).
+# scripts/publish_image.sh runs every prestartup script as a non-root user.
 RUN mkdir -p /app/temp /app/.home && chmod -R 0777 /app/temp /app/.home /app/output /app/input /app/user 2>/dev/null || true; \
-    chmod 0777 /app/custom_nodes
+    chmod 0777 /app/custom_nodes; \
+    mkdir -p /app/custom_nodes/ComfyUI-UniRig/web && chmod 0777 /app/custom_nodes/ComfyUI-UniRig/web
 ENV HOME=/app/.home
 
 # UniRig's own environment is built on the first start by scripts/entrypoint.sh,

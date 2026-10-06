@@ -228,6 +228,23 @@ docker exec comfyui-packaged bash -c 'P=/app/.home/.ce/envs/unirig-nodes/.pixi/e
 docker restart comfyui-packaged     # once /queue is empty
 ```
 
+## UniRig's preview panel is empty
+
+UniRig's Preview Rigged Mesh node runs but draws nothing, and ComfyUI's start-up
+log says `Failed to execute startup-script: .../ComfyUI-UniRig/prestartup_script.py
+/ [Errno 13] Permission denied`, with UniRig listed as `PRESTARTUP FAILED`. The
+server runs as your user and could not write UniRig's viewers into its own pack
+folder, so the script stopped there, before it copies UniRig's sample FBX files
+into `input/`.
+
+- **Packaged image, up to 0.1.8.** The packs in the image belong to root. From
+  0.1.9 the image makes `ComfyUI-UniRig/web` writable; pull it and recreate the
+  container. On 0.1.9 the panel drew UniRig's sample character with its
+  skeleton (2026-10-05).
+- **Development profile.** `./custom_nodes` is a bind mount, and files in it that
+  a container run as root wrote belong to root; here UniRig's `web/` folder did
+  (2026-10-05). `sudo chown -R "$(id -u):$(id -g)" custom_nodes` hands them back.
+
 ## The sprite sheet is the rest pose four times
 
 Look for this line in the output:
