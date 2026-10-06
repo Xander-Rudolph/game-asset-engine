@@ -106,6 +106,15 @@ The published images up to 0.1.9 do not have it. On those:
   or Wan stage. A restart clears it until the next texture run.
 - On the development profile, run `scripts/patch_nodes.py` and restart instead.
 
+With the patch, a Qwen job queued straight after a texture run gets past its
+text encoder, but on a 16 GB card it can then run out of GPU memory in its
+sampler, with `torch.OutOfMemoryError: Allocation on device`. On 0.1.10 on the
+reference machine, with Blender holding 365 MiB of the card, `txt2img_qwen_fast.json`
+did that twice in two tries straight after `mesh_texture_hunyuan3d21.json`, ran
+when queued again, and ran first time after `scripts/run_workflow.py --free`
+between the two (2026-10-06). So free memory after a texture run, or queue the
+failed job again: ComfyUI frees the same memory itself when it runs out.
+
 It is worth knowing this one by name because the error says *numpy*, and this
 stack documents a genuine numpy dependency chain at length, so the natural
 reaction is to go hunting through the pins, which is the wrong tree.
