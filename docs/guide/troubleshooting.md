@@ -82,16 +82,32 @@ server has been resident, not with any one prompt.
 
 ## Every generation fails with "can't convert cuda:0 device type tensor to numpy"
 
-Raised from ComfyUI's quantised-loading path, on **every** generation, while
-`nvidia-smi` shows several gigabytes held with an empty queue.
+Raised from ComfyUI's quantised-loading path (`layer_conf.numpy()` in
+`comfy/ops.py`) when a node loads a model stored in the fp8 "scaled" layout,
+while `nvidia-smi` shows several gigabytes held with an empty queue. In the
+asset workflow it shows up at the Qwen text encoder's `CLIPLoader` in a run with
+the Texture stage on as well as a Qwen stage, and Concept, fast is on when the
+graph opens.
 
-Restart the container. That clears it. On a shared server, check
-`curl -s http://127.0.0.1:8188/queue` first: a restart ends everyone's jobs.
+The texture stage causes it. Hunyuan3D-2.1's texture loader hands its paint
+pipeline to mmgp, a memory manager, and mmgp 3.7.14 finishes by setting torch's
+default device to CUDA for the whole server process. From then on ComfyUI builds
+each fp8 "scaled" model's quantisation settings on the GPU and cannot read them
+back. Five models in the weight set are stored that way: the Qwen and Wan text
+encoders, `qwen_image_2512_4steps_merged` and both Wan 2.2 image-to-video models
+(read from their file headers, 2026-10-06). So after one texture run, every Qwen
+and Wan stage fails, in the same run or any later one, until the server restarts.
+
+`scripts/patch_nodes.py` puts the default device back once mmgp is done. The
+published images up to 0.1.9 do not have that patch. On those:
+
+- Run the texture stage on its own, then restart the container before any Qwen
+  or Wan stage. A restart clears it until the next texture run.
+- On the development profile, run `scripts/patch_nodes.py` and restart instead.
 
 It is worth knowing this one by name because the error says *numpy*, and this
 stack documents a genuine numpy dependency chain at length, so the natural
-reaction is to go hunting through the pins, which is the wrong tree. The root
-cause here was never established; the restart is the answer.
+reaction is to go hunting through the pins, which is the wrong tree.
 
 ```sh
 docker restart "$(python3 scripts/_engine.py)"
