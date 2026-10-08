@@ -709,6 +709,8 @@ Seen live: ComfyUI failed every generation with `can't convert cuda:0 device typ
 
 > ComfyUI was failing every generation with `can't convert cuda:0 device type tensor to numpy` in its quantised-loading path, holding 7 GB of VRAM with nothing queued. A container restart cleared it. I don't know the root cause; if it recurs, that's the first thing to try.
 
+**Root cause found 2026-10-06:** mmgp 3.7.14's `offload.all()` ends with `torch.set_default_device('cuda')` and never restores it, and Hunyuan3D-2.1 TexGen's loader calls it when `enable_mmgp` is on, as `mesh_texture_hunyuan3d21.json` has it. ComfyUI's `convert_old_quants` then makes each fp8 "scaled" layer's `comfy_quant` tensor on the GPU, and `comfy/ops.py` calls `.numpy()` on it. Reproduced in a throwaway 0.1.9 container with a one-layer file in that layout, through ComfyUI's own `load_torch_file` and `convert_old_quants`; putting the default device back after `profile()` cleared it. `scripts/patch_nodes.py` now does that, and troubleshooting.md says so. The asset workflow hit it at the Qwen text encoder in a run with the Texture stage on.
+
 ### txt2mesh_sdxl_hunyuan3d21.json OOMs on a 16GB card and nothing says so
 
 **medium** &middot; **fixed 2026-09-10** &middot; belongs in `workflows/api/txt2mesh_sdxl_hunyuan3d21.json _comment, scripts/api_to_ui.py Note for txt2mesh_sdxl_hunyuan3d21, docs/reference/workflows.md base-graph table`

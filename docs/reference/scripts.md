@@ -23,7 +23,7 @@ Everything in `scripts/`. Each takes `--help`.
 | `validate_workflows.py` | Check every graph against a live server's node definitions. |
 | `api_to_ui.py` | Convert graphs into the editor's format. `--check` verifies every value survived. |
 | `build_presets.py` | Generate the drop in presets from base graphs plus the prompt library. |
-| `build_asset_workflow.py` | Join the base graphs into one editor graph, `asset_workflow.json`: the prompts at the top, a panel that switches stages on and off, a row of pickers under them, one per stage, for picking a run up at any stage, and a pause after each image stage to choose the take that carries on. Eight stages, from concept to a rig and a video. Run it after `build_presets.py`. `--check` verifies every value survived. See [the guide](/guide/asset-workflow). |
+| `build_asset_workflow.py` | Join the base graphs into one editor graph, `asset_workflow.json`: the prompts at the top, panels that switch stages on and off, one at a time for alternatives, a row of pickers under them, one per stage, for picking a run up at any stage, and a pause after each image stage to choose the take that carries on. Eight stages, from concept to a rig and a video. Run it after `build_presets.py`. `--check` verifies every value survived. See [the guide](/guide/asset-workflow). |
 | `generate_concepts.sh` | Generate a whole prompt folder in the house style. |
 | `simplify_concepts.sh` | Redraw existing art as simpler game ready versions. |
 | `asset_to_mesh.sh` | Concepts to shapes to textures to sheets to curated assets, correctly staged. |
@@ -46,6 +46,7 @@ Everything in `scripts/`. Each takes `--help`.
 | `normalise_mesh.py` | Scale a mesh to a declared world size and record the rule. `--check` gates a whole folder. |
 | `make_seamless.py` | Make a texture tile, and say whether it worked. |
 | `cut_icon.py` | Cut an icon out of its background and size it for a UI. |
+| `image_prompt.py` | Print the prompt an image was made from, read from the graph ComfyUI writes into every PNG and WebP it saves. Each text encoder's text is marked positive or negative by the sampler input it reaches, and a prompt typed into a separate string node is followed back to it. `--json` prints the whole graph instead, which `run_workflow.py` takes. An edited or converted copy has usually lost the graph. Stdlib only, on the host. |
 | `make_loop.py` | Make a music track loop without a seam at a set loudness: it chooses where in the take the loop starts and ends, keeps any silence in the take out of the loop, and reports what you would hear where it comes round. |
 | `cleanup.py` | Curate the keepers, then sweep the rest. Folders `keep` cannot claim, such as music takes, icons and mouth sets, are protected from the sweep. `keep --generator --source --licence --licence-url` records provenance rows in `sources.json`. `keep` refuses Daz 3D data, and keeps only renders from `output/daz/` ([below](#cleanup-py)). |
 

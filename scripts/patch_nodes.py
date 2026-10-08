@@ -71,6 +71,27 @@ PATCHES: list[tuple[str, str, str, str]] = [
         "Asking for 18000 gave 48491. Binding by keyword fixes it.",
     ),
     (
+        "ComfyUI-3D-Pack/nodes.py",
+        "                offload.profile(core_pipe, profile_type.LowRAM_LowVRAM)\n"
+        "                print(\"mmgp optimization enabled for texture pipeline\")",
+        "                default_device = torch.get_default_device()\n"
+        "                try:\n"
+        "                    offload.profile(core_pipe, profile_type.LowRAM_LowVRAM)\n"
+        "                finally:\n"
+        "                    torch.set_default_device(default_device)\n"
+        "                print(\"mmgp optimization enabled for texture pipeline\")",
+        "Hunyuan3D-2.1 TexGen's loader hands its paint pipeline to mmgp, whose "
+        "offload.all() ends with torch.set_default_device('cuda') (mmgp 3.7.14) and "
+        "never puts it back. That setting is for the whole process, so from then "
+        "until a restart every tensor ComfyUI makes without naming a device is made "
+        "on the GPU. ComfyUI makes the comfy_quant config of an fp8 'scaled' model "
+        "that way and reads it back with .numpy(), so loading "
+        "qwen_2.5_vl_7b_fp8_scaled after a texture run fails with \"can't convert "
+        "cuda:0 device type tensor to numpy\", in the same run or any later one. "
+        "Putting the default back once profile() returns keeps mmgp's offloading "
+        "and ends the leak. Drop this when mmgp restores the default itself.",
+    ),
+    (
         "ComfyUI-3D-Pack/Gen_3D_Modules/Hunyuan3D_2_1/hy3dpaint/utils/multiview_utils.py",
         "custom_pipeline=custom_pipeline, \n            torch_dtype=torch.float16",
         "custom_pipeline=custom_pipeline,\n            trust_remote_code=True,\n            torch_dtype=torch.float16",
