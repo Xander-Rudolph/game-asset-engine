@@ -70,8 +70,12 @@ restart; and no arbitrary file read or write. A client that needs one of those
 uses a shell, where a person can see what it is about to do.
 
 SAFETY. Every path argument is resolved and then refused unless it lies under
-`output/`, `input/` or the models directory, and anything written is refused
-unless it lies under `output/`. A graph is named, not pathed: `run_graph` takes
+`output/`, `input/` or the models directory, and a path given for a tool to
+write to is refused unless it lies under `output/`. Without one, a tool writes
+where its script does from a shell, which for render_sprite_sheet,
+normalise_mesh, compose_mouths and preview_lipsync is beside an input that may
+lie under `input/` or the models directory; that is kept so that calls that
+work today keep working. A graph is named, not pathed: `run_graph` takes
 `txt2img_sdxl`, resolved inside `workflows/api/`, so a path cannot escape
 through it, and the same holds for role pose files and prompt folders. No
 subprocess is ever run through a shell: every command is an argument list, so
@@ -1340,7 +1344,8 @@ TOOLS: list[dict] = [
             "check": {"type": "boolean", "default": False,
                       "description": "also run the sheet checks on the result"},
             "out": {"type": "string",
-                    "description": "where to write the sheet PNG; must be under output/"},
+                    "description": "where to write the sheet PNG; must be under output/. "
+                                   "Without it the sheet goes beside the model"},
             "timeout": _TIMEOUT,
         }, ["model"]),
         "handler": t_render_sprite_sheet,
@@ -1354,8 +1359,8 @@ TOOLS: list[dict] = [
             "and its skin weights, and print the table: root, pelvis, legs, spine, head "
             "and the rest. Automatic rigs name every bone bone_0 to bone_N, so this is how "
             "a pose written for no particular rig is aimed at this one. Writes a roles "
-            "file beside the rig, or where `out` says. Runs Blender in the container and "
-            "takes a minute or two.",
+            "file to output/rigged/<rig>.roles.json, or where `out` says. Runs Blender "
+            "in the container and takes a minute or two.",
         "inputSchema": _obj({
             "rig": {"type": "string", "description": f"the rigged .fbx or .glb: {_PATH}"},
             "out": {"type": "string",
@@ -1521,7 +1526,8 @@ TOOLS: list[dict] = [
             "edits": {"type": "string",
                       "description": "folder of edited whole images, one per shape"},
             "out": {"type": "string",
-                    "description": "where to write the overlays and manifest; under output/"},
+                    "description": "where to write the overlays and manifest; under output/. "
+                                   "Without it they go in the portrait's folder"},
             "feather": {"type": "integer", "minimum": 0, "maximum": 200,
                         "description": "soften the box edge by this many pixels"},
             "ring": {"type": "integer", "minimum": 0, "maximum": 200,
@@ -1549,8 +1555,10 @@ TOOLS: list[dict] = [
                          "description": "a cue timeline from lipsync_cues; without it only "
                                         "the contact sheet is made"},
             "audio": {"type": "string", "description": "audio to mux into the MP4"},
-            "out": {"type": "string", "description": "the MP4 path; must be under output/"},
-            "sheet": {"type": "string", "description": "the contact sheet PNG; under output/"},
+            "out": {"type": "string", "description": "the MP4 path; must be under output/. "
+                                                  "Without it the MP4 goes beside the timeline"},
+            "sheet": {"type": "string", "description": "the contact sheet PNG; under output/. "
+                                                    "Without it the sheet goes beside the manifest"},
             "no_sheet": {"type": "boolean", "default": False,
                          "description": "skip the contact sheet"},
             "label": {"type": "boolean", "default": False,

@@ -100,8 +100,18 @@ about to do.
 Read from `mcp/server.py` on 2026-09-19, and exercised by the selftest:
 
 - Every path argument is resolved, symlinks and all, and refused unless it lies
-  under `output/`, `input/` or the models directory. Anything written is refused
-  unless it lies under `output/`.
+  under `output/`, `input/` or the models directory. A path given for a tool to
+  write to (`out`, `out_dir`, `json_out` or `sheet`) is refused unless it lies
+  under `output/`.
+- Without one, a tool writes where its script does from a shell, and that can
+  be outside `output/`. `render_sprite_sheet` writes the sheet beside the model,
+  `normalise_mesh` writes the scaled copy and its `.scale.json` beside each
+  source, `compose_mouths` writes into the portrait's folder, and
+  `preview_lipsync` writes the MP4 beside the timeline and the contact sheet
+  beside the manifest. Any of those inputs may be under `input/` or the models
+  directory. This is deliberate, so that calls that work today keep working
+  (the owner, 2026-10-09). Give the output path to keep the result in
+  `output/`. Read from `mcp/server.py` on 2026-10-09, not run.
 - A graph is named, not pathed. `run_graph` takes `txt2img_sdxl` and resolves it
   inside `workflows/api/`, so a path cannot escape through it. Role pose files
   and prompt folders work the same way.
