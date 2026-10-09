@@ -112,6 +112,18 @@ Read from `mcp/server.py` on 2026-09-19, and exercised by the selftest:
 - A tool reports the files it wrote by path and size. It never returns their
   bytes.
 
+The files a tool reports are its own. Each tool works out where its script
+writes from the tool's own arguments and the script's defaults, such as the
+sheet beside the model when `render_sprite_sheet` is given no `out`, and lists
+the files there that were written during the call. `run_graph` lists the files
+`run_workflow.py` names for its own job. A file that another job, another client
+or a shell wrote into `output/` during the call is not listed; before
+2026-10-08 every file in `output/` modified during the call was. Checked on
+2026-10-08 with a loop writing decoy files into `output/` throughout: a
+two-node graph through `run_graph` and a one-cell sheet through
+`render_sprite_sheet` each listed only their own file, where the previous
+server listed 6 and 5 files in the same run (measured).
+
 ## Register it with Claude Code
 
 One command, using the config published with this site:
