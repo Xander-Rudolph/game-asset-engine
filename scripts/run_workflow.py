@@ -24,7 +24,11 @@ presets (preset_concept_*.json and preset_ground_texture.json) carry the house
 technique in that text around a `<<< SUBJECT: ... >>>` slot, so on those use
 --subject, which fills the slot and keeps the technique.
 
-Outputs (images and meshes alike) are reported by path under output/.
+When the job ends, the files it wrote are listed by path under output/: first
+the ones the server's /history names, then, each with its size, the ones that
+nodes such as Comfy3D's Save 3D Mesh write without naming them there, found
+from each node's own save path among the files written while the job ran.  A
+file another job or script wrote meanwhile is not listed.
 """
 from __future__ import annotations
 
@@ -264,6 +268,177 @@ def warn_unfilled_slots(graph: dict, source: Path) -> None:
               f"({slots}); it reaches the model as literal text.", file=sys.stderr)
 
 
+# ------------------------------------------------- files /history never names
+#
+# /history names a file only when the node that wrote it hands it back in its
+# `ui` result.  The nodes in SAVERS write files without doing that: Comfy3D's
+# Save 3D Mesh is an OUTPUT_NODE that returns its path as a STRING, so a mesh
+# graph's history has no outputs at all.  So each one's file is predicted from
+# the node's own inputs, as a pattern under output/.  The rules were read from
+# the node source in the packaged image on 2026-10-08: ComfyUI-3D-Pack's
+# nodes.py and parse_save_filename in its shared_utils/common_utils.py, and
+# ComfyUI-UniRig's nodes/skinning.py, nodes/animation.py and nodes/mesh_io.py.
+#
+# This used to be a sweep of output/ for every file newer than the moment the
+# job was queued, which also claimed what anything else wrote in that window:
+# the job queued ahead of this one, or a Blender run's .blend.  Now a file is
+# listed only when one of this graph's nodes would have written it, and it was
+# written while this job ran.  ComfyUI runs one job at a time, so only a host
+# script writing a matching name in those minutes could still be mistaken for
+# this job's.  An output node that SAVERS does not know and that names nothing
+# in /history is reported as such: where it writes cannot be predicted here.
+
+CONTAINER_OUTPUT = "/app/output/"
+# parse_save_filename replaces these in the file name, not the folder, with
+# the time of the save.
+DATE_CODES = {"%Y": r"\d{4}", "%m": r"\d{2}", "%d": r"\d{2}", "%H": r"\d{2}",
+              "%M": r"\d{2}", "%S": r"\d{2}", "%f": r"\d{6}"}
+ANY = r"[^/]+"   # a name that comes down a link, so is not known here
+
+
+def _literal(node: dict, name: str, default: str) -> str | None:
+    """A node's widget value, its default when absent, or None when linked."""
+    value = node.get("inputs", {}).get(name, default)
+    return None if isinstance(value, list) else str(value)
+
+
+def _under_output(path: str | None) -> str | None:
+    """A path a node saves to, relative to output/, or None when it is
+    linked or lies outside output/."""
+    if path is None:
+        return None
+    if path.startswith(CONTAINER_OUTPUT):
+        path = path[len(CONTAINER_OUTPUT):]
+    elif os.path.isabs(path):
+        return None
+    return os.path.normpath(path)
+
+
+def _comfy3d_save(default: str):
+    """[Comfy3D] Save 3D Mesh and Save 3DGS: save_path, with its date codes."""
+    def rule(node: dict) -> str | None:
+        rel = _under_output(_literal(node, "save_path", default))
+        if rel is None:
+            return None
+        folder, name = os.path.split(rel)
+        stem, ext = os.path.splitext(name)
+        rx = re.escape(stem)
+        for code, digits in DATE_CODES.items():
+            rx = rx.replace(code, digits)
+        return (re.escape(folder) + "/" if folder else "") + rx + re.escape(ext)
+    return rule
+
+
+def _unirig_skinning(node: dict) -> str:
+    """UniRigAutoRig and UniRigApplySkinningMLNew: <fbx_name>_<template>.fbx,
+    or rigged_<unix time>_<template>.fbx with no name, in output/ itself."""
+    name = _literal(node, "fbx_name", "")
+    if name is None:
+        base = ANY
+    elif name.strip():
+        base = name.strip()
+        if base.lower().endswith(".fbx"):
+            base = base[:-4]
+        base = re.escape(base)
+    else:
+        base = r"rigged_\d+"
+    return base + r"_[^/]+\.fbx"
+
+
+def _unirig_animation(node: dict) -> str:
+    """UniRigApplyAnimation: output_name, with .fbx added when it has none,
+    or else <model stem>_<animation stem>.fbx, in output/ itself."""
+    out = _literal(node, "output_name", "")
+    if out is None:
+        return ANY + r"\.(?i:fbx)"
+    if out.strip():
+        name = out.strip()
+        return re.escape(name if name.lower().endswith(".fbx") else name + ".fbx")
+    model = _literal(node, "model_fbx_path", "")
+    anim = _literal(node, "animation_file", "Breakdance.fbx")
+    m = ANY if model is None else re.escape(os.path.splitext(os.path.basename(model))[0])
+    a = ANY if anim is None else re.escape(os.path.splitext(anim)[0])
+    return f"{m}_{a}" + r"\.fbx"
+
+
+def _unirig_save_mesh(node: dict) -> str | None:
+    """UniRigSaveMesh: file_path, under output/ unless it is absolute."""
+    rel = _under_output(_literal(node, "file_path", "output.obj"))
+    return None if rel is None else re.escape(rel)
+
+
+# class_type -> rule(node) giving a regex for the path under output/, or None
+# when the node's inputs do not say where it writes.
+SAVERS = {
+    "[Comfy3D] Save 3D Mesh": _comfy3d_save("Mesh_%Y-%m-%d-%M-%S-%f.glb"),
+    "[Comfy3D] Save 3DGS": _comfy3d_save("3DGS_%Y-%m-%d-%M-%S-%f.ply"),
+    # Its input image and the textured mesh's every file, at fixed names.
+    "[Comfy3D] Hunyuan3D 21 TexGen": lambda node: r"Hun2-1/hunyuan_[^/]+",
+    "UniRigAutoRig": _unirig_skinning,
+    "UniRigApplySkinningMLNew": _unirig_skinning,
+    "UniRigApplyAnimation": _unirig_animation,
+    "UniRigSaveMesh": _unirig_save_mesh,
+}
+
+
+def ran_between(entry: dict, since: float) -> tuple[float, float]:
+    """When the job started and stopped running, in seconds, from the
+    timestamps on its /history status messages, a second wider each way for
+    file times; from `since` to now when there are none."""
+    stamps = [m[1]["timestamp"] / 1000.0
+              for m in entry.get("status", {}).get("messages", [])
+              if isinstance(m, list) and len(m) > 1 and isinstance(m[1], dict)
+              and isinstance(m[1].get("timestamp"), (int, float))]
+    if stamps:
+        return min(stamps) - 1, max(stamps) + 1
+    return since - 1, time.time() + 1
+
+
+def unreported_files(graph: dict, entry: dict, out_dir: Path,
+                     t0: float, t1: float) -> tuple[list[Path], list[tuple]]:
+    """The files this graph's nodes wrote without naming them in /history.
+
+    Returns (files, notes).  files are under out_dir, written between t0 and
+    t1, and match the pattern a SAVERS rule gives for one of this graph's
+    nodes, oldest first.  notes are (node id, class, why) for each node whose
+    files cannot be predicted."""
+    patterns, notes = [], []
+    outputs = entry.get("outputs", {})
+    prompt = entry.get("prompt")
+    # ComfyUI keeps the ids of the graph's output nodes in the prompt's fifth field.
+    output_ids = ({str(i) for i in prompt[4]}
+                  if isinstance(prompt, list) and len(prompt) > 4
+                  and isinstance(prompt[4], list) else set())
+    for nid, node in graph.items():
+        if not isinstance(node, dict):
+            continue
+        cls = node.get("class_type")
+        if cls in SAVERS:
+            rx = SAVERS[cls](node)
+            if rx is None:
+                notes.append((nid, cls, "its path comes down a link or lies "
+                              "outside output/, so its file is not listed"))
+            else:
+                patterns.append(re.compile(rx))
+        elif str(nid) in output_ids and not outputs.get(str(nid)):
+            notes.append((nid, cls, "an output node that named no files in "
+                          "/history, and this script does not know where it "
+                          "writes, so look in output/ for anything it made"))
+    files = []
+    if patterns and out_dir.is_dir():
+        for f in out_dir.rglob("*"):
+            try:
+                if not f.is_file() or not t0 <= f.stat().st_mtime <= t1:
+                    continue
+            except OSError:
+                continue
+            rel = f.relative_to(out_dir).as_posix()
+            if any(p.fullmatch(rel) for p in patterns):
+                files.append(f)
+    files.sort(key=lambda f: f.stat().st_mtime)
+    return files, notes
+
+
 # ----------------------------------------------------------------------- main
 
 def wait_for(prompt_id: str, poll=1.0) -> dict:
@@ -282,7 +457,11 @@ def wait_for(prompt_id: str, poll=1.0) -> dict:
         time.sleep(poll)
 
 
-def report(entry: dict, since: float = 0.0) -> int:
+def report(entry: dict, since: float = 0.0, graph: dict | None = None) -> int:
+    """Print how the job ended and the files it wrote; 1 if it failed.
+
+    `graph` is the graph that was queued.  Without it, the copy /history keeps
+    is used."""
     st = entry.get("status", {})
     if st.get("status_str") == "error":
         for kind, *rest in st.get("messages", []):
@@ -296,7 +475,7 @@ def report(entry: dict, since: float = 0.0) -> int:
         print(f"\nERROR: {json.dumps(st)[:2000]}")
         return 1
 
-    found, reported = 0, []
+    found, reported = 0, set()
     for nid, out in entry.get("outputs", {}).items():
         for key, items in out.items():
             if not isinstance(items, list):
@@ -304,26 +483,34 @@ def report(entry: dict, since: float = 0.0) -> int:
             for it in items:
                 if isinstance(it, dict) and "filename" in it:
                     sub = it.get("subfolder") or ""
-                    print(f"  output/{sub + '/' if sub else ''}{it['filename']}")
-                    reported.append(it["filename"])
+                    rel = f"{sub}/{it['filename']}" if sub else it["filename"]
+                    print(f"  output/{rel}")
+                    reported.add(rel)
                     found += 1
                 elif isinstance(it, str) and ("/" in it or "." in it):
+                    # A path a node hands back as text, such as the FBX that
+                    # UniRig's preview names, inside the container.
+                    if it.startswith(CONTAINER_OUTPUT):
+                        reported.add(it[len(CONTAINER_OUTPUT):])
+                        it = "output/" + it[len(CONTAINER_OUTPUT):]
+                    else:
+                        reported.add(it)
                     print(f"  {it}")
                     found += 1
-    # Comfy3D's Save 3D Mesh is an OUTPUT_NODE but records nothing in history:
-    # it returns the path as a STRING and never populates `ui`.  So the meshes
-    # land on disk and the API says nothing about them.  Sweep for what appeared.
-    out_dir = ROOT / "output"
-    if out_dir.is_dir():
-        fresh = sorted((f for f in out_dir.rglob("*")
-                        if f.is_file() and f.stat().st_mtime >= since - 1),
-                       key=lambda f: f.stat().st_mtime)
-        for f in fresh:
-            rel = f.relative_to(ROOT)
-            if not any(str(rel).endswith(seen) for seen in reported):
-                print(f"  {rel}  ({f.stat().st_size / 1024:.0f} KB)")
-                found += 1
-    if not found:
+
+    if graph is None:
+        prompt = entry.get("prompt")
+        graph = prompt[2] if isinstance(prompt, list) and len(prompt) > 2 else {}
+    t0, t1 = ran_between(entry, since)
+    files, notes = unreported_files(graph, entry, ROOT / "output", t0, t1)
+    for f in files:
+        rel = f.relative_to(ROOT / "output").as_posix()
+        if rel not in reported:
+            print(f"  output/{rel}  ({f.stat().st_size / 1024:.0f} KB)")
+            found += 1
+    for nid, cls, why in notes:
+        print(f"  (node {nid}, {cls}: {why})")
+    if not found and not notes:
         print("  (workflow produced no file outputs)")
     return 0
 
@@ -449,7 +636,7 @@ def main() -> int:
                 return 1
             pid = res["prompt_id"]
             print(f"  queued {pid}")
-            return report(wait_for(pid), since=started)
+            return report(wait_for(pid), since=started, graph=graph)
         except SystemExit:
             # A graph the server rejects will be rejected again; only a
             # dropped connection is worth another go, and `api` turns both

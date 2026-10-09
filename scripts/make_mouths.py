@@ -302,9 +302,10 @@ def find_output(stdout: str, prefix: str) -> Path | None:
     """The image this edit saved, from run_workflow.py's report.
 
     Matches the whole save path, `output/<prefix>_00001_.png`, and takes the
-    first hit: history is reported before the sweep for fresh files, and the
-    sweep can list other jobs' files, including ones with the same file name in
-    another folder.
+    first hit, from the files history names, which the report lists first.
+    Until 2026-10-08 a sweep for fresh files followed them and could list other
+    jobs' files, including ones with the same file name in another folder; the
+    report now lists only this job's.
     """
     rx = re.compile(r"^\s+(output/" + re.escape(prefix) + r"_\d+_\.png)(?:\s|$)", re.M)
     hit = rx.search(stdout)

@@ -252,11 +252,13 @@ def queue(workflow: Path, name: str, specs: list[str]) -> list[Path]:
     # image savers' <prefix>_00001_.png, so accept either.
     #
     # Only the lines with nothing after the path: those are the files this
-    # prompt saved, read from the server's history. run_workflow.py then lists
-    # everything else written to output/ while it waited, with a size after
-    # it, which on a shared server is other people's files and, often, the
-    # previous take finishing its write. Taking the last match looped seed 2's
-    # file a second time in place of seed 3's.
+    # prompt saved, read from the server's history. Until 2026-10-08
+    # run_workflow.py then listed everything else written to output/ while it
+    # waited, with a size after it, which on a shared server was other
+    # people's files and, often, the previous take finishing its write: taking
+    # the last match looped seed 2's file a second time in place of seed 3's.
+    # It now lists only this prompt's files, and SaveAudio names all of its
+    # own in history.
     found = re.findall(rf"^\s*output/(music/{re.escape(name)}_\d+_?\.flac)\s*$",
                        r.stdout, flags=re.M)
     return [ROOT / "output" / f for f in dict.fromkeys(found)]
