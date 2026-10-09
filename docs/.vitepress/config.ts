@@ -78,6 +78,7 @@ export default defineConfig({
             { text: 'Rooms for generated maps', link: '/guide/room-layouts' },
             { text: 'Icons', link: '/guide/icons' },
             { text: 'Props and scenery', link: '/guide/props' },
+            { text: 'Room kits', link: '/guide/room-kits' },
             { text: 'Music', link: '/guide/music' },
           ],
         },

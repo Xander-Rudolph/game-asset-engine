@@ -223,7 +223,11 @@ anything the game will load.
 
 **The key light is attached to the camera.** It rides round with it, so every
 facing is lit identically. A fixed light makes one facing bright and the opposite
-one a silhouette, and no amount of colour correction later fixes it.
+one a silhouette, and no amount of colour correction later fixes it. At the
+default 30 degree elevation it shines from below the horizon, travelling about
+19 degrees upward (computed from the rotations the script sets, not rendered),
+so a level top takes only the world light. That matters for floors: see
+[room kits](/guide/room-kits#light-it-like-the-sheets).
 
 **One engine for a whole set.** Since 2026-09-18 `render_sheet.py` path traces
 with Cycles on the graphics card; before that it rasterised with EEVEE on the
