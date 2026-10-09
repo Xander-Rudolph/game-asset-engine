@@ -242,7 +242,48 @@ words to keep them out. Read each match before acting on it.
 The chunk stops at the PNG. A mesh, a texture or a sprite sheet carries no
 prompt, and an edited image carries its edit's instruction and names its input
 only by file name. Keep each finished asset's concept beside it, as `keep` does,
-and the trail from a sheet back to its words stays one grep.
+and the trail from a sheet back to its words stays one grep. What that game did
+with the models it found is the next section.
+
+## Changing the markings on a finished model
+
+When a model has shipped and only its surface markings must change, edit the
+pictures its colour came from, not the model. The same game replaced the glyphs
+on its four enemies with circuit traces this way on 2026-10-09, keeping the
+meshes, the rigs and the render settings. Its models take their colour straight
+from two views, the front concept and a generated back view, each projected onto
+the mesh, so changing those views and projecting again changes only the colour.
+The texture stage here paints views of its own instead, and re-running it on an
+edited concept was not tried.
+
+1. **Edit each view that carries the marks** with `img_edit_qwen.json`. Name
+   every marked part, what replaces the marks and that nothing else changes, and
+   name what has to stay as it is: one enemy's rim stayed dark only once the
+   prompt said so, and a belt buckle kept its rune until the prompt asked for a
+   microchip and "no letter, no rune and no symbol anywhere". Make two seeds.
+2. **Bring back only the marks.** An edit redraws the whole image and restyles
+   the surface round the marks: one enemy's lens rim became a copper circuit
+   board, and another's white forearm plates took an orange wash. So paste the
+   edit back only inside a box or a ring round the marks, only where it differs
+   from the original by more than a threshold, and only on the figure, after
+   shifting the edit by the whole pixels that best line its figure up with the
+   original's outside that region. Where the edit restyles even inside the
+   region, erase the old marks by their colour instead, fill them from the
+   surface around them, and keep only the edit's bright lines near where a mark
+   was.
+3. **Mind the glow.** A mark in the hue of a glowing band lights up with it, so
+   choose the new marks' colour with that in mind, and look at them at sprite
+   size, lit and unlit.
+4. **Project, render and pack with the same settings**, then compare the result
+   with the shipped set.
+
+Measured by the game against its shipped sets on 2026-10-09: on two enemies no
+atlas pixel's alpha moved more than 2 levels, and on the third one pixel moved
+3; on the fourth, at most 60 pixels of a sheet differed in alpha, by 9 levels
+or less, all at anti-aliased edges. Between 1.6% and 2.8% of each figure's
+pixels changed colour, all at the marks, and `sheet_check.py` passed every
+sheet. The 16 edits took 130 to 157 s each, the paste 5.5 s a view, and the
+erase-and-lift variant 23 s.
 
 ## Checking a batch without opening a file manager
 

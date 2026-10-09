@@ -71,7 +71,9 @@ Rules that matter, learned by getting them wrong:
   reduces drift.
 - **Expect some global drift anyway.** The whole image is re-diffused, so
   lighting and surface finish shift slightly even in untouched areas. If a
-  faithful crop matters, that is a compositing job, not this.
+  faithful crop matters, that is a compositing job, not this:
+  `docs/guide/concept-art.md`, "Changing the markings on a finished model",
+  pastes an edit back only inside a region and only where it differs.
 
 Edits chain: feed `edit_00001_.png` back in to correct an overshoot.
 
