@@ -119,6 +119,9 @@ Measured by the game on the reference machine with image 0.1.10 on 2026-10-08:
 the five clips retargeted in about 3 s, and the 256 px sheets rendered from them
 took 17.0 to 22.6 s each in `render_sheet.py`.
 
+Dressing that one body several ways, for several characters that share the
+clips, is [one body, several looks](/guide/one-body-several-looks).
+
 ## Posing bones yourself
 
 For short game cycles, two to four frames of idle, walk, attack and hit,
