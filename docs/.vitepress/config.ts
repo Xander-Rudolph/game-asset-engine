@@ -87,6 +87,7 @@ export default defineConfig({
             { text: 'Rigging', link: '/guide/rigging' },
             { text: 'Animation cycles', link: '/guide/animation' },
             { text: 'Facings and camera angles', link: '/guide/facings' },
+            { text: 'Attack effects', link: '/guide/effects' },
             { text: 'Two render engines', link: '/guide/render-engines' },
             { text: 'Talking portraits', link: '/guide/talking-portraits' },
             { text: 'Daz figures', link: '/guide/daz-figures' },
