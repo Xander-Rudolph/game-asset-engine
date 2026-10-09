@@ -88,6 +88,7 @@ export default defineConfig({
             { text: 'Face counts and decimation', link: '/guide/decimation' },
             { text: 'Rigging', link: '/guide/rigging' },
             { text: 'Animation cycles', link: '/guide/animation' },
+            { text: 'One body, several looks', link: '/guide/one-body-several-looks' },
             { text: 'Facings and camera angles', link: '/guide/facings' },
             { text: 'Attack effects', link: '/guide/effects' },
             { text: 'Two render engines', link: '/guide/render-engines' },
