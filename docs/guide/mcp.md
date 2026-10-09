@@ -197,6 +197,50 @@ and `${VAR:-default}` in a server's `command`, `args` and `env`
 | `COMFY_URL` | `http://127.0.0.1:8188` | ComfyUI is on another host or port. |
 | `ASSET_ENGINE_CONTAINER` | empty | Several ComfyUI containers are up and you mean a particular one. Empty means `scripts/_engine.py` asks `docker ps`. |
 
+### Testing a branch from a git worktree
+
+A git worktree holds the tracked files and nothing else. `output/`, `input/`,
+`.env` and `custom_nodes/` are ignored by git, so a new worktree has none of
+them, and two things then go wrong without an error:
+
+- **The scripts look beside themselves.** 31 of the 38 Python scripts in
+  `scripts/` take their root as the folder above their own resolved path,
+  `run_workflow.py` and `render_sheet.py` among them (grep, 2026-10-09), so a
+  worktree's copy looks for everything in the worktree. Run from a worktree on
+  2026-10-09, `scripts/list_animations.py` reported mesh2motion
+  `not installed: scripts/setup.sh clones it` and exited 0, while the same
+  script in the main checkout listed its clips.
+- **The server does not.** `mcp/server.py` takes its root from
+  `ASSET_ENGINE_ROOT`, `/asset-engine` by default, and runs the scripts and
+  graphs it finds there. Started from a worktree without it, the server is the
+  branch's, and every script it runs is the main checkout's.
+
+What works is a scratch root: copies of the branch's files the tools read,
+links to the main checkout's `output/` and `input/`, and `ASSET_ENGINE_ROOT`
+pointing at it. Blender jobs run in the container, which mounts the main
+checkout's `output/`, so the link is also what lets the branch's scripts find
+what those jobs write. From the worktree's root:
+
+```sh
+root=$(mktemp -d)
+cp -r scripts workflows prompts poses models.json "$root"/
+ln -s /asset-engine/output /asset-engine/input "$root"/
+ASSET_ENGINE_ROOT="$root" python3 mcp/selftest.py
+```
+
+Run on 2026-10-09, that passed 19 of 19 stdio checks and 5 of 5 over HTTP.
+Without `prompts/`, `poses/` and `models.json`, two checks failed,
+`list_models` and `list_prompt_folders`. A server change was tested live this
+way on 2026-10-08, with `run_graph` and `render_sprite_sheet` called through it.
+
+Copy the scripts rather than linking them: a script resolves its own path
+through a link, so a linked `scripts/` finds the worktree again. On 2026-10-09,
+with `custom_nodes/` linked into a scratch root, `list_animations.py` still
+reported mesh2motion missing through a linked `scripts/`, and listed the clips
+through a copied one. So link `custom_nodes/` too for a script that reads it,
+and export `MODELS_DIR` for a tool that reads the weights folder, because the
+scratch root has no `.env` (read from `models_dir()` in `mcp/server.py`).
+
 ### Which scope to register it in
 
 Read from the [Claude Code MCP documentation](https://code.claude.com/docs/en/mcp)
