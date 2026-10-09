@@ -211,6 +211,39 @@ doesn't record which input or settings produced a file, so it becomes unreadable
 within a dozen runs. When you write your own batch script, set
 `Save.filename_prefix` per item.
 
+## When the art direction changes
+
+Put a project's setting in the art direction slot of `_style.txt`
+([above](#how-prompts-work)), not in each subject's file. A 2.5D isometric game
+made with the engine wrote its look into every enemy's own prompt: "Faint gold
+arcane glyphs are etched into its chest plate", and once "from an arcane
+technology laboratory". When its setting turned from arcane to cyberpunk, the
+old words sat in every one of those prompts, where one edit to the slot would
+have reached every image made after it.
+
+An edit to the style changes nothing already made, so the next job is finding
+what the old words touched. ComfyUI's save node writes the graph it ran into
+each PNG it saves, as a plain text chunk named `prompt`, positive and negative
+prompts included, unless the server was started with `--disable-metadata` (read
+from the image's `nodes.py` on 2026-10-09). So `grep` reads it straight from the
+files:
+
+```sh
+grep -l -a "arcane" output/concept/*.png
+grep -l -a "arcane" output/assets/*/concept.png
+```
+
+Run on 2026-10-09, the first listed 26 images, all of them that game's enemy
+concepts. `scripts/cleanup.py keep` copies a concept unchanged, so the second
+found the kept assets as well: six, five of them made under the old direction.
+The sixth was newer, and matched because its negative prompt names the old
+words to keep them out. Read each match before acting on it.
+
+The chunk stops at the PNG. A mesh, a texture or a sprite sheet carries no
+prompt, and an edited image carries its edit's instruction and names its input
+only by file name. Keep each finished asset's concept beside it, as `keep` does,
+and the trail from a sheet back to its words stays one grep.
+
 ## Checking a batch without opening a file manager
 
 Every batch script writes a log under `logs/`. But the useful check is to look at
