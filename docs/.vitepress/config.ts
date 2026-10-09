@@ -77,6 +77,7 @@ export default defineConfig({
             },
             { text: 'Icons', link: '/guide/icons' },
             { text: 'Props and scenery', link: '/guide/props' },
+            { text: 'Room kits', link: '/guide/room-kits' },
             { text: 'Music', link: '/guide/music' },
           ],
         },
