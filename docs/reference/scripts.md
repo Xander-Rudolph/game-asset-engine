@@ -19,7 +19,7 @@ Everything in `scripts/`. Each takes `--help`.
 
 | Script | Does |
 |---|---|
-| `run_workflow.py` | Queue a graph, wait, report the outputs. On a preset, `--subject` fills only the SUBJECT slot and keeps the house technique, which `--prompt` would replace. `--free`, `--interrupt PROMPT_ID` and `--delete PROMPT_ID` manage the queue, and refuse to touch a job that is not the one named. |
+| `run_workflow.py` | Queue a graph, wait, and list the files the job wrote, including the meshes `/history` never names ([Running one](/reference/workflows#running-one)). On a preset, `--subject` fills only the SUBJECT slot and keeps the house technique, which `--prompt` would replace. `--free`, `--interrupt PROMPT_ID` and `--delete PROMPT_ID` manage the queue, and refuse to touch a job that is not the one named. |
 | `validate_workflows.py` | Check every graph against a live server's node definitions. |
 | `api_to_ui.py` | Convert graphs into the editor's format. `--check` verifies every value survived. |
 | `build_presets.py` | Generate the drop in presets from base graphs plus the prompt library. |

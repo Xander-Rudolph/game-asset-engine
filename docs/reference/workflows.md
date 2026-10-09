@@ -82,6 +82,19 @@ Use `--prompt` and `--negative` rather than `--set text=...`. The `text` input
 exists on both the positive and negative nodes, and a bare `--set` is refused for
 that reason.
 
+When the job ends, `run_workflow.py` lists the files it wrote, as paths under
+`output/`. Most come from the server's `/history`, which names a file only when
+the node that wrote it hands the file back to the interface. Some nodes do not:
+Comfy3D's Save 3D Mesh passes its path on as a string, so a mesh graph's history
+has no outputs at all, and UniRig's Auto Rig and Apply Animation and the
+Hunyuan3D 2.1 texture stage, with its scratch files in `output/Hun2-1/`, write
+files that history never names. For those, `run_workflow.py` works each file's
+name out from the node's own inputs, then lists the matching files written while
+the job ran, each with its size, so a file another job or a host script wrote
+meanwhile is not taken for this job's. An output node it does not know that names
+nothing in history is listed by id and class instead. Automation that polls
+`/history` itself sees no outputs for a mesh graph: read the `save_path` you set.
+
 ## The rigging graph reads from disk
 
 `mesh_rig_unirig.json` does not take a wired mesh. Its loader picks from files

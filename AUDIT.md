@@ -341,7 +341,7 @@ MERGES candidates 13, 33, 34, 35, 36, 37, 38, 97, 98, 99 and 100 — a large clu
 
 ### run_workflow.py's output report is an mtime sweep, because Save 3D Mesh records nothing in the API history
 
-**medium** &middot; belongs in `docs/reference/scripts.md (the run_workflow.py block) or docs/reference/workflows.md ('Running one')`
+**medium** &middot; **fixed 2026-10-08** &middot; belongs in `docs/reference/scripts.md (the run_workflow.py block) or docs/reference/workflows.md ('Running one')`
 
 VERIFIED. scripts/run_workflow.py:185-196 sweeps output/ for files with mtime >= queue time and prints '(workflow produced no file outputs)' when it finds none — then returns 0. The reason is a good inline comment: Comfy3D's Save 3D Mesh is an OUTPUT_NODE that returns the path as a STRING and never populates `ui`, so /history carries no outputs for a mesh workflow. No doc says any of this: docs/reference/scripts.md:22 describes run_workflow.py as 'Queue a graph, wait, report the outputs', which reads as though the API reports them, and grep for 'OUTPUT_NODE' or '/history' across docs/ returns nothing. This matters for two audiences the docs explicitly cultivate: anyone writing their own automation over these graphs (meshes.md and first-asset.md both encourage custom batch loops) will poll /history, see no outputs at all for a mesh workflow, and conclude the run failed; and anyone debugging why run_workflow.py reported an unexpected file needs to know the report is an mtime sweep over the whole output tree, not an authoritative list. Note the exit-code half is already tracked in AUDIT.md's batch-driver entry.
 
