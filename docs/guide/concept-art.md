@@ -10,8 +10,13 @@ its mistakes. This is the cheapest stage to redo and the most expensive to skip.
 | `txt2img_qwen_fast.json` | Finding a look. Rerolls in about 30 seconds. | ~30s |
 | `txt2img_qwen.json` | The real thing. Negative prompts work here. | ~130s |
 | `txt2img_sdxl.json` | Comparison only. Weaker at following prompts. | ~60s |
-| `img_edit_qwen.json` | Changing an image you already have | ~90s |
+| `img_edit_qwen.json` | Changing an image you already have | 130 to 157s |
 | `img_refine_sdxl.json` | Re-rendering materials after a simplify, at low denoise | not recorded |
+
+The edit's time was measured on 2026-10-09 on the reference machine: 131.4 s for
+one edit started after `run_workflow.py --free`, so loading the model included,
+and 130 to 157 s each for 16 edits that a 2.5D isometric game made with the
+engine ran while three agents shared the card, waiting left out.
 
 ## The fast workflow ignores negative prompts
 
@@ -205,6 +210,80 @@ Outputs are named after the source file, not ComfyUI's counter. The counter
 doesn't record which input or settings produced a file, so it becomes unreadable
 within a dozen runs. When you write your own batch script, set
 `Save.filename_prefix` per item.
+
+## When the art direction changes
+
+Put a project's setting in the art direction slot of `_style.txt`
+([above](#how-prompts-work)), not in each subject's file. A 2.5D isometric game
+made with the engine wrote its look into every enemy's own prompt: "Faint gold
+arcane glyphs are etched into its chest plate", and once "from an arcane
+technology laboratory". When its setting turned from arcane to cyberpunk, the
+old words sat in every one of those prompts, where one edit to the slot would
+have reached every image made after it.
+
+An edit to the style changes nothing already made, so the next job is finding
+what the old words touched. ComfyUI's save node writes the graph it ran into
+each PNG it saves, as a plain text chunk named `prompt`, positive and negative
+prompts included, unless the server was started with `--disable-metadata` (read
+from the image's `nodes.py` on 2026-10-09). So `grep` reads it straight from the
+files:
+
+```sh
+grep -l -a "arcane" output/concept/*.png
+grep -l -a "arcane" output/assets/*/concept.png
+```
+
+Run on 2026-10-09, the first listed 26 images, all of them that game's enemy
+concepts. `scripts/cleanup.py keep` copies a concept unchanged, so the second
+found the kept assets as well: six, five of them made under the old direction.
+The sixth was newer, and matched because its negative prompt names the old
+words to keep them out. Read each match before acting on it.
+
+The chunk stops at the PNG. A mesh, a texture or a sprite sheet carries no
+prompt, and an edited image carries its edit's instruction and names its input
+only by file name. Keep each finished asset's concept beside it, as `keep` does,
+and the trail from a sheet back to its words stays one grep. What that game did
+with the models it found is the next section.
+
+## Changing the markings on a finished model
+
+When a model has shipped and only its surface markings must change, edit the
+pictures its colour came from, not the model. The same game replaced the glyphs
+on its four enemies with circuit traces this way on 2026-10-09, keeping the
+meshes, the rigs and the render settings. Its models take their colour straight
+from two views, the front concept and a generated back view, each projected onto
+the mesh, so changing those views and projecting again changes only the colour.
+The texture stage here paints views of its own instead, and re-running it on an
+edited concept was not tried.
+
+1. **Edit each view that carries the marks** with `img_edit_qwen.json`. Name
+   every marked part, what replaces the marks and that nothing else changes, and
+   name what has to stay as it is: one enemy's rim stayed dark only once the
+   prompt said so, and a belt buckle kept its rune until the prompt asked for a
+   microchip and "no letter, no rune and no symbol anywhere". Make two seeds.
+2. **Bring back only the marks.** An edit redraws the whole image and restyles
+   the surface round the marks: one enemy's lens rim became a copper circuit
+   board, and another's white forearm plates took an orange wash. So paste the
+   edit back only inside a box or a ring round the marks, only where it differs
+   from the original by more than a threshold, and only on the figure, after
+   shifting the edit by the whole pixels that best line its figure up with the
+   original's outside that region. Where the edit restyles even inside the
+   region, erase the old marks by their colour instead, fill them from the
+   surface around them, and keep only the edit's bright lines near where a mark
+   was.
+3. **Mind the glow.** A mark in the hue of a glowing band lights up with it, so
+   choose the new marks' colour with that in mind, and look at them at sprite
+   size, lit and unlit.
+4. **Project, render and pack with the same settings**, then compare the result
+   with the shipped set.
+
+Measured by the game against its shipped sets on 2026-10-09: on two enemies no
+atlas pixel's alpha moved more than 2 levels, and on the third one pixel moved
+3; on the fourth, at most 60 pixels of a sheet differed in alpha, by 9 levels
+or less, all at anti-aliased edges. Between 1.6% and 2.8% of each figure's
+pixels changed colour, all at the marks, and `sheet_check.py` passed every
+sheet. The 16 edits took 130 to 157 s each, the paste 5.5 s a view, and the
+erase-and-lift variant 23 s.
 
 ## Checking a batch without opening a file manager
 

@@ -135,12 +135,30 @@ def check(cells, rows, cols, azimuths=None, empty_floor=0.005, same_eps=0.002,
 
     # 3. Clipping. Any subject alpha touching a cell border means the frame is
     #    cutting the model, which a sheet makes surprisingly easy to miss.
+    #    render_sheet.py sets the camera's ortho scale to the subject's extent,
+    #    or to --span, times --zoom, so raising --zoom is what widens the frame;
+    #    --size only sets how many pixels a cell has. A cut on the top edge
+    #    alone, or the bottom edge alone, can instead be moved off that edge
+    #    with --look-at, the height the camera points at, when the opposite
+    #    edge has room to spare.
     for r in range(rows):
         for c in range(cols):
             m = mask[r][c]
-            if m[0, :].any() or m[-1, :].any() or m[:, 0].any() or m[:, -1].any():
-                findings.append(f"cell r{r}c{c} touches its border: the subject "
-                                "is clipped. Lower --zoom or raise --size")
+            edges = [name for name, line in (("top", m[0, :]), ("bottom", m[-1, :]),
+                                             ("left", m[:, 0]), ("right", m[:, -1]))
+                     if line.any()]
+            if not edges:
+                continue
+            where = (edges[0] if len(edges) == 1
+                     else ", ".join(edges[:-1]) + " and " + edges[-1])
+            hint = ("Raise --zoom to widen the frame, on every sheet of a set so "
+                    "they keep one scale; --size adds pixels without reframing")
+            if edges == ["top"]:
+                hint += ". If the bottom has room, a higher --look-at moves the frame up instead"
+            elif edges == ["bottom"]:
+                hint += ". If the top has room, a lower --look-at moves the frame down instead"
+            findings.append(f"cell r{r}c{c} touches its border: the subject is "
+                            f"clipped at the {where}. {hint}")
 
     # 4. Coverage spread across angles. A subject that fills 40% of one cell and
     #    4% of another at the same pose is usually a framing or scale problem.

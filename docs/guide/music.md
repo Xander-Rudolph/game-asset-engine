@@ -104,12 +104,14 @@ Six things about it that cost a run each:
   nothing.
 - **Save FLAC.** The loop and encode step should start from lossless audio.
 - **Take the files the prompt saved, not the last path printed.**
-  `run_workflow.py` lists the prompt's own outputs first, read from the
-  server's history, then every other file written to `output/` while it
-  waited, each with its size after it. On a shared server that means other
-  people's files, and often the previous take still finishing its write.
-  Taking the last `.flac` printed looped seed 2's take a second time in place
-  of seed 3's.
+  `run_workflow.py` lists the prompt's own outputs, read from the server's
+  history. Until 2026-10-08 it then listed every other file written to
+  `output/` while it waited, each with its size after it: on a shared server
+  that meant other people's files, and often the previous take still
+  finishing its write, and taking the last `.flac` printed looped seed 2's
+  take a second time in place of seed 3's. It now lists only the files the
+  prompt wrote, and `scripts/generate_music.py` still reads only the lines
+  history gave it.
 
 ## Prompts
 

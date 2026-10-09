@@ -70,14 +70,22 @@ restart; and no arbitrary file read or write. A client that needs one of those
 uses a shell, where a person can see what it is about to do.
 
 SAFETY. Every path argument is resolved and then refused unless it lies under
-`output/`, `input/` or the models directory, and anything written is refused
-unless it lies under `output/`. A graph is named, not pathed: `run_graph` takes
+`output/`, `input/` or the models directory, and a path given for a tool to
+write to is refused unless it lies under `output/`. Without one, a tool writes
+where its script does from a shell, which for render_sprite_sheet,
+normalise_mesh, compose_mouths and preview_lipsync is beside an input that may
+lie under `input/` or the models directory; that is kept so that calls that
+work today keep working. A graph is named, not pathed: `run_graph` takes
 `txt2img_sdxl`, resolved inside `workflows/api/`, so a path cannot escape
 through it, and the same holds for role pose files and prompt folders. No
 subprocess is ever run through a shell: every command is an argument list, so
 nothing a caller sends is parsed as shell syntax. Every tool has a timeout, and
 every result is capped in size. A tool reports the files it wrote by path and
-size; it never returns their bytes.
+size; it never returns their bytes. Those are the files its script was asked to
+write, worked out from the tool's arguments and the script's defaults, and for
+`run_graph` the files run_workflow.py lists for its own job, so a file that
+another job or a shell wrote into `output/` during the call is not reported as
+this tool's.
 
 THE ENVIRONMENT.
 
@@ -332,20 +340,51 @@ def clip(text: str, limit: int | None = None) -> str:
             f"the cap is {limit} characters] ...\n\n" + text[-keep:])
 
 
-def files_since(since: float, roots: list[Path] | None = None) -> list[Path]:
-    """Files under output/ whose mtime is at or after `since`, oldest first."""
-    hits: list[Path] = []
-    for root in (roots or [OUTPUT]):
-        if not root.is_dir():
-            continue
-        for f in root.rglob("*"):
+def written_files(targets: list[Path], since: float) -> list[Path]:
+    """The files among `targets` written at or after `since`, oldest first.
+
+    Each tool names the files its script writes, worked out from the tool's own
+    arguments and the script's defaults, so a file that something else wrote
+    under output/ during the call, such as a graph queued by another client or a
+    Blender run from a shell, is not listed as this tool's. A target is a file,
+    or a pattern in its last part such as output/lipsync/herald/mouth_*.png. The
+    second of slack allows for a filesystem that keeps whole seconds.
+    """
+    found: dict[str, Path] = {}
+    for target in targets:
+        if any(c in target.name for c in "*?["):
+            candidates = list(target.parent.glob(target.name))
+        else:
+            candidates = [target]
+        for f in candidates:
             try:
                 if f.is_file() and f.stat().st_mtime >= since - 1:
-                    hits.append(f)
+                    found[str(f)] = f
             except OSError:
                 continue
+    hits = list(found.values())
     hits.sort(key=lambda f: f.stat().st_mtime if f.exists() else 0)
     return hits
+
+
+# run_workflow.py prints each file its job wrote on a line of its own, as
+# "  output/<path>", followed by its size for a file /history does not name.
+LISTED_RE = re.compile(r"^  (output/\S.*?)(?:  \(\d+ KB\))?$", re.M)
+
+
+def listed_by_run_workflow(out: str) -> list[Path]:
+    """The files run_workflow.py says its job wrote, kept to those under output/."""
+    paths = []
+    for rel in LISTED_RE.findall(out):
+        path = REPO / rel
+        if _contained(_real(path), write_roots()):
+            paths.append(path)
+    return paths
+
+
+# decimation_report.py renders into a folder of its own for each run and names
+# it on this line before it starts.
+RENDERS_RE = re.compile(r"^  renders (.+)$", re.M)
 
 
 def describe_files(paths: list[Path]) -> str:
@@ -364,9 +403,11 @@ def describe_files(paths: list[Path]) -> str:
 
 
 def script_result(code: int, out: str, err: str, secs: float, *,
-                  label: str, since: float | None = None,
+                  label: str, files: list[Path] | None = None,
                   error_codes: tuple[int, ...] = (), note: str = "") -> dict:
-    """A tool result built from a script run: what it said, what it wrote, how it ended."""
+    """A tool result built from a script run: what it said, what it wrote, how it ended.
+
+    `files` are the files the run wrote, from written_files()."""
     body = [f"{label}: exit code {code} after {secs:.1f}s"]
     if note:
         body.append(note)
@@ -377,10 +418,8 @@ def script_result(code: int, out: str, err: str, secs: float, *,
         body.append("")
         body.append("stderr:")
         body.append(err.rstrip())
-    if since is not None:
-        written = describe_files(files_since(since))
-        if written:
-            body.append(written)
+    if files:
+        body.append(describe_files(files))
     is_error = code in error_codes if error_codes else code != 0
     return text_result("\n".join(body), is_error=is_error)
 
@@ -684,7 +723,8 @@ def t_run_graph(a: dict) -> dict:
         argv.append("--dry-run")
     since = time.time()
     code, out, err, secs = run(argv, timeout_of(a, 900, 7200), "run_workflow.py")
-    return script_result(code, out, err, secs, label=f"run_workflow.py {name}", since=since)
+    return script_result(code, out, err, secs, label=f"run_workflow.py {name}",
+                         files=written_files(listed_by_run_workflow(out), since))
 
 
 def t_queue_status(a: dict) -> dict:
@@ -756,25 +796,35 @@ def t_render_sprite_sheet(a: dict) -> dict:
         argv.append("--flat")
     if a.get("check"):
         argv.append("--check")
+    # Without --out, render_sheet.py writes the sheet beside the model
     if a.get("out"):
-        argv += ["--out", as_arg(out_path(a["out"], "out", suffixes=(".png",)))]
+        sheet = out_path(a["out"], "out", suffixes=(".png",))
+        argv += ["--out", as_arg(sheet)]
+    else:
+        sheet = model.parent / f"{model.stem}_sheet.png"
     inner = int(timeout_of(a, 1800, 7200))
     argv += ["--timeout", str(inner)]
     since = time.time()
     code, out, err, secs = run(argv, inner + 120, "render_sheet.py")
-    return script_result(code, out, err, secs, label="render_sheet.py", since=since)
+    return script_result(code, out, err, secs, label="render_sheet.py",
+                         files=written_files([sheet], since))
 
 
 def t_bone_roles_map(a: dict) -> dict:
     rig = safe_path(a["rig"], "rig")
     argv = [python_bin(), str(SCRIPTS / "bone_roles.py"), "map", as_arg(rig)]
+    # Without --out, bone_roles.py writes output/rigged/<rig>.roles.json
     if a.get("out"):
-        argv += ["--out", as_arg(out_path(a["out"], "out", suffixes=(".json",)))]
+        roles = out_path(a["out"], "out", suffixes=(".json",))
+        argv += ["--out", as_arg(roles)]
+    else:
+        roles = OUTPUT / "rigged" / f"{rig.stem}.roles.json"
     inner = int(timeout_of(a, 900, 3600))
     argv += ["--timeout", str(inner)]
     since = time.time()
     code, out, err, secs = run(argv, inner + 120, "bone_roles.py map")
-    return script_result(code, out, err, secs, label="bone_roles.py map", since=since)
+    return script_result(code, out, err, secs, label="bone_roles.py map",
+                         files=written_files([roles], since))
 
 
 def t_bone_roles_compile(a: dict) -> dict:
@@ -790,7 +840,8 @@ def t_bone_roles_compile(a: dict) -> dict:
     argv += ["--timeout", str(inner)]
     since = time.time()
     code, out, err, secs = run(argv, inner + 120, "bone_roles.py compile")
-    return script_result(code, out, err, secs, label="bone_roles.py compile", since=since)
+    return script_result(code, out, err, secs, label="bone_roles.py compile",
+                         files=written_files([dest], since))
 
 
 def t_face_rig_add_jaw(a: dict) -> dict:
@@ -808,7 +859,8 @@ def t_face_rig_add_jaw(a: dict) -> dict:
     argv += ["--timeout", str(inner)]
     since = time.time()
     code, out, err, secs = run(argv, inner + 120, "face_rig.py add-jaw")
-    return script_result(code, out, err, secs, label="face_rig.py add-jaw", since=since)
+    return script_result(code, out, err, secs, label="face_rig.py add-jaw",
+                         files=written_files([dest], since))
 
 
 def t_decimation_report(a: dict) -> dict:
@@ -823,13 +875,22 @@ def t_decimation_report(a: dict) -> dict:
         argv += ["--sprite", str(int(a["sprite"]))]
     if a.get("target_iou") is not None:
         argv += ["--target-iou", str(float(a["target_iou"]))]
+    targets = []
     if a.get("json_out"):
-        argv += ["--json", as_arg(out_path(a["json_out"], "json_out", suffixes=(".json",)))]
+        report = out_path(a["json_out"], "json_out", suffixes=(".json",))
+        argv += ["--json", as_arg(report)]
+        targets.append(report)
     inner = int(timeout_of(a, 3600, 7200))
     argv += ["--timeout", str(inner)]
     since = time.time()
     code, out, err, secs = run(argv, inner + 120, "decimation_report.py")
-    return script_result(code, out, err, secs, label="decimation_report.py", since=since)
+    shots = RENDERS_RE.search(out)
+    if shots:
+        folder = Path(shots.group(1).strip())
+        if _contained(_real(folder), write_roots()):
+            targets.append(folder / "*")
+    return script_result(code, out, err, secs, label="decimation_report.py",
+                         files=written_files(targets, since))
 
 
 def t_normalise_mesh(a: dict) -> dict:
@@ -843,8 +904,8 @@ def t_normalise_mesh(a: dict) -> dict:
         argv += ["--height", str(float(a["height"]))]
     else:
         argv += ["--footprint", str(float(a["footprint"]))]
-    check = bool(a.get("check"))
-    if check:
+    targets = []
+    if a.get("check"):
         argv.append("--check")
     else:
         suffix = a.get("suffix", "_norm")
@@ -856,13 +917,19 @@ def t_normalise_mesh(a: dict) -> dict:
         if suffix:
             argv += ["--suffix", suffix]
         if out_dir:
-            argv += ["--out-dir", as_arg(out_path(out_dir, "out_dir"))]
+            out_dir = out_path(out_dir, "out_dir")
+            argv += ["--out-dir", as_arg(out_dir)]
+        # Each model is written beside its source, or into out_dir, with a
+        # .scale.json beside it
+        for m in models:
+            dest = (out_dir or m.parent) / f"{m.stem}{suffix}{m.suffix}"
+            targets += [dest, dest.with_suffix(".scale.json")]
     inner = int(timeout_of(a, 1800, 7200))
     argv += ["--timeout", str(inner)]
     since = time.time()
     code, out, err, secs = run(argv, inner + 120, "normalise_mesh.py")
     return script_result(code, out, err, secs, label="normalise_mesh.py",
-                         since=None if check else since)
+                         files=written_files(targets, since))
 
 
 def t_lipsync_cues(a: dict) -> dict:
@@ -873,7 +940,10 @@ def t_lipsync_cues(a: dict) -> dict:
     elif a.get("no_text"):
         argv.append("--no-text")
     if a.get("out"):
-        argv += ["--out", as_arg(out_path(a["out"], "out"))]
+        dest = out_path(a["out"], "out")
+        argv += ["--out", as_arg(dest)]
+    else:
+        dest = OUTPUT / "lipsync"
     if a.get("fps") is not None:
         argv += ["--fps", str(float(a["fps"]))]
     if a.get("rule"):
@@ -882,13 +952,23 @@ def t_lipsync_cues(a: dict) -> dict:
         argv += ["--recognizer", a["recognizer"]]
     inner = int(timeout_of(a, 900, 3600))
     argv += ["--timeout", str(inner)]
+    # One timeline per line, LINE.json with Rhubarb's log as LINE.log beside
+    # it: in the out folder for each file of a folder, or at `out` itself when
+    # it names a .json
+    if source.is_dir():
+        timelines = [dest / f"{p.stem}.json" for p in source.iterdir() if p.is_file()]
+    elif dest.suffix == ".json":
+        timelines = [dest]
+    else:
+        timelines = [dest / f"{source.stem}.json"]
+    logs = [t.with_suffix(".log") for t in timelines]
     since = time.time()
     code, out, err, secs = run(argv, inner + 120, "lipsync_cues.py")
-    return script_result(code, out, err, secs, label="lipsync_cues.py", since=since)
+    return script_result(code, out, err, secs, label="lipsync_cues.py",
+                         files=written_files(timelines + logs, since))
 
 
 def t_compose_mouths(a: dict) -> dict:
-    since = time.time()
     if a.get("check"):
         manifest = safe_path(a["check"], "check")
         argv = [python_bin(), str(SCRIPTS / "compose_mouths.py"), "--check", as_arg(manifest)]
@@ -903,36 +983,56 @@ def t_compose_mouths(a: dict) -> dict:
         raise ToolError("box: expected X,Y,W,H in the portrait's own pixels, such as 410,440,204,190")
     argv = [python_bin(), str(SCRIPTS / "compose_mouths.py"), as_arg(portrait),
             "--box", a["box"], "--edits", as_arg(edits)]
+    # mouth_<S>.png for each shape and manifest.json, in the portrait's folder
+    # unless `out` names another
     if a.get("out"):
-        argv += ["--out", as_arg(out_path(a["out"], "out"))]
+        folder = out_path(a["out"], "out")
+        argv += ["--out", as_arg(folder)]
+    else:
+        folder = portrait.parent
     if a.get("feather") is not None:
         argv += ["--feather", str(int(a["feather"]))]
     if a.get("ring") is not None:
         argv += ["--ring", str(int(a["ring"]))]
+    since = time.time()
     code, out, err, secs = run(argv, timeout_of(a, 600, 1800), "compose_mouths.py")
-    return script_result(code, out, err, secs, label="compose_mouths.py", since=since)
+    return script_result(code, out, err, secs, label="compose_mouths.py",
+                         files=written_files([folder / "mouth_*.png",
+                                              folder / "manifest.json"], since))
 
 
 def t_preview_lipsync(a: dict) -> dict:
     manifest = safe_path(a["manifest"], "manifest")
+    timeline = safe_path(a["timeline"], "timeline") if a.get("timeline") else None
     argv = [python_bin(), str(SCRIPTS / "preview_lipsync.py"), as_arg(manifest)]
-    if a.get("timeline"):
-        argv.append(as_arg(safe_path(a["timeline"], "timeline")))
+    if timeline is not None:
+        argv.append(as_arg(timeline))
     if a.get("audio"):
         argv += ["--audio", as_arg(safe_path(a["audio"], "audio"))]
+    mp4 = sheet = None
     if a.get("out"):
-        argv += ["--out", as_arg(out_path(a["out"], "out", suffixes=(".mp4",)))]
+        mp4 = out_path(a["out"], "out", suffixes=(".mp4",))
+        argv += ["--out", as_arg(mp4)]
     if a.get("sheet"):
-        argv += ["--sheet", as_arg(out_path(a["sheet"], "sheet", suffixes=(".png",)))]
+        sheet = out_path(a["sheet"], "sheet", suffixes=(".png",))
+        argv += ["--sheet", as_arg(sheet)]
     if a.get("no_sheet"):
         argv.append("--no-sheet")
     if a.get("label"):
         argv.append("--label")
     if a.get("height") is not None:
         argv += ["--height", str(int(a["height"]))]
+    # The mp4 is made only from a timeline, beside it unless `out` says
+    # otherwise; the contact sheet goes beside the manifest unless `sheet` does
+    targets = []
+    if timeline is not None:
+        targets.append(mp4 or timeline.with_suffix(".mp4"))
+    if not a.get("no_sheet"):
+        targets.append(sheet or manifest.parent / "contact_sheet.png")
     since = time.time()
     code, out, err, secs = run(argv, timeout_of(a, 900, 3600), "preview_lipsync.py")
-    return script_result(code, out, err, secs, label="preview_lipsync.py", since=since)
+    return script_result(code, out, err, secs, label="preview_lipsync.py",
+                         files=written_files(targets, since))
 
 
 # ------------------------------------------------------------- the tool table
@@ -1244,7 +1344,8 @@ TOOLS: list[dict] = [
             "check": {"type": "boolean", "default": False,
                       "description": "also run the sheet checks on the result"},
             "out": {"type": "string",
-                    "description": "where to write the sheet PNG; must be under output/"},
+                    "description": "where to write the sheet PNG; must be under output/. "
+                                   "Without it the sheet goes beside the model"},
             "timeout": _TIMEOUT,
         }, ["model"]),
         "handler": t_render_sprite_sheet,
@@ -1258,8 +1359,8 @@ TOOLS: list[dict] = [
             "and its skin weights, and print the table: root, pelvis, legs, spine, head "
             "and the rest. Automatic rigs name every bone bone_0 to bone_N, so this is how "
             "a pose written for no particular rig is aimed at this one. Writes a roles "
-            "file beside the rig, or where `out` says. Runs Blender in the container and "
-            "takes a minute or two.",
+            "file to output/rigged/<rig>.roles.json, or where `out` says. Runs Blender "
+            "in the container and takes a minute or two.",
         "inputSchema": _obj({
             "rig": {"type": "string", "description": f"the rigged .fbx or .glb: {_PATH}"},
             "out": {"type": "string",
@@ -1425,7 +1526,8 @@ TOOLS: list[dict] = [
             "edits": {"type": "string",
                       "description": "folder of edited whole images, one per shape"},
             "out": {"type": "string",
-                    "description": "where to write the overlays and manifest; under output/"},
+                    "description": "where to write the overlays and manifest; under output/. "
+                                   "Without it they go in the portrait's folder"},
             "feather": {"type": "integer", "minimum": 0, "maximum": 200,
                         "description": "soften the box edge by this many pixels"},
             "ring": {"type": "integer", "minimum": 0, "maximum": 200,
@@ -1453,8 +1555,10 @@ TOOLS: list[dict] = [
                          "description": "a cue timeline from lipsync_cues; without it only "
                                         "the contact sheet is made"},
             "audio": {"type": "string", "description": "audio to mux into the MP4"},
-            "out": {"type": "string", "description": "the MP4 path; must be under output/"},
-            "sheet": {"type": "string", "description": "the contact sheet PNG; under output/"},
+            "out": {"type": "string", "description": "the MP4 path; must be under output/. "
+                                                  "Without it the MP4 goes beside the timeline"},
+            "sheet": {"type": "string", "description": "the contact sheet PNG; under output/. "
+                                                    "Without it the sheet goes beside the manifest"},
             "no_sheet": {"type": "boolean", "default": False,
                          "description": "skip the contact sheet"},
             "label": {"type": "boolean", "default": False,

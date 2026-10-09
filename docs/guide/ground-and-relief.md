@@ -1,7 +1,9 @@
 # Ground relief and blending
 
 *This is the long version. If you only need a ground texture that tiles,
-[Ground and terrain](/guide/terrain) is the shorter path.*
+[Ground and terrain](/guide/terrain) is the shorter path. Rooms built from
+modelled pieces, with platforms and pits inside them, are in
+[room kits](/guide/room-kits).*
 
 ## Two separate jobs that look like one
 

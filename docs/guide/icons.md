@@ -57,6 +57,44 @@ its canopy. It never touches the canvas edge. Icons are mostly solid shapes and
 rarely have one; props often do. See
 [Props and scenery](/guide/props#clear-the-pockets-the-fill-cannot-reach).
 
+## Pale parts want a gentler cut, not a harsher one
+
+A white or pale part shades toward the background on its dark side, and the
+flood fill follows it in. Measured on 2026-10-09 on a power-cell icon from a
+2.5D isometric game made with the engine: a battery with white ceramic end caps,
+generated on four seeds with "Flat plain mid-grey background" in the prompt, as
+the icon prompts here have it, and cut with `scripts/cut_icon.py` at 256 px.
+
+| Seed | Background, the corners' median | At the default `--tol 60` | What cut it whole |
+|---|---|---|---|
+| 11 | 158, 166, 176 | a grey contact shadow under the cell stayed | nothing from 20 to 90: by 70 the cap was holed and the shadow still showed |
+| 22 | 146, 157, 161 | the shaded side of a cap was torn | `--tol 35`; tears began again at 45 |
+| 33 | 164, 176, 184 | the same | `--tol 35`; tears began again at 45 |
+| 44 | 128, 140, 148 | clean | the default |
+
+So try a lower `--tol` first, as the snow cap in
+[Props and scenery](/guide/props#the-tolerances-belong-to-the-subject-so-write-them-down)
+needed. Raising it is the wrong way: the game raised it on seed 11, watched the
+cap go, and generated two more seeds (its run, the same day).
+
+A contact shadow is the one thing no tolerance separates from a pale part,
+because it is the same grey as the part's shaded side. So keep it out in the
+prompt. The icon negative here names drop and cast shadows but not contact
+shadows, which the [scenery negative](/guide/props#the-scenery-style-used-to-stand-every-prop-on-a-slab)
+does name. Whether adding them clears it on icons was not tried.
+
+"Mid-grey" did not land one grey either: the four seeds' corners ran from 128 to
+184 a channel, and the clean cut came from the darkest. On props, "neutral 50%
+grey" landed a true mid grey
+([Props and scenery](/guide/props#pick-the-background-against-the-subject-s-finest-parts));
+that wording was not tried on icons.
+
+Check a cut over both a dark and a light background at the size the UI draws it.
+A torn cap showed as a dark notch over dark and nearly vanished over light, and
+at 40 px the notches still showed over dark. Glowing parts gave the same game no
+trouble: the other seven icons in its set, five of them glowing cores, cut at
+the default and were judged clean by eye.
+
 ## Where to stop
 
 Painting every icon is not the goal. If your UI already uses emoji, replace the

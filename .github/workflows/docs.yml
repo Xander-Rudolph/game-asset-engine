@@ -40,7 +40,10 @@ jobs:
       # The action's enablement input is left off on purpose. It cannot switch
       # Pages on with the default token, and only swaps that error for "Create
       # Pages site failed ... Resource not accessible by integration".
-      # Pages on a private repo also needs a paid plan.
+      # Pages on a private repo also needs a paid plan, and the site is public
+      # even then: only GitHub Enterprise Cloud publishes one privately
+      # (GitHub's Pages docs, read 2026-10-09). For a private project's docs,
+      # build without deploying: docs/guide/troubleshooting.md has the steps.
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -19,7 +19,7 @@ Everything in `scripts/`. Each takes `--help`.
 
 | Script | Does |
 |---|---|
-| `run_workflow.py` | Queue a graph, wait, report the outputs. On a preset, `--subject` fills only the SUBJECT slot and keeps the house technique, which `--prompt` would replace. `--free`, `--interrupt PROMPT_ID` and `--delete PROMPT_ID` manage the queue, and refuse to touch a job that is not the one named. |
+| `run_workflow.py` | Queue a graph, wait, and list the files the job wrote, including the meshes `/history` never names ([Running one](/reference/workflows#running-one)). On a preset, `--subject` fills only the SUBJECT slot and keeps the house technique, which `--prompt` would replace. `--free`, `--interrupt PROMPT_ID` and `--delete PROMPT_ID` manage the queue, and refuse to touch a job that is not the one named. |
 | `validate_workflows.py` | Check every graph against a live server's node definitions. |
 | `api_to_ui.py` | Convert graphs into the editor's format. `--check` verifies every value survived. |
 | `build_presets.py` | Generate the drop in presets from base graphs plus the prompt library. |
@@ -356,6 +356,13 @@ cell, a pose row identical to the first row at every angle (the pose did
 nothing), a subject touching its cell border, and a subject that fills far more
 of one angle's cell than another's, which usually means a framing problem. It
 exits non-zero if any sheet fails.
+
+A clipped cell is reported with the edges the subject touches. Raising
+`render_sheet.py --zoom` widens the frame, by the same amount on every sheet of
+a set so they keep one scale; `--size` adds pixels without reframing. A cut on
+the top edge alone or the bottom edge alone can instead be moved off it with
+`--look-at`, when the opposite edge has room: a higher value moves the frame up,
+off a cut at the top, and a lower one moves it down.
 
 Pass `--cell` at the `--size` the sheet was rendered at, and `--azimuths` to have
 it name the down-and-right facing. It does not judge whether the motion looks

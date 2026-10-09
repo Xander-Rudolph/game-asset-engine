@@ -100,8 +100,18 @@ about to do.
 Read from `mcp/server.py` on 2026-09-19, and exercised by the selftest:
 
 - Every path argument is resolved, symlinks and all, and refused unless it lies
-  under `output/`, `input/` or the models directory. Anything written is refused
-  unless it lies under `output/`.
+  under `output/`, `input/` or the models directory. A path given for a tool to
+  write to (`out`, `out_dir`, `json_out` or `sheet`) is refused unless it lies
+  under `output/`.
+- Without one, a tool writes where its script does from a shell, and that can
+  be outside `output/`. `render_sprite_sheet` writes the sheet beside the model,
+  `normalise_mesh` writes the scaled copy and its `.scale.json` beside each
+  source, `compose_mouths` writes into the portrait's folder, and
+  `preview_lipsync` writes the MP4 beside the timeline and the contact sheet
+  beside the manifest. Any of those inputs may be under `input/` or the models
+  directory. This is deliberate, so that calls that work today keep working
+  (the owner, 2026-10-09). Give the output path to keep the result in
+  `output/`. Read from `mcp/server.py` on 2026-10-09, not run.
 - A graph is named, not pathed. `run_graph` takes `txt2img_sdxl` and resolves it
   inside `workflows/api/`, so a path cannot escape through it. Role pose files
   and prompt folders work the same way.
@@ -111,6 +121,18 @@ Read from `mcp/server.py` on 2026-09-19, and exercised by the selftest:
 - One result is capped at 40,000 characters (`ASSET_ENGINE_MCP_MAX_CHARS`).
 - A tool reports the files it wrote by path and size. It never returns their
   bytes.
+
+The files a tool reports are its own. Each tool works out where its script
+writes from the tool's own arguments and the script's defaults, such as the
+sheet beside the model when `render_sprite_sheet` is given no `out`, and lists
+the files there that were written during the call. `run_graph` lists the files
+`run_workflow.py` names for its own job. A file that another job, another client
+or a shell wrote into `output/` during the call is not listed; before
+2026-10-08 every file in `output/` modified during the call was. Checked on
+2026-10-08 with a loop writing decoy files into `output/` throughout: a
+two-node graph through `run_graph` and a one-cell sheet through
+`render_sprite_sheet` each listed only their own file, where the previous
+server listed 6 and 5 files in the same run (measured).
 
 ## Register it with Claude Code
 
@@ -184,6 +206,50 @@ and `${VAR:-default}` in a server's `command`, `args` and `env`
 | `MODELS_DIR` | empty | You want to override `.env`. Empty is deliberate: the server then reads `MODELS_DIR` out of the repo's `.env` and resolves a relative value against the repo root, exactly as `scripts/fetch_models.py` and compose do. |
 | `COMFY_URL` | `http://127.0.0.1:8188` | ComfyUI is on another host or port. |
 | `ASSET_ENGINE_CONTAINER` | empty | Several ComfyUI containers are up and you mean a particular one. Empty means `scripts/_engine.py` asks `docker ps`. |
+
+### Testing a branch from a git worktree
+
+A git worktree holds the tracked files and nothing else. `output/`, `input/`,
+`.env` and `custom_nodes/` are ignored by git, so a new worktree has none of
+them, and two things then go wrong without an error:
+
+- **The scripts look beside themselves.** 31 of the 38 Python scripts in
+  `scripts/` take their root as the folder above their own resolved path,
+  `run_workflow.py` and `render_sheet.py` among them (grep, 2026-10-09), so a
+  worktree's copy looks for everything in the worktree. Run from a worktree on
+  2026-10-09, `scripts/list_animations.py` reported mesh2motion
+  `not installed: scripts/setup.sh clones it` and exited 0, while the same
+  script in the main checkout listed its clips.
+- **The server does not.** `mcp/server.py` takes its root from
+  `ASSET_ENGINE_ROOT`, `/asset-engine` by default, and runs the scripts and
+  graphs it finds there. Started from a worktree without it, the server is the
+  branch's, and every script it runs is the main checkout's.
+
+What works is a scratch root: copies of the branch's files the tools read,
+links to the main checkout's `output/` and `input/`, and `ASSET_ENGINE_ROOT`
+pointing at it. Blender jobs run in the container, which mounts the main
+checkout's `output/`, so the link is also what lets the branch's scripts find
+what those jobs write. From the worktree's root:
+
+```sh
+root=$(mktemp -d)
+cp -r scripts workflows prompts poses models.json "$root"/
+ln -s /asset-engine/output /asset-engine/input "$root"/
+ASSET_ENGINE_ROOT="$root" python3 mcp/selftest.py
+```
+
+Run on 2026-10-09, that passed 19 of 19 stdio checks and 5 of 5 over HTTP.
+Without `prompts/`, `poses/` and `models.json`, two checks failed,
+`list_models` and `list_prompt_folders`. A server change was tested live this
+way on 2026-10-08, with `run_graph` and `render_sprite_sheet` called through it.
+
+Copy the scripts rather than linking them: a script resolves its own path
+through a link, so a linked `scripts/` finds the worktree again. On 2026-10-09,
+with `custom_nodes/` linked into a scratch root, `list_animations.py` still
+reported mesh2motion missing through a linked `scripts/`, and listed the clips
+through a copied one. So link `custom_nodes/` too for a script that reads it,
+and export `MODELS_DIR` for a tool that reads the weights folder, because the
+scratch root has no `.env` (read from `models_dir()` in `mcp/server.py`).
 
 ### Which scope to register it in
 

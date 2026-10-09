@@ -59,6 +59,50 @@ pending; `ASSET_ENGINE_FORCE_RESTART=1` skips that check, so set it only when
 those jobs are yours to lose. Do not interleave the two stages in your own
 scripts.
 
+## Out of memory when several jobs share the card
+
+ComfyUI runs one job at a time, so graphs sent by several people or agents
+queue rather than collide. Blender is not in that queue. A Cycles render, which
+is `render_sheet.py`'s default, uses the same card, and so does anything else
+you run in Blender on the GPU.
+
+An edit leaves no room beside it. Sampled with `nvidia-smi` every 200 ms on
+2026-10-09: after `run_workflow.py --free` the card had 1,142 MiB of 16,376 in
+use, and one `img_edit_qwen.json` job at the graph's defaults, on a 1328 by 1328
+image, then peaked at 15,190 MiB and stayed above 15,000 for about 106 of its
+131.4 seconds. When the job had finished, 2,738 MiB were still in use.
+
+`render_sheet.py` waits before a Cycles render until ComfyUI's queue is empty
+and no other Blender job is running
+([two render engines](/guide/render-engines#which-to-use)). It checks before it
+starts, not while it renders: a graph queued a moment later loads its model
+beside the render, and two renders that both find the card free start together.
+That is read from the script, not provoked.
+
+When more than one person or agent drives the card, give every GPU job the same
+lock:
+
+```sh
+flock -w 7200 /tmp/gpu.lock scripts/run_workflow.py workflows/api/img_edit_qwen.json --image in.png
+flock -w 7200 /tmp/gpu.lock scripts/render_sheet.py output/rigged/golem.fbx --angles 4 --check
+```
+
+`flock` takes an exclusive lock on the file, runs the command and lets go when
+the command exits. With `-w` it gives up after that many seconds and exits 1
+(flock(1) from util-linux 2.41.3, read 2026-10-09). The lock is advisory: it
+orders only the jobs that take it, so everyone sharing the card has to use the
+same file. Work that never touches the card, such as a Blender build rendering
+with Cycles on the CPU, can stay outside it.
+
+A queued job outlives its client. `run_workflow.py` does not cancel its job when
+it is stopped, by Ctrl-C or by a `timeout`, so the job carries on in ComfyUI
+after the lock is free (read from the script). Check `/queue` before the next
+job starts.
+
+The cost is waiting. A 2.5D isometric game made with the engine had three
+agents share one card through one lock on 2026-10-09, and a render waited up to
+24 minutes for it (the game's notes).
+
 ## A batch reported every name and produced no files
 
 ComfyUI drops the connection mid-generation and the container restarts itself.
@@ -351,6 +395,26 @@ project site from `/<repo>/`. Set `DOCS_BASE` when building for anywhere else:
 ```sh
 DOCS_BASE=/ npm run docs:build
 ```
+
+## The docs site is public although the repo is private
+
+GitHub Pages publishes to the open internet whatever the repository's
+visibility. Read in GitHub's documentation on 2026-10-09: "GitHub Pages sites
+are publicly available on the internet, even if the repository for the site is
+private (if your plan or organization allows it)", and "If the account that owns
+the repository uses GitHub Free or GitHub Free for organizations, the repository
+must be public." A paid plan lets Pages publish from a private repository, and
+the site is still public. The exception is an organisation's plan: "To publish
+a GitHub Pages site privately, your organization must use GitHub Enterprise
+Cloud." ([Creating a Pages site](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site),
+[changing its visibility](https://docs.github.com/en/pages/getting-started-with-github-pages/changing-the-visibility-of-your-github-pages-site).)
+
+`.github/workflows/docs.yml` deploys this repository's docs, which are public
+on purpose. If you copy it into a private project, such as a game's own docs,
+make it build without deploying: delete the `deploy` job, the two Pages steps
+and the `pages` and `id-token` permissions, keep `npm install` and
+`npm run docs:build` so a broken page still fails the run, and read the site on
+your own machine with `npm run docs:dev`.
 
 ## A workflow edited in the editor behaves differently from the file
 
