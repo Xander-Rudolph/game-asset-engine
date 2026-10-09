@@ -396,6 +396,26 @@ project site from `/<repo>/`. Set `DOCS_BASE` when building for anywhere else:
 DOCS_BASE=/ npm run docs:build
 ```
 
+## The docs site is public although the repo is private
+
+GitHub Pages publishes to the open internet whatever the repository's
+visibility. Read in GitHub's documentation on 2026-10-09: "GitHub Pages sites
+are publicly available on the internet, even if the repository for the site is
+private (if your plan or organization allows it)", and "If the account that owns
+the repository uses GitHub Free or GitHub Free for organizations, the repository
+must be public." A paid plan lets Pages publish from a private repository, and
+the site is still public. The exception is an organisation's plan: "To publish
+a GitHub Pages site privately, your organization must use GitHub Enterprise
+Cloud." ([Creating a Pages site](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site),
+[changing its visibility](https://docs.github.com/en/pages/getting-started-with-github-pages/changing-the-visibility-of-your-github-pages-site).)
+
+`.github/workflows/docs.yml` deploys this repository's docs, which are public
+on purpose. If you copy it into a private project, such as a game's own docs,
+make it build without deploying: delete the `deploy` job, the two Pages steps
+and the `pages` and `id-token` permissions, keep `npm install` and
+`npm run docs:build` so a broken page still fails the run, and read the site on
+your own machine with `npm run docs:dev`.
+
 ## A workflow edited in the editor behaves differently from the file
 
 The graphs in `workflows/api/` are in the format the server accepts, which the web
