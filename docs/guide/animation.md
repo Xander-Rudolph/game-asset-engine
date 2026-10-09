@@ -52,6 +52,73 @@ a character with 65 `mixamorig:` bones, took about a second and gave a 250-frame
 action in which the hips, left hand and right foot travel 1.5 to 2.2 units
 (2026-09-30).
 
+### Quaternius clips on an MPFB body
+
+UniRig's node copies curves between bones of the same name, and nothing here yet
+retargets a clip between two different skeletons. One pairing has worked
+outside the repo: a 2.5D isometric game made with the engine baked five clips
+from Quaternius's Universal Animation Library onto a body built with MPFB 2 and
+MPFB's `mixamo` rig, using a Blender script of its own. That script's log, read
+here and not re-run (2026-10-09), shows every clip driving all 52 of the rig's
+bones. What follows is how the script works, for anyone writing the same thing.
+The licence facts are in
+[animation sources](/reference/animation-sources#clip-libraries) for the clips
+and in [credits](/credits#tools) for MPFB 2.
+
+**The clips.** Take `Unreal-Godot/UAL1_Standard.glb` from the free Standard zip:
+it is the in-place file. Extract only that, and run nothing from inside the
+archive. Read from the file's glTF chunks on 2026-10-09, it holds 43 animations
+and one skin of 65 joints with Unreal mannequin names (`root`, `pelvis`,
+`spine_01` to `spine_03`, `neck_01`, `Head`, `clavicle_l` and on), with keys
+0.0333 s apart, so 30 fps. It rests in a T pose.
+
+**The map.** A table from MPFB's names to Quaternius's: `mixamorig:Hips` to
+`pelvis`; `Spine`, `Spine1` and `Spine2` to `spine_01` to `spine_03`; `Neck` and
+`Head` to `neck_01` and `Head`; on each side `Shoulder`, `Arm`, `ForeArm` and
+`Hand` to `clavicle`, `upperarm`, `lowerarm` and `hand`, and `UpLeg`, `Leg`,
+`Foot` and `ToeBase` to `thigh`, `calf`, `foot` and `ball`; and three joints a
+finger. That names all 52 of the rig's bones. The source's other 13 are its
+`root` and twelve end bones at the tips of the fingers and toes, which the rig
+has nothing for (the log).
+
+**Scale.** The source is scaled so its hips stand as high as the body's: by
+1.2854 for this pair (the log).
+
+**Match the rest pose, parent before child.** MPFB's figure rests with its arms
+angled down, and the clips rest in a T pose: by the log, the upper arms' rest
+directions differ by 49 degrees and the hands' by 63 to 66 degrees. So the
+script first poses the body into the source's T pose, from the hips outward.
+Each bone is carried by its parent's new pose, then swung the shortest way onto
+its source bone's rest direction. On every frame after that, each bone takes
+its source bone's world rotation, offset by the difference the matched pose
+left between them. Two details mattered:
+
+- **Walk the hierarchy, not the bone list.** MPFB adds bones to its armature in
+  alphabetical order, so a child can come before its parent in the list. Walk
+  from the root down.
+- **Carry each bone by its parent.** Turning each bone's rest onto its source
+  bone's on its own, without its parent's result, twisted the forearms and
+  hands. With each bone carried by its parent, the result agreed, by the game's
+  notes, with MPFB's own Mixamo snap on a Mixamo clip and with Quaternius's
+  mannequin playing its own clips.
+
+**Set the frame rate before importing.** Blender's glTF importer converts the
+file's seconds to frames at the scene's rate, 24 by default, so a 30 fps clip's
+keys land between frames. The FBX importer changes the scene's rate to the
+file's instead. Set the scene to 30 first.
+
+**Mirror for the other hand.** Swapping left for right in the map, and reflecting
+each world rotation through the figure's middle, plays a one-handed clip with the
+other hand. The game cast from its gauntlet arm this way.
+
+A Mixamo clip on the same rig needs none of the rest matching. MPFB's own snap,
+each bone taking its namesake's world rotation, matched a Mixamo kick played on
+Mixamo's own character (the game's notes, 2026-10-08).
+
+Measured by the game on the reference machine with image 0.1.10 on 2026-10-08:
+the five clips retargeted in about 3 s, and the 256 px sheets rendered from them
+took 17.0 to 22.6 s each in `render_sheet.py`.
+
 ## Posing bones yourself
 
 For short game cycles, two to four frames of idle, walk, attack and hit,
@@ -364,6 +431,32 @@ angle.
 
 They can share the resting figure's texture, because posing moves vertices and
 does not touch UVs. So only the geometry is written per frame.
+
+## Attack sheets need a strike frame
+
+An attack sheet is a few frames played once, and the game, not the sheet, decides
+when the blow lands. Played at one steady rate from the click, the two disagree.
+In a 2.5D isometric game made with the engine, in Godot 4.6, the player's casts
+hit on the frame of the click while the frame of the release showed 17 to 19
+frames later (a probe scene run headless at a fixed 60 fps, 2026-10-09).
+
+So ship each attack sheet with the index of the frame the blow lands on, its
+strike frame. Play the frames before it at whatever rate fills the wind-up and the
+rest at the rate that fills the recovery, and the strike frame shows when the hit
+happens. That game's attacks have six frames. The strike frame is 2 for three
+enemies and 3 for the fourth, and on the player 2 for the punch, where the arm is
+straight, and 4 for a cast, where the gauntlet's glow peaks.
+
+Measured with the same probe after the change, a cast's hit and its strike frame
+both fell on frame 9 after the click, a 0.15 s wind-up (2026-10-09). On an
+enemy the strike frame showed within one physics frame of its hitbox opening, on
+frame 29 against 30, which is 17 ms (2026-10-08).
+
+**Pin the index to the pose.** The strike frame is an index into the frame list
+the sheet was rendered from, such as `--poses frames:...`, so a re-render with a
+different list moves the blow without any error. The game keeps a test that each
+strike index still names the same frame of the rig's action, frame 3010 for the
+punch's index 2, so a re-render that changes the list fails it.
 
 ## Faces and lip sync
 
