@@ -10,8 +10,13 @@ its mistakes. This is the cheapest stage to redo and the most expensive to skip.
 | `txt2img_qwen_fast.json` | Finding a look. Rerolls in about 30 seconds. | ~30s |
 | `txt2img_qwen.json` | The real thing. Negative prompts work here. | ~130s |
 | `txt2img_sdxl.json` | Comparison only. Weaker at following prompts. | ~60s |
-| `img_edit_qwen.json` | Changing an image you already have | ~90s |
+| `img_edit_qwen.json` | Changing an image you already have | 130 to 157s |
 | `img_refine_sdxl.json` | Re-rendering materials after a simplify, at low denoise | not recorded |
+
+The edit's time was measured on 2026-10-09 on the reference machine: 131.4 s for
+one edit started after `run_workflow.py --free`, so loading the model included,
+and 130 to 157 s each for 16 edits that a 2.5D isometric game made with the
+engine ran while three agents shared the card, waiting left out.
 
 ## The fast workflow ignores negative prompts
 

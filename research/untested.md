@@ -201,7 +201,7 @@ Built 2026-09-19 in `mcp/`: 23 tools over the protocol, 24 self-test checks, and
 - **`cleanup.py keep` on the real tree.** Provenance rows ran only in scratch trees. `scripts/cleanup.py keep <name> --concept <png> --source Qwen/Qwen-Image --licence Apache-2.0`, then read `sources.json`. Cost: seconds.
 - **Unfilled `<<< ... >>>` slots.** `run_workflow.py` warns, then queues the placeholder. `--dry-run` a preset with `--subject` alone, then decide: refuse or strip. Cost: seconds.
 - **Deprecated `SaveAudio` in `txt2music_acestep15.json`.** An update may remove it and break the music graph. Swap the node and run `scripts/api_to_ui.py`. Cost: seconds.
-- **Two claims with no run.** The concept-edit skill says about 130 s where `concept-art.md:13` says about 90 s, and UniRig leaving long creatures under 2.0 units was read from code. Time one `img_edit_qwen` edit; rig `beast_chimera.glb`, then `scripts/normalise_mesh.py <fbx> --height 2.0 --check`. Cost: GPU jobs.
+- **A claim with no run.** UniRig leaving long creatures under 2.0 units was read from code. Rig `beast_chimera.glb`, then `scripts/normalise_mesh.py <fbx> --height 2.0 --check`. Cost: a GPU job.
 
 ## Docs and skills
 
