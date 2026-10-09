@@ -6,12 +6,12 @@ that the rooms you author, and the code that places them, do not repeat it.*
 
 ## Where this comes from
 
-The case study is
-[The Gaoler Protocol](https://github.com/Xander-Rudolph/The-Gaoler-Protocol)
-(a private repository at the time of writing), a 2D isometric dungeon crawler
-whose maps are stitched together from hand-authored rooms. A level design
-review of its generator on 2026-10-08 found twelve problems. Three kinds of
-evidence sit behind this page, and every section says which it rests on:
+The case study is The Gaoler Protocol, a 2D isometric dungeon crawler whose
+maps are stitched together from hand-authored rooms. Its repository is private,
+so the commits and pull requests named below cannot be followed from here. A
+level design review of its generator on 2026-10-08 found twelve problems. Three
+kinds of evidence sit behind this page, and every section says which it rests
+on:
 
 - **Read in the code, not run.** The game's generator at commit `1f19b66`
   (2026-10-08) was read for this page, not run.
