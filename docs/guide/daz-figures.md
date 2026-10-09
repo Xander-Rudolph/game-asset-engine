@@ -1154,12 +1154,12 @@ What the sheets showed, all of it counted with numpy and none of it looked at:
 the four facings cover 10.3 to 11.0 per cent of their cells at 128 px, and at
 the default `--zoom 1.15` the back view is clipped at both sizes, `cell r0c2
 touches its border: the subject is clipped`, which `--zoom 1.35` cleared.
-Ignore the rest of that message. It ends `Lower --zoom or raise --size`, and
-both halves are wrong: `render_sheet.py` sets the camera's ortho scale to the
+The rest of that message then ended `Lower --zoom or raise --size`, and both
+halves were wrong: `render_sheet.py` sets the camera's ortho scale to the
 subject's extent times `--zoom`, so lowering `--zoom` tightens the frame and
 clips harder, while `--size` only changes how many pixels a cell has, which is
 why 220 px clipped by 9 pixels where 128 px clipped by 7. Raise `--zoom` to
-widen the frame. A
+widen the frame, which is what the message has said since 2026-10-08. A
 walking pose row differs from a rest row by 1830 to 2491 pixels a facing, 700
 to 1573 of them silhouette. A shape dial swept 0.0, 0.5 and 1.0 down the rows
 through `"@props"` raised the opaque pixels at every facing, 3694 to 3787 to
