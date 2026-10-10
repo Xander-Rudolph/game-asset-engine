@@ -522,6 +522,7 @@ On 2026-10-10, on image 0.1.11, with the server's own timings and VRAM read by
 | `txt2img_krea2.json` | 864x1152, a batch of two | Out of GPU memory |
 | `txt2img_krea2_style.json` | 864x1152, and 672x896 | Out of GPU memory in the sampler, both |
 | `txt2img_krea2_style.json` | 864x1152, server started with `--reserve-vram 2`, then 4 | Out of GPU memory sooner, merging the LoRA into the int8 weights |
+| `txt2img_krea2_style.json` | 864x1152, on Comfy-Org's fp8 weights in place of int8 | Out of GPU memory merging the LoRA into the fp8 weights |
 
 Both times include loading the 4,999 MB encoder and the 12,867 MB int8 weights,
 which the server log shows loaded whole. The weights fill most of the card,
@@ -533,7 +534,12 @@ LoRA is merged into the weights as they load, each patched int8 weight becomes a
 float32 copy on the card, and the log shows `ERROR lora
 diffusion_model.blocks.25.mlp.down.weight Allocation on device`. At that point
 PyTorch had 7,308 MiB allocated at its peak and 9,600 MiB reserved, far short of
-the card, so the cause is not simply room; it was not found. The same flag was
+the card, so the cause is not simply room; it was not found. The fp8 weights,
+`krea2_turbo_fp8_scaled.safetensors`, in place of int8 and at the usual flags,
+failed in the same merge, as it converted each patched weight back to fp8, with
+the 4,999 MB text encoder still on the card: 10,556 MiB allocated at the peak,
+14,880 MiB reserved. Every attempt fails on merging a full-precision LoRA into
+quantised weights on a full card. The same flag was
 not tried for 1104x1472 or for two takes, and the compose file keeps its usual
 flags. The 864x1152 golem came out head to toe on a
 plain grey background, as the prompt asked.
