@@ -23,7 +23,7 @@
     "text": ""
    },
    "widgets_values": [
-    "CONCEPT IN A GIVEN STYLE -- Krea 2 Turbo + style reference\n(not yet run here)\n\nPut an image whose LOOK you want in Style Reference.  The prompt says\nwhat to draw; the reference says how it is painted.  It is not an\nedit: nothing of the reference's content is kept on purpose.\n\nSame licence as txt2img_krea2: commercial use only under $1,000,000\ncompany revenue a year, revocable on 30 days' notice, content\nfiltering required.  The LoRA is ostris's, under the same licence.\n\nModelSamplingFlux's width and height should match the latent's.\nMore references go in image2 and image3 on the Prompt node.\n\nNeeds:  scripts/fetch_models.py --download --group krea2\n\n---\n\nKrea 2 Turbo with a style reference: a new image from the\nprompt, painted in the style of the image in Style Reference. It\ntakes the reference's look, not its content, so it is a style\nmatch, not an edit. The style comes from ostris's\nkrea2_style_reference LoRA, whose model card declares the Krea 2\nCommunity License, so everything txt2img_krea2.json says about\nthe licence holds here too: commercial use of Outputs only while\ncompany-wide revenue, affiliates included, is under $1,000,000 a\nyear, revocable by Krea on 30 days' notice, and content\nfiltering required. See docs/guide/licensing.md. The wiring and\nsettings are Comfy-Org's template\nimage_krea2_turbo_int8_image_style_reference (workflow_templates\ncommit 3e50a92, read 2026-10-10, not yet run here): the\nreference goes in through TextEncodeQwenImageEditPlus as a\nreference latent, FluxKontextMultiReferenceLatentMethod\nindex_timestep_zero, the LoRA at strength 1, ModelSamplingFlux\nmax_shift 1.15 and base_shift 0.5 at the latent's size, 8 steps,\ncfg 1, euler, simple. The template takes up to three references;\nthis graph wires one, and image2 and image3 on the encoder take\nmore. Its prompt enhancer is left out. 1104x1472 as in\ntxt2img_krea2.json, and likewise not yet run at that size. Needs\nthe krea2 weight group: scripts/fetch_models.py --download\n--group krea2."
+    "CONCEPT IN A GIVEN STYLE -- Krea 2 Turbo + style reference\n\nDOES NOT FIT A 16 GB CARD AS WIRED.  On 2026-10-10 it ran out of\nGPU memory in the sampler at 864x1152 and at 672x896: the reference\nadds about a megapixel of latent to every step.  A larger\n--reserve-vram in the compose command, not tried, may let it run.\n\nPut an image whose LOOK you want in Style Reference.  The prompt says\nwhat to draw; the reference says how it is painted.  It is not an\nedit: nothing of the reference's content is kept on purpose.\n\nSame licence as txt2img_krea2: commercial use only under $1,000,000\ncompany revenue a year, revocable on 30 days' notice, content\nfiltering required.  The LoRA is ostris's, under the same licence.\n\nModelSamplingFlux's width and height should match the latent's.\nMore references go in image2 and image3 on the Prompt node.\n\nNeeds:  scripts/fetch_models.py --download --group krea2\n\n---\n\nKrea 2 Turbo with a style reference: a new image from the\nprompt, painted in the style of the image in Style Reference. It\ntakes the reference's look, not its content, so it is a style\nmatch, not an edit. The style comes from ostris's\nkrea2_style_reference LoRA, whose model card declares the Krea 2\nCommunity License, so everything txt2img_krea2.json says about\nthe licence holds here too: commercial use of Outputs only while\ncompany-wide revenue, affiliates included, is under $1,000,000 a\nyear, revocable by Krea on 30 days' notice, and content\nfiltering required. See docs/guide/licensing.md. The wiring and\nsettings are Comfy-Org's template\nimage_krea2_turbo_int8_image_style_reference (workflow_templates\ncommit 3e50a92, read 2026-10-10): the reference goes in through\nTextEncodeQwenImageEditPlus as a reference latent,\nFluxKontextMultiReferenceLatentMethod index_timestep_zero, the\nLoRA at strength 1, ModelSamplingFlux max_shift 1.15 and\nbase_shift 0.5 at the latent's size, 8 steps, cfg 1, euler,\nsimple. The template takes up to three references; this graph\nwires one, and image2 and image3 on the encoder take more. Its\nprompt enhancer is left out. DOES NOT FIT THE 16 GB REFERENCE\nCARD AS WIRED: on 2026-10-10, in image 0.1.11, it ran out of GPU\nmemory in the sampler at 864x1152 and again at 672x896. The int8\nweights load whole (12,867 MB) and the reference adds its own\nlatent, which the encoder scales to about a megapixel, to every\nstep. Not tried: a larger --reserve-vram in the compose command,\nwhich would offload part of the model. 864x1152 matches\ntxt2img_krea2.json. Needs the krea2 weight group:\nscripts/fetch_models.py --download --group krea2."
    ],
    "color": "#432",
    "bgcolor": "#653"
@@ -260,8 +260,8 @@
     "Node name for S&R": "EmptyLatentImage"
    },
    "widgets_values": [
-    1104,
-    1472,
+    864,
+    1152,
     1
    ]
   },
@@ -400,8 +400,8 @@
    "widgets_values": [
     1.15,
     0.5,
-    1104,
-    1472
+    864,
+    1152
    ]
   },
   {

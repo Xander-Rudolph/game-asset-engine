@@ -313,7 +313,8 @@ KREA_STAGES = [
      "feed": {"3.text": "prompt"}, "takes": "5.batch_size", "pick": True,
      "result": ("8", 0), "save": ("9", "krea_concept")},
     {"key": "krea_style", "src": "txt2img_krea2_style",
-     "title": "1. Concept, styled: Krea 2 Turbo with a style reference",
+     "title": "1. Concept, styled: Krea 2 Turbo with a style reference "
+              "(runs out of memory on a 16 GB card)",
      "feed": {"7.prompt": "prompt"}, "takes": "14.batch_size", "pick": True,
      "result": ("16", 0), "save": ("17", "krea_concept_styled")},
     {"key": "edit", "src": "img_edit_qwen",
@@ -375,7 +376,9 @@ Write the subject in **Prompt**, switch stages on in the **Stage** panels, and
 queue. Only Stage 1, Concept, is on when the graph opens. The two Stage 1 rows
 are alternatives, and their panel lets one at a time be on. **Concept, styled**
 paints the prompt in the style of the image in its **Style Reference** node: it
-takes the look, not the content.
+takes the look, not the content. It ran out of memory on the 16 GB reference
+card at 864x1152 and at 672x896 (2026-10-10), so on a card that size use plain
+Concept.
 
 **Handing over.** Each stage takes its input from the nearest stage above it
 that is on. With Concept, Edit and Animate all on, one queue goes from the
@@ -383,7 +386,8 @@ prompt to a video. To start from your own art, switch on **0. Your image** and
 leave the Concept stages off.
 
 **Takes and picks.** Stages 1 and 2 make **Takes** images per queue and save
-them all. When a stage below is on, the queue pauses after the stage, shows the
+them all. Takes opens at 1, because two Krea images at once ran out of memory on
+the 16 GB reference card; queue again for another take. When a stage below is on, the queue pauses after the stage, shows the
 takes, and carries on with the one you click and Send. Escape cancels the
 queue; left alone for an hour it carries on with the first take. A stage with
 nothing below it on never pauses.
@@ -397,10 +401,12 @@ the video goes to `output/video/`.
 **Seeds** are set to randomise, so each queue of a stage is a new take. Krea
 runs at cfg 1, so it has no negative prompt: put everything in **Prompt**.
 
-**Memory, on a 16 GB card and a 31 GB host.** The Krea 2 Turbo weights are
-12.6 GiB with a 4.9 GiB encoder, the edit model 19.0 GiB with an 8.7 GiB
-encoder, and Wan's two experts 13.3 GiB each (file sizes). A queue that runs
-every stage loads them in turn: not yet run on the reference machine.
+**Memory, on a 16 GB card and a 31 GB host.** Concept at 864x1152 took 22.3 s
+and peaked at 15,786 MiB of 16,066 (2026-10-10): the 12.6 GiB int8 weights load
+whole. 1104x1472, the Qwen concept size, ran out of memory, so keep Concept to
+about a megapixel. The edit model is 19.0 GiB with an 8.7 GiB encoder, and Wan's
+two experts 13.3 GiB each (file sizes). A queue that runs every stage loads them
+in turn: not yet run on the reference machine.
 
 **3. Animate** keeps the settings that ran on the 16 GB reference card: 480x640
 and 20 steps, with the 4-step LoRAs in the graph at strength 0.
@@ -416,6 +422,7 @@ GRAPHS = {
     "asset_workflow": {
         "stages": STAGES, "own_image": OWN_IMAGE_GRAPH, "texts": TEXTS,
         "switches": SWITCHES, "readme": README,
+        "takes": TAKES,
         "takes_title": "Takes per image stage (each queue of Stages 1 to 3)",
         "models_title": "Models (shared by the Qwen stages; a loader only "
                         "runs for a stage that is on)",
@@ -423,7 +430,10 @@ GRAPHS = {
     "krea_workflow": {
         "stages": KREA_STAGES, "own_image": KREA_OWN_IMAGE_GRAPH,
         "texts": KREA_TEXTS, "switches": KREA_SWITCHES, "readme": KREA_README,
-        "takes_title": "Takes per image stage (each queue of Stages 1 and 2)",
+        # One take: two at 864x1152 ran Krea out of memory on the 16 GB card.
+        "takes": 1,
+        "takes_title": "Takes per image stage (each queue of Stages 1 and 2; "
+                       "Krea runs out of memory at 2 on a 16 GB card)",
         "models_title": "Models (shared by the Krea and Qwen stages; a loader "
                         "only runs for a stage that is on)",
         "node_base": 20000, "link_base": 200000},
@@ -520,7 +530,7 @@ def build(info, spec):
         text_id[key] = new("PrimitiveStringMultiline",
                            {"value": base[stage][lid]["inputs"][iname]},
                            "inputs", name)
-    takes = new("PrimitiveInt", {"value": TAKES}, "inputs",
+    takes = new("PrimitiveInt", {"value": spec["takes"]}, "inputs",
                 spec["takes_title"])
 
     # Shared loaders first, so a stage can point at them.

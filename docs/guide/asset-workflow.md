@@ -441,10 +441,11 @@ queued on 2026-10-02 from the captured prompts.
 
 ## krea_workflow.json
 
-::: tip Status: built and checked in the editor on 2026-10-10, never run
-Nothing in this graph, and neither of its Krea base graphs, has been queued, and
-the `krea2` weights have not been fetched on the reference machine. What was
-checked is under [Checked, and not yet run](#checked-and-not-yet-run).
+::: tip Status: Concept run on its own on 2026-10-10; the graph checked in the editor, not queued
+`txt2img_krea2.json`, the base graph of Stage 1, ran on the reference machine
+on 2026-10-10. `txt2img_krea2_style.json` ran out of memory there, and the graph
+itself has not been queued. The figures are under
+[Measured on the 16 GB card](#measured-on-the-16-gb-card).
 :::
 
 The image and video half of the pipeline, as `complete_workflow.json` is, with
@@ -456,7 +457,7 @@ the ones in `asset_workflow.json`.
 |---|---|---|
 | 0. Your image | none | Starts from concept art you already have |
 | 1. Concept | `txt2img_krea2.json` | Krea 2 Turbo, 8 steps, from the prompt |
-| 1. Concept, styled | `txt2img_krea2_style.json` | The same, painted in the style of the image in its **Style Reference** node. A style match, not an edit |
+| 1. Concept, styled | `txt2img_krea2_style.json` | The same, painted in the style of the image in its **Style Reference** node. A style match, not an edit. Ran out of memory on the 16 GB card |
 | 2. Edit | `img_edit_qwen.json` | Qwen-Image-Edit 2509 |
 | 3. Animate | `img2video_wan22.json` | Wan 2.2, five seconds at 480x640 |
 
@@ -465,7 +466,9 @@ It works as `asset_workflow.json` does: **Prompt** feeds both Concept stages,
 stages share a panel that lets one at a time be on. Each stage takes its input
 from the nearest stage above it that is on, a stage with a stage below it on
 pauses for you to [pick a take](#picking-a-take), and the **Stage inputs** row
-holds a picker for Edit and one for Animate. Only Concept is on when it opens.
+holds a picker for Edit and one for Animate. Only Concept is on when it opens,
+and **Takes** opens at 1, because two Krea images at once ran out of memory on
+the 16 GB card.
 Stage images save to the top of `output/` as `krea_<stage>_NNNNN_.png`, and the
 video under `output/video/`. Its node ids start at 20000 and its link ids at
 200000, a range no other graph here uses, so the
@@ -504,6 +507,35 @@ stages make. In short:
 - **Qwen-Image-Edit 2509 and Wan 2.2**: Apache-2.0. Your image, through Edit, to
   Animate never touches Krea.
 
+### Measured on the 16 GB card
+
+On 2026-10-10, on image 0.1.11, with the server's own timings and VRAM read by
+`nvidia-smi` every half second:
+
+| Graph | Size | Result |
+|---|---|---|
+| `txt2img_krea2.json` | 864x1152, the graph's size | 22.3 s, 8 steps at 2.43 s each, peak 15,786 MiB of 16,066 |
+| `txt2img_krea2.json` | 1024x1024 | 27.9 s, 2.62 s a step, peak 15,678 MiB |
+| `txt2img_krea2.json` | 1104x1472 | Out of GPU memory in the sampler |
+| `txt2img_krea2.json` | 864x1152, a batch of two | Out of GPU memory |
+| `txt2img_krea2_style.json` | 864x1152, and 672x896 | Out of GPU memory in the sampler, both |
+
+Both times include loading the 4,999 MB encoder and the 12,867 MB int8 weights,
+which the server log shows loaded whole. The weights fill most of the card,
+which is why 1104x1472, a second image in the batch, or a style reference, whose
+latent the encoder scales to about a megapixel and adds to every step, do not
+fit. Each of those might run with part of the model offloaded, which a larger
+`--reserve-vram` in the compose command would ask for; not tried, because it
+changes every graph's memory. The 864x1152 golem came out head to toe on a
+plain grey background, as the prompt asked.
+
+**Krea's encoder also reads images.** Its text encoder is Qwen3-VL 4B, a
+vision-language model, and ComfyUI's `TextGenerate` node takes an image. Given
+the golem and an instruction to describe it for a text-to-image prompt, with
+greedy decoding, it wrote an accurate paragraph about its stone, moss, pose,
+lighting and plain grey background in 15.0 s, peaking at 6,542 MiB. That was a
+test graph, not one in `workflows/api/`.
+
 ### Checked, and not yet run
 
 On 2026-10-10, in the packaged container on image 0.1.10 (ComfyUI 0.30.2):
@@ -527,12 +559,8 @@ On 2026-10-10, in the packaged container on image 0.1.10 (ComfyUI 0.30.2):
 - Switching **Concept, styled** on with a click, with Concept on, switched
   Concept off.
 
-Not known until it runs: whether ComfyUI 0.30.2 loads the int8 ConvRot weights
-on the reference card, which its `comfy/ops.py` has code for (read, not run);
-how long 8 steps take at 1104x1472, where Comfy-Org's templates render 1024x1024;
-whether the style LoRA, applied at load to the int8 weights, fits in 16 GB, given
-that a bf16 LoRA on Qwen's fp8 weights does not; and whether a queue that runs
-Krea, then the 19.0GB edit model, then Wan, fits the 31 GB host.
+Not yet run: this graph itself, so whether a queue that runs Krea, then the
+19.0GB edit model, then Wan, fits the 31 GB host.
 
 ## complete_workflow.json
 

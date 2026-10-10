@@ -135,10 +135,10 @@
     "Node name for S&R": "PrimitiveInt"
    },
    "widgets_values": [
-    2,
+    1,
     "fixed"
    ],
-   "title": "Takes per image stage (each queue of Stages 1 and 2)"
+   "title": "Takes per image stage (each queue of Stages 1 and 2; Krea runs out of memory at 2 on a 16 GB card)"
   },
   {
    "id": 20004,
@@ -679,8 +679,8 @@
     "Node name for S&R": "EmptyLatentImage"
    },
    "widgets_values": [
-    1104,
-    1472
+    864,
+    1152
    ]
   },
   {
@@ -897,8 +897,8 @@
    "widgets_values": [
     1.15,
     0.5,
-    1104,
-    1472
+    864,
+    1152
    ]
   },
   {
@@ -1269,8 +1269,8 @@
     "Node name for S&R": "EmptyLatentImage"
    },
    "widgets_values": [
-    1104,
-    1472
+    864,
+    1152
    ]
   },
   {
@@ -3522,7 +3522,7 @@
    "outputs": [],
    "properties": {},
    "widgets_values": [
-    "## Krea pipeline\n\nThe image and video half of the pipeline on Krea 2 Turbo: a concept from the\nprompt, an edit of it, and five seconds of video. Krea has no open model for\nediting or for image to video, so Stage 2 is Qwen-Image-Edit 2509 and Stage 3\nis Wan 2.2, the same stages as in asset_workflow.json.\n\n**Licence first.** The Krea 2 Community License allows commercial use of the\nmodel and of what it makes only while your company, affiliates included, earns\nunder $1,000,000 a year. Past that you must stop commercial use, of its outputs\ntoo, until Krea grants an enterprise licence; it makes no exception for images\nmade earlier. Krea may end the licence for any reason on 30 days' notice, and it\nrequires content filtering: look at every image before it ships. The style\nreference LoRA is under the same licence. Qwen-Image-Edit 2509 and Wan 2.2 are\nApache-2.0. See docs/guide/licensing.\n\nWrite the subject in **Prompt**, switch stages on in the **Stage** panels, and\nqueue. Only Stage 1, Concept, is on when the graph opens. The two Stage 1 rows\nare alternatives, and their panel lets one at a time be on. **Concept, styled**\npaints the prompt in the style of the image in its **Style Reference** node: it\ntakes the look, not the content.\n\n**Handing over.** Each stage takes its input from the nearest stage above it\nthat is on. With Concept, Edit and Animate all on, one queue goes from the\nprompt to a video. To start from your own art, switch on **0. Your image** and\nleave the Concept stages off.\n\n**Takes and picks.** Stages 1 and 2 make **Takes** images per queue and save\nthem all. When a stage below is on, the queue pauses after the stage, shows the\ntakes, and carries on with the one you click and Send. Escape cancels the\nqueue; left alone for an hour it carries on with the first take. A stage with\nnothing below it on never pauses.\n\n**Picking up at any stage.** The **Stage inputs** row holds one picker per\nstage that reads an image. A picker is read only when its stage is on and no\nstage above it is on, and is muted otherwise. Its refresh arrow selects the\nnewest file in `output/`, where the stages save as `krea_<stage>_NNNNN_.png`;\nthe video goes to `output/video/`.\n\n**Seeds** are set to randomise, so each queue of a stage is a new take. Krea\nruns at cfg 1, so it has no negative prompt: put everything in **Prompt**.\n\n**Memory, on a 16 GB card and a 31 GB host.** The Krea 2 Turbo weights are\n12.6 GiB with a 4.9 GiB encoder, the edit model 19.0 GiB with an 8.7 GiB\nencoder, and Wan's two experts 13.3 GiB each (file sizes). A queue that runs\nevery stage loads them in turn: not yet run on the reference machine.\n\n**3. Animate** keeps the settings that ran on the 16 GB reference card: 480x640\nand 20 steps, with the 4-step LoRAs in the graph at strength 0.\n\nBuilt by scripts/build_asset_workflow.py from the graphs in workflows/api/.\nChange those, not this."
+    "## Krea pipeline\n\nThe image and video half of the pipeline on Krea 2 Turbo: a concept from the\nprompt, an edit of it, and five seconds of video. Krea has no open model for\nediting or for image to video, so Stage 2 is Qwen-Image-Edit 2509 and Stage 3\nis Wan 2.2, the same stages as in asset_workflow.json.\n\n**Licence first.** The Krea 2 Community License allows commercial use of the\nmodel and of what it makes only while your company, affiliates included, earns\nunder $1,000,000 a year. Past that you must stop commercial use, of its outputs\ntoo, until Krea grants an enterprise licence; it makes no exception for images\nmade earlier. Krea may end the licence for any reason on 30 days' notice, and it\nrequires content filtering: look at every image before it ships. The style\nreference LoRA is under the same licence. Qwen-Image-Edit 2509 and Wan 2.2 are\nApache-2.0. See docs/guide/licensing.\n\nWrite the subject in **Prompt**, switch stages on in the **Stage** panels, and\nqueue. Only Stage 1, Concept, is on when the graph opens. The two Stage 1 rows\nare alternatives, and their panel lets one at a time be on. **Concept, styled**\npaints the prompt in the style of the image in its **Style Reference** node: it\ntakes the look, not the content. It ran out of memory on the 16 GB reference\ncard at 864x1152 and at 672x896 (2026-10-10), so on a card that size use plain\nConcept.\n\n**Handing over.** Each stage takes its input from the nearest stage above it\nthat is on. With Concept, Edit and Animate all on, one queue goes from the\nprompt to a video. To start from your own art, switch on **0. Your image** and\nleave the Concept stages off.\n\n**Takes and picks.** Stages 1 and 2 make **Takes** images per queue and save\nthem all. Takes opens at 1, because two Krea images at once ran out of memory on\nthe 16 GB reference card; queue again for another take. When a stage below is on, the queue pauses after the stage, shows the\ntakes, and carries on with the one you click and Send. Escape cancels the\nqueue; left alone for an hour it carries on with the first take. A stage with\nnothing below it on never pauses.\n\n**Picking up at any stage.** The **Stage inputs** row holds one picker per\nstage that reads an image. A picker is read only when its stage is on and no\nstage above it is on, and is muted otherwise. Its refresh arrow selects the\nnewest file in `output/`, where the stages save as `krea_<stage>_NNNNN_.png`;\nthe video goes to `output/video/`.\n\n**Seeds** are set to randomise, so each queue of a stage is a new take. Krea\nruns at cfg 1, so it has no negative prompt: put everything in **Prompt**.\n\n**Memory, on a 16 GB card and a 31 GB host.** Concept at 864x1152 took 22.3 s\nand peaked at 15,786 MiB of 16,066 (2026-10-10): the 12.6 GiB int8 weights load\nwhole. 1104x1472, the Qwen concept size, ran out of memory, so keep Concept to\nabout a megapixel. The edit model is 19.0 GiB with an 8.7 GiB encoder, and Wan's\ntwo experts 13.3 GiB each (file sizes). A queue that runs every stage loads them\nin turn: not yet run on the reference machine.\n\n**3. Animate** keeps the settings that ran on the 16 GB reference card: 480x640\nand 20 steps, with the 4-step LoRAs in the graph at strength 0.\n\nBuilt by scripts/build_asset_workflow.py from the graphs in workflows/api/.\nChange those, not this."
    ],
    "color": "#432",
    "bgcolor": "#653"
@@ -3658,7 +3658,7 @@
    ],
    "size": [
     420,
-    443
+    477
    ],
    "flags": {},
    "order": 17,
@@ -3667,7 +3667,7 @@
    "outputs": [],
    "properties": {},
    "widgets_values": [
-    "CONCEPT -- Krea 2 Turbo, 8 steps (not yet run here)\n\nLICENCE FIRST.  The Krea 2 Community License allows commercial use of\nwhat this makes only while your company, affiliates included, earns\nunder $1,000,000 a year.  Past that you must stop commercial use of\nthe model AND its outputs until Krea grants an enterprise licence; it\nmakes no exception for images made earlier.  Krea can\nalso end the licence on 30 days' notice, and it requires content\nfiltering: review every image before it ships.  docs/guide/licensing.\n\nWrite sentences, not tags.  cfg is 1, so there is no negative: the\nempty negative is a ConditioningZeroOut, and everything goes in the\nprompt.  Change the seed in KSampler to reroll.\n\nSettings are Comfy-Org's int8 template; 1104x1472 is the Qwen\nconcept size, not the template's 1024x1024.\n\nNeeds:  scripts/fetch_models.py --download --group krea2\n\n(From workflows/api/txt2img_krea2.json.)"
+    "CONCEPT -- Krea 2 Turbo, 8 steps (22.3s measured)\n\nLICENCE FIRST.  The Krea 2 Community License allows commercial use of\nwhat this makes only while your company, affiliates included, earns\nunder $1,000,000 a year.  Past that you must stop commercial use of\nthe model AND its outputs until Krea grants an enterprise licence; it\nmakes no exception for images made earlier.  Krea can\nalso end the licence on 30 days' notice, and it requires content\nfiltering: review every image before it ships.  docs/guide/licensing.\n\nWrite sentences, not tags.  cfg is 1, so there is no negative: the\nempty negative is a ConditioningZeroOut, and everything goes in the\nprompt.  Change the seed in KSampler to reroll.\n\nONE TAKE AT A TIME on a 16 GB card.  The int8 weights load whole\nand leave little room: 864x1152 peaked at 15,786 MiB of 16,066, and\n1104x1472, or a batch of two, ran out of memory (2026-10-10).  Keep\nto about a megapixel: 864x1152 for a figure, 1024x1024 for a prop.\n\nNeeds:  scripts/fetch_models.py --download --group krea2\n\n(From workflows/api/txt2img_krea2.json.)"
    ],
    "color": "#432",
    "bgcolor": "#653"
@@ -3681,7 +3681,7 @@
    ],
    "size": [
     420,
-    392
+    460
    ],
    "flags": {},
    "order": 25,
@@ -3690,7 +3690,7 @@
    "outputs": [],
    "properties": {},
    "widgets_values": [
-    "CONCEPT IN A GIVEN STYLE -- Krea 2 Turbo + style reference\n(not yet run here)\n\nPut an image whose LOOK you want in Style Reference.  The prompt says\nwhat to draw; the reference says how it is painted.  It is not an\nedit: nothing of the reference's content is kept on purpose.\n\nSame licence as txt2img_krea2: commercial use only under $1,000,000\ncompany revenue a year, revocable on 30 days' notice, content\nfiltering required.  The LoRA is ostris's, under the same licence.\n\nModelSamplingFlux's width and height should match the latent's.\nMore references go in image2 and image3 on the Prompt node.\n\nNeeds:  scripts/fetch_models.py --download --group krea2\n\n(From workflows/api/txt2img_krea2_style.json.)"
+    "CONCEPT IN A GIVEN STYLE -- Krea 2 Turbo + style reference\n\nDOES NOT FIT A 16 GB CARD AS WIRED.  On 2026-10-10 it ran out of\nGPU memory in the sampler at 864x1152 and at 672x896: the reference\nadds about a megapixel of latent to every step.  A larger\n--reserve-vram in the compose command, not tried, may let it run.\n\nPut an image whose LOOK you want in Style Reference.  The prompt says\nwhat to draw; the reference says how it is painted.  It is not an\nedit: nothing of the reference's content is kept on purpose.\n\nSame licence as txt2img_krea2: commercial use only under $1,000,000\ncompany revenue a year, revocable on 30 days' notice, content\nfiltering required.  The LoRA is ostris's, under the same licence.\n\nModelSamplingFlux's width and height should match the latent's.\nMore references go in image2 and image3 on the Prompt node.\n\nNeeds:  scripts/fetch_models.py --download --group krea2\n\n(From workflows/api/txt2img_krea2_style.json.)"
    ],
    "color": "#432",
    "bgcolor": "#653"
@@ -4628,7 +4628,7 @@
   },
   {
    "id": 6,
-   "title": "1. Concept, styled: Krea 2 Turbo with a style reference",
+   "title": "1. Concept, styled: Krea 2 Turbo with a style reference (runs out of memory on a 16 GB card)",
    "bounding": [
     520,
     3124,
