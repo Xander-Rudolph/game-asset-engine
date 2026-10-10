@@ -94,6 +94,39 @@ THE NEGATIVE BOX DOES NOTHING HERE.  The distilled 4-step model runs at
 cfg 1.0, where there is no classifier-free guidance to steer with --
 so the second CLIPTextEncode is inert whatever you type in it.  Put
 everything in the positive, or switch to txt2img_qwen for a real one.""",
+    "txt2img_krea2": """CONCEPT -- Krea 2 Turbo, 8 steps (not yet run here)
+
+LICENCE FIRST.  The Krea 2 Community License allows commercial use of
+what this makes only while your company, affiliates included, earns
+under $1,000,000 a year.  Past that you must stop commercial use of
+the model AND its outputs until Krea grants an enterprise licence; it
+makes no exception for images made earlier.  Krea can
+also end the licence on 30 days' notice, and it requires content
+filtering: review every image before it ships.  docs/guide/licensing.
+
+Write sentences, not tags.  cfg is 1, so there is no negative: the
+empty negative is a ConditioningZeroOut, and everything goes in the
+prompt.  Change the seed in KSampler to reroll.
+
+Settings are Comfy-Org's int8 template; 1104x1472 is the Qwen
+concept size, not the template's 1024x1024.
+
+Needs:  scripts/fetch_models.py --download --group krea2""",
+    "txt2img_krea2_style": """CONCEPT IN A GIVEN STYLE -- Krea 2 Turbo + style reference
+(not yet run here)
+
+Put an image whose LOOK you want in Style Reference.  The prompt says
+what to draw; the reference says how it is painted.  It is not an
+edit: nothing of the reference's content is kept on purpose.
+
+Same licence as txt2img_krea2: commercial use only under $1,000,000
+company revenue a year, revocable on 30 days' notice, content
+filtering required.  The LoRA is ostris's, under the same licence.
+
+ModelSamplingFlux's width and height should match the latent's.
+More references go in image2 and image3 on the Prompt node.
+
+Needs:  scripts/fetch_models.py --download --group krea2""",
     "img_edit_qwen": """CHARACTER EDIT -- Qwen-Image-Edit 2509
 
 Load the image to change in LoadImage, then say what to change in the

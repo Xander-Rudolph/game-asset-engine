@@ -1,0 +1,240 @@
+{
+  "_comment": "Krea 2 Turbo with a style reference: a new image from the prompt, painted in the style of the image in Style Reference. It takes the reference's look, not its content, so it is a style match, not an edit. The style comes from ostris's krea2_style_reference LoRA, whose model card declares the Krea 2 Community License, so everything txt2img_krea2.json says about the licence holds here too: commercial use of Outputs only while company-wide revenue, affiliates included, is under $1,000,000 a year, revocable by Krea on 30 days' notice, and content filtering required. See docs/guide/licensing.md. The wiring and settings are Comfy-Org's template image_krea2_turbo_int8_image_style_reference (workflow_templates commit 3e50a92, read 2026-10-10, not yet run here): the reference goes in through TextEncodeQwenImageEditPlus as a reference latent, FluxKontextMultiReferenceLatentMethod index_timestep_zero, the LoRA at strength 1, ModelSamplingFlux max_shift 1.15 and base_shift 0.5 at the latent's size, 8 steps, cfg 1, euler, simple. The template takes up to three references; this graph wires one, and image2 and image3 on the encoder take more. Its prompt enhancer is left out. 1104x1472 as in txt2img_krea2.json, and likewise not yet run at that size. Needs the krea2 weight group: scripts/fetch_models.py --download --group krea2.",
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "krea2_turbo_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    },
+    "_meta": {
+      "title": "Krea 2 Turbo"
+    }
+  },
+  "2": {
+    "class_type": "LoraLoaderModelOnly",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "lora_name": "krea2_style_reference.safetensors",
+      "strength_model": 1.0
+    },
+    "_meta": {
+      "title": "Style Reference LoRA"
+    }
+  },
+  "3": {
+    "class_type": "ModelSamplingFlux",
+    "inputs": {
+      "model": [
+        "2",
+        0
+      ],
+      "max_shift": 1.15,
+      "base_shift": 0.5,
+      "width": 1104,
+      "height": 1472
+    },
+    "_meta": {
+      "title": "Sampling Shift (match the latent size)"
+    }
+  },
+  "4": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen3vl_4b_fp8_scaled.safetensors",
+      "type": "krea2",
+      "device": "default"
+    },
+    "_meta": {
+      "title": "Krea 2 Text Encoder (Qwen3-VL 4B)"
+    }
+  },
+  "5": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "qwen_image_vae.safetensors"
+    },
+    "_meta": {
+      "title": "Qwen VAE"
+    }
+  },
+  "6": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "example.png"
+    },
+    "_meta": {
+      "title": "Style Reference"
+    }
+  },
+  "7": {
+    "class_type": "TextEncodeQwenImageEditPlus",
+    "inputs": {
+      "clip": [
+        "4",
+        0
+      ],
+      "vae": [
+        "5",
+        0
+      ],
+      "image1": [
+        "6",
+        0
+      ],
+      "prompt": "A weathered stone golem overgrown with moss, a single creature standing upright, the whole figure visible from head to feet in a three-quarter view. Even flat studio lighting, a plain neutral grey background and no cast shadow. Painted game asset concept art with a crisp, readable silhouette and sharp detail."
+    },
+    "_meta": {
+      "title": "Prompt"
+    }
+  },
+  "8": {
+    "class_type": "FluxKontextMultiReferenceLatentMethod",
+    "inputs": {
+      "conditioning": [
+        "7",
+        0
+      ],
+      "reference_latents_method": "index_timestep_zero"
+    },
+    "_meta": {
+      "title": "Reference Method"
+    }
+  },
+  "9": {
+    "class_type": "ConditioningZeroOut",
+    "inputs": {
+      "conditioning": [
+        "8",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Empty Negative (cfg 1)"
+    }
+  },
+  "10": {
+    "class_type": "CFGGuider",
+    "inputs": {
+      "model": [
+        "3",
+        0
+      ],
+      "positive": [
+        "8",
+        0
+      ],
+      "negative": [
+        "9",
+        0
+      ],
+      "cfg": 1.0
+    },
+    "_meta": {
+      "title": "Guider"
+    }
+  },
+  "11": {
+    "class_type": "RandomNoise",
+    "inputs": {
+      "noise_seed": 0
+    },
+    "_meta": {
+      "title": "Seed"
+    }
+  },
+  "12": {
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "_meta": {
+      "title": "Sampler Name"
+    }
+  },
+  "13": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "model": [
+        "3",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 8,
+      "denoise": 1.0
+    },
+    "_meta": {
+      "title": "Steps"
+    }
+  },
+  "14": {
+    "class_type": "EmptyLatentImage",
+    "inputs": {
+      "width": 1104,
+      "height": 1472,
+      "batch_size": 1
+    },
+    "_meta": {
+      "title": "Latent"
+    }
+  },
+  "15": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "noise": [
+        "11",
+        0
+      ],
+      "guider": [
+        "10",
+        0
+      ],
+      "sampler": [
+        "12",
+        0
+      ],
+      "sigmas": [
+        "13",
+        0
+      ],
+      "latent_image": [
+        "14",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Sampler"
+    }
+  },
+  "16": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "15",
+        0
+      ],
+      "vae": [
+        "5",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Decode"
+    }
+  },
+  "17": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "16",
+        0
+      ],
+      "filename_prefix": "concept/krea2_style"
+    },
+    "_meta": {
+      "title": "Save"
+    }
+  }
+}

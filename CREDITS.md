@@ -61,6 +61,10 @@ which all of the above extends.
 - **Anything2Real** by lrzjason. Licence unsettled, treated as non-commercial.
 - **Wan 2.2** by Alibaba's Wan team, with Google's **umT5** text encoder and the
   **Wan2.2-Lightning** LoRAs by LightX2V. Apache 2.0. Image to video.
+- **Krea 2** by Krea, repackaged for ComfyUI by Comfy-Org, and the **Krea 2
+  style reference** LoRA by ostris. Krea 2 Community License: free for
+  commercial use only under 1 million dollars of company revenue a year,
+  outputs included; see the licensing guide.
 - **DWPose** by IDEA Research, with **YOLOX** by Megvii. Apache 2.0.
 - **Stable Diffusion XL** and **SD 1.5** by Stability AI.
 - **InstantMesh**, **Zero123++**, **MV-Adapter**, **Unique3D**, **CharacterGen**,

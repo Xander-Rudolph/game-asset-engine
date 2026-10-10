@@ -1,0 +1,128 @@
+{
+  "_comment": "Krea 2 Turbo, Krea's 12B open-weights text-to-image model, distilled to 8 steps. LICENCE, read before shipping anything it makes: the Krea 2 Community License Agreement v.1 (2026-06-22) allows commercial use of the model and of its Outputs 'only if you (including all affiliated entities under common ownership or control) have total company-wide annual revenue of less than one million United States dollars', and past that 'you must immediately cease Commercial Use and contact Krea'. Krea may end it 'for any reason upon thirty (30) days' prior written or electronic notice', and section 4.2 requires 'reasonable and appropriate Content Filter measures'. See docs/guide/licensing.md. The settings are Comfy-Org's template image_krea2_turbo_t2i_int8 (workflow_templates commit 3e50a92, read 2026-10-10, not yet run here): the int8 ConvRot weights, the Qwen3-VL 4B encoder on CLIPLoader type krea2, the same qwen_image_vae as the Qwen graphs, 8 steps, cfg 1, euler, simple, and an empty negative from ConditioningZeroOut. cfg 1 means no classifier-free guidance, so everything goes in the prompt. The template's prompt enhancer, a TextGenerate on the same encoder, is left out. 1104x1472 is the 3:4 the Qwen concept graphs use, so a figure stays head to toe and img2video_wan22's 480x640 keeps its shape; the template renders 1024x1024, and Comfy-Org's Krea 2 page gives 1K to 2K. This size has not been run. Needs the krea2 weight group: scripts/fetch_models.py --download --group krea2.",
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "krea2_turbo_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    },
+    "_meta": {
+      "title": "Krea 2 Turbo"
+    }
+  },
+  "2": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen3vl_4b_fp8_scaled.safetensors",
+      "type": "krea2",
+      "device": "default"
+    },
+    "_meta": {
+      "title": "Krea 2 Text Encoder (Qwen3-VL 4B)"
+    }
+  },
+  "3": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "2",
+        0
+      ],
+      "text": "A weathered stone golem overgrown with moss, a single creature standing upright, the whole figure visible from head to feet in a three-quarter view. Even flat studio lighting, a plain neutral grey background and no cast shadow. Painted game asset concept art with a crisp, readable silhouette and sharp detail."
+    },
+    "_meta": {
+      "title": "Prompt"
+    }
+  },
+  "4": {
+    "class_type": "ConditioningZeroOut",
+    "inputs": {
+      "conditioning": [
+        "3",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Empty Negative (cfg 1)"
+    }
+  },
+  "5": {
+    "class_type": "EmptyLatentImage",
+    "inputs": {
+      "width": 1104,
+      "height": 1472,
+      "batch_size": 1
+    },
+    "_meta": {
+      "title": "Latent"
+    }
+  },
+  "6": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "positive": [
+        "3",
+        0
+      ],
+      "negative": [
+        "4",
+        0
+      ],
+      "latent_image": [
+        "5",
+        0
+      ],
+      "seed": 0,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0
+    },
+    "_meta": {
+      "title": "Sampler"
+    }
+  },
+  "7": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "qwen_image_vae.safetensors"
+    },
+    "_meta": {
+      "title": "Qwen VAE"
+    }
+  },
+  "8": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "6",
+        0
+      ],
+      "vae": [
+        "7",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Decode"
+    }
+  },
+  "9": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "8",
+        0
+      ],
+      "filename_prefix": "concept/krea2"
+    },
+    "_meta": {
+      "title": "Save"
+    }
+  }
+}

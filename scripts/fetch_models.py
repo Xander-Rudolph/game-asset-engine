@@ -360,6 +360,10 @@ def main() -> int:
     for e, missing in todo:
         print(f"\n==> {e['name']}  ({len(missing)} file(s))")
         for url, dest, size in missing:
+            # Two groups can list the same file, as qwen and krea2 both list
+            # the Qwen VAE; the first entry this run fetched it.
+            if dest.exists() and (size is None or dest.stat().st_size == size):
+                continue
             print(f"  {dest.relative_to(mdir)}  {human(size)}")
             try:
                 download(url, dest, size)

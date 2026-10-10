@@ -30,6 +30,7 @@
     "qwen_edit": "Qwen-Image-Edit 2509, ~19GB. Change one element of a concept without rerolling it",
     "qwen_rapid": "Phr00t's Qwen-Image-Edit Rapid AIO for complete_workflow.json: the v19 SFW checkpoint with its text encoder and VAE merged in (~26GB), the v18 SFW Q4_K GGUF (~12GB), which reuses the qwen group's text encoder and VAE, and the Anything2Real LoRA, which is fetched only with --accept-noncommercial. Licences unsettled: see --licenses",
     "wan_i2v": "WAN 2.2 image-to-video 14B for complete_workflow.json's video group: the high- and low-noise fp8 experts, the umT5 text encoder, the 2.1 VAE and the lightx2v 4-step LoRAs, ~35GB. Apache-2.0",
+    "krea2": "Krea 2 Turbo text-to-image for txt2img_krea2.json, txt2img_krea2_style.json and krea_workflow.json: the int8 ConvRot weights, the Qwen3-VL 4B text encoder, ostris's style reference LoRA and the Qwen VAE, ~18GB. Krea 2 Community License: commercial use, outputs included, only while company revenue is under $1M a year, and Krea may end it on 30 days' notice: see --licenses. krea_workflow.json's Edit and Animate stages also need qwen_edit, the qwen group's text encoder and wan_i2v",
     "music": "ACE-Step 1.5 turbo text-to-music, ~10GB. MIT, and its model card allows commercial use of the music it makes"
   },
   "models": [
@@ -665,6 +666,54 @@
       "license_url": "https://github.com/IDEA-Research/DWPose/blob/main/LICENSE",
       "commercial": "yes",
       "note": "hr16's TorchScript export of DWPose's dw-ll_ucoco_384; the card declares apache-2.0 in metadata only, and IDEA-Research/DWPose's LICENSE is Apache-2.0. The weights are Apache-2.0; the code that runs them is not: comfyui_controlnet_aux's src/custom_controlnet_aux/dwpose/ folder ships CMU's OpenPose licence, 'ACADEMIC OR NON-PROFIT ORGANIZATION NONCOMMERCIAL RESEARCH USE ONLY' (read 2026-09-30 at 0cd2904). See docs/guide/licensing."
+    },
+    {
+      "name": "Krea 2 Turbo (int8 ConvRot)",
+      "group": "krea2",
+      "kind": "file",
+      "repo": "Comfy-Org/Krea-2",
+      "file": "diffusion_models/krea2_turbo_int8_convrot.safetensors",
+      "dest": "diffusion_models/krea2_turbo_int8_convrot.safetensors",
+      "license": "Krea 2 Community License Agreement v.1",
+      "license_url": "https://huggingface.co/Comfy-Org/Krea-2/blob/main/LICENSE.pdf",
+      "commercial": "conditional (only while company-wide revenue, affiliates included, is under $1M a year, and that covers its outputs too; Krea may end the licence on 30 days' notice; content filtering required)",
+      "note": "The int8 build Comfy-Org's int8 templates load, for both text to image and the style reference; ComfyUI v0.30.2's comfy/ops.py has the int8_tensorwise and convrot code paths (read, not yet run). Read 2026-10-10 in the LICENSE.pdf of Comfy-Org/Krea-2 at eb1eddd: 'KREA 2 Community License Agreement v.1, Date: June 22, 2026'. 2.3: Commercial Use 'of the Krea Model, Derivatives, or Outputs is permitted only if you (including all affiliated entities under common ownership or control) have total company-wide annual revenue of less than one million United States dollars ($1,000,000 USD)', and past it 'you must immediately cease Commercial Use and contact Krea'. 9.2: Krea may terminate 'for any reason upon thirty (30) days' prior written or electronic notice'. 4.2: 'You must implement reasonable and appropriate Content Filter measures'. Downloading binds you: 'BY DOWNLOADING, ACCESSING, COPYING, USING, OR DISTRIBUTING ... YOU ACKNOWLEDGE THAT YOU HAVE READ, UNDERSTOOD, AND AGREE'. Comfy-Org's repack is not gated; Krea's own krea/Krea-2-Turbo asks you to agree first. See docs/guide/licensing."
+    },
+    {
+      "name": "Qwen3-VL 4B text encoder (fp8, for Krea 2)",
+      "group": "krea2",
+      "kind": "file",
+      "repo": "Comfy-Org/Krea-2",
+      "file": "text_encoders/qwen3vl_4b_fp8_scaled.safetensors",
+      "dest": "text_encoders/qwen3vl_4b_fp8_scaled.safetensors",
+      "license": "Krea 2 Community License Agreement v.1 (the repack's card declares it for the whole repository)",
+      "license_url": "https://huggingface.co/Comfy-Org/Krea-2/blob/main/LICENSE.pdf",
+      "commercial": "conditional (only while company-wide revenue, affiliates included, is under $1M a year, and that covers its outputs too; Krea may end the licence on 30 days' notice; content filtering required)",
+      "note": "Loaded with CLIPLoader type krea2. Whether this is an unmodified Qwen3-VL 4B under Qwen's own licence was not checked, so it is treated as under the Krea licence the repack declares."
+    },
+    {
+      "name": "Krea 2 style reference LoRA (ostris)",
+      "group": "krea2",
+      "kind": "file",
+      "repo": "Comfy-Org/Krea-2",
+      "file": "loras/krea2_style_reference.safetensors",
+      "dest": "loras/krea2_style_reference.safetensors",
+      "license": "Krea 2 Community License Agreement v.1, declared in the card metadata of ostris/krea2_turbo_style_reference, no licence file there",
+      "license_url": "https://huggingface.co/ostris/krea2_turbo_style_reference",
+      "commercial": "conditional (only while company-wide revenue, affiliates included, is under $1M a year, and that covers its outputs too; Krea may end the licence on 30 days' notice; content filtering required)",
+      "note": "ostris's LoRA for Krea 2 Turbo. Its card declares the Krea licence, and the licence's definition of a Derivative includes any 'work based on the Krea Model'. txt2img_krea2_style.json loads it at strength 1, as Comfy-Org's style reference template does."
+    },
+    {
+      "name": "Qwen-Image VAE (for Krea 2)",
+      "group": "krea2",
+      "kind": "file",
+      "repo": "Comfy-Org/Krea-2",
+      "file": "vae/qwen_image_vae.safetensors",
+      "dest": "vae/qwen_image_vae.safetensors",
+      "license": "Apache-2.0",
+      "license_url": "https://huggingface.co/Qwen/Qwen-Image",
+      "commercial": "yes",
+      "note": "The same file as the qwen group's Qwen-Image VAE: both SHA-256 a70580f0213e67967ee9c95f05bb400e8fb08307e017a924bf3441223e023d1f (the Hub's LFS id for Comfy-Org/Krea-2, and sha256sum of the qwen group's copy, 2026-10-10). Listed here so --group krea2 is complete on its own; with the qwen group fetched it is already present."
     }
   ]
 }

@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
-"""Join the pipeline's graphs into one editor graph, asset_workflow.json.
+"""Join the pipeline's graphs into editor graphs: asset_workflow.json and krea_workflow.json.
 
 The graphs in `workflows/api/` each do one job: paint a concept, edit it, turn
 it into a mesh, texture the mesh, look at it.  Run one at a time, the output of
 one has to be carried to the next by hand.  This builds a single graph for the
 editor with every stage in it, a prompt at the top, and panels that switch the
 stages on and off, one at a time where two stages are alternatives.
+
+It builds two such graphs from the same machinery.  asset_workflow.json is the
+whole pipeline, from a prompt to a rig and a video.  krea_workflow.json is its
+image and video half, as complete_workflow.json is, with Krea 2 Turbo painting
+the concept: Krea has no open edit or image-to-video model, so its Edit and
+Animate are the same Qwen and Wan stages.  Krea 2's licence is free for
+commercial use only under $1M of company revenue a year; see
+docs/guide/licensing.md.
 
 How the stages hand over, which is the point of the design:
 
@@ -43,9 +51,10 @@ Built, never hand-edited, from the base graphs, so a fix to one of them reaches
 this graph on the next run.  Presets come first: the Simplify stage is read
 from preset_simplify_concept.json, which scripts/build_presets.py writes.
 
-    scripts/build_asset_workflow.py              # write it
-    scripts/build_asset_workflow.py --check      # write it, then verify it
+    scripts/build_asset_workflow.py              # write both
+    scripts/build_asset_workflow.py --check      # write both, then verify them
     scripts/build_asset_workflow.py --dry-run    # verify in memory, write nothing
+    scripts/build_asset_workflow.py --graph krea_workflow   # just one
 
 The check puts every widget value back on its name and compares the graph with
 the base graphs it came from, as scripts/api_to_ui.py --check does.  It cannot
@@ -65,7 +74,6 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import api_to_ui  # noqa: E402  (a sibling script, not a package)
 
 API_DIR = api_to_ui.API_DIR
-OUT = api_to_ui.UI_DIR / "asset_workflow.json"
 
 # Loaders every Qwen stage would otherwise load again for itself.  Merged into
 # one copy each in the Models group: two CLIPLoaders are two 8.8GB text
@@ -292,6 +300,135 @@ docs/reference/video-mocap.md is the state of that.
 Built by scripts/build_asset_workflow.py from the graphs in workflows/api/.
 Change those, not this."""
 
+# ------------------------------------------------------- krea_workflow.json
+# The image and video half of the pipeline, as complete_workflow.json is, with
+# Krea 2 Turbo painting the concept.  Krea has no open edit or image-to-video
+# model, so Edit and Animate are the Qwen and Wan stages of asset_workflow.json.
+KREA_STAGES = [
+    {"key": "own_image",
+     "title": "0. Your image: start from concept art you already have",
+     "result": ("1", 0)},
+    {"key": "krea", "src": "txt2img_krea2", "on": True,
+     "title": "1. Concept: Krea 2 Turbo, 8 steps",
+     "feed": {"3.text": "prompt"}, "takes": "5.batch_size", "pick": True,
+     "result": ("8", 0), "save": ("9", "krea_concept")},
+    {"key": "krea_style", "src": "txt2img_krea2_style",
+     "title": "1. Concept, styled: Krea 2 Turbo with a style reference",
+     "feed": {"7.prompt": "prompt"}, "takes": "14.batch_size", "pick": True,
+     "result": ("16", 0), "save": ("17", "krea_concept_styled")},
+    {"key": "edit", "src": "img_edit_qwen",
+     "title": "2. Edit: Qwen-Image-Edit 2509",
+     "drop": ["1"], "feed": {"2.image": "image_switch:edit",
+                             "8.prompt": "instruction"},
+     "takes": "repeat:11.latent_image", "pick": True,
+     "result": ("12", 0), "save": ("13", "krea_edit")},
+    {"key": "animate", "src": "img2video_wan22",
+     "title": "3. Animate: Wan 2.2 image to video, five seconds",
+     "drop": ["1"], "feed": {"12.start_image": "image_switch:animate",
+                             "10.text": "motion"},
+     "set": {"16.filename_prefix": "video/krea_animate",
+             "17.filename_prefix": "video/krea_animate"},
+     "save": ("19", "krea_animate_last")},
+]
+
+KREA_OWN_IMAGE_GRAPH = {
+    "_comment": "Concept art you already have. Upload it here, or pick a file "
+                "already in input/. With this stage on and the Concept stages "
+                "off, Edit and Animate start from it.",
+    "1": OWN_IMAGE_GRAPH["1"],
+}
+
+KREA_TEXTS = {
+    "prompt": ("krea", "3", "text", "Prompt (both Concept stages)"),
+    "instruction": ("edit", "8", "prompt", "Edit instruction (Stage 2)"),
+    "motion": ("animate", "10", "text", "Motion prompt (Stage 3)"),
+}
+
+KREA_SWITCHES = {
+    "image_switch:edit": {
+        "type": "IMAGE", "sources": ["krea_style", "krea", "own_image"],
+        "title": "2. Edit takes",
+        "picker": "2. Edit: image to edit"},
+    "image_switch:animate": {
+        "type": "IMAGE", "sources": ["edit", "krea_style", "krea", "own_image"],
+        "title": "3. Animate takes",
+        "picker": "3. Animate: start frame"},
+}
+
+KREA_README = """## Krea pipeline
+
+The image and video half of the pipeline on Krea 2 Turbo: a concept from the
+prompt, an edit of it, and five seconds of video. Krea has no open model for
+editing or for image to video, so Stage 2 is Qwen-Image-Edit 2509 and Stage 3
+is Wan 2.2, the same stages as in asset_workflow.json.
+
+**Licence first.** The Krea 2 Community License allows commercial use of the
+model and of what it makes only while your company, affiliates included, earns
+under $1,000,000 a year. Past that you must stop commercial use, of its outputs
+too, until Krea grants an enterprise licence; it makes no exception for images
+made earlier. Krea may end the licence for any reason on 30 days' notice, and it
+requires content filtering: look at every image before it ships. The style
+reference LoRA is under the same licence. Qwen-Image-Edit 2509 and Wan 2.2 are
+Apache-2.0. See docs/guide/licensing.
+
+Write the subject in **Prompt**, switch stages on in the **Stage** panels, and
+queue. Only Stage 1, Concept, is on when the graph opens. The two Stage 1 rows
+are alternatives, and their panel lets one at a time be on. **Concept, styled**
+paints the prompt in the style of the image in its **Style Reference** node: it
+takes the look, not the content.
+
+**Handing over.** Each stage takes its input from the nearest stage above it
+that is on. With Concept, Edit and Animate all on, one queue goes from the
+prompt to a video. To start from your own art, switch on **0. Your image** and
+leave the Concept stages off.
+
+**Takes and picks.** Stages 1 and 2 make **Takes** images per queue and save
+them all. When a stage below is on, the queue pauses after the stage, shows the
+takes, and carries on with the one you click and Send. Escape cancels the
+queue; left alone for an hour it carries on with the first take. A stage with
+nothing below it on never pauses.
+
+**Picking up at any stage.** The **Stage inputs** row holds one picker per
+stage that reads an image. A picker is read only when its stage is on and no
+stage above it is on, and is muted otherwise. Its refresh arrow selects the
+newest file in `output/`, where the stages save as `krea_<stage>_NNNNN_.png`;
+the video goes to `output/video/`.
+
+**Seeds** are set to randomise, so each queue of a stage is a new take. Krea
+runs at cfg 1, so it has no negative prompt: put everything in **Prompt**.
+
+**Memory, on a 16 GB card and a 31 GB host.** The Krea 2 Turbo weights are
+12.6 GiB with a 4.9 GiB encoder, the edit model 19.0 GiB with an 8.7 GiB
+encoder, and Wan's two experts 13.3 GiB each (file sizes). A queue that runs
+every stage loads them in turn: not yet run on the reference machine.
+
+**3. Animate** keeps the settings that ran on the 16 GB reference card: 480x640
+and 20 steps, with the 4-step LoRAs in the graph at strength 0.
+
+Built by scripts/build_asset_workflow.py from the graphs in workflows/api/.
+Change those, not this."""
+
+# The graphs this script builds.  Node and link ids start where no other graph
+# here numbers, and where the two graphs' ranges do not meet, so a relay left
+# running from one graph finds nothing in another opened after it (see the
+# note above stage_rows below).
+GRAPHS = {
+    "asset_workflow": {
+        "stages": STAGES, "own_image": OWN_IMAGE_GRAPH, "texts": TEXTS,
+        "switches": SWITCHES, "readme": README,
+        "takes_title": "Takes per image stage (each queue of Stages 1 to 3)",
+        "models_title": "Models (shared by the Qwen stages; a loader only "
+                        "runs for a stage that is on)",
+        "node_base": 10000, "link_base": 100000},
+    "krea_workflow": {
+        "stages": KREA_STAGES, "own_image": KREA_OWN_IMAGE_GRAPH,
+        "texts": KREA_TEXTS, "switches": KREA_SWITCHES, "readme": KREA_README,
+        "takes_title": "Takes per image stage (each queue of Stages 1 and 2)",
+        "models_title": "Models (shared by the Krea and Qwen stages; a loader "
+                        "only runs for a stage that is on)",
+        "node_base": 20000, "link_base": 200000},
+}
+
 # ------------------------------------------------------------------ layout
 COL_W = 460
 GAP = 40                # between rows, and between a group and its contents
@@ -316,32 +453,31 @@ def note_node(nid, text, pos, size, markdown=False):
 
 
 # ------------------------------------------------------------------- build
-# Node ids from 10000 and link ids from 100000.  rgthree's Mute / Bypass
-# Relays keep polling after the editor loads another graph, and find their
-# targets by link id in whatever graph is now open; with ids from 1, the
-# relays of this graph muted and bypassed nodes of complete_workflow.json
-# opened in the same tab (its CLIP switch and its LoRA loader, 2026-10-04).
-# No hand-built or converted graph here numbers that high, so a leftover
-# relay finds nothing.
-NODE_ID_BASE = 10000
-LINK_ID_BASE = 100000
+# Node ids from 10000 and link ids from 100000 in asset_workflow.json, and
+# from 20000 and 200000 in krea_workflow.json (GRAPHS).  rgthree's Mute /
+# Bypass Relays keep polling after the editor loads another graph, and find
+# their targets by link id in whatever graph is now open; with ids from 1, the
+# relays of asset_workflow.json muted and bypassed nodes of
+# complete_workflow.json opened in the same tab (its CLIP switch and its LoRA
+# loader, 2026-10-04).  No hand-built or converted graph here numbers that
+# high, so a leftover relay finds nothing.
 
 
-def stage_rows(numbers):
+def stage_rows(spec, numbers):
     """The stages whose titles start with one of these numbers."""
-    return [s for s in STAGES if s["title"].split(".")[0] in numbers]
+    return [s for s in spec["stages"] if s["title"].split(".")[0] in numbers]
 
 
-def stage_panels():
+def stage_panels(spec):
     """(title, stage numbers, at most one on) for each stage panel, in order."""
     order = []
-    for s in STAGES:
+    for s in spec["stages"]:
         n = s["title"].split(".")[0]
         if n not in order:
             order.append(n)
     panels = []
     for n in order:
-        rows = stage_rows([n])
+        rows = stage_rows(spec, [n])
         if len(rows) > 1:
             name = rows[0]["title"].split(". ", 1)[1].split(",")[0].split(":")[0]
             panels.append((f"Stage {n}, {name}: one at a time", [n], True))
@@ -359,11 +495,11 @@ def stage_panels():
     return out
 
 
-def build(info):
+def build(info, spec):
     api = {}                       # every backend node, as the server sees it
     group_of = {}                  # node id -> group key
     title = {}                     # node id -> title shown in the editor
-    next_id = [NODE_ID_BASE]
+    next_id = [spec["node_base"]]
 
     def new(ctype, inputs, group, name=None):
         nid = str(next_id[0])
@@ -375,17 +511,17 @@ def build(info):
         return nid
 
     base = {s["key"]: (json.loads((API_DIR / f"{s['src']}.json").read_text())
-                       if "src" in s else OWN_IMAGE_GRAPH)
-            for s in STAGES}
+                       if "src" in s else spec["own_image"])
+            for s in spec["stages"]}
 
     # The texts typed at the top.  Their defaults are the base graphs' own.
     text_id = {}
-    for key, (stage, lid, iname, name) in TEXTS.items():
+    for key, (stage, lid, iname, name) in spec["texts"].items():
         text_id[key] = new("PrimitiveStringMultiline",
                            {"value": base[stage][lid]["inputs"][iname]},
                            "inputs", name)
     takes = new("PrimitiveInt", {"value": TAKES}, "inputs",
-                "Takes per image stage (each queue of Stages 1 to 3)")
+                spec["takes_title"])
 
     # Shared loaders first, so a stage can point at them.
     shared = {}                    # canonical key -> node id
@@ -408,7 +544,7 @@ def build(info):
         return all(is_shared(stage, str(v[0])) for v in node["inputs"].values()
                    if isinstance(v, list) and len(v) == 2)
 
-    for s in STAGES:
+    for s in spec["stages"]:
         g = base[s["key"]]
         order = sorted((k for k in g if not k.startswith("_")), key=int)
         # Upstream before downstream, so a model chain's links resolve.
@@ -426,7 +562,7 @@ def build(info):
 
     # Stage nodes, with fresh ids.  Links are resolved in a second pass, once
     # every node in every stage has its new id.
-    for s in STAGES:
+    for s in spec["stages"]:
         g = base[s["key"]]
         for lid in sorted((k for k in g if not k.startswith("_")), key=int):
             if (s["key"], lid) in local or lid in s.get("drop", []):
@@ -440,7 +576,7 @@ def build(info):
     # watches beside the sources.  It is a string nobody reads, so the server
     # never runs it; a picker needs a node with an output to be muted through.
     switch_id, picker_id, flag_id = {}, {}, {}
-    for key, sw in SWITCHES.items():
+    for key, sw in spec["switches"].items():
         if sw["type"] == "IMAGE":
             picker_id[key] = new("LoadImageOutput", {"image": ""},
                                  "inputs", sw["picker"])
@@ -456,7 +592,7 @@ def build(info):
     # becomes what the stages below and the relays read.  It is an ordinary
     # node, so the server runs it only when something below it is on.
     result = {}
-    for s in STAGES:
+    for s in spec["stages"]:
         if "result" in s:
             lid, slot = s["result"]
             result[s["key"]] = [local[(s["key"], lid)], slot]
@@ -471,22 +607,22 @@ def build(info):
 
     # The stages that read each switch, by the node that reads it: what the
     # inverter watches.
-    owners = {key: [] for key in SWITCHES}
-    for s in STAGES:
+    owners = {key: [] for key in spec["switches"]}
+    for s in spec["stages"]:
         for target, what in s.get("feed", {}).items():
-            if what in SWITCHES:
+            if what in spec["switches"]:
                 lid = target.split(".")[0]
                 node = local[(s["key"], lid)]
                 if (s["key"], node) not in owners[what]:
                     owners[what].append((s["key"], node))
 
-    for key, sw in SWITCHES.items():
+    for key, sw in spec["switches"].items():
         wires = [result[k] for k in sw["sources"]] + [[picker_id[key], 0]]
         api[switch_id[key]]["inputs"] = {
             f"any_{i:02d}": w for i, w in enumerate(wires, 1)}
 
     # Rewire each stage: its links, what it is fed, where it saves.
-    for s in STAGES:
+    for s in spec["stages"]:
         g = base[s["key"]]
         for lid in g:
             if lid.startswith("_") or lid in s.get("drop", []):
@@ -565,14 +701,14 @@ def depth_in(graph, lid, seen=()):
     return d
 
 
-def to_ui(api, group_of, title, wiring, info):
+def to_ui(api, group_of, title, wiring, info, spec):
     """The joined graph as the editor's file: nodes placed in groups, links,
     the stage panel and the relays."""
     switch_id, picker_id, flag_id = wiring["switch"], wiring["picker"], wiring["flag"]
     owners, result = wiring["owners"], wiring["result"]
     nodes, links = [], []
     by_id = {}
-    next_link = [LINK_ID_BASE]
+    next_link = [spec["link_base"]]
     last_id = max(int(k) for k in api)
 
     def fresh_id():
@@ -594,7 +730,7 @@ def to_ui(api, group_of, title, wiring, info):
     for nid, node in api.items():
         if node["class_type"] == SWITCH:
             n = len(node["inputs"])
-            typ = SWITCHES[next(k for k, v in switch_id.items() if v == nid)]["type"]
+            typ = spec["switches"][next(k for k, v in switch_id.items() if v == nid)]["type"]
             built = {"id": int(nid), "type": SWITCH, "pos": [0, 0],
                      "size": [260, 60 + 22 * (n + 1)], "flags": {}, "order": 0,
                      "mode": 0,
@@ -699,7 +835,7 @@ def to_ui(api, group_of, title, wiring, info):
         return relay, repeater
 
     handoff = {}                   # switch key -> its column, top to bottom
-    for key, sw in SWITCHES.items():
+    for key, sw in spec["switches"].items():
         stage_relay, stage_repeater = relay_pair(
             [stage for stage, _ in owners[key]], "flag",
             sw["title"] + ": flag on while every stage reading it is off",
@@ -731,12 +867,12 @@ def to_ui(api, group_of, title, wiring, info):
     # order, so the stack reads top to bottom like the stages: a number two
     # stages share gets a panel of its own set to "max one", where switching
     # one on switches the other off; the numbers between share plain panels.
-    readme = note_node(fresh_id(), README, [0, 0], [480, 820], markdown=True)
+    readme = note_node(fresh_id(), spec["readme"], [0, 0], [480, 820], markdown=True)
     nodes.append(readme)
     group_of[str(readme["id"])] = "inputs"
-    for title, numbers, only_one in stage_panels():
+    for title, numbers, only_one in stage_panels(spec):
         muter = {"id": fresh_id(), "type": "Fast Groups Muter (rgthree)",
-                 "pos": [0, 0], "size": [440, 40 + 30 * len(stage_rows(numbers))],
+                 "pos": [0, 0], "size": [440, 40 + 30 * len(stage_rows(spec, numbers))],
                  "flags": {}, "order": 0, "mode": 0, "title": title,
                  "inputs": [], "outputs": [{"name": "OPT_CONNECTION", "type": "*",
                                             "links": None}],
@@ -748,9 +884,9 @@ def to_ui(api, group_of, title, wiring, info):
         nodes.append(muter)
         group_of[str(muter["id"])] = "inputs"
 
-    for s in STAGES:
+    for s in spec["stages"]:
         src = (json.loads((API_DIR / f"{s['src']}.json").read_text())
-               if "src" in s else OWN_IMAGE_GRAPH)
+               if "src" in s else spec["own_image"])
         text = api_to_ui.NOTES.get(s.get("src"))
         comment = src.get("_comment", "")
         if isinstance(comment, list):
@@ -764,17 +900,17 @@ def to_ui(api, group_of, title, wiring, info):
         group_of[str(note["id"])] = s["key"]
 
     groups = layout(nodes, group_of, handoff,
-                    [by_id[picker_id[key]] for key in SWITCHES])
+                    [by_id[picker_id[key]] for key in spec["switches"]], spec)
 
     # Starting modes: only the stages marked "on".  A flag and a picker start
     # in the mode their relays would give them, so the file is consistent
     # before the relays first run.
-    on = {s["key"] for s in STAGES if s.get("on")}
+    on = {s["key"] for s in spec["stages"] if s.get("on")}
     for n in nodes:
         g = group_of.get(str(n["id"]), "")
-        if g in {s["key"] for s in STAGES}:
+        if g in {s["key"] for s in spec["stages"]}:
             n["mode"] = ACTIVE if g in on else MUTE
-    for key, sw in SWITCHES.items():
+    for key, sw in spec["switches"].items():
         live = any(k in on for k in sw["sources"])
         owned = any(stage in on for stage, _ in owners[key])
         by_id[flag_id[key]]["mode"] = MUTE if owned else ACTIVE
@@ -784,7 +920,7 @@ def to_ui(api, group_of, title, wiring, info):
         n["order"] = i
 
     return {
-        "id": "asset_workflow",
+        "id": spec["name"],
         "revision": 0,
         "last_node_id": last_id,
         "last_link_id": next_link[0] - 1,
@@ -797,7 +933,7 @@ def to_ui(api, group_of, title, wiring, info):
     }
 
 
-def layout(nodes, group_of, handoff, pickers):
+def layout(nodes, group_of, handoff, pickers, spec):
     """Inputs and Models across the top, the Stage inputs row under them, then
     one row per stage: the hand-off column on the left, the stage group to its
     right, laid out by depth."""
@@ -893,7 +1029,7 @@ def layout(nodes, group_of, handoff, pickers):
                    "bounding": [x, y, inputs_right - x, inputs_bottom - y + GAP],
                    "font_size": 24, "flags": {}})
     _, models_bottom = group(
-        "Models (shared by the Qwen stages; a loader only runs for a stage that is on)",
+        spec["models_title"],
         by_group["models"], "#444", inputs_right + GAP, y)
 
     # Second row: the pickers, one per switch, in stage order.  An image
@@ -916,11 +1052,11 @@ def layout(nodes, group_of, handoff, pickers):
     # of every switch this stage is the first to read.
     y += 2 * GAP
     placed = set()
-    for s in STAGES:
+    for s in spec["stages"]:
         row_top = y
         handoff_bottom = row_top
-        for key, sw in SWITCHES.items():
-            owner = next(st["key"] for st in STAGES
+        for key, sw in spec["switches"].items():
+            owner = next(st["key"] for st in spec["stages"]
                          if key in st.get("feed", {}).values())
             if owner != s["key"] or key in placed:
                 continue
@@ -986,34 +1122,41 @@ def check(text, api, info, broadcast):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--check", action="store_true",
-                    help="write the graph, then compare it value by value with "
-                         "the base graphs it was built from")
+                    help="write the graphs, then compare each value by value "
+                         "with the base graphs it was built from")
     ap.add_argument("--dry-run", action="store_true",
                     help="build and compare in memory, and write nothing")
-    ap.add_argument("--out", default=str(OUT))
+    ap.add_argument("--graph", choices=list(GRAPHS), action="append",
+                    help="build only this graph; repeatable (default: all)")
     args = ap.parse_args()
 
     info = api_to_ui.object_info()
-    api, group_of, title, wiring = build(info)
-    ui = to_ui(api, group_of, title, wiring, info)
-    text = json.dumps(ui, indent=1)
+    bad = []
+    for name in args.graph or GRAPHS:
+        spec = {**GRAPHS[name], "name": name}
+        api, group_of, title, wiring = build(info, spec)
+        ui = to_ui(api, group_of, title, wiring, info, spec)
+        text = json.dumps(ui, indent=1)
 
-    out = pathlib.Path(args.out)
-    if not args.dry_run:
-        if out.is_file() and out.read_text() == text:
-            print(f"{out}: already up to date")
-        else:
-            out.write_text(text)
-            print(f"{out}: written")
-    print(f"{len(ui['nodes'])} nodes, {len(ui['links'])} links, "
-          f"{len(ui['groups'])} groups, {len(STAGES)} stages")
-    if args.check or args.dry_run:
-        broadcast = {nid for nid in api if group_of[nid] == "models"
-                     and api[nid]["class_type"] in BROADCAST}
-        bad = check(text, api, info, broadcast)
-        if bad:
-            sys.exit("MISMATCH\n  " + "\n  ".join(bad))
-        print("round trip OK: every value is back on its name")
+        out = api_to_ui.UI_DIR / f"{name}.json"
+        if not args.dry_run:
+            if out.is_file() and out.read_text() == text:
+                print(f"{out}: already up to date")
+            else:
+                out.write_text(text)
+                print(f"{out}: written")
+        print(f"{name}: {len(ui['nodes'])} nodes, {len(ui['links'])} links, "
+              f"{len(ui['groups'])} groups, {len(spec['stages'])} stages")
+        if args.check or args.dry_run:
+            broadcast = {nid for nid in api if group_of[nid] == "models"
+                         and api[nid]["class_type"] in BROADCAST}
+            mine = check(text, api, info, broadcast)
+            if mine:
+                bad += [f"{name}: {b}" for b in mine]
+            else:
+                print(f"{name}: round trip OK: every value is back on its name")
+    if bad:
+        sys.exit("MISMATCH\n  " + "\n  ".join(bad))
 
 
 if __name__ == "__main__":

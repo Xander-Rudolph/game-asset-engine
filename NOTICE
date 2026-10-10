@@ -108,6 +108,16 @@ UNSETTLED WEIGHTS. The Qwen-Image-Edit Rapid AIO merge and its GGUF quant, and
 the Anything2Real LoRA, all used by complete_workflow.json, have no settled
 licence. scripts/fetch_models.py treats Anything2Real as non-commercial.
 
+REVENUE-CAPPED AND REVOCABLE WEIGHTS. Krea 2 Turbo, its text encoder and
+ostris's style reference LoRA, which txt2img_krea2.json, txt2img_krea2_style.json
+and krea_workflow.json load, are under the Krea 2 Community License Agreement
+v.1. It permits commercial use of the model or its Outputs "only if you
+(including all affiliated entities under common ownership or control) have total
+company-wide annual revenue of less than one million United States dollars", and
+Krea "may terminate this Agreement or any rights granted to you under this
+Agreement for any reason upon thirty (30) days' prior written or electronic
+notice". The weights are not in the image.
+
 UNRESOLVED PROVENANCE. The LICENSE file in the pack's TripoSG module is the
 Tencent Hunyuan FlashVDM Community License, not a TripoSG licence, and the module
 contains FlashVDM code paths. Upstream TripoSG is MIT. Which terms govern the

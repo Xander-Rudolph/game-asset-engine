@@ -37,6 +37,7 @@ node an hour later.
 | `qwen_edit` | Qwen-Image-Edit, for changing one part of an image | ~19GB |
 | `qwen_rapid` | For `complete_workflow.json`: Phr00t's Qwen-Image-Edit Rapid AIO merge and a GGUF quant of it, the Anything2Real LoRA and the DWPose weights. Licences unsettled, and Anything2Real needs `--accept-noncommercial` | ~40GB |
 | `wan_i2v` | Wan 2.2 image to video 14B, both experts in fp8, with its text encoder, VAE and 4 step LoRAs. Apache 2.0 | ~35GB |
+| `krea2` | Krea 2 Turbo, text to image, for `txt2img_krea2.json`, `txt2img_krea2_style.json` and `krea_workflow.json`: the int8 weights, the Qwen3-VL 4B encoder, a style reference LoRA and the Qwen VAE. Free for commercial use only under 1 million dollars of company revenue a year, outputs included | ~18GB |
 | `hunyuan` | Hunyuan3D 2.1 shape generation and texturing. Best meshes. Territory limited licence | ~24GB |
 | `instantmesh` | Zero123++ multiview into InstantMesh | ~10GB |
 | `trellis` | TRELLIS image to 3D, both branches | ~9GB |
@@ -69,12 +70,16 @@ at all.
 ## Licences in one line each
 
 Run `scripts/fetch_models.py --licenses` for the authoritative list. Every model
-not listed below is MIT, Apache 2.0 or BSD. The six that are not, or are not
+not listed below is MIT, Apache 2.0 or BSD. The seven that are not, or are not
 settled:
 
 - **Hunyuan3D 2 and 2.1**: royalty free but territorially limited. Does not apply
   in the EU, UK or South Korea.
 - **StableFast3D**: free under 1 million dollars annual revenue.
+- **Krea 2 Turbo, its text encoder and the style reference LoRA**: the Krea 2
+  Community License. Commercial use of the model and of what it makes only while
+  your company, affiliates included, earns under 1 million dollars a year. Krea
+  may end it on 30 days' notice, and it requires content filtering.
 - **RMBG-1.4**: non commercial without a paid agreement. Not needed. Hunyuan3D
   and TRELLIS remove backgrounds internally with rembg (MIT) and its u2net model
   (Apache 2.0).
