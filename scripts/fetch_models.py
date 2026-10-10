@@ -309,6 +309,13 @@ def main() -> int:
             groups.discard("gated")
     if args.gated:
         groups.add("gated")
+    # A misspelt group would otherwise check nothing and report 0/0 complete,
+    # which reads as success; the container's ASSET_ENGINE_FETCH_GROUPS is
+    # typed by hand.
+    unknown = groups - set(man["groups"])
+    if unknown:
+        sys.exit(f"unknown group(s): {', '.join(sorted(unknown))}. "
+                 f"Groups: {', '.join(man['groups'])}")
     print(f"groups     = {', '.join(sorted(groups))}\n")
 
     entries = [e for e in man["models"] if e["group"] in groups]
@@ -360,6 +367,10 @@ def main() -> int:
     for e, missing in todo:
         print(f"\n==> {e['name']}  ({len(missing)} file(s))")
         for url, dest, size in missing:
+            # Two groups can list the same file, as qwen and krea2 both list
+            # the Qwen VAE; the first entry this run fetched it.
+            if dest.exists() and (size is None or dest.stat().st_size == size):
+                continue
             print(f"  {dest.relative_to(mdir)}  {human(size)}")
             try:
                 download(url, dest, size)

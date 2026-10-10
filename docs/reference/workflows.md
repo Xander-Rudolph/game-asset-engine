@@ -47,6 +47,8 @@ means it is silently reverted next time anyone runs the builder.
 | `txt2img_qwen_fast.json` | Prompt to concept image, 4 steps, about 30s. Guidance 1.0, so no negative prompt |
 | `txt2img_qwen.json` | Same at 20 steps, about 130s. Negative prompt honoured |
 | `txt2img_sdxl.json` | The older SDXL path. Weaker prompt adherence, photographic look |
+| `txt2img_krea2.json` | Prompt to concept image with Krea 2 Turbo, 8 steps, guidance 1.0, so no negative prompt. 864x1152 in 22.3 s on the 16 GB card, one image at a time: 1104x1472, or two at once, ran out of memory. Free for commercial use only under 1 million dollars of company revenue a year, outputs included: see [licensing](/guide/licensing#krea-2). Needs the `krea2` weight group |
+| `txt2img_krea2_style.json` | The same, painted in the style of a reference image through ostris's style reference LoRA. A style match, not an edit. Ran out of memory on the 16 GB card at 864x1152 and 672x896. Same licence. Needs the `krea2` weight group |
 | `img_edit_qwen.json` | Change part of an existing image |
 | `img_refine_sdxl.json` | Refine pass over an image |
 | `img2mesh_hunyuan3d21.json` | Image to mesh, shape only. Best geometry. Removes the background itself. Territory limited licence |
@@ -164,9 +166,9 @@ Converted graphs are generated. Edit the API JSON and re-run the converter,
 unless you are crafting in the editor, in which case save from ComfyUI and it
 lands in the same folder.
 
-## Two graphs made for the editor
+## Three graphs made for the editor
 
-Two graphs in `workflows/default/workflows/` have no API version, because they
+Three graphs in `workflows/default/workflows/` have no API version, because they
 are built for the editor and lean on node packs that do their work in the
 browser: rgthree's stage panels, relays and switches, and Use Everywhere.
 
@@ -177,12 +179,18 @@ browser: rgthree's stage panels, relays and switches, and Use Everywhere.
   which of its takes carries on.
   `scripts/build_asset_workflow.py` builds it from the base graphs, so edit
   those, not it.
+- `krea_workflow.json` is the image and video half of that pipeline, as
+  `complete_workflow.json` is, with Krea 2 Turbo painting the concept, plain or
+  from a style reference, then Qwen-Image-Edit 2509 and Wan 2.2: Krea has no
+  open edit or image-to-video model. The same builder makes it, with the same
+  panels, pickers and pauses. Krea 2's licence is free for commercial use only
+  under 1 million dollars of company revenue a year.
 - `complete_workflow.json` is the owner's image and video graph on the Rapid AIO
   merge and Wan 2.2, and the one editor graph that is built by hand. Its weights
   are the `qwen_rapid` and `wan_i2v` groups. Some of those weights, and its Pose
   Transfer flow, are not cleared for commercial use.
 
-[The whole pipeline in one graph](/guide/asset-workflow) covers both.
+[The whole pipeline in one graph](/guide/asset-workflow) covers all three.
 
 ## Export format
 

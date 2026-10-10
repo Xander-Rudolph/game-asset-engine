@@ -94,6 +94,47 @@ THE NEGATIVE BOX DOES NOTHING HERE.  The distilled 4-step model runs at
 cfg 1.0, where there is no classifier-free guidance to steer with --
 so the second CLIPTextEncode is inert whatever you type in it.  Put
 everything in the positive, or switch to txt2img_qwen for a real one.""",
+    "txt2img_krea2": """CONCEPT -- Krea 2 Turbo, 8 steps (22.3s measured)
+
+LICENCE FIRST.  The Krea 2 Community License allows commercial use of
+what this makes only while your company, affiliates included, earns
+under $1,000,000 a year.  Past that you must stop commercial use of
+the model AND its outputs until Krea grants an enterprise licence; it
+makes no exception for images made earlier.  Krea can
+also end the licence on 30 days' notice, and it requires content
+filtering: review every image before it ships.  docs/guide/licensing.
+
+Write sentences, not tags.  cfg is 1, so there is no negative: the
+empty negative is a ConditioningZeroOut, and everything goes in the
+prompt.  Change the seed in KSampler to reroll.
+
+ONE TAKE AT A TIME on a 16 GB card.  The int8 weights load whole
+and leave little room: 864x1152 peaked at 15,786 MiB of 16,066, and
+1104x1472, or a batch of two, ran out of memory (2026-10-10).  Keep
+to about a megapixel: 864x1152 for a figure, 1024x1024 for a prop.
+
+Needs:  scripts/fetch_models.py --download --group krea2""",
+    "txt2img_krea2_style": """CONCEPT IN A GIVEN STYLE -- Krea 2 Turbo + style reference
+
+DOES NOT FIT A 16 GB CARD AS WIRED.  On 2026-10-10 it ran out of
+GPU memory in the sampler at 864x1152 and at 672x896: the reference
+adds about a megapixel of latent to every step.  --reserve-vram 2
+and 4 did not help: the model then loads in part, and merging the
+LoRA into its int8 weights runs out of memory instead.  The fp8
+weights fail in the same merge.
+
+Put an image whose LOOK you want in Style Reference.  The prompt says
+what to draw; the reference says how it is painted.  It is not an
+edit: nothing of the reference's content is kept on purpose.
+
+Same licence as txt2img_krea2: commercial use only under $1,000,000
+company revenue a year, revocable on 30 days' notice, content
+filtering required.  The LoRA is ostris's, under the same licence.
+
+ModelSamplingFlux's width and height should match the latent's.
+More references go in image2 and image3 on the Prompt node.
+
+Needs:  scripts/fetch_models.py --download --group krea2""",
     "img_edit_qwen": """CHARACTER EDIT -- Qwen-Image-Edit 2509
 
 Load the image to change in LoadImage, then say what to change in the

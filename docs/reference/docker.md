@@ -120,6 +120,7 @@ because only the empty host folder case runs the seeding.
 | `COMFY_URL` | Where the server answers. Defaults to `http://127.0.0.1:8188`. |
 | `HF_TOKEN` | For the gated weight group. |
 | `ASSET_ENGINE_FETCH_MODELS` | Set to 1 to have the container fetch missing weights on boot. |
+| `ASSET_ENGINE_FETCH_GROUPS` | The `models.json` groups the boot check covers, and fetches when `ASSET_ENGINE_FETCH_MODELS` is 1, separated by spaces or commas. `core` when unset. Name a group only if you accept its models' licences, which bind you from download: `core krea2` takes Krea 2 on its revenue-capped terms. A name `fetch_models.py` does not know is refused. Image 0.1.11 and later. |
 | `ASSET_ENGINE_CONTROLNET_AUX` | 1 by default: fetch comfyui_controlnet_aux from GitHub on boot, since the image may not carry it. 0 skips it, and Pose Transfer with it. |
 | `ASSET_ENGINE_UNIRIG_ENV` | 1 by default: build UniRig's own environment on boot if it is missing or fails its check, about 10GB into the `unirig-home` volume. 0 skips it, and every UniRig node with it. |
 

@@ -27,7 +27,7 @@ CC0 is the cleanest source in the stack, because it has no conditions at all.
 
 ## Models are where the constraints are
 
-Most of the stack uses MIT or Apache 2.0 licences. The six below don't, or
+Most of the stack uses MIT or Apache 2.0 licences. The seven below don't, or
 aren't settled.
 
 ### Hunyuan3D 2 and 2.1
@@ -57,6 +57,73 @@ using the weights. It applies regardless of who owns the output.
 
 Free under 1 million dollars annual revenue, enterprise licence above it. It is
 gated on the model hub, so using it is opt in already.
+
+### Krea 2
+
+`txt2img_krea2.json`, `txt2img_krea2_style.json` and the concept stages of
+`krea_workflow.json` run Krea 2 Turbo, from the `krea2` weight group. It is
+under the Krea 2 Community License Agreement v.1, dated 22 June 2026, read on
+2026-10-10 in the `LICENSE.pdf` that Comfy-Org's repack ships (commit
+`eb1eddd`). Free to use, with three conditions that matter for a game you sell.
+
+**A revenue cap that reaches the outputs.** Section 2.3: "Commercial Use under
+this Agreement of the Krea Model, Derivatives, or Outputs is permitted only if
+you (including all affiliated entities under common ownership or control) have
+total company-wide annual revenue of less than one million United States
+dollars ($1,000,000 USD), calculated on a trailing twelve-month basis and
+including all revenue from all sources." And: "If your revenue meets or exceeds
+this threshold at any time during your use of the Krea Model under this
+Agreement, you must immediately cease Commercial Use and contact Krea." Commercial
+Use is "any use of the Krea Model, Derivatives, or Outputs in connection with any
+business, trade, or commercial activity". The licence makes no exception for
+images made before the threshold was crossed, so a game that sells well enough
+to cross it, with Krea-made art in it, needs Krea's enterprise licence. That is
+the difference from StableFast3D's cap: the duty to stop names the outputs.
+
+**Krea can end it at will.** Section 9.2: "Krea may terminate this Agreement or
+any rights granted to you under this Agreement for any reason upon thirty (30)
+days' prior written or electronic notice to you." On termination you must stop
+using the model and destroy your copies (9.4). Section 5, under which "You own
+all Outputs you generate, subject to your compliance with this Agreement",
+survives termination (9.5).
+
+**Content filtering is required.** Section 4.2: "You must implement reasonable
+and appropriate Content Filter measures to detect, prevent, and mitigate the
+generation or distribution of prohibited, harmful, or unlawful content through
+your deployment of the Krea Model". Its examples include "manual human review
+processes". Nothing in this pipeline filters automatically, so the measure here
+is you looking at every image before it goes anywhere. Section 4.4 also binds
+you to Krea's [Acceptable Use Policy](https://www.krea.ai/krea-2-use-policy),
+dated 22 June 2026 and read on 2026-10-10. Of its ten prohibited uses, the ones
+nearest a game are "Violation of any third-party rights, including intellectual
+property rights", which covers an image made to look like someone else's
+character, and content that "incites violence". It does not mention fictional
+violence, weapons outside "Military applications", or games.
+
+Downloading binds you: the licence opens with "BY DOWNLOADING, ACCESSING,
+COPYING, USING, OR DISTRIBUTING KREA 2 RAW MODEL, KREA 2 TURBO MODEL, OR ANY
+DERIVATIVE THEREOF, YOU ACKNOWLEDGE THAT YOU HAVE READ, UNDERSTOOD, AND AGREE TO
+BE BOUND". Krea's own `krea/Krea-2-Turbo` asks you to agree before it lets you
+download; Comfy-Org's repack, which `fetch_models.py` fetches from, does not ask,
+and the terms apply all the same. The image does not carry the weights, so the
+distribution terms of section 3 do not reach the image.
+
+The rest of the group:
+
+- **The Qwen3-VL 4B text encoder** comes from the same repack, whose card
+  declares the Krea licence for the whole repository. Whether it is an
+  unmodified Qwen3-VL 4B under Qwen's own licence was not checked, so it is
+  treated as under Krea's.
+- **The style reference LoRA** is ostris's. Its card declares the Krea licence in
+  metadata, with no licence file, and the licence's definition of a Derivative
+  includes any "work based on the Krea Model".
+- **The VAE** is the Qwen-Image VAE, Apache-2.0: the same file as the `qwen`
+  group's, by SHA-256.
+
+`krea_workflow.json`'s Edit and Animate stages are Qwen-Image-Edit 2509 and Wan
+2.2, both Apache-2.0, so an image you take from Your image through Edit to a
+video never touches Krea. Not to be confused with FLUX.1 Krea [dev], which is
+[kept out](#kept-out-on-purpose) as non-commercial.
 
 ### RMBG-1.4
 
@@ -608,8 +675,8 @@ under the licences above.
 
 ## Kept out on purpose
 
-Image models that are easy to plug in here, and that this repository does not
-use. Checked on 2026-09-16.
+Models that are easy to plug in here, and that this repository does not use.
+The image models were checked on 2026-09-16, and MiniMax H3 on 2026-10-10.
 
 **FLUX.1 [dev] and FLUX.1 Krea [dev].** The
 [FLUX.1 [dev] Non-Commercial License v1.1.1](https://raw.githubusercontent.com/black-forest-labs/flux/main/model_licenses/LICENSE-FLUX1-dev)
@@ -624,7 +691,25 @@ prohibited herein", and 4(a) names data produced by the model. The
 [Krea [dev] model card](https://huggingface.co/black-forest-labs/FLUX.1-Krea-dev)
 names the licence `flux-1-dev-non-commercial-license`, and its download gate
 asks you to agree to the "FluxDev Non-Commercial License Agreement". Neither
-belongs in a pipeline for a game you sell.
+belongs in a pipeline for a game you sell. Krea's own later model, Krea 2, is a
+different model under a different licence, and is [here](#krea-2) with its
+conditions.
+
+**MiniMax H3.** Video with its own soundtrack, from text, from a first or last
+frame, or from reference images, and native in ComfyUI 0.30.2. The MiniMax H3
+Community License Agreement, dated 2 August 2026 and read on 2026-10-10 at commit
+`42ed227` of `MiniMaxAI/MiniMax-H3`, "is expressly limited to the 'Applicable
+Territory'", which "means worldwide, excluding the Excluded Territories", and
+"'Excluded Territories' means the European Union, the United Kingdom, the
+Republic of Korea and the United States of America." Section V.4: "You may not
+use, reproduce, modify, distribute, or display the MiniMax H3 Works or any of
+their Outputs or results outside the Applicable Territory." That is Hunyuan3D's
+exclusion with the United States added: it cannot be run in the United States at
+all, and a game sold on a storefront that reaches any of those four displays its
+output where it is not licensed. It also suits the reference card poorly:
+Comfy-Org's repack (commit `e5eb578`) has a 20,958,205,608-byte fp8 model and a
+15,687,142,551-byte text encoder, beside 16 GB of VRAM and 31 GB of RAM. Kept
+out on the owner's decision, 2026-10-10.
 
 **Community checkpoints from CivitAI.** There is no one licence to quote. The
 realism checkpoints that were on the development machine are not used, and

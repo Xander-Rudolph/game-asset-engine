@@ -23,7 +23,7 @@ Everything in `scripts/`. Each takes `--help`.
 | `validate_workflows.py` | Check every graph against a live server's node definitions. |
 | `api_to_ui.py` | Convert graphs into the editor's format. `--check` verifies every value survived. |
 | `build_presets.py` | Generate the drop in presets from base graphs plus the prompt library. |
-| `build_asset_workflow.py` | Join the base graphs into one editor graph, `asset_workflow.json`: the prompts at the top, panels that switch stages on and off, one at a time for alternatives, a row of pickers under them, one per stage, for picking a run up at any stage, and a pause after each image stage to choose the take that carries on. Eight stages, from concept to a rig and a video. Run it after `build_presets.py`. `--check` verifies every value survived. See [the guide](/guide/asset-workflow). |
+| `build_asset_workflow.py` | Join the base graphs into one editor graph, `asset_workflow.json`: the prompts at the top, panels that switch stages on and off, one at a time for alternatives, a row of pickers under them, one per stage, for picking a run up at any stage, and a pause after each image stage to choose the take that carries on. Eight stages, from concept to a rig and a video. It builds `krea_workflow.json` too, the same machinery on Krea 2 Turbo, Qwen-Image-Edit and Wan 2.2; `--graph NAME` builds one of the two. Run it after `build_presets.py`. `--check` verifies every value survived. See [the guide](/guide/asset-workflow). |
 | `generate_concepts.sh` | Generate a whole prompt folder in the house style. |
 | `simplify_concepts.sh` | Redraw existing art as simpler game ready versions. |
 | `asset_to_mesh.sh` | Concepts to shapes to textures to sheets to curated assets, correctly staged. |

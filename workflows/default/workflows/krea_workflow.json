@@ -1,0 +1,4680 @@
+{
+ "id": "krea_workflow",
+ "revision": 0,
+ "last_node_id": 20085,
+ "last_link_id": 200101,
+ "nodes": [
+  {
+   "id": 20000,
+   "type": "PrimitiveStringMultiline",
+   "pos": [
+    560,
+    60
+   ],
+   "size": [
+    620,
+    300
+   ],
+   "flags": {},
+   "order": 1,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "STRING",
+     "type": "STRING",
+     "links": [
+      200002,
+      200013
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "PrimitiveStringMultiline"
+   },
+   "widgets_values": [
+    "A weathered stone golem overgrown with moss, a single creature standing upright, the whole figure visible from head to feet in a three-quarter view. Even flat studio lighting, a plain neutral grey background and no cast shadow. Painted game asset concept art with a crisp, readable silhouette and sharp detail."
+   ],
+   "title": "Prompt (both Concept stages)"
+  },
+  {
+   "id": 20001,
+   "type": "PrimitiveStringMultiline",
+   "pos": [
+    560,
+    400
+   ],
+   "size": [
+    620,
+    300
+   ],
+   "flags": {},
+   "order": 9,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "STRING",
+     "type": "STRING",
+     "links": [
+      200031
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "PrimitiveStringMultiline"
+   },
+   "widgets_values": [
+    "Replace only the shoulder pauldron on the left of the image with a plain rounded steel pauldron edged in dark leather, keeping the pose, armour, colours and background identical."
+   ],
+   "title": "Edit instruction (Stage 2)"
+  },
+  {
+   "id": 20002,
+   "type": "PrimitiveStringMultiline",
+   "pos": [
+    560,
+    740
+   ],
+   "size": [
+    620,
+    300
+   ],
+   "flags": {},
+   "order": 11,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "STRING",
+     "type": "STRING",
+     "links": [
+      200046
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "PrimitiveStringMultiline"
+   },
+   "widgets_values": [
+    "The weathered stone golem walks slowly on the spot, lifting each foot in turn and swinging its arms, the whole figure staying in frame from head to feet. The camera is fixed and the plain grey background does not change."
+   ],
+   "title": "Motion prompt (Stage 3)"
+  },
+  {
+   "id": 20003,
+   "type": "PrimitiveInt",
+   "pos": [
+    560,
+    1080
+   ],
+   "size": [
+    620,
+    80
+   ],
+   "flags": {},
+   "order": 12,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "INT",
+     "type": "INT",
+     "links": [
+      200004,
+      200021,
+      200080
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "PrimitiveInt"
+   },
+   "widgets_values": [
+    1,
+    "fixed"
+   ],
+   "title": "Takes per image stage (each queue of Stages 1 and 2; Krea runs out of memory at 2 on a 16 GB card)"
+  },
+  {
+   "id": 20004,
+   "type": "UNETLoader",
+   "pos": [
+    1780,
+    60
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 3,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      200005,
+      200011
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "UNETLoader"
+   },
+   "widgets_values": [
+    "krea2_turbo_int8_convrot.safetensors",
+    "default"
+   ]
+  },
+  {
+   "id": 20005,
+   "type": "CLIPLoader",
+   "pos": [
+    1780,
+    238
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 7,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "CLIP",
+     "type": "CLIP",
+     "links": [
+      200081
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPLoader"
+   },
+   "widgets_values": [
+    "qwen3vl_4b_fp8_scaled.safetensors",
+    "krea2",
+    "default"
+   ]
+  },
+  {
+   "id": 20006,
+   "type": "VAELoader",
+   "pos": [
+    1780,
+    444
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 10,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "VAE",
+     "type": "VAE",
+     "links": [
+      200082
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAELoader"
+   },
+   "widgets_values": [
+    "qwen_image_vae.safetensors"
+   ]
+  },
+  {
+   "id": 20007,
+   "type": "UNETLoader",
+   "pos": [
+    1020,
+    4220
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 43,
+   "mode": 2,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      200000
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "UNETLoader"
+   },
+   "widgets_values": [
+    "qwen_image_edit_2509_fp8_e4m3fn.safetensors",
+    "default"
+   ]
+  },
+  {
+   "id": 20008,
+   "type": "CLIPLoader",
+   "pos": [
+    1020,
+    4398
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 51,
+   "mode": 2,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "CLIP",
+     "type": "CLIP",
+     "links": [
+      200030,
+      200033
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPLoader"
+   },
+   "widgets_values": [
+    "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+    "qwen_image",
+    "default"
+   ]
+  },
+  {
+   "id": 20009,
+   "type": "ModelSamplingAuraFlow",
+   "pos": [
+    1480,
+    4220
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 44,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 200000
+    }
+   ],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      200001
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ModelSamplingAuraFlow"
+   },
+   "widgets_values": [
+    3.0
+   ]
+  },
+  {
+   "id": 20010,
+   "type": "CFGNorm",
+   "pos": [
+    1940,
+    4220
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 45,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 200001
+    }
+   ],
+   "outputs": [
+    {
+     "name": "patched_model",
+     "type": "MODEL",
+     "links": [
+      200036
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CFGNorm"
+   },
+   "widgets_values": [
+    1.0,
+    false
+   ]
+  },
+  {
+   "id": 20011,
+   "type": "CLIPLoader",
+   "pos": [
+    1020,
+    5406
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 63,
+   "mode": 2,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "CLIP",
+     "type": "CLIP",
+     "links": [
+      200047,
+      200048
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPLoader"
+   },
+   "widgets_values": [
+    "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+    "wan",
+    "default"
+   ]
+  },
+  {
+   "id": 20012,
+   "type": "UNETLoader",
+   "pos": [
+    1020,
+    5612
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 73,
+   "mode": 2,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      200042
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "UNETLoader"
+   },
+   "widgets_values": [
+    "wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors",
+    "default"
+   ]
+  },
+  {
+   "id": 20013,
+   "type": "UNETLoader",
+   "pos": [
+    1020,
+    5790
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 78,
+   "mode": 2,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      200043
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "UNETLoader"
+   },
+   "widgets_values": [
+    "wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors",
+    "default"
+   ]
+  },
+  {
+   "id": 20014,
+   "type": "VAELoader",
+   "pos": [
+    1020,
+    5968
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 82,
+   "mode": 2,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "VAE",
+     "type": "VAE",
+     "links": [
+      200051,
+      200062
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAELoader"
+   },
+   "widgets_values": [
+    "wan_2.1_vae.safetensors"
+   ]
+  },
+  {
+   "id": 20015,
+   "type": "LoadImage",
+   "pos": [
+    1020,
+    1940
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 16,
+   "mode": 2,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      200069,
+      200074,
+      200089,
+      200099
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "MASK",
+     "type": "MASK",
+     "links": [],
+     "slot_index": 1
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "LoadImage"
+   },
+   "widgets_values": [
+    "example.png"
+   ]
+  },
+  {
+   "id": 20016,
+   "type": "CLIPTextEncode",
+   "pos": [
+    1020,
+    2292
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 18,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "text",
+     "type": "STRING",
+     "widget": {
+      "name": "text"
+     },
+     "link": 200002
+    },
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      200003,
+      200006
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPTextEncode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 20017,
+   "type": "ConditioningZeroOut",
+   "pos": [
+    1480,
+    2292
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 19,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "conditioning",
+     "type": "CONDITIONING",
+     "link": 200003
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      200007
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ConditioningZeroOut"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 20018,
+   "type": "EmptyLatentImage",
+   "pos": [
+    1020,
+    2436
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 23,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "batch_size",
+     "type": "INT",
+     "widget": {
+      "name": "batch_size"
+     },
+     "link": 200004
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      200008
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "EmptyLatentImage"
+   },
+   "widgets_values": [
+    864,
+    1152
+   ]
+  },
+  {
+   "id": 20019,
+   "type": "KSampler",
+   "pos": [
+    1940,
+    2292
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 20,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 200005
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 200006
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 200007
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 200008
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      200009
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "KSampler"
+   },
+   "widgets_values": [
+    0,
+    "randomize",
+    8,
+    1.0,
+    "euler",
+    "simple",
+    1.0
+   ]
+  },
+  {
+   "id": 20020,
+   "type": "VAEDecode",
+   "pos": [
+    2400,
+    2292
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 21,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 200009
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      200010,
+      200076
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEDecode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 20021,
+   "type": "SaveImage",
+   "pos": [
+    2860,
+    2292
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 22,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 200010
+    }
+   ],
+   "outputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "links": [],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "SaveImage"
+   },
+   "widgets_values": [
+    "krea_concept"
+   ]
+  },
+  {
+   "id": 20022,
+   "type": "LoraLoaderModelOnly",
+   "pos": [
+    1020,
+    3184
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 26,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 200011
+    }
+   ],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      200012
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "LoraLoaderModelOnly"
+   },
+   "widgets_values": [
+    "krea2_style_reference.safetensors",
+    1.0
+   ]
+  },
+  {
+   "id": 20023,
+   "type": "ModelSamplingFlux",
+   "pos": [
+    1480,
+    3184
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 27,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 200012
+    }
+   ],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      200017,
+      200020
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ModelSamplingFlux"
+   },
+   "widgets_values": [
+    1.15,
+    0.5,
+    864,
+    1152
+   ]
+  },
+  {
+   "id": 20024,
+   "type": "LoadImage",
+   "pos": [
+    1020,
+    3362
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 36,
+   "mode": 2,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      200014
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "MASK",
+     "type": "MASK",
+     "links": [],
+     "slot_index": 1
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "LoadImage"
+   },
+   "widgets_values": [
+    "example.png"
+   ]
+  },
+  {
+   "id": 20025,
+   "type": "TextEncodeQwenImageEditPlus",
+   "pos": [
+    1480,
+    3418
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 37,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": null
+    },
+    {
+     "name": "prompt",
+     "type": "STRING",
+     "widget": {
+      "name": "prompt"
+     },
+     "link": 200013
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": null
+    },
+    {
+     "name": "image1",
+     "type": "IMAGE",
+     "link": 200014
+    },
+    {
+     "name": "image2",
+     "type": "IMAGE",
+     "link": null
+    },
+    {
+     "name": "image3",
+     "type": "IMAGE",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      200015
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "TextEncodeQwenImageEditPlus"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 20026,
+   "type": "FluxKontextMultiReferenceLatentMethod",
+   "pos": [
+    1940,
+    3184
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 28,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "conditioning",
+     "type": "CONDITIONING",
+     "link": 200015
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      200016,
+      200018
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "FluxKontextMultiReferenceLatentMethod"
+   },
+   "widgets_values": [
+    "index_timestep_zero"
+   ]
+  },
+  {
+   "id": 20027,
+   "type": "ConditioningZeroOut",
+   "pos": [
+    2400,
+    3184
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 29,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "conditioning",
+     "type": "CONDITIONING",
+     "link": 200016
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      200019
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ConditioningZeroOut"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 20028,
+   "type": "CFGGuider",
+   "pos": [
+    2860,
+    3184
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 30,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 200017
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 200018
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 200019
+    }
+   ],
+   "outputs": [
+    {
+     "name": "GUIDER",
+     "type": "GUIDER",
+     "links": [
+      200023
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CFGGuider"
+   },
+   "widgets_values": [
+    1.0
+   ]
+  },
+  {
+   "id": 20029,
+   "type": "RandomNoise",
+   "pos": [
+    1020,
+    3534
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 38,
+   "mode": 2,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "NOISE",
+     "type": "NOISE",
+     "links": [
+      200022
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "RandomNoise"
+   },
+   "widgets_values": [
+    0,
+    "randomize"
+   ]
+  },
+  {
+   "id": 20030,
+   "type": "KSamplerSelect",
+   "pos": [
+    1020,
+    3712
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 39,
+   "mode": 2,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "SAMPLER",
+     "type": "SAMPLER",
+     "links": [
+      200024
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "KSamplerSelect"
+   },
+   "widgets_values": [
+    "euler"
+   ]
+  },
+  {
+   "id": 20031,
+   "type": "BasicScheduler",
+   "pos": [
+    1940,
+    3334
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 34,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 200020
+    }
+   ],
+   "outputs": [
+    {
+     "name": "SIGMAS",
+     "type": "SIGMAS",
+     "links": [
+      200025
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "BasicScheduler"
+   },
+   "widgets_values": [
+    "simple",
+    8,
+    1.0
+   ]
+  },
+  {
+   "id": 20032,
+   "type": "EmptyLatentImage",
+   "pos": [
+    1020,
+    3862
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 40,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "batch_size",
+     "type": "INT",
+     "widget": {
+      "name": "batch_size"
+     },
+     "link": 200021
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      200026
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "EmptyLatentImage"
+   },
+   "widgets_values": [
+    864,
+    1152
+   ]
+  },
+  {
+   "id": 20033,
+   "type": "SamplerCustomAdvanced",
+   "pos": [
+    3320,
+    3184
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 31,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "noise",
+     "type": "NOISE",
+     "link": 200022
+    },
+    {
+     "name": "guider",
+     "type": "GUIDER",
+     "link": 200023
+    },
+    {
+     "name": "sampler",
+     "type": "SAMPLER",
+     "link": 200024
+    },
+    {
+     "name": "sigmas",
+     "type": "SIGMAS",
+     "link": 200025
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 200026
+    }
+   ],
+   "outputs": [
+    {
+     "name": "output",
+     "type": "LATENT",
+     "links": [
+      200027
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "denoised_output",
+     "type": "LATENT",
+     "links": [],
+     "slot_index": 1
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "SamplerCustomAdvanced"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 20034,
+   "type": "VAEDecode",
+   "pos": [
+    3780,
+    3184
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 32,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 200027
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      200028,
+      200077
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEDecode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 20035,
+   "type": "SaveImage",
+   "pos": [
+    4240,
+    3184
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 33,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 200028
+    }
+   ],
+   "outputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "links": [],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "SaveImage"
+   },
+   "widgets_values": [
+    "krea_concept_styled"
+   ]
+  },
+  {
+   "id": 20036,
+   "type": "FluxKontextImageScale",
+   "pos": [
+    1020,
+    4604
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 55,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "image",
+     "type": "IMAGE",
+     "link": 200029
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      200032,
+      200034,
+      200035,
+      200084
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "FluxKontextImageScale"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 20037,
+   "type": "TextEncodeQwenImageEditPlus",
+   "pos": [
+    1480,
+    4370
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 49,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 200030
+    },
+    {
+     "name": "prompt",
+     "type": "STRING",
+     "widget": {
+      "name": "prompt"
+     },
+     "link": 200031
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": null
+    },
+    {
+     "name": "image1",
+     "type": "IMAGE",
+     "link": 200032
+    },
+    {
+     "name": "image2",
+     "type": "IMAGE",
+     "link": null
+    },
+    {
+     "name": "image3",
+     "type": "IMAGE",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      200037
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "TextEncodeQwenImageEditPlus"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 20038,
+   "type": "TextEncodeQwenImageEditPlus",
+   "pos": [
+    1480,
+    4602
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 54,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 200033
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": null
+    },
+    {
+     "name": "image1",
+     "type": "IMAGE",
+     "link": 200034
+    },
+    {
+     "name": "image2",
+     "type": "IMAGE",
+     "link": null
+    },
+    {
+     "name": "image3",
+     "type": "IMAGE",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      200038
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "TextEncodeQwenImageEditPlus"
+   },
+   "widgets_values": [
+    ""
+   ]
+  },
+  {
+   "id": 20039,
+   "type": "VAEEncode",
+   "pos": [
+    1480,
+    4840
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 58,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "pixels",
+     "type": "IMAGE",
+     "link": 200035
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      200079
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEEncode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 20040,
+   "type": "KSampler",
+   "pos": [
+    2400,
+    4220
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 46,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 200036
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 200037
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 200038
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 200039
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      200040
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "KSampler"
+   },
+   "widgets_values": [
+    0,
+    "randomize",
+    20,
+    4.0,
+    "euler",
+    "simple",
+    1.0
+   ]
+  },
+  {
+   "id": 20041,
+   "type": "VAEDecode",
+   "pos": [
+    2860,
+    4220
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 47,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 200040
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      200041,
+      200078
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEDecode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 20042,
+   "type": "SaveImage",
+   "pos": [
+    3320,
+    4220
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 48,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 200041
+    }
+   ],
+   "outputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "links": [],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "SaveImage"
+   },
+   "widgets_values": [
+    "krea_edit"
+   ]
+  },
+  {
+   "id": 20043,
+   "type": "LoraLoaderModelOnly",
+   "pos": [
+    1480,
+    5406
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 64,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 200042
+    }
+   ],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      200044
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "LoraLoaderModelOnly"
+   },
+   "widgets_values": [
+    "wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors",
+    0.0
+   ]
+  },
+  {
+   "id": 20044,
+   "type": "LoraLoaderModelOnly",
+   "pos": [
+    1480,
+    5584
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 72,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 200043
+    }
+   ],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      200045
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "LoraLoaderModelOnly"
+   },
+   "widgets_values": [
+    "wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors",
+    0.0
+   ]
+  },
+  {
+   "id": 20045,
+   "type": "ModelSamplingSD3",
+   "pos": [
+    1940,
+    5406
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 65,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 200044
+    }
+   ],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      200053
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ModelSamplingSD3"
+   },
+   "widgets_values": [
+    8.0
+   ]
+  },
+  {
+   "id": 20046,
+   "type": "ModelSamplingSD3",
+   "pos": [
+    1940,
+    5556
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 71,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 200045
+    }
+   ],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      200057
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ModelSamplingSD3"
+   },
+   "widgets_values": [
+    8.0
+   ]
+  },
+  {
+   "id": 20047,
+   "type": "CLIPTextEncode",
+   "pos": [
+    1480,
+    5762
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 77,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "text",
+     "type": "STRING",
+     "widget": {
+      "name": "text"
+     },
+     "link": 200046
+    },
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 200047
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      200049
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPTextEncode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 20048,
+   "type": "CLIPTextEncode",
+   "pos": [
+    1480,
+    5906
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 81,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 200048
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "links": [
+      200050
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "CLIPTextEncode"
+   },
+   "widgets_values": [
+    "\u8272\u8c03\u8273\u4e3d\uff0c\u8fc7\u66dd\uff0c\u9759\u6001\uff0c\u7ec6\u8282\u6a21\u7cca\u4e0d\u6e05\uff0c\u5b57\u5e55\uff0c\u98ce\u683c\uff0c\u4f5c\u54c1\uff0c\u753b\u4f5c\uff0c\u753b\u9762\uff0c\u9759\u6b62\uff0c\u6574\u4f53\u53d1\u7070\uff0c\u6700\u5dee\u8d28\u91cf\uff0c\u4f4e\u8d28\u91cf\uff0cJPEG\u538b\u7f29\u6b8b\u7559\uff0c\u4e11\u964b\u7684\uff0c\u6b8b\u7f3a\u7684\uff0c\u591a\u4f59\u7684\u624b\u6307\uff0c\u753b\u5f97\u4e0d\u597d\u7684\u624b\u90e8\uff0c\u753b\u5f97\u4e0d\u597d\u7684\u8138\u90e8\uff0c\u7578\u5f62\u7684\uff0c\u6bc1\u5bb9\u7684\uff0c\u5f62\u6001\u7578\u5f62\u7684\u80a2\u4f53\uff0c\u624b\u6307\u878d\u5408\uff0c\u9759\u6b62\u4e0d\u52a8\u7684\u753b\u9762\uff0c\u6742\u4e71\u7684\u80cc\u666f\uff0c\u4e09\u6761\u817f\uff0c\u80cc\u666f\u4eba\u5f88\u591a\uff0c\u5012\u7740\u8d70"
+   ]
+  },
+  {
+   "id": 20049,
+   "type": "WanImageToVideo",
+   "pos": [
+    1940,
+    5706
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 76,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 200049
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 200050
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 200051
+    },
+    {
+     "name": "clip_vision_output",
+     "type": "CLIP_VISION_OUTPUT",
+     "link": null
+    },
+    {
+     "name": "start_image",
+     "type": "IMAGE",
+     "link": 200052
+    }
+   ],
+   "outputs": [
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "links": [
+      200054,
+      200058,
+      200093
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "links": [
+      200055,
+      200059
+     ],
+     "slot_index": 1
+    },
+    {
+     "name": "latent",
+     "type": "LATENT",
+     "links": [
+      200056
+     ],
+     "slot_index": 2
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "WanImageToVideo"
+   },
+   "widgets_values": [
+    480,
+    640,
+    81,
+    1
+   ]
+  },
+  {
+   "id": 20050,
+   "type": "KSamplerAdvanced",
+   "pos": [
+    2400,
+    5406
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 66,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 200053
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 200054
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 200055
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 200056
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      200060
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "KSamplerAdvanced"
+   },
+   "widgets_values": [
+    "enable",
+    0,
+    "randomize",
+    20,
+    3.5,
+    "euler",
+    "simple",
+    0,
+    10,
+    "enable"
+   ]
+  },
+  {
+   "id": 20051,
+   "type": "KSamplerAdvanced",
+   "pos": [
+    2860,
+    5406
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 67,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 200057
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 200058
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 200059
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 200060
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      200061
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "KSamplerAdvanced"
+   },
+   "widgets_values": [
+    "disable",
+    0,
+    "randomize",
+    20,
+    3.5,
+    "euler",
+    "simple",
+    10,
+    10000,
+    "disable"
+   ]
+  },
+  {
+   "id": 20052,
+   "type": "VAEDecode",
+   "pos": [
+    3320,
+    5406
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 68,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 200061
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 200062
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      200063,
+      200064,
+      200065
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEDecode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 20053,
+   "type": "SaveWEBM",
+   "pos": [
+    3780,
+    5406
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 69,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 200063
+    }
+   ],
+   "outputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "links": [],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "SaveWEBM"
+   },
+   "widgets_values": [
+    "video/krea_animate",
+    "vp9",
+    16.0,
+    13.33
+   ]
+  },
+  {
+   "id": 20054,
+   "type": "SaveAnimatedWEBP",
+   "pos": [
+    3780,
+    5640
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 75,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 200064
+    }
+   ],
+   "outputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "links": [],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "SaveAnimatedWEBP"
+   },
+   "widgets_values": [
+    "video/krea_animate",
+    16.0,
+    false,
+    80,
+    "default"
+   ]
+  },
+  {
+   "id": 20055,
+   "type": "ImageFromBatch",
+   "pos": [
+    3780,
+    5902
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 80,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "image",
+     "type": "IMAGE",
+     "link": 200065
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      200066
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ImageFromBatch"
+   },
+   "widgets_values": [
+    80,
+    1
+   ]
+  },
+  {
+   "id": 20056,
+   "type": "SaveImage",
+   "pos": [
+    4240,
+    5406
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 70,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 200066
+    }
+   ],
+   "outputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "links": [],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "SaveImage"
+   },
+   "widgets_values": [
+    "krea_animate_last"
+   ]
+  },
+  {
+   "id": 20057,
+   "type": "LoadImageOutput",
+   "pos": [
+    40,
+    1340
+   ],
+   "size": [
+    400,
+    420
+   ],
+   "flags": {},
+   "order": 13,
+   "mode": 2,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      200070,
+      200091
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "MASK",
+     "type": "MASK",
+     "links": [],
+     "slot_index": 1
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "LoadImageOutput"
+   },
+   "widgets_values": [
+    ""
+   ],
+   "title": "2. Edit: image to edit"
+  },
+  {
+   "id": 20058,
+   "type": "Any Switch (rgthree)",
+   "pos": [
+    40,
+    4220
+   ],
+   "size": [
+    400,
+    170
+   ],
+   "flags": {},
+   "order": 41,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "any_01",
+     "type": "IMAGE",
+     "link": 200067
+    },
+    {
+     "name": "any_02",
+     "type": "IMAGE",
+     "link": 200068
+    },
+    {
+     "name": "any_03",
+     "type": "IMAGE",
+     "link": 200069
+    },
+    {
+     "name": "any_04",
+     "type": "IMAGE",
+     "link": 200070
+    },
+    {
+     "name": "any_05",
+     "type": "IMAGE",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "*",
+     "label": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      200029
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "Any Switch (rgthree)"
+   },
+   "widgets_values": [],
+   "title": "2. Edit takes"
+  },
+  {
+   "id": 20059,
+   "type": "PrimitiveString",
+   "pos": [
+    40,
+    5116
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 60,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "STRING",
+     "type": "STRING",
+     "links": [
+      200085,
+      200090
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "PrimitiveString"
+   },
+   "widgets_values": [
+    ""
+   ],
+   "title": "2. Edit takes: flag, active while its stage is off"
+  },
+  {
+   "id": 20060,
+   "type": "LoadImageOutput",
+   "pos": [
+    480,
+    1340
+   ],
+   "size": [
+    400,
+    420
+   ],
+   "flags": {},
+   "order": 14,
+   "mode": 2,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      200075,
+      200101
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "MASK",
+     "type": "MASK",
+     "links": [],
+     "slot_index": 1
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "LoadImageOutput"
+   },
+   "widgets_values": [
+    ""
+   ],
+   "title": "3. Animate: start frame"
+  },
+  {
+   "id": 20061,
+   "type": "Any Switch (rgthree)",
+   "pos": [
+    40,
+    5406
+   ],
+   "size": [
+    400,
+    192
+   ],
+   "flags": {},
+   "order": 61,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "any_01",
+     "type": "IMAGE",
+     "link": 200071
+    },
+    {
+     "name": "any_02",
+     "type": "IMAGE",
+     "link": 200072
+    },
+    {
+     "name": "any_03",
+     "type": "IMAGE",
+     "link": 200073
+    },
+    {
+     "name": "any_04",
+     "type": "IMAGE",
+     "link": 200074
+    },
+    {
+     "name": "any_05",
+     "type": "IMAGE",
+     "link": 200075
+    },
+    {
+     "name": "any_06",
+     "type": "IMAGE",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "*",
+     "label": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      200052
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "Any Switch (rgthree)"
+   },
+   "widgets_values": [],
+   "title": "3. Animate takes"
+  },
+  {
+   "id": 20062,
+   "type": "PrimitiveString",
+   "pos": [
+    40,
+    6346
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 85,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "STRING",
+     "type": "STRING",
+     "links": [
+      200094,
+      200100
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "PrimitiveString"
+   },
+   "widgets_values": [
+    ""
+   ],
+   "title": "3. Animate takes: flag, active while its stage is off"
+  },
+  {
+   "id": 20063,
+   "type": "Image Filter",
+   "pos": [
+    2860,
+    2442
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 24,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 200076
+    },
+    {
+     "name": "latents",
+     "type": "LATENT",
+     "link": null
+    },
+    {
+     "name": "masks",
+     "type": "MASK",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "links": [
+      200068,
+      200073,
+      200088,
+      200098
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "latents",
+     "type": "LATENT",
+     "links": [],
+     "slot_index": 1
+    },
+    {
+     "name": "masks",
+     "type": "MASK",
+     "links": [],
+     "slot_index": 2
+    },
+    {
+     "name": "extra1",
+     "type": "STRING",
+     "links": [],
+     "slot_index": 3
+    },
+    {
+     "name": "extra2",
+     "type": "STRING",
+     "links": [],
+     "slot_index": 4
+    },
+    {
+     "name": "extra3",
+     "type": "STRING",
+     "links": [],
+     "slot_index": 5
+    },
+    {
+     "name": "indexes",
+     "type": "STRING",
+     "links": [],
+     "slot_index": 6
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "Image Filter"
+   },
+   "widgets_values": [
+    3600,
+    "send first",
+    "",
+    "1. Concept: click the take to carry on with, then Send. Escape cancels the queue.",
+    "",
+    "",
+    "",
+    0,
+    "",
+    1,
+    "ding.mp3"
+   ],
+   "title": "1. Concept: pick the take"
+  },
+  {
+   "id": 20064,
+   "type": "Image Filter",
+   "pos": [
+    4240,
+    3334
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 35,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 200077
+    },
+    {
+     "name": "latents",
+     "type": "LATENT",
+     "link": null
+    },
+    {
+     "name": "masks",
+     "type": "MASK",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "links": [
+      200067,
+      200072,
+      200087,
+      200097
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "latents",
+     "type": "LATENT",
+     "links": [],
+     "slot_index": 1
+    },
+    {
+     "name": "masks",
+     "type": "MASK",
+     "links": [],
+     "slot_index": 2
+    },
+    {
+     "name": "extra1",
+     "type": "STRING",
+     "links": [],
+     "slot_index": 3
+    },
+    {
+     "name": "extra2",
+     "type": "STRING",
+     "links": [],
+     "slot_index": 4
+    },
+    {
+     "name": "extra3",
+     "type": "STRING",
+     "links": [],
+     "slot_index": 5
+    },
+    {
+     "name": "indexes",
+     "type": "STRING",
+     "links": [],
+     "slot_index": 6
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "Image Filter"
+   },
+   "widgets_values": [
+    3600,
+    "send first",
+    "",
+    "1. Concept, styled: click the take to carry on with, then Send. Escape cancels the queue.",
+    "",
+    "",
+    "",
+    0,
+    "",
+    1,
+    "ding.mp3"
+   ],
+   "title": "1. Concept, styled: pick the take"
+  },
+  {
+   "id": 20065,
+   "type": "Image Filter",
+   "pos": [
+    3320,
+    4370
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 50,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 200078
+    },
+    {
+     "name": "latents",
+     "type": "LATENT",
+     "link": null
+    },
+    {
+     "name": "masks",
+     "type": "MASK",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "links": [
+      200071,
+      200096
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "latents",
+     "type": "LATENT",
+     "links": [],
+     "slot_index": 1
+    },
+    {
+     "name": "masks",
+     "type": "MASK",
+     "links": [],
+     "slot_index": 2
+    },
+    {
+     "name": "extra1",
+     "type": "STRING",
+     "links": [],
+     "slot_index": 3
+    },
+    {
+     "name": "extra2",
+     "type": "STRING",
+     "links": [],
+     "slot_index": 4
+    },
+    {
+     "name": "extra3",
+     "type": "STRING",
+     "links": [],
+     "slot_index": 5
+    },
+    {
+     "name": "indexes",
+     "type": "STRING",
+     "links": [],
+     "slot_index": 6
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "Image Filter"
+   },
+   "widgets_values": [
+    3600,
+    "send first",
+    "",
+    "2. Edit: click the take to carry on with, then Send. Escape cancels the queue.",
+    "",
+    "",
+    "",
+    0,
+    "",
+    1,
+    "ding.mp3"
+   ],
+   "title": "2. Edit: pick the take"
+  },
+  {
+   "id": 20066,
+   "type": "RepeatLatentBatch",
+   "pos": [
+    1940,
+    4398
+   ],
+   "size": [
+    400,
+    120
+   ],
+   "flags": {},
+   "order": 52,
+   "mode": 2,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 200079
+    },
+    {
+     "name": "amount",
+     "type": "INT",
+     "widget": {
+      "name": "amount"
+     },
+     "link": 200080
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      200039
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "RepeatLatentBatch"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 20067,
+   "type": "Anything Everywhere",
+   "pos": [
+    2240,
+    60
+   ],
+   "size": [
+    400,
+    60
+   ],
+   "flags": {},
+   "order": 4,
+   "mode": 0,
+   "title": "CLIP to every stage",
+   "inputs": [
+    {
+     "label": "CLIP",
+     "localized_name": "anything",
+     "name": "anything",
+     "shape": 7,
+     "type": "CLIP",
+     "link": 200081
+    },
+    {
+     "label": "anything",
+     "name": "anything2",
+     "type": "*",
+     "link": null
+    }
+   ],
+   "outputs": [],
+   "properties": {
+    "ue_properties": {
+     "version": "7.8",
+     "group_restricted": 0,
+     "color_restricted": 0,
+     "widget_ue_connectable": {},
+     "input_ue_unconnectable": {},
+     "title_regex": null,
+     "input_regex": null,
+     "group_regex": null,
+     "title_regex_invert": false,
+     "input_regex_invert": false,
+     "group_regex_invert": false,
+     "repeated_type_rule": 0,
+     "apply_to_unrepeated": 0,
+     "string_to_combo": 0,
+     "send_to_any": 0,
+     "next_input_index": 3
+    },
+    "Node name for S&R": "Anything Everywhere"
+   }
+  },
+  {
+   "id": 20068,
+   "type": "Anything Everywhere",
+   "pos": [
+    2240,
+    204
+   ],
+   "size": [
+    400,
+    60
+   ],
+   "flags": {},
+   "order": 6,
+   "mode": 0,
+   "title": "VAE to every stage",
+   "inputs": [
+    {
+     "label": "VAE",
+     "localized_name": "anything",
+     "name": "anything",
+     "shape": 7,
+     "type": "VAE",
+     "link": 200082
+    },
+    {
+     "label": "anything",
+     "name": "anything2",
+     "type": "*",
+     "link": null
+    }
+   ],
+   "outputs": [],
+   "properties": {
+    "ue_properties": {
+     "version": "7.8",
+     "group_restricted": 0,
+     "color_restricted": 0,
+     "widget_ue_connectable": {},
+     "input_ue_unconnectable": {},
+     "title_regex": null,
+     "input_regex": null,
+     "group_regex": null,
+     "title_regex_invert": false,
+     "input_regex_invert": false,
+     "group_regex_invert": false,
+     "repeated_type_rule": 0,
+     "apply_to_unrepeated": 0,
+     "string_to_combo": 0,
+     "send_to_any": 0,
+     "next_input_index": 3
+    },
+    "Node name for S&R": "Anything Everywhere"
+   }
+  },
+  {
+   "id": 20069,
+   "type": "Mute / Bypass Relay (rgthree)",
+   "pos": [
+    40,
+    4806
+   ],
+   "size": [
+    400,
+    104
+   ],
+   "flags": {
+    "collapsed": false
+   },
+   "order": 57,
+   "mode": 0,
+   "title": "2. Edit takes: flag on while every stage reading it is off",
+   "inputs": [
+    {
+     "dir": 3,
+     "name": "edit",
+     "type": "*",
+     "link": 200084
+    },
+    {
+     "dir": 3,
+     "name": "",
+     "type": "*",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "REPEATER",
+     "dir": 4,
+     "shape": 5,
+     "type": "_NODE_REPEATER_",
+     "links": [
+      200083
+     ],
+     "color_on": "#Fc0",
+     "color_off": "#a80"
+    }
+   ],
+   "properties": {
+    "on_muted_inputs": "ACTIVE",
+    "on_bypassed_inputs": "ACTIVE",
+    "on_any_active_inputs": "MUTE"
+   },
+   "widgets_values": null
+  },
+  {
+   "id": 20070,
+   "type": "Mute / Bypass Repeater (rgthree)",
+   "pos": [
+    40,
+    4950
+   ],
+   "size": [
+    400,
+    90
+   ],
+   "flags": {},
+   "order": 59,
+   "mode": 0,
+   "title": "2. Edit takes: flag switch",
+   "inputs": [
+    {
+     "dir": 3,
+     "name": "Mute / Bypass Relay (rgthree)",
+     "type": "*",
+     "link": 200083
+    },
+    {
+     "dir": 3,
+     "name": "flag",
+     "type": "*",
+     "link": 200085
+    },
+    {
+     "dir": 3,
+     "name": "",
+     "type": "*",
+     "link": null
+    }
+   ],
+   "outputs": [],
+   "properties": {},
+   "widgets_values": null
+  },
+  {
+   "id": 20071,
+   "type": "Mute / Bypass Relay (rgthree)",
+   "pos": [
+    40,
+    4430
+   ],
+   "size": [
+    400,
+    170
+   ],
+   "flags": {
+    "collapsed": false
+   },
+   "order": 53,
+   "mode": 0,
+   "title": "2. Edit takes: picker off while a source is on or its stage is off",
+   "inputs": [
+    {
+     "dir": 3,
+     "name": "krea_style",
+     "type": "*",
+     "link": 200087
+    },
+    {
+     "dir": 3,
+     "name": "krea",
+     "type": "*",
+     "link": 200088
+    },
+    {
+     "dir": 3,
+     "name": "own_image",
+     "type": "*",
+     "link": 200089
+    },
+    {
+     "dir": 3,
+     "name": "stage off",
+     "type": "*",
+     "link": 200090
+    },
+    {
+     "dir": 3,
+     "name": "",
+     "type": "*",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "REPEATER",
+     "dir": 4,
+     "shape": 5,
+     "type": "_NODE_REPEATER_",
+     "links": [
+      200086
+     ],
+     "color_on": "#Fc0",
+     "color_off": "#a80"
+    }
+   ],
+   "properties": {
+    "on_muted_inputs": "ACTIVE",
+    "on_bypassed_inputs": "ACTIVE",
+    "on_any_active_inputs": "MUTE"
+   },
+   "widgets_values": null
+  },
+  {
+   "id": 20072,
+   "type": "Mute / Bypass Repeater (rgthree)",
+   "pos": [
+    40,
+    4640
+   ],
+   "size": [
+    400,
+    90
+   ],
+   "flags": {},
+   "order": 56,
+   "mode": 0,
+   "title": "2. Edit takes: picker switch",
+   "inputs": [
+    {
+     "dir": 3,
+     "name": "Mute / Bypass Relay (rgthree)",
+     "type": "*",
+     "link": 200086
+    },
+    {
+     "dir": 3,
+     "name": "picker",
+     "type": "*",
+     "link": 200091
+    },
+    {
+     "dir": 3,
+     "name": "",
+     "type": "*",
+     "link": null
+    }
+   ],
+   "outputs": [],
+   "properties": {},
+   "widgets_values": null
+  },
+  {
+   "id": 20073,
+   "type": "Mute / Bypass Relay (rgthree)",
+   "pos": [
+    40,
+    6036
+   ],
+   "size": [
+    400,
+    104
+   ],
+   "flags": {
+    "collapsed": false
+   },
+   "order": 83,
+   "mode": 0,
+   "title": "3. Animate takes: flag on while every stage reading it is off",
+   "inputs": [
+    {
+     "dir": 3,
+     "name": "animate",
+     "type": "*",
+     "link": 200093
+    },
+    {
+     "dir": 3,
+     "name": "",
+     "type": "*",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "REPEATER",
+     "dir": 4,
+     "shape": 5,
+     "type": "_NODE_REPEATER_",
+     "links": [
+      200092
+     ],
+     "color_on": "#Fc0",
+     "color_off": "#a80"
+    }
+   ],
+   "properties": {
+    "on_muted_inputs": "ACTIVE",
+    "on_bypassed_inputs": "ACTIVE",
+    "on_any_active_inputs": "MUTE"
+   },
+   "widgets_values": null
+  },
+  {
+   "id": 20074,
+   "type": "Mute / Bypass Repeater (rgthree)",
+   "pos": [
+    40,
+    6180
+   ],
+   "size": [
+    400,
+    90
+   ],
+   "flags": {},
+   "order": 84,
+   "mode": 0,
+   "title": "3. Animate takes: flag switch",
+   "inputs": [
+    {
+     "dir": 3,
+     "name": "Mute / Bypass Relay (rgthree)",
+     "type": "*",
+     "link": 200092
+    },
+    {
+     "dir": 3,
+     "name": "flag",
+     "type": "*",
+     "link": 200094
+    },
+    {
+     "dir": 3,
+     "name": "",
+     "type": "*",
+     "link": null
+    }
+   ],
+   "outputs": [],
+   "properties": {},
+   "widgets_values": null
+  },
+  {
+   "id": 20075,
+   "type": "Mute / Bypass Relay (rgthree)",
+   "pos": [
+    40,
+    5638
+   ],
+   "size": [
+    400,
+    192
+   ],
+   "flags": {
+    "collapsed": false
+   },
+   "order": 74,
+   "mode": 0,
+   "title": "3. Animate takes: picker off while a source is on or its stage is off",
+   "inputs": [
+    {
+     "dir": 3,
+     "name": "edit",
+     "type": "*",
+     "link": 200096
+    },
+    {
+     "dir": 3,
+     "name": "krea_style",
+     "type": "*",
+     "link": 200097
+    },
+    {
+     "dir": 3,
+     "name": "krea",
+     "type": "*",
+     "link": 200098
+    },
+    {
+     "dir": 3,
+     "name": "own_image",
+     "type": "*",
+     "link": 200099
+    },
+    {
+     "dir": 3,
+     "name": "stage off",
+     "type": "*",
+     "link": 200100
+    },
+    {
+     "dir": 3,
+     "name": "",
+     "type": "*",
+     "link": null
+    }
+   ],
+   "outputs": [
+    {
+     "name": "REPEATER",
+     "dir": 4,
+     "shape": 5,
+     "type": "_NODE_REPEATER_",
+     "links": [
+      200095
+     ],
+     "color_on": "#Fc0",
+     "color_off": "#a80"
+    }
+   ],
+   "properties": {
+    "on_muted_inputs": "ACTIVE",
+    "on_bypassed_inputs": "ACTIVE",
+    "on_any_active_inputs": "MUTE"
+   },
+   "widgets_values": null
+  },
+  {
+   "id": 20076,
+   "type": "Mute / Bypass Repeater (rgthree)",
+   "pos": [
+    40,
+    5870
+   ],
+   "size": [
+    400,
+    90
+   ],
+   "flags": {},
+   "order": 79,
+   "mode": 0,
+   "title": "3. Animate takes: picker switch",
+   "inputs": [
+    {
+     "dir": 3,
+     "name": "Mute / Bypass Relay (rgthree)",
+     "type": "*",
+     "link": 200095
+    },
+    {
+     "dir": 3,
+     "name": "picker",
+     "type": "*",
+     "link": 200101
+    },
+    {
+     "dir": 3,
+     "name": "",
+     "type": "*",
+     "link": null
+    }
+   ],
+   "outputs": [],
+   "properties": {},
+   "widgets_values": null
+  },
+  {
+   "id": 20077,
+   "type": "MarkdownNote",
+   "pos": [
+    40,
+    60
+   ],
+   "size": [
+    480,
+    820
+   ],
+   "flags": {},
+   "order": 0,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [],
+   "properties": {},
+   "widgets_values": [
+    "## Krea pipeline\n\nThe image and video half of the pipeline on Krea 2 Turbo: a concept from the\nprompt, an edit of it, and five seconds of video. Krea has no open model for\nediting or for image to video, so Stage 2 is Qwen-Image-Edit 2509 and Stage 3\nis Wan 2.2, the same stages as in asset_workflow.json.\n\n**Licence first.** The Krea 2 Community License allows commercial use of the\nmodel and of what it makes only while your company, affiliates included, earns\nunder $1,000,000 a year. Past that you must stop commercial use, of its outputs\ntoo, until Krea grants an enterprise licence; it makes no exception for images\nmade earlier. Krea may end the licence for any reason on 30 days' notice, and it\nrequires content filtering: look at every image before it ships. The style\nreference LoRA is under the same licence. Qwen-Image-Edit 2509 and Wan 2.2 are\nApache-2.0. See docs/guide/licensing.\n\nWrite the subject in **Prompt**, switch stages on in the **Stage** panels, and\nqueue. Only Stage 1, Concept, is on when the graph opens. The two Stage 1 rows\nare alternatives, and their panel lets one at a time be on. **Concept, styled**\npaints the prompt in the style of the image in its **Style Reference** node: it\ntakes the look, not the content. It ran out of memory on the 16 GB reference\ncard at 864x1152 and at 672x896 (2026-10-10), so on a card that size use plain\nConcept.\n\n**Handing over.** Each stage takes its input from the nearest stage above it\nthat is on. With Concept, Edit and Animate all on, one queue goes from the\nprompt to a video. To start from your own art, switch on **0. Your image** and\nleave the Concept stages off.\n\n**Takes and picks.** Stages 1 and 2 make **Takes** images per queue and save\nthem all. Takes opens at 1, because two Krea images at once ran out of memory on\nthe 16 GB reference card; queue again for another take. When a stage below is on, the queue pauses after the stage, shows the\ntakes, and carries on with the one you click and Send. Escape cancels the\nqueue; left alone for an hour it carries on with the first take. A stage with\nnothing below it on never pauses.\n\n**Picking up at any stage.** The **Stage inputs** row holds one picker per\nstage that reads an image. A picker is read only when its stage is on and no\nstage above it is on, and is muted otherwise. Its refresh arrow selects the\nnewest file in `output/`, where the stages save as `krea_<stage>_NNNNN_.png`;\nthe video goes to `output/video/`.\n\n**Seeds** are set to randomise, so each queue of a stage is a new take. Krea\nruns at cfg 1, so it has no negative prompt: put everything in **Prompt**.\n\n**Memory, on a 16 GB card and a 31 GB host.** Concept at 864x1152 took 22.3 s\nand peaked at 15,786 MiB of 16,066 (2026-10-10): the 12.6 GiB int8 weights load\nwhole. 1104x1472, the Qwen concept size, ran out of memory, so keep Concept to\nabout a megapixel. The edit model is 19.0 GiB with an 8.7 GiB encoder, and Wan's\ntwo experts 13.3 GiB each (file sizes). A queue that runs every stage loads them\nin turn: not yet run on the reference machine.\n\n**3. Animate** keeps the settings that ran on the 16 GB reference card: 480x640\nand 20 steps, with the 4-step LoRAs in the graph at strength 0.\n\nBuilt by scripts/build_asset_workflow.py from the graphs in workflows/api/.\nChange those, not this."
+   ],
+   "color": "#432",
+   "bgcolor": "#653"
+  },
+  {
+   "id": 20078,
+   "type": "Fast Groups Muter (rgthree)",
+   "pos": [
+    1220,
+    60
+   ],
+   "size": [
+    440,
+    70
+   ],
+   "flags": {},
+   "order": 2,
+   "mode": 0,
+   "title": "Stage 0",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "OPT_CONNECTION",
+     "type": "*",
+     "links": null
+    }
+   ],
+   "properties": {
+    "matchColors": "",
+    "matchTitle": "^(0)\\. ",
+    "showNav": true,
+    "showAllGraphs": true,
+    "sort": "position",
+    "customSortAlphabet": "",
+    "toggleRestriction": "default"
+   }
+  },
+  {
+   "id": 20079,
+   "type": "Fast Groups Muter (rgthree)",
+   "pos": [
+    1220,
+    150
+   ],
+   "size": [
+    440,
+    100
+   ],
+   "flags": {},
+   "order": 5,
+   "mode": 0,
+   "title": "Stage 1, Concept: one at a time",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "OPT_CONNECTION",
+     "type": "*",
+     "links": null
+    }
+   ],
+   "properties": {
+    "matchColors": "",
+    "matchTitle": "^(1)\\. ",
+    "showNav": true,
+    "showAllGraphs": true,
+    "sort": "position",
+    "customSortAlphabet": "",
+    "toggleRestriction": "max one"
+   }
+  },
+  {
+   "id": 20080,
+   "type": "Fast Groups Muter (rgthree)",
+   "pos": [
+    1220,
+    270
+   ],
+   "size": [
+    440,
+    100
+   ],
+   "flags": {},
+   "order": 8,
+   "mode": 0,
+   "title": "Stages 2 and 3",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "OPT_CONNECTION",
+     "type": "*",
+     "links": null
+    }
+   ],
+   "properties": {
+    "matchColors": "",
+    "matchTitle": "^(2|3)\\. ",
+    "showNav": true,
+    "showAllGraphs": true,
+    "sort": "position",
+    "customSortAlphabet": "",
+    "toggleRestriction": "default"
+   }
+  },
+  {
+   "id": 20081,
+   "type": "Note",
+   "pos": [
+    560,
+    1940
+   ],
+   "size": [
+    420,
+    154
+   ],
+   "flags": {},
+   "order": 15,
+   "mode": 2,
+   "inputs": [],
+   "outputs": [],
+   "properties": {},
+   "widgets_values": [
+    "Concept art you already have. Upload it here, or pick a file\nalready in input/. With this stage on and the Concept stages\noff, Edit and Animate start from it."
+   ],
+   "color": "#432",
+   "bgcolor": "#653"
+  },
+  {
+   "id": 20082,
+   "type": "Note",
+   "pos": [
+    560,
+    2292
+   ],
+   "size": [
+    420,
+    477
+   ],
+   "flags": {},
+   "order": 17,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [],
+   "properties": {},
+   "widgets_values": [
+    "CONCEPT -- Krea 2 Turbo, 8 steps (22.3s measured)\n\nLICENCE FIRST.  The Krea 2 Community License allows commercial use of\nwhat this makes only while your company, affiliates included, earns\nunder $1,000,000 a year.  Past that you must stop commercial use of\nthe model AND its outputs until Krea grants an enterprise licence; it\nmakes no exception for images made earlier.  Krea can\nalso end the licence on 30 days' notice, and it requires content\nfiltering: review every image before it ships.  docs/guide/licensing.\n\nWrite sentences, not tags.  cfg is 1, so there is no negative: the\nempty negative is a ConditioningZeroOut, and everything goes in the\nprompt.  Change the seed in KSampler to reroll.\n\nONE TAKE AT A TIME on a 16 GB card.  The int8 weights load whole\nand leave little room: 864x1152 peaked at 15,786 MiB of 16,066, and\n1104x1472, or a batch of two, ran out of memory (2026-10-10).  Keep\nto about a megapixel: 864x1152 for a figure, 1024x1024 for a prop.\n\nNeeds:  scripts/fetch_models.py --download --group krea2\n\n(From workflows/api/txt2img_krea2.json.)"
+   ],
+   "color": "#432",
+   "bgcolor": "#653"
+  },
+  {
+   "id": 20083,
+   "type": "Note",
+   "pos": [
+    560,
+    3184
+   ],
+   "size": [
+    420,
+    494
+   ],
+   "flags": {},
+   "order": 25,
+   "mode": 2,
+   "inputs": [],
+   "outputs": [],
+   "properties": {},
+   "widgets_values": [
+    "CONCEPT IN A GIVEN STYLE -- Krea 2 Turbo + style reference\n\nDOES NOT FIT A 16 GB CARD AS WIRED.  On 2026-10-10 it ran out of\nGPU memory in the sampler at 864x1152 and at 672x896: the reference\nadds about a megapixel of latent to every step.  --reserve-vram 2\nand 4 did not help: the model then loads in part, and merging the\nLoRA into its int8 weights runs out of memory instead.  The fp8\nweights fail in the same merge.\n\nPut an image whose LOOK you want in Style Reference.  The prompt says\nwhat to draw; the reference says how it is painted.  It is not an\nedit: nothing of the reference's content is kept on purpose.\n\nSame licence as txt2img_krea2: commercial use only under $1,000,000\ncompany revenue a year, revocable on 30 days' notice, content\nfiltering required.  The LoRA is ostris's, under the same licence.\n\nModelSamplingFlux's width and height should match the latent's.\nMore references go in image2 and image3 on the Prompt node.\n\nNeeds:  scripts/fetch_models.py --download --group krea2\n\n(From workflows/api/txt2img_krea2_style.json.)"
+   ],
+   "color": "#432",
+   "bgcolor": "#653"
+  },
+  {
+   "id": 20084,
+   "type": "Note",
+   "pos": [
+    560,
+    4220
+   ],
+   "size": [
+    420,
+    307
+   ],
+   "flags": {},
+   "order": 42,
+   "mode": 2,
+   "inputs": [],
+   "outputs": [],
+   "properties": {},
+   "widgets_values": [
+    "CHARACTER EDIT -- Qwen-Image-Edit 2509\n\nLoad the image to change in LoadImage, then say what to change in the\nTextEncodeQwenImageEditPlus 'prompt' box -- an instruction, not a\ndescription: \"replace the pauldron on the left of the image with a plain\nsteel pauldron\", not \"a figure with a steel pauldron\".\n\nDenoise is a cliff, not a slider.  Below about 0.75 nothing moves;\nabove it the whole figure is redrawn.  If the edit will not take, it is\nusually the prompt, not the number.\n\n(From workflows/api/img_edit_qwen.json.)"
+   ],
+   "color": "#432",
+   "bgcolor": "#653"
+  },
+  {
+   "id": 20085,
+   "type": "Note",
+   "pos": [
+    560,
+    5406
+   ],
+   "size": [
+    420,
+    545
+   ],
+   "flags": {},
+   "order": 62,
+   "mode": 2,
+   "inputs": [],
+   "outputs": [],
+   "properties": {},
+   "widgets_values": [
+    "CONCEPT -> VIDEO -- Wan 2.2 image to video, 14B (604.7s measured)\n\nFive seconds (81 frames at 16 fps) of the start image moving, as a\nWEBM and an animated WEBP under output/video/, plus the last frame as\na PNG.  Two fp8 experts take turns: high noise for the first ten\nsteps, low noise for the last ten.\n\nThe defaults are what ran on the reference 16 GB card on 2026-10-02:\n480x640, 20 steps, cfg 3.5, the lightx2v 4-step LoRAs in the graph at\nstrength 0, which the server skips.  At strength 1 (then set both\nsamplers to 4 steps, cfg 1, split at step 2) that card ran out of GPU\nmemory four times: merging a LoRA into fp8 weights needs float copies\nof each weight on the card, and there was no room.\n\nThe start image is squeezed to width x height.  480x640 keeps the 3:4\nof a 1104x1472 concept; square would flatten a standing figure, and\n624x832 with the LoRAs on ran out of memory in the forward pass\n(without them, not tried).\n\nWrite the MOTION in the prompt, not the subject again: what moves, how\nfast, and that the camera and background stay put.\n\nThis makes a video.  Nothing in this image turns it into a clip for a\nrig: docs/reference/video-mocap.md is the state of that.\n\n(From workflows/api/img2video_wan22.json.)"
+   ],
+   "color": "#432",
+   "bgcolor": "#653"
+  }
+ ],
+ "links": [
+  [
+   200000,
+   20007,
+   0,
+   20009,
+   0,
+   "MODEL"
+  ],
+  [
+   200001,
+   20009,
+   0,
+   20010,
+   0,
+   "MODEL"
+  ],
+  [
+   200002,
+   20000,
+   0,
+   20016,
+   0,
+   "STRING"
+  ],
+  [
+   200003,
+   20016,
+   0,
+   20017,
+   0,
+   "CONDITIONING"
+  ],
+  [
+   200004,
+   20003,
+   0,
+   20018,
+   0,
+   "INT"
+  ],
+  [
+   200005,
+   20004,
+   0,
+   20019,
+   0,
+   "MODEL"
+  ],
+  [
+   200006,
+   20016,
+   0,
+   20019,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   200007,
+   20017,
+   0,
+   20019,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   200008,
+   20018,
+   0,
+   20019,
+   3,
+   "LATENT"
+  ],
+  [
+   200009,
+   20019,
+   0,
+   20020,
+   0,
+   "LATENT"
+  ],
+  [
+   200010,
+   20020,
+   0,
+   20021,
+   0,
+   "IMAGE"
+  ],
+  [
+   200011,
+   20004,
+   0,
+   20022,
+   0,
+   "MODEL"
+  ],
+  [
+   200012,
+   20022,
+   0,
+   20023,
+   0,
+   "MODEL"
+  ],
+  [
+   200013,
+   20000,
+   0,
+   20025,
+   1,
+   "STRING"
+  ],
+  [
+   200014,
+   20024,
+   0,
+   20025,
+   3,
+   "IMAGE"
+  ],
+  [
+   200015,
+   20025,
+   0,
+   20026,
+   0,
+   "CONDITIONING"
+  ],
+  [
+   200016,
+   20026,
+   0,
+   20027,
+   0,
+   "CONDITIONING"
+  ],
+  [
+   200017,
+   20023,
+   0,
+   20028,
+   0,
+   "MODEL"
+  ],
+  [
+   200018,
+   20026,
+   0,
+   20028,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   200019,
+   20027,
+   0,
+   20028,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   200020,
+   20023,
+   0,
+   20031,
+   0,
+   "MODEL"
+  ],
+  [
+   200021,
+   20003,
+   0,
+   20032,
+   0,
+   "INT"
+  ],
+  [
+   200022,
+   20029,
+   0,
+   20033,
+   0,
+   "NOISE"
+  ],
+  [
+   200023,
+   20028,
+   0,
+   20033,
+   1,
+   "GUIDER"
+  ],
+  [
+   200024,
+   20030,
+   0,
+   20033,
+   2,
+   "SAMPLER"
+  ],
+  [
+   200025,
+   20031,
+   0,
+   20033,
+   3,
+   "SIGMAS"
+  ],
+  [
+   200026,
+   20032,
+   0,
+   20033,
+   4,
+   "LATENT"
+  ],
+  [
+   200027,
+   20033,
+   0,
+   20034,
+   0,
+   "LATENT"
+  ],
+  [
+   200028,
+   20034,
+   0,
+   20035,
+   0,
+   "IMAGE"
+  ],
+  [
+   200029,
+   20058,
+   0,
+   20036,
+   0,
+   "IMAGE"
+  ],
+  [
+   200030,
+   20008,
+   0,
+   20037,
+   0,
+   "CLIP"
+  ],
+  [
+   200031,
+   20001,
+   0,
+   20037,
+   1,
+   "STRING"
+  ],
+  [
+   200032,
+   20036,
+   0,
+   20037,
+   3,
+   "IMAGE"
+  ],
+  [
+   200033,
+   20008,
+   0,
+   20038,
+   0,
+   "CLIP"
+  ],
+  [
+   200034,
+   20036,
+   0,
+   20038,
+   2,
+   "IMAGE"
+  ],
+  [
+   200035,
+   20036,
+   0,
+   20039,
+   0,
+   "IMAGE"
+  ],
+  [
+   200036,
+   20010,
+   0,
+   20040,
+   0,
+   "MODEL"
+  ],
+  [
+   200037,
+   20037,
+   0,
+   20040,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   200038,
+   20038,
+   0,
+   20040,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   200039,
+   20066,
+   0,
+   20040,
+   3,
+   "LATENT"
+  ],
+  [
+   200040,
+   20040,
+   0,
+   20041,
+   0,
+   "LATENT"
+  ],
+  [
+   200041,
+   20041,
+   0,
+   20042,
+   0,
+   "IMAGE"
+  ],
+  [
+   200042,
+   20012,
+   0,
+   20043,
+   0,
+   "MODEL"
+  ],
+  [
+   200043,
+   20013,
+   0,
+   20044,
+   0,
+   "MODEL"
+  ],
+  [
+   200044,
+   20043,
+   0,
+   20045,
+   0,
+   "MODEL"
+  ],
+  [
+   200045,
+   20044,
+   0,
+   20046,
+   0,
+   "MODEL"
+  ],
+  [
+   200046,
+   20002,
+   0,
+   20047,
+   0,
+   "STRING"
+  ],
+  [
+   200047,
+   20011,
+   0,
+   20047,
+   1,
+   "CLIP"
+  ],
+  [
+   200048,
+   20011,
+   0,
+   20048,
+   0,
+   "CLIP"
+  ],
+  [
+   200049,
+   20047,
+   0,
+   20049,
+   0,
+   "CONDITIONING"
+  ],
+  [
+   200050,
+   20048,
+   0,
+   20049,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   200051,
+   20014,
+   0,
+   20049,
+   2,
+   "VAE"
+  ],
+  [
+   200052,
+   20061,
+   0,
+   20049,
+   4,
+   "IMAGE"
+  ],
+  [
+   200053,
+   20045,
+   0,
+   20050,
+   0,
+   "MODEL"
+  ],
+  [
+   200054,
+   20049,
+   0,
+   20050,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   200055,
+   20049,
+   1,
+   20050,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   200056,
+   20049,
+   2,
+   20050,
+   3,
+   "LATENT"
+  ],
+  [
+   200057,
+   20046,
+   0,
+   20051,
+   0,
+   "MODEL"
+  ],
+  [
+   200058,
+   20049,
+   0,
+   20051,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   200059,
+   20049,
+   1,
+   20051,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   200060,
+   20050,
+   0,
+   20051,
+   3,
+   "LATENT"
+  ],
+  [
+   200061,
+   20051,
+   0,
+   20052,
+   0,
+   "LATENT"
+  ],
+  [
+   200062,
+   20014,
+   0,
+   20052,
+   1,
+   "VAE"
+  ],
+  [
+   200063,
+   20052,
+   0,
+   20053,
+   0,
+   "IMAGE"
+  ],
+  [
+   200064,
+   20052,
+   0,
+   20054,
+   0,
+   "IMAGE"
+  ],
+  [
+   200065,
+   20052,
+   0,
+   20055,
+   0,
+   "IMAGE"
+  ],
+  [
+   200066,
+   20055,
+   0,
+   20056,
+   0,
+   "IMAGE"
+  ],
+  [
+   200067,
+   20064,
+   0,
+   20058,
+   0,
+   "IMAGE"
+  ],
+  [
+   200068,
+   20063,
+   0,
+   20058,
+   1,
+   "IMAGE"
+  ],
+  [
+   200069,
+   20015,
+   0,
+   20058,
+   2,
+   "IMAGE"
+  ],
+  [
+   200070,
+   20057,
+   0,
+   20058,
+   3,
+   "IMAGE"
+  ],
+  [
+   200071,
+   20065,
+   0,
+   20061,
+   0,
+   "IMAGE"
+  ],
+  [
+   200072,
+   20064,
+   0,
+   20061,
+   1,
+   "IMAGE"
+  ],
+  [
+   200073,
+   20063,
+   0,
+   20061,
+   2,
+   "IMAGE"
+  ],
+  [
+   200074,
+   20015,
+   0,
+   20061,
+   3,
+   "IMAGE"
+  ],
+  [
+   200075,
+   20060,
+   0,
+   20061,
+   4,
+   "IMAGE"
+  ],
+  [
+   200076,
+   20020,
+   0,
+   20063,
+   0,
+   "IMAGE"
+  ],
+  [
+   200077,
+   20034,
+   0,
+   20064,
+   0,
+   "IMAGE"
+  ],
+  [
+   200078,
+   20041,
+   0,
+   20065,
+   0,
+   "IMAGE"
+  ],
+  [
+   200079,
+   20039,
+   0,
+   20066,
+   0,
+   "LATENT"
+  ],
+  [
+   200080,
+   20003,
+   0,
+   20066,
+   1,
+   "INT"
+  ],
+  [
+   200081,
+   20005,
+   0,
+   20067,
+   0,
+   "CLIP"
+  ],
+  [
+   200082,
+   20006,
+   0,
+   20068,
+   0,
+   "VAE"
+  ],
+  [
+   200083,
+   20069,
+   0,
+   20070,
+   0,
+   "_NODE_REPEATER_"
+  ],
+  [
+   200084,
+   20036,
+   0,
+   20069,
+   0,
+   "IMAGE"
+  ],
+  [
+   200085,
+   20059,
+   0,
+   20070,
+   1,
+   "STRING"
+  ],
+  [
+   200086,
+   20071,
+   0,
+   20072,
+   0,
+   "_NODE_REPEATER_"
+  ],
+  [
+   200087,
+   20064,
+   0,
+   20071,
+   0,
+   "IMAGE"
+  ],
+  [
+   200088,
+   20063,
+   0,
+   20071,
+   1,
+   "IMAGE"
+  ],
+  [
+   200089,
+   20015,
+   0,
+   20071,
+   2,
+   "IMAGE"
+  ],
+  [
+   200090,
+   20059,
+   0,
+   20071,
+   3,
+   "STRING"
+  ],
+  [
+   200091,
+   20057,
+   0,
+   20072,
+   1,
+   "IMAGE"
+  ],
+  [
+   200092,
+   20073,
+   0,
+   20074,
+   0,
+   "_NODE_REPEATER_"
+  ],
+  [
+   200093,
+   20049,
+   0,
+   20073,
+   0,
+   "CONDITIONING"
+  ],
+  [
+   200094,
+   20062,
+   0,
+   20074,
+   1,
+   "STRING"
+  ],
+  [
+   200095,
+   20075,
+   0,
+   20076,
+   0,
+   "_NODE_REPEATER_"
+  ],
+  [
+   200096,
+   20065,
+   0,
+   20075,
+   0,
+   "IMAGE"
+  ],
+  [
+   200097,
+   20064,
+   0,
+   20075,
+   1,
+   "IMAGE"
+  ],
+  [
+   200098,
+   20063,
+   0,
+   20075,
+   2,
+   "IMAGE"
+  ],
+  [
+   200099,
+   20015,
+   0,
+   20075,
+   3,
+   "IMAGE"
+  ],
+  [
+   200100,
+   20062,
+   0,
+   20075,
+   4,
+   "STRING"
+  ],
+  [
+   200101,
+   20060,
+   0,
+   20076,
+   1,
+   "IMAGE"
+  ]
+ ],
+ "groups": [
+  {
+   "id": 1,
+   "title": "Inputs",
+   "color": "#3f789e",
+   "bounding": [
+    0,
+    0,
+    1700,
+    1240
+   ],
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 2,
+   "title": "Models (shared by the Krea and Qwen stages; a loader only runs for a stage that is on)",
+   "bounding": [
+    1740,
+    0,
+    960,
+    634
+   ],
+   "color": "#444",
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 3,
+   "title": "Stage inputs: each is read when its stage is on and no stage above it is on, and muted otherwise",
+   "color": "#3f789e",
+   "bounding": [
+    0,
+    1280,
+    920,
+    520
+   ],
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 4,
+   "title": "0. Your image: start from concept art you already have",
+   "bounding": [
+    520,
+    1880,
+    960,
+    272
+   ],
+   "color": "#3f789e",
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 5,
+   "title": "1. Concept: Krea 2 Turbo, 8 steps",
+   "bounding": [
+    520,
+    2232,
+    2800,
+    812
+   ],
+   "color": "#8A8",
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 6,
+   "title": "1. Concept, styled: Krea 2 Turbo with a style reference (runs out of memory on a 16 GB card)",
+   "bounding": [
+    520,
+    3124,
+    4180,
+    956
+   ],
+   "color": "#3f789e",
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 7,
+   "title": "2. Edit: Qwen-Image-Edit 2509",
+   "bounding": [
+    520,
+    4160,
+    3260,
+    864
+   ],
+   "color": "#3f789e",
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 8,
+   "title": "3. Animate: Wan 2.2 image to video, five seconds",
+   "bounding": [
+    520,
+    5346,
+    4180,
+    812
+   ],
+   "color": "#3f789e",
+   "font_size": 24,
+   "flags": {}
+  }
+ ],
+ "config": {},
+ "extra": {
+  "ds": {
+   "scale": 0.55,
+   "offset": [
+    80,
+    80
+   ]
+  }
+ },
+ "version": 0.4
+}

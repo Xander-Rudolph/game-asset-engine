@@ -21,13 +21,18 @@ by the owner, and the prompt for each of its seven flows was captured and checke
 the same way; it has not been run here.
 :::
 
-Two graphs are made for the editor rather than for `run_workflow.py`, and both
-open from the sidebar under **Workflows**:
+Three graphs are made for the editor rather than for `run_workflow.py`, and all
+three open from the sidebar under **Workflows**:
 
 - **`asset_workflow.json`** is the pipeline in one graph: the prompts at the
   top, panels that switch stages on and off, one at a time for alternatives, a
   row of pickers for picking a run up at any stage, and every stage from
   concept to a rig and a video, wired so that each one hands over to the next.
+- **`krea_workflow.json`** is the image and video half of that pipeline with
+  Krea 2 Turbo painting the concept, plain or from a style reference, then
+  Qwen-Image-Edit 2509 and Wan 2.2. Same panels, pickers and pauses. Krea 2's
+  licence is free for commercial use only under 1 million dollars of company
+  revenue a year: see [below](#krea-workflow-json).
 - **`complete_workflow.json`** is the owner's image and video graph on Phr00t's
   Qwen-Image-Edit Rapid AIO merge and Wan 2.2, one flow at a time off a shared
   image and prompt.
@@ -310,6 +315,9 @@ scripts/build_presets.py
 scripts/build_asset_workflow.py --check
 ```
 
+The same command rebuilds [`krea_workflow.json`](#krea-workflow-json);
+`--graph asset_workflow` builds this one alone.
+
 It needs a running server, because the order of every node's values in the
 editor's format is only knowable from `/object_info`, as for
 `scripts/api_to_ui.py`. `--check` puts every value back on its name and compares
@@ -430,6 +438,144 @@ queued on 2026-10-02 from the captured prompts.
   It is fixed in `scripts/api_to_ui.py`, which this graph's builder shares, and
   [Workflows](/reference/workflows#editing-graphs-in-the-comfyui-editor) records
   the five older editor graphs it had also broken.
+
+## krea_workflow.json
+
+::: tip Status: Concept run on its own on 2026-10-10; the graph checked in the editor, not queued
+`txt2img_krea2.json`, the base graph of Stage 1, ran on the reference machine
+on 2026-10-10. `txt2img_krea2_style.json` ran out of memory there, and the graph
+itself has not been queued. The figures are under
+[Measured on the 16 GB card](#measured-on-the-16-gb-card).
+:::
+
+The image and video half of the pipeline, as `complete_workflow.json` is, with
+[Krea 2](/guide/licensing#krea-2) Turbo painting the concept. Krea publishes no
+open model for editing or for image to video, so the Edit and Animate stages are
+the ones in `asset_workflow.json`.
+
+| Stage | Base graph | Does |
+|---|---|---|
+| 0. Your image | none | Starts from concept art you already have |
+| 1. Concept | `txt2img_krea2.json` | Krea 2 Turbo, 8 steps, from the prompt |
+| 1. Concept, styled | `txt2img_krea2_style.json` | The same, painted in the style of the image in its **Style Reference** node. A style match, not an edit. Ran out of memory on the 16 GB card |
+| 2. Edit | `img_edit_qwen.json` | Qwen-Image-Edit 2509 |
+| 3. Animate | `img2video_wan22.json` | Wan 2.2, five seconds at 480x640 |
+
+It works as `asset_workflow.json` does: **Prompt** feeds both Concept stages,
+**Edit instruction** Stage 2 and **Motion prompt** Stage 3. The two Concept
+stages share a panel that lets one at a time be on. Each stage takes its input
+from the nearest stage above it that is on, a stage with a stage below it on
+pauses for you to [pick a take](#picking-a-take), and the **Stage inputs** row
+holds a picker for Edit and one for Animate. Only Concept is on when it opens,
+and **Takes** opens at 1, because two Krea images at once ran out of memory on
+the 16 GB card.
+Stage images save to the top of `output/` as `krea_<stage>_NNNNN_.png`, and the
+video under `output/video/`. Its node ids start at 20000 and its link ids at
+200000, a range no other graph here uses, so the
+[relay warning](#asset-workflow-json) above cannot reach between it and
+`asset_workflow.json`; `complete_workflow.json`, numbered from 1, can still be
+reached by its relays, so open each graph in its own tab.
+
+### What it needs
+
+Image 0.1.11 is the first to carry it and its two Krea base graphs; an editor
+volume from an older image gains them on the first start, since their names are
+new. No node pack beyond those `asset_workflow.json` needs. The weights:
+
+```sh
+scripts/fetch_models.py --download --group krea2 --group qwen_edit --group qwen --group wan_i2v
+```
+
+`krea2` is about 18GB in the fetcher's units: Krea 2 Turbo's int8 ConvRot weights
+(12.6GB), its Qwen3-VL 4B encoder (4.9GB), ostris's style reference LoRA and the
+Qwen VAE. The Edit stage needs `qwen_edit` and the `qwen` group's text encoder,
+and Animate needs `wan_i2v`. Downloading the Krea weights binds you to the Krea 2
+Community License, whether or not the download page asks. The packaged container
+fetches them itself on boot with `ASSET_ENGINE_FETCH_MODELS=1` and
+`ASSET_ENGINE_FETCH_GROUPS` naming the groups
+([running the image](/guide/running-the-image)).
+
+### Licences
+
+Read [Krea 2](/guide/licensing#krea-2) before shipping anything the Concept
+stages make. In short:
+
+- **Krea 2 Turbo, its encoder and the style LoRA**: commercial use of the model
+  and of what it makes only while your company, affiliates included, earns under
+  1 million dollars a year. Past that you must stop commercial use, of the
+  outputs too, until Krea grants an enterprise licence. Krea may end the licence
+  for any reason on 30 days' notice, and it requires content filtering, which
+  here means looking at every image before it ships.
+- **Qwen-Image-Edit 2509 and Wan 2.2**: Apache-2.0. Your image, through Edit, to
+  Animate never touches Krea.
+
+### Measured on the 16 GB card
+
+On 2026-10-10, on image 0.1.11, with the server's own timings and VRAM read by
+`nvidia-smi` every half second:
+
+| Graph | Size | Result |
+|---|---|---|
+| `txt2img_krea2.json` | 864x1152, the graph's size | 22.3 s, 8 steps at 2.43 s each, peak 15,786 MiB of 16,066 |
+| `txt2img_krea2.json` | 1024x1024 | 27.9 s, 2.62 s a step, peak 15,678 MiB |
+| `txt2img_krea2.json` | 1104x1472 | Out of GPU memory in the sampler |
+| `txt2img_krea2.json` | 864x1152, a batch of two | Out of GPU memory |
+| `txt2img_krea2_style.json` | 864x1152, and 672x896 | Out of GPU memory in the sampler, both |
+| `txt2img_krea2_style.json` | 864x1152, server started with `--reserve-vram 2`, then 4 | Out of GPU memory sooner, merging the LoRA into the int8 weights |
+| `txt2img_krea2_style.json` | 864x1152, on Comfy-Org's fp8 weights in place of int8 | Out of GPU memory merging the LoRA into the fp8 weights |
+
+Both times include loading the 4,999 MB encoder and the 12,867 MB int8 weights,
+which the server log shows loaded whole. The weights fill most of the card,
+which is why 1104x1472, a second image in the batch, or a style reference, whose
+latent the encoder scales to about a megapixel and adds to every step, do not
+fit. A larger `--reserve-vram` makes the server load only part of the model,
+but for the style reference that moved the failure rather than curing it: the
+LoRA is merged into the weights as they load, each patched int8 weight becomes a
+float32 copy on the card, and the log shows `ERROR lora
+diffusion_model.blocks.25.mlp.down.weight Allocation on device`. At that point
+PyTorch had 7,308 MiB allocated at its peak and 9,600 MiB reserved, far short of
+the card, so the cause is not simply room; it was not found. The fp8 weights,
+`krea2_turbo_fp8_scaled.safetensors`, in place of int8 and at the usual flags,
+failed in the same merge, as it converted each patched weight back to fp8, with
+the 4,999 MB text encoder still on the card: 10,556 MiB allocated at the peak,
+14,880 MiB reserved. Every attempt fails on merging a full-precision LoRA into
+quantised weights on a full card. The same flag was
+not tried for 1104x1472 or for two takes, and the compose file keeps its usual
+flags. The 864x1152 golem came out head to toe on a
+plain grey background, as the prompt asked.
+
+**Krea's encoder also reads images.** Its text encoder is Qwen3-VL 4B, a
+vision-language model, and ComfyUI's `TextGenerate` node takes an image. Given
+the golem and an instruction to describe it for a text-to-image prompt, with
+greedy decoding, it wrote an accurate paragraph about its stone, moss, pose,
+lighting and plain grey background in 15.0 s, peaking at 6,542 MiB. That was a
+test graph, not one in `workflows/api/`.
+
+### Checked, and not yet run
+
+On 2026-10-10, in the packaged container on image 0.1.10 (ComfyUI 0.30.2):
+
+- Both Krea base graphs passed `scripts/validate_workflows.py`, and their editor
+  copies `scripts/api_to_ui.py --check`. This graph passed
+  `scripts/build_asset_workflow.py --check`, and the rebuild left
+  `asset_workflow.json` byte for byte as it was.
+- It was opened in the editor, with the relay guard from the warning above, and
+  its panels driven through their own widgets for nine combinations of stages:
+  each Concept alone, Concept and Edit, Concept, styled with Edit and Animate,
+  Your image with Edit and with Edit and Animate, Edit alone, Animate alone, and
+  Concept and Animate. The prompt each would send was captured with the submit
+  call stubbed. In all nine every node the server knows passed
+  `scripts/validate_workflows.py`, which complained only of the Any Switch's
+  numbered inputs and the picker's `refresh`, as for `asset_workflow.json`; every
+  link resolved inside the prompt; and Edit and Animate read the stage above
+  that was on, or their picker when none was. Use Everywhere gave the Krea stages
+  the Qwen3-VL encoder and the Qwen VAE; Edit kept its own Qwen 2.5 VL encoder,
+  and Animate its umT5 and Wan VAE.
+- Switching **Concept, styled** on with a click, with Concept on, switched
+  Concept off.
+
+Not yet run: this graph itself, so whether a queue that runs Krea, then the
+19.0GB edit model, then Wan, fits the 31 GB host.
 
 ## complete_workflow.json
 
