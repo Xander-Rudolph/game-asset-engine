@@ -675,8 +675,8 @@ under the licences above.
 
 ## Kept out on purpose
 
-Image models that are easy to plug in here, and that this repository does not
-use. Checked on 2026-09-16.
+Models that are easy to plug in here, and that this repository does not use.
+The image models were checked on 2026-09-16, and MiniMax H3 on 2026-10-10.
 
 **FLUX.1 [dev] and FLUX.1 Krea [dev].** The
 [FLUX.1 [dev] Non-Commercial License v1.1.1](https://raw.githubusercontent.com/black-forest-labs/flux/main/model_licenses/LICENSE-FLUX1-dev)
@@ -694,6 +694,22 @@ asks you to agree to the "FluxDev Non-Commercial License Agreement". Neither
 belongs in a pipeline for a game you sell. Krea's own later model, Krea 2, is a
 different model under a different licence, and is [here](#krea-2) with its
 conditions.
+
+**MiniMax H3.** Video with its own soundtrack, from text, from a first or last
+frame, or from reference images, and native in ComfyUI 0.30.2. The MiniMax H3
+Community License Agreement, dated 2 August 2026 and read on 2026-10-10 at commit
+`42ed227` of `MiniMaxAI/MiniMax-H3`, "is expressly limited to the 'Applicable
+Territory'", which "means worldwide, excluding the Excluded Territories", and
+"'Excluded Territories' means the European Union, the United Kingdom, the
+Republic of Korea and the United States of America." Section V.4: "You may not
+use, reproduce, modify, distribute, or display the MiniMax H3 Works or any of
+their Outputs or results outside the Applicable Territory." That is Hunyuan3D's
+exclusion with the United States added: it cannot be run in the United States at
+all, and a game sold on a storefront that reaches any of those four displays its
+output where it is not licensed. It also suits the reference card poorly:
+Comfy-Org's repack (commit `e5eb578`) has a 20,958,205,608-byte fp8 model and a
+15,687,142,551-byte text encoder, beside 16 GB of VRAM and 31 GB of RAM. Kept
+out on the owner's decision, 2026-10-10.
 
 **Community checkpoints from CivitAI.** There is no one licence to quote. The
 realism checkpoints that were on the development machine are not used, and

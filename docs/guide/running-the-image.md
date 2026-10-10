@@ -105,7 +105,7 @@ Or have the container fetch the core group itself on boot (about 20GB):
 ASSET_ENGINE_FETCH_MODELS=1 docker compose --profile packaged up -d
 ```
 
-Name other groups in `ASSET_ENGINE_FETCH_GROUPS` to have those fetched too, and
+From image 0.1.11, name other groups in `ASSET_ENGINE_FETCH_GROUPS` to have those fetched too, and
 put both lines in `.env` to have it happen on every start. A file already there
 is not fetched again, because the weights land in `MODELS_DIR`:
 

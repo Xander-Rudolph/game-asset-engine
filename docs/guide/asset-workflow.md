@@ -478,7 +478,9 @@ reached by its relays, so open each graph in its own tab.
 
 ### What it needs
 
-No node pack beyond those `asset_workflow.json` needs. The weights:
+Image 0.1.11 is the first to carry it and its two Krea base graphs; an editor
+volume from an older image gains them on the first start, since their names are
+new. No node pack beyond those `asset_workflow.json` needs. The weights:
 
 ```sh
 scripts/fetch_models.py --download --group krea2 --group qwen_edit --group qwen --group wan_i2v
