@@ -3681,7 +3681,7 @@
    ],
    "size": [
     420,
-    460
+    477
    ],
    "flags": {},
    "order": 25,
@@ -3690,7 +3690,7 @@
    "outputs": [],
    "properties": {},
    "widgets_values": [
-    "CONCEPT IN A GIVEN STYLE -- Krea 2 Turbo + style reference\n\nDOES NOT FIT A 16 GB CARD AS WIRED.  On 2026-10-10 it ran out of\nGPU memory in the sampler at 864x1152 and at 672x896: the reference\nadds about a megapixel of latent to every step.  A larger\n--reserve-vram in the compose command, not tried, may let it run.\n\nPut an image whose LOOK you want in Style Reference.  The prompt says\nwhat to draw; the reference says how it is painted.  It is not an\nedit: nothing of the reference's content is kept on purpose.\n\nSame licence as txt2img_krea2: commercial use only under $1,000,000\ncompany revenue a year, revocable on 30 days' notice, content\nfiltering required.  The LoRA is ostris's, under the same licence.\n\nModelSamplingFlux's width and height should match the latent's.\nMore references go in image2 and image3 on the Prompt node.\n\nNeeds:  scripts/fetch_models.py --download --group krea2\n\n(From workflows/api/txt2img_krea2_style.json.)"
+    "CONCEPT IN A GIVEN STYLE -- Krea 2 Turbo + style reference\n\nDOES NOT FIT A 16 GB CARD AS WIRED.  On 2026-10-10 it ran out of\nGPU memory in the sampler at 864x1152 and at 672x896: the reference\nadds about a megapixel of latent to every step.  --reserve-vram 2\nand 4 did not help: the model then loads in part, and merging the\nLoRA into its int8 weights runs out of memory instead.\n\nPut an image whose LOOK you want in Style Reference.  The prompt says\nwhat to draw; the reference says how it is painted.  It is not an\nedit: nothing of the reference's content is kept on purpose.\n\nSame licence as txt2img_krea2: commercial use only under $1,000,000\ncompany revenue a year, revocable on 30 days' notice, content\nfiltering required.  The LoRA is ostris's, under the same licence.\n\nModelSamplingFlux's width and height should match the latent's.\nMore references go in image2 and image3 on the Prompt node.\n\nNeeds:  scripts/fetch_models.py --download --group krea2\n\n(From workflows/api/txt2img_krea2_style.json.)"
    ],
    "color": "#432",
    "bgcolor": "#653"

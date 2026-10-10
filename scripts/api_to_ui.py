@@ -118,8 +118,9 @@ Needs:  scripts/fetch_models.py --download --group krea2""",
 
 DOES NOT FIT A 16 GB CARD AS WIRED.  On 2026-10-10 it ran out of
 GPU memory in the sampler at 864x1152 and at 672x896: the reference
-adds about a megapixel of latent to every step.  A larger
---reserve-vram in the compose command, not tried, may let it run.
+adds about a megapixel of latent to every step.  --reserve-vram 2
+and 4 did not help: the model then loads in part, and merging the
+LoRA into its int8 weights runs out of memory instead.
 
 Put an image whose LOOK you want in Style Reference.  The prompt says
 what to draw; the reference says how it is painted.  It is not an
