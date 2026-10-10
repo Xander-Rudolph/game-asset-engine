@@ -74,7 +74,8 @@ services:
   # extension compiled, and the workflows are already in ComfyUI's sidebar.
   # The two mounts left are the two things an image cannot carry: ~274GB of
   # weights, and the output you want to keep. The container names any missing
-  # weights on boot, and fetches them if ASSET_ENGINE_FETCH_MODELS=1.
+  # weights on boot, and fetches them if ASSET_ENGINE_FETCH_MODELS=1: the core
+  # group, or the groups ASSET_ENGINE_FETCH_GROUPS names.
   #
   # Deliberately NOT mounting custom_nodes or workflows: a bind mount replaces
   # the path rather than merging with it, so mounting an empty host directory
@@ -92,6 +93,10 @@ services:
       - PYOPENGL_PLATFORM=egl
       - HF_HOME=/app/models/.hf
       - ASSET_ENGINE_FETCH_MODELS=${ASSET_ENGINE_FETCH_MODELS:-0}
+      # The models.json groups the boot check covers, and fetches with the line
+      # above at 1. Only core unless you name more, such as "core krea2":
+      # each model's licence binds you when it downloads. See scripts/entrypoint.sh.
+      - ASSET_ENGINE_FETCH_GROUPS=${ASSET_ENGINE_FETCH_GROUPS:-core}
       # comfyui_controlnet_aux is fetched from GitHub on start, not baked: its
       # CMU-licensed pose code forbids distribution. 0 skips it, and with it
       # complete_workflow.json's Pose Transfer flow. See scripts/entrypoint.sh.

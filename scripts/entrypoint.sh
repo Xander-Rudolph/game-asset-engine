@@ -16,10 +16,11 @@
 #      carry, because its licence forbids distributing part of it (1b below),
 #      and build UniRig's own environment if it is missing or broken (1c).
 #
-#   3. Say what weights are missing, by name, before the server starts.
-#      Models are the one thing too large to bake (the set is ~274GB), so
-#      the next best thing is refusing to be quiet about it: a missing
-#      checkpoint otherwise shows up as a red node an hour later.
+#   3. Say what weights are missing, by name, before the server starts, and
+#      fetch them when asked (2 below). Models are the one thing too large to
+#      bake (the set is ~274GB), so the next best thing is refusing to be
+#      quiet about it: a missing checkpoint otherwise shows up as a red node
+#      an hour later.
 #
 #   4. exec the command, so ComfyUI is PID 1 and signals reach it.
 #
@@ -194,13 +195,31 @@ build_unirig_env
 
 # --- 2. report on the weights ---------------------------------------------
 
+# ASSET_ENGINE_FETCH_GROUPS names the models.json groups to check, and with
+# ASSET_ENGINE_FETCH_MODELS=1 to download: "core" when unset. Nothing beyond
+# core arrives unless it is named, because a group is up to tens of GB and
+# each model's licence binds you from the moment it downloads; the Krea 2
+# Community License says so in its first paragraph. So
+# ASSET_ENGINE_FETCH_GROUPS="core krea2" with ASSET_ENGINE_FETCH_MODELS=1 is
+# an explicit choice to take Krea 2 on its terms. The weights land in the
+# MODELS_DIR mount, so they are fetched once, not on every start. A model
+# whose licence forbids commercial use is still refused, as on the host.
+#
+# The weights are not baked into the image instead: compose mounts MODELS_DIR
+# over /app/models, which would hide a baked copy, and an image carrying Krea
+# 2 would be a distribution of it, under section 3 of its licence.
 if [ "${ASSET_ENGINE_CHECK_MODELS:-1}" = "1" ] && [ -x /opt/asset-engine/scripts/fetch_models.py ]; then
+    fetch_groups="${ASSET_ENGINE_FETCH_GROUPS:-core}"
+    group_args=()
+    for g in ${fetch_groups//,/ }; do group_args+=(--group "$g"); done
+    [ ${#group_args[@]} -gt 0 ] || group_args=(--group core)
     if [ "${ASSET_ENGINE_FETCH_MODELS:-0}" = "1" ]; then
-        say "fetching any missing models (ASSET_ENGINE_FETCH_MODELS=1)"
-        python3 /opt/asset-engine/scripts/fetch_models.py --download || \
+        say "fetching any missing models in: $fetch_groups (ASSET_ENGINE_FETCH_MODELS=1)"
+        say "  each model's licence binds you from download; fetch_models.py --licenses lists them"
+        python3 /opt/asset-engine/scripts/fetch_models.py --download "${group_args[@]}" || \
             warn "model fetch failed; starting anyway"
     else
-        python3 /opt/asset-engine/scripts/fetch_models.py || true
+        python3 /opt/asset-engine/scripts/fetch_models.py "${group_args[@]}" || true
         say "set ASSET_ENGINE_FETCH_MODELS=1 to download the missing ones on boot"
     fi
 fi

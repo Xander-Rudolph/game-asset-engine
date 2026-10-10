@@ -309,6 +309,13 @@ def main() -> int:
             groups.discard("gated")
     if args.gated:
         groups.add("gated")
+    # A misspelt group would otherwise check nothing and report 0/0 complete,
+    # which reads as success; the container's ASSET_ENGINE_FETCH_GROUPS is
+    # typed by hand.
+    unknown = groups - set(man["groups"])
+    if unknown:
+        sys.exit(f"unknown group(s): {', '.join(sorted(unknown))}. "
+                 f"Groups: {', '.join(man['groups'])}")
     print(f"groups     = {', '.join(sorted(groups))}\n")
 
     entries = [e for e in man["models"] if e["group"] in groups]

@@ -485,7 +485,10 @@ scripts/fetch_models.py --download --group krea2 --group qwen_edit --group qwen 
 (12.6GB), its Qwen3-VL 4B encoder (4.9GB), ostris's style reference LoRA and the
 Qwen VAE. The Edit stage needs `qwen_edit` and the `qwen` group's text encoder,
 and Animate needs `wan_i2v`. Downloading the Krea weights binds you to the Krea 2
-Community License, whether or not the download page asks.
+Community License, whether or not the download page asks. The packaged container
+fetches them itself on boot with `ASSET_ENGINE_FETCH_MODELS=1` and
+`ASSET_ENGINE_FETCH_GROUPS` naming the groups
+([running the image](/guide/running-the-image)).
 
 ### Licences
 

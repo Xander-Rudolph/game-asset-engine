@@ -79,6 +79,22 @@ To have the container fetch the core group itself on boot (about 20GB):
 ASSET_ENGINE_FETCH_MODELS=1 docker compose --profile packaged up -d
 ```
 
+Name other groups in `ASSET_ENGINE_FETCH_GROUPS` to have those fetched too, and
+put both lines in `.env` to have it happen on every start. A file already there
+is not fetched again, because the weights land in `MODELS_DIR`:
+
+```sh
+ASSET_ENGINE_FETCH_MODELS=1
+ASSET_ENGINE_FETCH_GROUPS=core krea2
+```
+
+Only `core` is fetched unless you name more, because each model's licence binds
+you from the moment it downloads; Krea 2's licence caps commercial use at 1
+million dollars of company revenue a year ([licensing](/guide/licensing#krea-2)).
+Weights are never baked into the image: compose mounts `MODELS_DIR` over
+`/app/models`, which would hide them, and an image carrying Krea 2 would be a
+distribution of it under its licence.
+
 Or fetch them yourself, in groups:
 
 ```sh
